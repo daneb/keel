@@ -49,9 +49,9 @@ pub fn run(
 
     match diff::against(paths, &base) {
         Ok(d) => {
-            let patch = read_patch(paths, &base);
+            let patch = read_patch(paths, cfg, &base);
             checks.push(test_invalidation(run, &d, patch.as_deref())?);
-            checks.push(test_movement(&d));
+            checks.push(test_movement(cfg, &d));
         }
         Err(e) => {
             checks.push(Check::blocked("test-invalidation", format!("could not read the diff: {e}")));
@@ -61,9 +61,105 @@ pub fn run(
 
     checks.push(conventions_present(paths)?);
     checks.push(lessons_in_force(paths)?);
+    checks.extend(reviewer_findings(paths, cfg, spec, run, &base)?);
     checks.extend(run_plugins(paths, cfg, "G2.5", Some(&spec.front.slug)));
 
     Ok(GateResult::new("G2.5", Some(spec.front.slug.clone()), checks))
+}
+
+/// The configured adversarial reviewer, if there is one.
+///
+/// The heuristics above stay regardless. A reviewer that is not configured must
+/// not silently remove the only check there was, and a reviewer that cannot run
+/// must not silently pass one.
+fn reviewer_findings(
+    paths: &Paths,
+    cfg: &Config,
+    spec: &Spec,
+    run: &Run,
+    base: &str,
+) -> Result<Vec<Check>> {
+    let Some(reviewer) = &cfg.review else {
+        return Ok(vec![Check::pass(
+            "reviewer",
+            "no adversarial reviewer configured — the heuristics above are the whole pass",
+        )]);
+    };
+
+    let diff = read_patch(paths, cfg, base).unwrap_or_default();
+    if diff.trim().is_empty() {
+        return Ok(vec![Check::pass("reviewer", "nothing changed to review")]);
+    }
+
+    let conventions = StoreDoc::read_optional(&paths.conventions())?
+        .map(|d| d.body)
+        .unwrap_or_default();
+    let lessons: Vec<String> = crate::lesson::list(paths)?
+        .iter()
+        .filter_map(|l| l.rule().map(|r| format!("{}: {r}", l.front.id)))
+        .collect();
+    let criteria: Vec<String> = spec
+        .criteria
+        .iter()
+        .map(|c| format!("{} {}: {}", c.id, c.title, c.statement))
+        .collect();
+
+    let request = crate::review::ReviewRequest {
+        schema: crate::review::REQUEST_SCHEMA.to_string(),
+        run: run.meta.id.clone(),
+        spec: spec.front.slug.clone(),
+        diff,
+        conventions,
+        lessons,
+        criteria,
+        prompt: crate::review::REVIEW_PROMPT.to_string(),
+        repo: paths.repo.to_string_lossy().to_string(),
+    };
+
+    let review = crate::review::run(paths, reviewer, &request);
+    let evidence = run.write_evidence(
+        "review.json",
+        &serde_json::to_string_pretty(&review.result)?,
+    )?;
+
+    if let Some(why) = review.blocked {
+        return Ok(vec![Check::blocked("reviewer", why)]);
+    }
+
+    if review.result.findings.is_empty() {
+        let mut c = Check::pass(
+            "reviewer",
+            format!(
+                "{} ({:.1}s)",
+                review.result.summary.clone().unwrap_or_else(|| "no findings".into()),
+                review.elapsed.as_secs_f64()
+            ),
+        );
+        c.evidence = Some(evidence);
+        return Ok(vec![c]);
+    }
+
+    // One check per finding, so each is separately visible on the gate report
+    // and separately classifiable by the Phase 3 taxonomy.
+    let mut out = Vec::new();
+    let took = format!("{:.1}s", review.elapsed.as_secs_f64());
+    for f in &review.result.findings {
+        let id = format!("review:{}", f.id);
+        let detail = match f.where_().as_str() {
+            "" => f.detail.clone(),
+            w => format!("{w} — {}", f.detail),
+        };
+        let mut check = if f.severity == crate::review::Severity::Fail && !reviewer.advisory {
+            Check::fail(&id, "no defect of this kind", format!("{detail} [reviewed in {took}]"))
+        } else {
+            // Advisory mode, or the reviewer's own "concern": a look, not a block.
+            Check::blocked(&id, detail)
+        };
+        check.evidence = Some(evidence.clone());
+        check.from = Some("reviewer".into());
+        out.push(check);
+    }
+    Ok(out)
 }
 
 /// Look for mocks and weakened assertions *added* by this change.
@@ -126,17 +222,17 @@ fn test_invalidation(run: &Run, d: &diff::Diff, patch: Option<&str>) -> Result<C
 }
 
 /// Code changed with no test changed at all is worth a look; so is the reverse.
-fn test_movement(d: &diff::Diff) -> Check {
+fn test_movement(cfg: &Config, d: &diff::Diff) -> Check {
     let is_test = |p: &str| crate::map::rank::is_test(p);
     let changed_tests = d
         .files
         .iter()
-        .filter(|f| is_test(&f.path) && !crate::gate::g2::is_incidental(&f.path))
+        .filter(|f| is_test(&f.path) && !crate::gate::g2::is_incidental_for(cfg, &f.path))
         .count();
     let changed_code = d
         .files
         .iter()
-        .filter(|f| !is_test(&f.path) && !crate::gate::g2::is_incidental(&f.path))
+        .filter(|f| !is_test(&f.path) && !crate::gate::g2::is_incidental_for(cfg, &f.path))
         .count();
 
     if changed_code > 0 && changed_tests == 0 {
@@ -188,7 +284,7 @@ fn lessons_in_force(paths: &Paths) -> Result<Check> {
 /// This exclusion is load-bearing, not tidiness: without it the check reads the
 /// evidence file it just wrote — which contains the phrase "no added mocks" —
 /// and reports itself. A reviewer that reviews its own output is not a reviewer.
-fn read_patch(paths: &Paths, base: &str) -> Option<String> {
+fn read_patch(paths: &Paths, cfg: &Config, base: &str) -> Option<String> {
     let tracked = std::process::Command::new("git")
         .args(["diff", "--unified=0", base, "--", ".", ":(exclude).keel"])
         .current_dir(&paths.repo)
@@ -205,7 +301,7 @@ fn read_patch(paths: &Paths, base: &str) -> Option<String> {
     {
         for path in String::from_utf8_lossy(&out.stdout).lines() {
             let path = path.trim();
-            if path.is_empty() || crate::gate::g2::is_incidental(path) {
+            if path.is_empty() || crate::gate::g2::is_incidental_for(cfg, path) {
                 continue;
             }
             if let Ok(content) = std::fs::read_to_string(paths.repo.join(path)) {
@@ -281,7 +377,7 @@ mod tests {
             added: 40,
             removed: 0,
         };
-        assert_eq!(test_movement(&d).verdict, super::super::Verdict::Blocked);
+        assert_eq!(test_movement(&Config::default(), &d).verdict, super::super::Verdict::Blocked);
     }
 
     #[test]
@@ -295,6 +391,6 @@ mod tests {
             added: 60,
             removed: 0,
         };
-        assert_eq!(test_movement(&d).verdict, super::super::Verdict::Pass);
+        assert_eq!(test_movement(&Config::default(), &d).verdict, super::super::Verdict::Pass);
     }
 }

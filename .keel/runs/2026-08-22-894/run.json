@@ -1,0 +1,11 @@
+{
+  "schema": "keel.run/1",
+  "id": "2026-08-22-894",
+  "spec": "trajectory-log",
+  "keel_version": "0.1.0",
+  "store_hash": "718d50aabd0d9479e61fa69b755ecc1abb02b9e797a70066b220b9f0dd1ce3e4",
+  "started_at": "2026-08-22T19:47:08.636250+02:00",
+  "finished_at": "2026-08-22T19:47:51.745522+02:00",
+  "verdict": "fail",
+  "base_commit": "4180e3a31ea7e1d8c5c6bff0d88d438bad842c51"
+}

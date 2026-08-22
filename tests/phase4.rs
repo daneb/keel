@@ -288,12 +288,20 @@ fn the_mcp_server_handshakes_lists_tools_and_answers() {
 fn the_benchmark_reports_a_ratio_and_holds_the_target() {
     // Run against keel's own repository, which is what the fixed task set
     // describes; a synthetic fixture would measure nothing.
+    // This is the one test that measures the real repository, because the fixed
+    // task set describes it. That means it reads the live index, which a
+    // concurrent `keel map` rewrites — so a missing index here is an
+    // environment condition, and saying which it was beats a confusing assert.
     let out = std::process::Command::new(support::BIN)
         .args(["bench", "--json"])
         .current_dir(env!("CARGO_MANIFEST_DIR"))
         .output()
         .unwrap();
-    assert!(out.status.success(), "bench failed: {}", String::from_utf8_lossy(&out.stderr));
+    let stderr = String::from_utf8_lossy(&out.stderr).to_string();
+    if !out.status.success() && stderr.contains("index") {
+        panic!("the repository index was unavailable or being rebuilt: {stderr}");
+    }
+    assert!(out.status.success(), "bench failed: {stderr}");
 
     let v: serde_json::Value = serde_json::from_str(&String::from_utf8_lossy(&out.stdout)).unwrap();
     assert_eq!(v["tasks"].as_array().unwrap().len(), 5, "the plan fixes five tasks");

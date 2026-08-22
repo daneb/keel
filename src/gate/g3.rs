@@ -72,7 +72,7 @@ fn reviewable_size(paths: &Paths, cfg: &Config, run: &Run) -> Check {
     let churn: usize = d
         .files
         .iter()
-        .filter(|f| !super::g2::is_incidental(&f.path))
+        .filter(|f| !super::g2::is_incidental_for(cfg, &f.path))
         .map(|f| f.churn())
         .sum();
     let max = cfg.plan.max_reviewable_lines;

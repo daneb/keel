@@ -38,10 +38,30 @@ pub struct Config {
     pub learn: LearnConfig,
     #[serde(default)]
     pub retrieve: RetrieveConfig,
+    /// An adversarial reviewer for G2.5. Absent means the heuristics stand alone.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub review: Option<Reviewer>,
     /// Metrics that may improve and must not regress.
     #[serde(default = "default_ratchets", rename = "ratchet")]
     pub ratchets: Vec<Ratchet>,
 }
+
+/// A second agent pass, run in critique mode over the diff (PLAN.md G2.5).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Reviewer {
+    pub cmd: String,
+    #[serde(default = "default_review_timeout")]
+    pub timeout_secs: u64,
+    /// Treat every finding as a concern, however the reviewer rated it.
+    ///
+    /// The honest setting while you calibrate a reviewer: findings appear on the
+    /// gate report and invite a look without blocking a merge on a model's
+    /// opinion you have not yet learned to trust.
+    #[serde(default)]
+    pub advisory: bool,
+}
+
+fn default_review_timeout() -> u64 { 300 }
 
 /// The budget governor's limits (PLAN.md P4).
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -301,6 +321,7 @@ impl Default for Config {
             oracle: OracleConfig::default(),
             learn: LearnConfig::default(),
             retrieve: RetrieveConfig::default(),
+            review: None,
             ratchets: default_ratchets(),
         }
     }

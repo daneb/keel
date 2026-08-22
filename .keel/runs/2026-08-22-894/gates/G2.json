@@ -1,0 +1,73 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G2",
+  "run": "2026-08-22-d8f",
+  "spec": "trajectory-log",
+  "verdict": "fail",
+  "generated_at": "2026-08-22T19:47:51.745374+02:00",
+  "checks": [
+    {
+      "id": "build",
+      "verdict": "pass",
+      "detail": "`cargo build --quiet` exited 0",
+      "evidence": "evidence/build.txt"
+    },
+    {
+      "id": "test",
+      "verdict": "pass",
+      "detail": "`cargo test --quiet` exited 0",
+      "evidence": "evidence/test.txt"
+    },
+    {
+      "id": "lint",
+      "verdict": "pass",
+      "detail": "`cargo clippy --all-targets --quiet` exited 0",
+      "evidence": "evidence/lint.txt"
+    },
+    {
+      "id": "oracle-coverage",
+      "verdict": "pass",
+      "detail": "7/7 oracles pass (0 awaiting human judgement)",
+      "evidence": "evidence/oracles.json"
+    },
+    {
+      "id": "blast-radius",
+      "verdict": "fail",
+      "expected": "diff ⊆ src/trajectory/**, src/cmd/run.rs",
+      "actual": "8 outside scope: src/cmd/mod.rs (+1 -0), src/cmd/prune.rs (+64 -0), src/config.rs (+21 -0), src/gate/g25.rs (+96 -0), src/main.rs (+17 -1), … and 3 more",
+      "evidence": "evidence/diff-stat.txt"
+    },
+    {
+      "id": "line-budget",
+      "verdict": "fail",
+      "expected": "at most 160 lines of churn",
+      "actual": "652 lines — raise the budget deliberately or split the work",
+      "evidence": "evidence/diff-stat.txt"
+    },
+    {
+      "id": "baseline-ratchet",
+      "verdict": "fail",
+      "expected": "no metric moves the wrong way",
+      "actual": "clippy-warnings 0 → 1",
+      "evidence": "evidence/ratchet.json"
+    },
+    {
+      "id": "store-drift",
+      "verdict": "pass",
+      "detail": "4 projections current"
+    },
+    {
+      "id": "lesson:L-0002",
+      "verdict": "fail",
+      "expected": "Changes MUST leave lint and the house rules clean.",
+      "actual": "expected exit 0, got 101",
+      "from": "L-0002"
+    },
+    {
+      "id": "lesson:L-0003",
+      "verdict": "pass",
+      "detail": "Changes MUST build before the run ends. holds",
+      "from": "L-0003"
+    }
+  ]
+}

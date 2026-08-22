@@ -175,6 +175,87 @@ fn head_commit(paths: &Paths) -> Option<String> {
     (!s.is_empty()).then_some(s)
 }
 
+/// Runs that something still points at, and so must never be pruned.
+///
+/// Lesson cards cite the runs they were derived from — that citation is what
+/// answers "why does this rule exist?". Pruning a cited run turns the answer
+/// into a dangling id, which is worse than keeping the bytes.
+pub fn protected(paths: &Paths) -> Result<std::collections::BTreeSet<String>> {
+    let mut keep = std::collections::BTreeSet::new();
+    for l in crate::lesson::list(paths)? {
+        for src in &l.front.sources {
+            if let Some(id) = src.strip_prefix("runs/") {
+                keep.insert(id.to_string());
+            }
+        }
+    }
+    // Demoted lessons are archived rather than deleted, and their provenance
+    // matters for exactly the question "should we re-promote this?".
+    let demoted = paths.lessons().join("demoted");
+    if demoted.is_dir() {
+        for entry in std::fs::read_dir(&demoted)? {
+            let p = entry?.path();
+            if p.extension().and_then(|e| e.to_str()) != Some("md") {
+                continue;
+            }
+            if let Ok(l) = crate::lesson::Lesson::read(&p) {
+                for src in &l.front.sources {
+                    if let Some(id) = src.strip_prefix("runs/") {
+                        keep.insert(id.to_string());
+                    }
+                }
+            }
+        }
+    }
+    Ok(keep)
+}
+
+#[derive(Debug, Clone)]
+pub struct PruneCandidate {
+    pub id: String,
+    pub verdict: String,
+    pub bytes: u64,
+    pub protected_by: Option<String>,
+}
+
+/// Decide what could be pruned, keeping the most recent `keep` runs and
+/// everything a lesson cites.
+pub fn prune_plan(paths: &Paths, keep: usize) -> Result<Vec<PruneCandidate>> {
+    let all = list(paths)?;
+    let protected_ids = protected(paths)?;
+    let cutoff = all.len().saturating_sub(keep);
+
+    let mut out = Vec::new();
+    for (i, id) in all.iter().enumerate() {
+        if i >= cutoff {
+            continue; // within the most-recent window
+        }
+        let dir = paths.runs().join(id);
+        let verdict = Run::load(paths, id)
+            .ok()
+            .and_then(|r| r.meta.verdict)
+            .unwrap_or_else(|| "unknown".into());
+        out.push(PruneCandidate {
+            protected_by: protected_ids.contains(id).then(|| "cited by a lesson".to_string()),
+            id: id.clone(),
+            verdict,
+            bytes: dir_size(&dir),
+        });
+    }
+    Ok(out)
+}
+
+fn dir_size(dir: &std::path::Path) -> u64 {
+    let Ok(entries) = std::fs::read_dir(dir) else { return 0 };
+    entries
+        .filter_map(|e| e.ok())
+        .map(|e| {
+            let p = e.path();
+            if p.is_dir() { dir_size(&p) } else { p.metadata().map(|m| m.len()).unwrap_or(0) }
+        })
+        .sum()
+}
+
 /// Resolve a run reference: an explicit id, or the most recent run.
 pub fn resolve(paths: &Paths, id: Option<String>) -> Result<String> {
     match id {

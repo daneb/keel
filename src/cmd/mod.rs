@@ -9,6 +9,7 @@ pub mod map;
 pub mod status;
 pub mod store;
 pub mod plan;
+pub mod prune;
 pub mod ratchet;
 pub mod retrieve;
 pub mod run;

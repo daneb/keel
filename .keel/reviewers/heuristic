@@ -1,0 +1,30 @@
+#!/bin/sh
+# A reviewer that needs no model: reads a keel.reviewrequest/1 on stdin and
+# reports added assertions that cannot fail. Deliberately narrow — it exists to
+# prove the contract end to end, and to be replaced by an agent in critique mode.
+#
+# Note the shape: the request is captured *before* python runs, because a
+# heredoc would otherwise become python's stdin and the request would be lost.
+request=$(cat)
+printf '%s' "$request" | python3 -c '
+import json, sys, re
+req = json.load(sys.stdin)
+findings = []
+current = None
+for line in req.get("diff", "").splitlines():
+    if line.startswith("+++ b/"):
+        current = line[6:].strip()
+        continue
+    if not line.startswith("+") or line.startswith("+++"):
+        continue
+    body = line[1:]
+    if re.search(r"assert!\(\s*true|assert_eq!\(\s*(\w+)\s*,\s*\1\s*\)|assertTrue\(true", body):
+        findings.append({
+            "id": "test-invalidation",
+            "severity": "fail",
+            "detail": "added assertion cannot fail: " + body.strip()[:100],
+            "file": current or "?",
+        })
+print(json.dumps({"schema": "keel.reviewresult/1", "findings": findings,
+                  "summary": "%d finding(s)" % len(findings)}))
+'

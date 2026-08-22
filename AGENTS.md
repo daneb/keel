@@ -1,4 +1,4 @@
-<!-- keel:generated schema=keel.projection/1 adapter=agents store=718d50aabd0d body=b31472a7c3ff -->
+<!-- keel:generated schema=keel.projection/1 adapter=agents store=cd24e058f858 body=82e7eb96f5f4 -->
 <!-- Source of truth: .keel/store/ — regenerate with `keel store render`. Edits here are drift and will be reported by `keel store check`. -->
 
 # Project context
@@ -49,31 +49,32 @@ _Versions that cannot move, platforms that must keep working, dependencies that 
 
 ## Repository map
 
-**74 files · 1242 symbols · 17776 lines** — rust 74
+**77 files · 1300 symbols · 18832 lines** — rust 77
 
 Files are ordered by import-graph centrality, not alphabetically. Signatures only; read a body with the file path and line number. Per-directory detail lives in `.keel/store/map/<dir>/CODEMAP.md`.
 
 ### Layout
 
-- `src/` — 7 files, 1786 lines · paths.rs, config.rs, hashing.rs
-- `src/cmd/` — 16 files, 2318 lines · mod.rs, learn.rs, spec.rs
+- `src/` — 7 files, 1904 lines · paths.rs, config.rs, hashing.rs
+- `src/cmd/` — 17 files, 2435 lines · mod.rs, learn.rs, spec.rs
 - `src/driver/` — 2 files, 454 lines · mod.rs, contract.rs
 - `src/evidence/` — 2 files, 423 lines · mod.rs, manifest.rs
 - `src/failure/` — 2 files, 767 lines · mod.rs, taxonomy.rs
-- `src/gate/` — 10 files, 2759 lines · mod.rs, ratchet.rs, oracle_exec.rs
+- `src/gate/` — 10 files, 2872 lines · mod.rs, ratchet.rs, oracle_exec.rs
 - `src/lesson/` — 2 files, 726 lines · mod.rs, usage.rs
 - `src/map/` — 9 files, 2424 lines · lang.rs, extract.rs, db.rs
 - `src/mcp/` — 1 file, 271 lines · mod.rs
 - `src/projection/` — 3 files, 672 lines · drift.rs, mod.rs, sections.rs
 - `src/retrieve/` — 3 files, 763 lines · mod.rs, fallback.rs, budget.rs
+- `src/review/` — 1 file, 366 lines · mod.rs
 - `src/spec/` — 4 files, 1143 lines · mod.rs, oracle.rs, ears.rs
 - `src/store/` — 2 files, 250 lines · mod.rs, frontmatter.rs
 - `src/trajectory/` — 2 files, 462 lines · event.rs, mod.rs
-- `tests/` — 9 files, 2558 lines · support.rs, cli.rs, phase1.rs
+- `tests/` — 10 files, 2900 lines · support.rs, cli.rs, phase1.rs
 
 ### Key files
 
-**`src/paths.rs`** · 82 lines · imported by 45
+**`src/paths.rs`** · 82 lines · imported by 47
 - `pub struct Paths`  <sub>L10</sub>
 - `impl Paths`  <sub>L14</sub>
 - `pub fn discover() -> Result<Self>` — Find the repo root: nearest ancestor holding `.keel/`, else `.git/`, else cwd.  <sub>L16</sub>
@@ -81,13 +82,13 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub fn rel<'a>(&self, p: &'a Path) -> &'a Path` — Present `p` relative to the repo root when possible, for display.  <sub>L68</sub>
 - `pub fn scaffold(&self) -> Result<()>`  <sub>L72</sub>
 
-**`src/config.rs`** · 325 lines · imported by 32
+**`src/config.rs`** · 346 lines · imported by 33
 - `pub struct Config`  <sub>L14</sub>
-- `pub struct SpecConfig`  <sub>L156</sub>
-- `pub struct PlanConfig`  <sub>L179</sub>
-- `pub struct MapConfig`  <sub>L216</sub>
-- `pub struct StoreConfig`  <sub>L243</sub>
-- `pub struct Adapter`  <sub>L260</sub>
+- `pub struct Reviewer`  <sub>L51</sub>
+- `pub struct SpecConfig`  <sub>L176</sub>
+- `pub struct PlanConfig`  <sub>L199</sub>
+- `pub struct MapConfig`  <sub>L236</sub>
+- `pub struct StoreConfig`  <sub>L263</sub>
 
 **`src/map/lang.rs`** · 317 lines · imported by 6
 - `pub struct Compiled` — The three queries keel runs over every file.  <sub>L11</sub>
@@ -105,14 +106,6 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub fn list(paths: &Paths) -> Result<Vec<String>>` — Every spec slug present on disk, sorted.  <sub>L113</sub>
 - `fn parse_criteria(body: &str, line_offset: usize) -> Vec<Criterion>` — A criterion block is a `###` heading whose text begins with an identifier  <sub>L129</sub>
 
-**`src/map/extract.rs`** · 393 lines · imported by 4
-- `pub struct Symbol`  <sub>L12</sub>
-- `pub struct Reference`  <sub>L24</sub>
-- `pub struct FileFacts`  <sub>L31</sub>
-- `pub struct Extractor` — Reusable per-thread parse state. Compiling a query is expensive relative to  <sub>L46</sub>
-- `pub fn unparsed(rel: &str, lang: Lang, source_len: u64, sha: String, lines: usize) -> FileFacts` — Metadata-only entry for a file that was never parsed (too large, or an  <sub>L197</sub>
-- `fn doc_comment(node: &Node, source: &[u8], lang: Lang) -> Option<String>` — First line of the doc attached to a definition: preceding comment block for  <sub>L253</sub>
-
 **`src/gate/mod.rs`** · 355 lines · imported by 9
 - `pub enum Verdict`  <sub>L33</sub>
 - `pub struct Check`  <sub>L60</sub>
@@ -120,6 +113,14 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub fn roll_up(checks: &[Check]) -> Verdict` — misconfiguration, and reporting it as success is precisely how a pipeline  <sub>L164</sub>
 - `pub fn run_id() -> String` — `2026-08-21-7c1` — sortable by date, unique enough within a day.  <sub>L178</sub>
 - `pub fn run_plugins(paths: &Paths, cfg: &Config, gate: &str, slug: Option<&str>) -> Vec<Check>` — A plugin that cannot be executed yields `blocked`, never `fail`: the  <sub>L206</sub>
+
+**`src/map/extract.rs`** · 393 lines · imported by 4
+- `pub struct Symbol`  <sub>L12</sub>
+- `pub struct Reference`  <sub>L24</sub>
+- `pub struct FileFacts`  <sub>L31</sub>
+- `pub struct Extractor` — Reusable per-thread parse state. Compiling a query is expensive relative to  <sub>L46</sub>
+- `pub fn unparsed(rel: &str, lang: Lang, source_len: u64, sha: String, lines: usize) -> FileFacts` — Metadata-only entry for a file that was never parsed (too large, or an  <sub>L197</sub>
+- `fn doc_comment(node: &Node, source: &[u8], lang: Lang) -> Option<String>` — First line of the doc attached to a definition: preceding comment block for  <sub>L253</sub>
 
 **`src/trajectory/event.rs`** · 228 lines · imported by 2
 - `pub enum Payload`  <sub>L12</sub>
@@ -145,21 +146,20 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub fn add(&mut self, path: &str, content: &[u8])`  <sub>L34</sub>
 - `pub fn finish(self) -> String`  <sub>L42</sub>
 
+**`src/run.rs`** · 271 lines · imported by 10
+- `pub struct RunMeta`  <sub>L17</sub>
+- `pub struct Run`  <sub>L37</sub>
+- `pub fn list(paths: &Paths) -> Result<Vec<String>>` — Every run id on disk, oldest first.  <sub>L145</sub>
+- `pub fn protected(paths: &Paths) -> Result<std::collections::BTreeSet<String>>` — answers "why does this rule exist?". Pruning a cited run turns the answer  <sub>L183</sub>
+- `pub struct PruneCandidate`  <sub>L214</sub>
+- `pub fn prune_plan(paths: &Paths, keep: usize) -> Result<Vec<PruneCandidate>>` — Decide what could be pruned, keeping the most recent `keep` runs and  <sub>L223</sub>
+
 **`src/store/mod.rs`** · 113 lines · imported by 11
 - `pub mod frontmatter;` — already covers them so projections invalidate correctly when they arrive).  <sub>L7</sub>
 - `pub struct StoreDoc`  <sub>L16</sub>
 - `pub fn projection_inputs(paths: &Paths) -> Result<Vec<PathBuf>>` — Every file that feeds a projection, in a stable order.  <sub>L64</sub>
-- `pub fn store_hash(paths: &Paths) -> Result<String>` — Hash of everything a projection is rendered from (see hashing.rs for why  <sub>L88</sub>
-- `pub fn lessons(paths: &Paths) -> Result<Vec<StoreDoc>>` — Lesson cards, sorted by id. Phase 3 fills this; Phase 0 renders whatever is  <sub>L100</sub>
-- `pub fn today() -> String`  <sub>L111</sub>
 
-**`src/run.rs`** · 190 lines · imported by 10
-- `pub struct RunMeta`  <sub>L17</sub>
-- `pub struct Run`  <sub>L37</sub>
-- `pub fn list(paths: &Paths) -> Result<Vec<String>>` — Every run id on disk, oldest first.  <sub>L145</sub>
-- `pub fn latest(paths: &Paths) -> Result<Option<String>>`  <sub>L161</sub>
-
-_… 269 more lines in `.keel/store/steering/structure.md`._
+_… 278 more lines in `.keel/store/steering/structure.md`._
 
 ## What this is
 

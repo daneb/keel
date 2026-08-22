@@ -1,0 +1,12 @@
+$ cargo clippy --all-targets --quiet
+
+warning: this assertion is always `true`
+   --> tests/support.rs:237:5
+    |
+237 |     assert!(true);
+    |     ^^^^^^^^^^^^^
+    |
+    = help: remove the assertion
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.94.0/index.html#assertions_on_constants
+    = note: `#[warn(clippy::assertions_on_constants)]` on by default
+

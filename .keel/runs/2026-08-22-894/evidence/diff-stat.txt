@@ -1,0 +1,18 @@
+     5      0  .keel/keel.toml
+    30      0  .keel/reviewers/heuristic
+     2      0  .keel/runs/2026-08-22-894/evidence/build.txt
+    12      0  .keel/runs/2026-08-22-894/evidence/lint.txt
+    66      0  .keel/runs/2026-08-22-894/evidence/oracles.json
+    54      0  .keel/runs/2026-08-22-894/evidence/test.txt
+     9      0  .keel/runs/2026-08-22-894/run.json
+    16      0  .keel/runs/2026-08-22-894/trajectory.jsonl
+     1      0  src/cmd/mod.rs
+    64      0  src/cmd/prune.rs
+    21      0  src/config.rs
+    96      0  src/gate/g25.rs
+    17      1  src/main.rs
+   366      0  src/review/mod.rs
+    81      0  src/run.rs
+     5      0  tests/support.rs
+
+16 file(s), +845 -1 (846 lines of churn) against 4180e3a31ea7e1d8c5c6bff0d88d438bad842c51

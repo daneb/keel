@@ -65,6 +65,11 @@ sections = [
 ]
 enabled = true
 
+[review]
+cmd = ".keel/reviewers/heuristic"
+timeout_secs = 60
+advisory = false
+
 [verify]
 build = "cargo build --quiet"
 test = "cargo test --quiet"

@@ -36,28 +36,40 @@ All three Phase-2/3 specs are `status: implemented` with their oracles passing.
 
 Taken deliberately, recorded so they are not rediscovered as surprises.
 
-- [ ] **Answer quality is unmeasured.** `keel bench` measures token cost only,
-      and says so ([ADR-0012](.keel/store/decisions/ADR-0012-bench-measures-cost-not-quality.md)).
-      A quality number needs a task set with known-correct answers.
-- [ ] **G2.5 is heuristic.** Added mocks and weakened assertions are caught by
-      substring match; scope creep by the diff. A reviewer plugin — a driver run
-      in critique mode — is the intended implementation and is not built.
+### Paid
+
+- [x] **G2.5 is heuristic.** A reviewer now runs as a subprocess in critique
+      mode (`keel.reviewrequest/1` → `keel.reviewresult/1`), receiving the diff,
+      the conventions, the lessons in force and the criteria. Each finding
+      becomes its own gate check with its location. `advisory = true` downgrades
+      every finding to a look while you learn whether to trust a reviewer. The
+      substring heuristics stay: a reviewer that is not configured must not
+      remove the only check there was, and one that cannot run must not pass one.
+- [x] **Runs accumulate.** `keel runs --prune --keep N` reports, `--apply`
+      removes. Runs cited by a lesson's `sources:` — including demoted lessons —
+      are never pruned, because a dangling provenance id is worse than the bytes.
+- [x] **`doctest` and `schema` oracle kinds were never exercised.** Both now
+      have end-to-end tests that prove they pass on a good input and *fail* on a
+      bad one, which is the half that matters.
+- [x] **Retrieval quality was entirely unmeasured.** `keel bench` now reports
+      recall alongside the ratio: whether the cheap answer named the files a
+      correct answer needs. Currently 100% at 14.1×. This is narrow and the
+      output says so — it does not measure whether a model would then answer
+      correctly.
+
+### Outstanding
+
+- [ ] **Answer quality proper.** Recall says retrieval surfaced the right files.
+      Whether a model answers correctly from them needs a task set with
+      known-good answers ([ADR-0012](.keel/store/decisions/ADR-0012-bench-measures-cost-not-quality.md)).
 - [ ] **One human oracle has never been exercised.** `evidence-bundle` AC-6
       ("a reviewer who did not run the work states what changed") is legal,
       counted, and still awaiting an actual reviewer.
-- [ ] **`doctest` and `schema` oracle kinds are barely used.** Both parse and
-      execute; no spec in this repo currently depends on either, so neither has
-      been exercised in anger. (`schema` was used and then withdrawn — its
-      target only exists inside an archive.)
 - [ ] **Windows is compiled, not tested.** Process-group kill, `taskkill` and
       the `cmd /C` shell paths are `cfg`'d and unexercised.
-- [ ] **Runs accumulate.** `.keel/runs/` grows without bound and nothing prunes
-      or archives it. Lesson `sources:` point into it, so pruning must not be
-      naive.
 - [ ] **Lesson count is thin.** 3 in force against the ≥5 the Phase 3 exit
-      criterion wants. Four were promoted from real data and one was demoted;
-      the number accrues with use and should not be manufactured
-      ([ADR-0006](.keel/store/decisions/ADR-0006-promotion-needs-distinct-runs.md)).
+      criterion wants. The number accrues with use and should not be
+      manufactured ([ADR-0006](.keel/store/decisions/ADR-0006-promotion-needs-distinct-runs.md)).
 - [ ] **ADRs are not projected.** They live in `.keel/store/decisions/` and are
       deliberately outside the projection budget, so an agent will not see them
       unless it looks. `keel status` reports the count; nothing injects them.

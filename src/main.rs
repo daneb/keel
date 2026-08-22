@@ -19,6 +19,7 @@ mod paths;
 mod plan;
 mod projection;
 mod retrieve;
+mod review;
 mod run;
 mod spec;
 mod store;
@@ -127,6 +128,15 @@ enum Command {
         /// Print only the most recent run id
         #[arg(long)]
         latest: bool,
+        /// Remove old runs, keeping the most recent N and anything a lesson cites
+        #[arg(long)]
+        prune: bool,
+        /// How many recent runs to keep when pruning
+        #[arg(long, default_value = "20")]
+        keep: usize,
+        /// Actually delete; without this, prune only reports
+        #[arg(long)]
+        apply: bool,
     },
     /// Write an evidence bundle, or verify one
     Export {
@@ -417,7 +427,13 @@ fn run() -> Result<i32> {
             cmd::run::run(cmd::run::Options { slug, task, driver, no_driver, json })
         }
         Command::Replay { run, json } => cmd::run::replay(run, json),
-        Command::Runs { latest } => cmd::run::list(latest),
+        Command::Runs { latest, prune, keep, apply } => {
+            if prune {
+                cmd::prune::prune(keep, apply)
+            } else {
+                cmd::run::list(latest)
+            }
+        }
         Command::Export { run, verify, out } => cmd::run::export(run, verify, out),
         Command::Ratchet { accept } => cmd::ratchet::run(accept),
     }

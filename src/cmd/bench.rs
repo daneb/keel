@@ -28,6 +28,9 @@ struct Task {
     retrieval: Vec<Query>,
     /// The files an agent without an index would read to answer the same thing.
     baseline_files: Vec<&'static str>,
+    /// The files a correct answer must surface. Retrieval that saves tokens by
+    /// not mentioning these has not saved anything — it has just answered less.
+    answer_files: Vec<&'static str>,
 }
 
 enum Query {
@@ -44,6 +47,10 @@ pub struct TaskResult {
     pub baseline_tokens: usize,
     pub ratio: f64,
     pub baseline_files: usize,
+    /// Fraction of the answer files retrieval actually surfaced.
+    pub recall: f64,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub missed: Vec<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -52,6 +59,7 @@ pub struct BenchResult {
     pub retrieval_total: usize,
     pub baseline_total: usize,
     pub ratio: f64,
+    pub recall: f64,
     pub indexed_files: usize,
     pub indexed_symbols: usize,
 }
@@ -69,6 +77,7 @@ fn tasks() -> Vec<Task> {
                 Query::Outline("src/projection/drift.rs"),
             ],
             baseline_files: vec!["src/projection/mod.rs", "src/projection/drift.rs"],
+            answer_files: vec!["src/projection/mod.rs", "src/projection/drift.rs"],
         },
         Task {
             question: "Where is `store_hash` defined and who calls it?",
@@ -77,6 +86,7 @@ fn tasks() -> Vec<Task> {
                 "src/store/mod.rs", "src/projection/mod.rs", "src/cmd/store.rs",
                 "src/gate/g0.rs", "src/gate/g2.rs", "src/cmd/status.rs",
             ],
+            answer_files: vec!["src/store/mod.rs", "src/gate/g0.rs", "src/gate/g2.rs"],
         },
         Task {
             question: "What breaks if the Paths type changes?",
@@ -86,6 +96,7 @@ fn tasks() -> Vec<Task> {
                 "src/projection/mod.rs", "src/cmd/init.rs", "src/cmd/status.rs",
                 "src/gate/g0.rs", "src/gate/g1.rs",
             ],
+            answer_files: vec!["src/paths.rs", "src/store/mod.rs", "src/map/mod.rs"],
         },
         Task {
             question: "How does a gate verdict get recorded?",
@@ -95,11 +106,13 @@ fn tasks() -> Vec<Task> {
                 Query::Outline("src/gate/mod.rs"),
             ],
             baseline_files: vec!["src/gate/mod.rs", "src/cmd/gate.rs", "src/run.rs"],
+            answer_files: vec!["src/gate/mod.rs", "src/cmd/gate.rs"],
         },
         Task {
             question: "What does the failure classifier do with a blocked check?",
             retrieval: vec![Query::Symbol("classify"), Query::Outline("src/failure/mod.rs")],
             baseline_files: vec!["src/failure/mod.rs", "src/failure/taxonomy.rs"],
+            answer_files: vec!["src/failure/mod.rs"],
         },
     ]
 }
@@ -119,6 +132,7 @@ pub fn run(json: bool) -> Result<i32> {
         // Retrieval side: unbudgeted, so the comparison is like for like. A
         // truncated answer would flatter retrieval by hiding the cost.
         let mut retrieval_tokens = 0;
+        let mut surfaced = String::new();
         for q in &t.retrieval {
             let a = match q {
                 Query::Outline(p) => r.outline(p)?,
@@ -127,7 +141,22 @@ pub fn run(json: bool) -> Result<i32> {
                 Query::Importers(p) => r.importers(p)?,
             };
             retrieval_tokens += a.tokens;
+            surfaced.push_str(&a.text);
         }
+
+        // Recall: did the cheaper answer actually name the files that hold the
+        // answer? A token saving achieved by answering less is not a saving.
+        let missed: Vec<String> = t
+            .answer_files
+            .iter()
+            .filter(|f| !surfaced.contains(**f))
+            .map(|f| f.to_string())
+            .collect();
+        let recall = if t.answer_files.is_empty() {
+            1.0
+        } else {
+            1.0 - missed.len() as f64 / t.answer_files.len() as f64
+        };
 
         let mut baseline_tokens = 0;
         for f in &t.baseline_files {
@@ -144,12 +173,20 @@ pub fn run(json: bool) -> Result<i32> {
             baseline_tokens,
             ratio: if retrieval_tokens == 0 { 0.0 } else { baseline_tokens as f64 / retrieval_tokens as f64 },
             baseline_files: t.baseline_files.len(),
+            recall,
+            missed,
         });
     }
 
     let retrieval_total: usize = results.iter().map(|r| r.retrieval_tokens).sum();
     let baseline_total: usize = results.iter().map(|r| r.baseline_tokens).sum();
+    let recall = if results.is_empty() {
+        0.0
+    } else {
+        results.iter().map(|r| r.recall).sum::<f64>() / results.len() as f64
+    };
     let bench = BenchResult {
+        recall,
         ratio: if retrieval_total == 0 { 0.0 } else { baseline_total as f64 / retrieval_total as f64 },
         tasks: results,
         retrieval_total,
@@ -167,31 +204,46 @@ pub fn run(json: bool) -> Result<i32> {
         "keel bench — {} files, {} symbols indexed\n",
         bench.indexed_files, bench.indexed_symbols
     );
-    println!("{:<52} {:>10} {:>10} {:>7}", "task", "retrieval", "read", "ratio");
-    println!("{}", "-".repeat(82));
+    println!("{:<48} {:>10} {:>10} {:>7} {:>7}", "task", "retrieval", "read", "ratio", "recall");
+    println!("{}", "-".repeat(86));
     for t in &bench.tasks {
         println!(
-            "{:<52} {:>10} {:>10} {:>6.1}×",
-            truncate(&t.question, 50),
+            "{:<48} {:>10} {:>10} {:>6.1}× {:>6.0}%",
+            truncate(&t.question, 46),
             t.retrieval_tokens,
             t.baseline_tokens,
-            t.ratio
+            t.ratio,
+            t.recall * 100.0
         );
+        for m in &t.missed {
+            println!("{:<48} missed {m}", "");
+        }
     }
-    println!("{}", "-".repeat(82));
+    println!("{}", "-".repeat(86));
     println!(
-        "{:<52} {:>10} {:>10} {:>6.1}×",
-        "total", bench.retrieval_total, bench.baseline_total, bench.ratio
+        "{:<48} {:>10} {:>10} {:>6.1}× {:>6.0}%",
+        "total", bench.retrieval_total, bench.baseline_total, bench.ratio, bench.recall * 100.0
     );
     println!(
         "\nTokens estimated at 4 chars each, both sides, on this repository.\n\
-         This measures cost, not answer quality: the published comparison that\n\
-         reports ~10× also reports 83% answer quality against 92%.\n\
-         Phase 4 accepts anything at or above 3×."
+         \n\
+         Recall is narrow: it asks whether the cheap answer named the files that\n\
+         hold the answer, because a token saving achieved by answering less is\n\
+         not a saving. It does not measure whether a model would then answer\n\
+         correctly — that needs a task set with known-good answers, which this\n\
+         is not. Phase 4 accepts a ratio at or above 3×."
     );
     if bench.ratio < 3.0 {
         println!("\n  BELOW TARGET — {:.1}× is under the 3× the plan accepts.", bench.ratio);
         return Ok(1);
+    }
+    if bench.recall < 1.0 {
+        // Not a failure — but a saving bought by missing the answer is worth
+        // seeing next to the ratio it inflated.
+        println!(
+            "\n  {:.0}% recall — retrieval missed a file a correct answer needs.",
+            bench.recall * 100.0
+        );
     }
     Ok(0)
 }

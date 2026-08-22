@@ -159,6 +159,29 @@ impl Repo {
         );
     }
 
+    /// A spec whose single criterion carries the given oracle line, for
+    /// exercising one oracle kind end to end.
+    pub fn write_spec_with_oracle(&self, oracle: &str) {
+        self.write(
+            ".keel/specs/demo/spec.md",
+            &format!(
+                "---\n\
+                 id: SPEC-0001\nslug: demo\nschema: keel.spec/1\nstatus: draft\n\
+                 scope:\n  - \"src/api/**\"\n  - \"schemas/**\"\n  - \"*.json\"\n\
+                 budget:\n  criteria: 6\n  lines: 120\n---\n\n\
+                 # Demo\n\n## Acceptance criteria\n\n\
+                 ### AC-1 The document conforms\n\n\
+                 WHEN the document is written THE SYSTEM SHALL keep it conformant.\n\n{oracle}\n"
+            ),
+        );
+        self.write(
+            ".keel/specs/demo/tasks.md",
+            "---\nid: TASKS-0001\nslug: demo\nschema: keel.tasks/1\n---\n\n\
+             # Tasks\n\n### T-1 Keep it conformant\n- criteria: AC-1\n\
+             - files: src/api/mod.rs\n- budget: 60\n- exit: the oracle passes\n",
+        );
+    }
+
     pub fn write_tasks(&self) {
         self.write(
             ".keel/specs/demo/tasks.md",
@@ -172,13 +195,20 @@ impl Repo {
         );
     }
 
+    /// Fill in the rollback `keel plan` leaves empty.
+    ///
+    /// Idempotent: re-running `keel plan` preserves a rollback that is already
+    /// there, so a test that re-plans must not fail for finding its own value.
     pub fn set_rollback(&self, text: &str) {
         let p = ".keel/specs/demo/plan.md";
         let content = self.read(p);
+        if !content.contains("rollback: ''") && !content.contains("rollback: \"\"") {
+            assert!(content.contains("rollback:"), "no rollback field at all in:\n{content}");
+            return;
+        }
         let replaced = content
             .replace("rollback: ''", &format!("rollback: '{text}'"))
             .replace("rollback: \"\"", &format!("rollback: '{text}'"));
-        assert_ne!(replaced, content, "no empty rollback in:\n{content}");
         self.write(p, &replaced);
     }
 
