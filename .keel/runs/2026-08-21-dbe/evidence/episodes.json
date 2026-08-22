@@ -1,0 +1,83 @@
+[
+  {
+    "id": "2026-08-21-dbe#1",
+    "run": "2026-08-21-dbe",
+    "spec": "trajectory-log",
+    "signal": {
+      "signal": "gate_check",
+      "gate": "G2",
+      "check": "blast-radius",
+      "verdict": "fail",
+      "expected": "diff ⊆ src/trajectory/**, src/cmd/run.rs",
+      "actual": "64 outside scope: .github/copilot-instructions.md (+123 -0), .gitignore (+6 -0), .kiro/steering/keel.md (+203 -0), AGENTS.md (+182 -0), CLAUDE.md (+182 -0), … and 59 more"
+    },
+    "attribution": "AGENTIC",
+    "class": "scope-creep",
+    "rationale": "`blast-radius` in G2 is a plan failure",
+    "scope": "repo",
+    "evidence": "evidence/diff-stat.txt"
+  },
+  {
+    "id": "2026-08-21-dbe#2",
+    "run": "2026-08-21-dbe",
+    "spec": "trajectory-log",
+    "signal": {
+      "signal": "gate_check",
+      "gate": "G2",
+      "check": "build",
+      "verdict": "blocked",
+      "actual": "no `build` command configured — set verify.build in .keel/keel.toml"
+    },
+    "attribution": "PROCESS",
+    "rationale": "`build` could not run; a blocked check is an environment fact, not an agent output",
+    "scope": "repo"
+  },
+  {
+    "id": "2026-08-21-dbe#3",
+    "run": "2026-08-21-dbe",
+    "spec": "trajectory-log",
+    "signal": {
+      "signal": "gate_check",
+      "gate": "G2",
+      "check": "line-budget",
+      "verdict": "fail",
+      "expected": "at most 160 lines of churn",
+      "actual": "16906 lines — raise the budget deliberately or split the work"
+    },
+    "attribution": "AGENTIC",
+    "class": "scope-creep",
+    "rationale": "`line-budget` in G2 is a plan failure",
+    "scope": "repo",
+    "evidence": "evidence/diff-stat.txt"
+  },
+  {
+    "id": "2026-08-21-dbe#4",
+    "run": "2026-08-21-dbe",
+    "spec": "trajectory-log",
+    "signal": {
+      "signal": "gate_check",
+      "gate": "G2",
+      "check": "lint",
+      "verdict": "blocked",
+      "actual": "no `lint` command configured — set verify.lint in .keel/keel.toml"
+    },
+    "attribution": "PROCESS",
+    "rationale": "`lint` could not run; a blocked check is an environment fact, not an agent output",
+    "scope": "repo"
+  },
+  {
+    "id": "2026-08-21-dbe#5",
+    "run": "2026-08-21-dbe",
+    "spec": "trajectory-log",
+    "signal": {
+      "signal": "gate_check",
+      "gate": "G2",
+      "check": "test",
+      "verdict": "blocked",
+      "actual": "no `test` command configured — set verify.test in .keel/keel.toml"
+    },
+    "attribution": "PROCESS",
+    "rationale": "`test` could not run; a blocked check is an environment fact, not an agent output",
+    "scope": "repo"
+  }
+]

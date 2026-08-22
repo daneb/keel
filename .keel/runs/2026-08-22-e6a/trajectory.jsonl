@@ -1,0 +1,16 @@
+{"t":"2026-08-22T07:23:14.900347+02:00","seq":1,"kind":"run_start","spec":"agent-driver","keel_version":"0.1.0","store_hash":"c2333028ecfbd48eda1fcc1ce333f2f0234686ea4426ef80a3a062a7af928254"}
+{"t":"2026-08-22T07:23:14.900400+02:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":184,"bytes":736}
+{"t":"2026-08-22T07:23:14.900422+02:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
+{"t":"2026-08-22T07:23:14.900454+02:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":7493,"bytes":29970}
+{"t":"2026-08-22T07:23:14.900534+02:00","seq":5,"kind":"inject","source":".keel/specs/agent-driver/spec.md","tokens":561,"bytes":2241}
+{"t":"2026-08-22T07:23:16.320106+02:00","seq":6,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
+{"t":"2026-08-22T07:23:24.751540+02:00","seq":7,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
+{"t":"2026-08-22T07:23:26.996814+02:00","seq":8,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
+{"t":"2026-08-22T07:23:33.677202+02:00","seq":9,"kind":"oracle","criterion":"AC-1","oracle":"test tests/driver.rs::task_in_result_out","verdict":"pass","exit_code":0}
+{"t":"2026-08-22T07:23:33.677247+02:00","seq":10,"kind":"oracle","criterion":"AC-2","oracle":"test tests/driver.rs::unstartable_driver_is_blocked","verdict":"pass","exit_code":0}
+{"t":"2026-08-22T07:23:33.677254+02:00","seq":11,"kind":"oracle","criterion":"AC-3","oracle":"test tests/driver.rs::invalid_result_names_the_field","verdict":"pass","exit_code":0}
+{"t":"2026-08-22T07:23:33.677259+02:00","seq":12,"kind":"oracle","criterion":"AC-4","oracle":"test tests/driver.rs::claude_code_driver_round_trips","verdict":"pass","exit_code":0}
+{"t":"2026-08-22T07:23:33.677263+02:00","seq":13,"kind":"oracle","criterion":"AC-5","oracle":"test tests/driver.rs::invocation_is_recorded","verdict":"pass","exit_code":0}
+{"t":"2026-08-22T07:23:33.677268+02:00","seq":14,"kind":"oracle","criterion":"AC-6","oracle":"test tests/driver.rs::timeout_terminates_and_blocks","verdict":"pass","exit_code":0}
+{"t":"2026-08-22T07:23:40.738838+02:00","seq":15,"kind":"gate","gate":"G2","verdict":"fail","result":"gates/G2.json"}
+{"t":"2026-08-22T07:23:40.738877+02:00","seq":16,"kind":"run_end","verdict":"fail","duration_ms":25847}

@@ -1,0 +1,64 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "test",
+      "oracle": "test tests/driver.rs::task_in_result_out",
+      "outcome": "fail",
+      "exit_code": 101,
+      "detail": "`cargo test --quiet --test driver -- --exact task_in_result_out` exited 101",
+      "output": "error[E0425]: cannot find function `this_does_not_exist` in this scope\n  --> src/paths.rs:52:39\n   |\n52 |     pub fn broken(&self) -> PathBuf { this_does_not_exist() }\n   |                                       ^^^^^^^^^^^^^^^^^^^ not found in this scope\n\nFor more information about this error, try `rustc --explain E0425`.\nerror: could not compile `keel` (bin \"keel\") due to 1 previous error"
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "test",
+      "oracle": "test tests/driver.rs::unstartable_driver_is_blocked",
+      "outcome": "fail",
+      "exit_code": 101,
+      "detail": "`cargo test --quiet --test driver -- --exact unstartable_driver_is_blocked` exited 101",
+      "output": "error[E0425]: cannot find function `this_does_not_exist` in this scope\n  --> src/paths.rs:52:39\n   |\n52 |     pub fn broken(&self) -> PathBuf { this_does_not_exist() }\n   |                                       ^^^^^^^^^^^^^^^^^^^ not found in this scope\n\nFor more information about this error, try `rustc --explain E0425`.\nerror: could not compile `keel` (bin \"keel\") due to 1 previous error"
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "test",
+      "oracle": "test tests/driver.rs::invalid_result_names_the_field",
+      "outcome": "fail",
+      "exit_code": 101,
+      "detail": "`cargo test --quiet --test driver -- --exact invalid_result_names_the_field` exited 101",
+      "output": "error[E0425]: cannot find function `this_does_not_exist` in this scope\n  --> src/paths.rs:52:39\n   |\n52 |     pub fn broken(&self) -> PathBuf { this_does_not_exist() }\n   |                                       ^^^^^^^^^^^^^^^^^^^ not found in this scope\n\nFor more information about this error, try `rustc --explain E0425`.\nerror: could not compile `keel` (bin \"keel\") due to 1 previous error"
+    },
+    {
+      "criterion": "AC-4",
+      "kind": "test",
+      "oracle": "test tests/driver.rs::claude_code_driver_round_trips",
+      "outcome": "fail",
+      "exit_code": 101,
+      "detail": "`cargo test --quiet --test driver -- --exact claude_code_driver_round_trips` exited 101",
+      "output": "error[E0425]: cannot find function `this_does_not_exist` in this scope\n  --> src/paths.rs:52:39\n   |\n52 |     pub fn broken(&self) -> PathBuf { this_does_not_exist() }\n   |                                       ^^^^^^^^^^^^^^^^^^^ not found in this scope\n\nFor more information about this error, try `rustc --explain E0425`.\nerror: could not compile `keel` (bin \"keel\") due to 1 previous error"
+    },
+    {
+      "criterion": "AC-5",
+      "kind": "test",
+      "oracle": "test tests/driver.rs::invocation_is_recorded",
+      "outcome": "fail",
+      "exit_code": 101,
+      "detail": "`cargo test --quiet --test driver -- --exact invocation_is_recorded` exited 101",
+      "output": "error[E0425]: cannot find function `this_does_not_exist` in this scope\n  --> src/paths.rs:52:39\n   |\n52 |     pub fn broken(&self) -> PathBuf { this_does_not_exist() }\n   |                                       ^^^^^^^^^^^^^^^^^^^ not found in this scope\n\nFor more information about this error, try `rustc --explain E0425`.\nerror: could not compile `keel` (bin \"keel\") due to 1 previous error"
+    },
+    {
+      "criterion": "AC-6",
+      "kind": "test",
+      "oracle": "test tests/driver.rs::timeout_terminates_and_blocks",
+      "outcome": "fail",
+      "exit_code": 101,
+      "detail": "`cargo test --quiet --test driver -- --exact timeout_terminates_and_blocks` exited 101",
+      "output": "error[E0425]: cannot find function `this_does_not_exist` in this scope\n  --> src/paths.rs:52:39\n   |\n52 |     pub fn broken(&self) -> PathBuf { this_does_not_exist() }\n   |                                       ^^^^^^^^^^^^^^^^^^^ not found in this scope\n\nFor more information about this error, try `rustc --explain E0425`.\nerror: could not compile `keel` (bin \"keel\") due to 1 previous error"
+    }
+  ],
+  "criteria": 6,
+  "executed": 6,
+  "passed": 0,
+  "failed": 6,
+  "blocked": 0,
+  "human": 0
+}

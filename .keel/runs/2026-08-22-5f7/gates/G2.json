@@ -1,0 +1,63 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G2",
+  "run": "2026-08-22-1d5",
+  "spec": "trajectory-log",
+  "verdict": "fail",
+  "generated_at": "2026-08-22T07:24:21.442429+02:00",
+  "checks": [
+    {
+      "id": "build",
+      "verdict": "fail",
+      "expected": "`cargo build --quiet` exits 0",
+      "actual": "exited 101",
+      "evidence": "evidence/build.txt"
+    },
+    {
+      "id": "test",
+      "verdict": "fail",
+      "expected": "`cargo test --quiet` exits 0",
+      "actual": "exited 101",
+      "evidence": "evidence/test.txt"
+    },
+    {
+      "id": "lint",
+      "verdict": "fail",
+      "expected": "`cargo clippy --all-targets --quiet` exits 0",
+      "actual": "exited 101",
+      "evidence": "evidence/lint.txt"
+    },
+    {
+      "id": "oracle-coverage",
+      "verdict": "fail",
+      "expected": "all 7 criteria satisfied",
+      "actual": "AC-1 (`cargo test --quiet --test trajectory -- --exact one_json_object_per_line` exited 101), AC-2 (`cargo test --quiet --test trajectory -- --exact seq_is_gapless_and_increasing` exited 101), AC-3 (`cargo test --quiet --test trajectory -- --exact append_preserves_existing_lines` exited 101), AC-4 (`cargo test --quiet --test trajectory -- --exact gate_verdict_is_recorded` exited 101), … and 2 more",
+      "evidence": "evidence/oracles.json"
+    },
+    {
+      "id": "blast-radius",
+      "verdict": "fail",
+      "expected": "diff ⊆ src/trajectory/**, src/cmd/run.rs",
+      "actual": "72 outside scope: .github/copilot-instructions.md (+123 -0), .gitignore (+6 -0), .kiro/steering/keel.md (+203 -0), AGENTS.md (+182 -0), CLAUDE.md (+182 -0), … and 67 more",
+      "evidence": "evidence/diff-stat.txt"
+    },
+    {
+      "id": "line-budget",
+      "verdict": "fail",
+      "expected": "at most 160 lines of churn",
+      "actual": "16862 lines — raise the budget deliberately or split the work",
+      "evidence": "evidence/diff-stat.txt"
+    },
+    {
+      "id": "baseline-ratchet",
+      "verdict": "blocked",
+      "detail": "tests-passing (`cargo test --quiet 2>&1 | grep -o '[0-9]* passed' | awk '{s+=$1} END {print s}'` printed no integer (got ``))",
+      "evidence": "evidence/ratchet.json"
+    },
+    {
+      "id": "store-drift",
+      "verdict": "pass",
+      "detail": "4 projections current"
+    }
+  ]
+}

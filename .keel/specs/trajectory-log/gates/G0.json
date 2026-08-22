@@ -1,0 +1,85 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G0",
+  "run": "2026-08-21-d7e",
+  "spec": "trajectory-log",
+  "verdict": "pass",
+  "generated_at": "2026-08-21T20:25:50.232381+02:00",
+  "checks": [
+    {
+      "id": "schema",
+      "verdict": "pass",
+      "detail": "SPEC-0001 (keel.spec/1)"
+    },
+    {
+      "id": "criteria-present",
+      "verdict": "pass",
+      "detail": "7 criteria"
+    },
+    {
+      "id": "criterion-ids-unique",
+      "verdict": "pass",
+      "detail": "no duplicate ids"
+    },
+    {
+      "id": "no-placeholders",
+      "verdict": "pass",
+      "detail": "no unfilled scaffold text"
+    },
+    {
+      "id": "ears-conformance",
+      "verdict": "pass",
+      "detail": "7/7 conform (event-driven, ubiquitous, unwanted-behaviour)"
+    },
+    {
+      "id": "oracle-presence",
+      "verdict": "pass",
+      "detail": "7 oracles across 7 criteria"
+    },
+    {
+      "id": "oracle-wellformed",
+      "verdict": "pass",
+      "detail": "all oracles parse"
+    },
+    {
+      "id": "ambiguity",
+      "verdict": "pass",
+      "detail": "no ambiguous phrasing in criteria"
+    },
+    {
+      "id": "criterion-budget",
+      "verdict": "pass",
+      "detail": "7/8 criteria"
+    },
+    {
+      "id": "spec-length",
+      "verdict": "pass",
+      "detail": "82/250 lines"
+    },
+    {
+      "id": "scope-declared",
+      "verdict": "pass",
+      "detail": "2 glob(s): src/trajectory/**, src/cmd/run.rs"
+    },
+    {
+      "id": "change-budget",
+      "verdict": "pass",
+      "detail": "160 lines of diff budgeted"
+    },
+    {
+      "id": "oracle-mix",
+      "verdict": "pass",
+      "detail": "7/7 runnable (1 cmd, 6 test)"
+    },
+    {
+      "id": "human-cost",
+      "verdict": "pass",
+      "detail": "0 human oracle(s), none load-bearing"
+    },
+    {
+      "id": "store-drift",
+      "verdict": "pass",
+      "detail": "4 projections current"
+    }
+  ]
+}

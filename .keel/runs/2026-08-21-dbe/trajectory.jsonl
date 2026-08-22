@@ -1,0 +1,15 @@
+{"t":"2026-08-21T21:54:54.694745+02:00","seq":1,"kind":"run_start","spec":"trajectory-log","keel_version":"0.1.0","store_hash":"4618324de4ead0367177395da9f39a0f7e983f8955079ccfee5cab91bbff24ac"}
+{"t":"2026-08-21T21:54:54.694831+02:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":184,"bytes":736}
+{"t":"2026-08-21T21:54:54.694863+02:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
+{"t":"2026-08-21T21:54:54.694920+02:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6977,"bytes":27905}
+{"t":"2026-08-21T21:54:54.694960+02:00","seq":5,"kind":"inject","source":".keel/specs/trajectory-log/spec.md","tokens":647,"bytes":2587}
+{"t":"2026-08-21T21:55:00.681084+02:00","seq":6,"kind":"oracle","criterion":"AC-1","oracle":"test tests/trajectory.rs::one_json_object_per_line","verdict":"pass","exit_code":0}
+{"t":"2026-08-21T21:55:00.681105+02:00","seq":7,"kind":"oracle","criterion":"AC-2","oracle":"test tests/trajectory.rs::seq_is_gapless_and_increasing","verdict":"pass","exit_code":0}
+{"t":"2026-08-21T21:55:00.681109+02:00","seq":8,"kind":"oracle","criterion":"AC-3","oracle":"test tests/trajectory.rs::append_preserves_existing_lines","verdict":"pass","exit_code":0}
+{"t":"2026-08-21T21:55:00.681111+02:00","seq":9,"kind":"oracle","criterion":"AC-4","oracle":"test tests/trajectory.rs::gate_verdict_is_recorded","verdict":"pass","exit_code":0}
+{"t":"2026-08-21T21:55:00.681114+02:00","seq":10,"kind":"oracle","criterion":"AC-5","oracle":"test tests/trajectory.rs::injection_records_source_and_tokens","verdict":"pass","exit_code":0}
+{"t":"2026-08-21T21:55:00.681116+02:00","seq":11,"kind":"oracle","criterion":"AC-6","oracle":"`keel replay $(keel runs --latest) | head -1` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-08-21T21:55:00.681118+02:00","seq":12,"kind":"oracle","criterion":"AC-7","oracle":"test tests/trajectory.rs::corrupt_line_names_file_and_line","verdict":"pass","exit_code":0}
+{"t":"2026-08-21T21:55:06.064208+02:00","seq":13,"kind":"gate","gate":"G2","verdict":"fail","result":"gates/G2.json"}
+{"t":"2026-08-21T21:55:06.064234+02:00","seq":14,"kind":"run_end","verdict":"fail","duration_ms":11382}
+{"t":"2026-08-21T22:02:34.412265+02:00","seq":15,"kind":"human","stage":"merge","decision":"approved","by":"Dane Balia","note":"Phase 2 implemented; scope deliberately exceeded, see below"}

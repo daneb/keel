@@ -1,0 +1,8 @@
+{
+  "schema": "keel.baseline/1",
+  "recorded_at": "2026-08-22T07:33:20.412994+02:00",
+  "metrics": {
+    "clippy-warnings": 0,
+    "tests-passing": 261
+  }
+}

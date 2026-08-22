@@ -1,0 +1,59 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G2",
+  "run": "2026-08-21-0d5",
+  "spec": "trajectory-log",
+  "verdict": "fail",
+  "generated_at": "2026-08-21T21:56:13.548430+02:00",
+  "checks": [
+    {
+      "id": "build",
+      "verdict": "pass",
+      "detail": "`cargo build --quiet` exited 0",
+      "evidence": "evidence/build.txt"
+    },
+    {
+      "id": "test",
+      "verdict": "pass",
+      "detail": "`cargo test --quiet` exited 0",
+      "evidence": "evidence/test.txt"
+    },
+    {
+      "id": "lint",
+      "verdict": "pass",
+      "detail": "`cargo clippy --all-targets --quiet` exited 0",
+      "evidence": "evidence/lint.txt"
+    },
+    {
+      "id": "oracle-coverage",
+      "verdict": "pass",
+      "detail": "7/7 oracles pass (0 awaiting human judgement)",
+      "evidence": "evidence/oracles.json"
+    },
+    {
+      "id": "blast-radius",
+      "verdict": "fail",
+      "expected": "diff ⊆ src/trajectory/**, src/cmd/run.rs",
+      "actual": "64 outside scope: .github/copilot-instructions.md (+123 -0), .gitignore (+6 -0), .kiro/steering/keel.md (+203 -0), AGENTS.md (+182 -0), CLAUDE.md (+182 -0), … and 59 more",
+      "evidence": "evidence/diff-stat.txt"
+    },
+    {
+      "id": "line-budget",
+      "verdict": "fail",
+      "expected": "at most 160 lines of churn",
+      "actual": "14229 lines — raise the budget deliberately or split the work",
+      "evidence": "evidence/diff-stat.txt"
+    },
+    {
+      "id": "baseline-ratchet",
+      "verdict": "pass",
+      "detail": "2 metric(s) held",
+      "evidence": "evidence/ratchet.json"
+    },
+    {
+      "id": "store-drift",
+      "verdict": "pass",
+      "detail": "4 projections current"
+    }
+  ]
+}

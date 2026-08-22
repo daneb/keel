@@ -1,0 +1,343 @@
+//! keel — a gated harness for daily AI-assisted delivery.
+//!
+//! Phase 0: one store, many agents. Everything here exists to make every AI
+//! session in every tool start from the same, current, budget-bounded picture
+//! of the repository — and to make drift in that picture loud.
+
+mod approval;
+mod cmd;
+mod config;
+mod driver;
+mod evidence;
+mod failure;
+mod gate;
+mod lesson;
+mod hashing;
+mod map;
+mod paths;
+mod plan;
+mod projection;
+mod run;
+mod spec;
+mod store;
+mod trajectory;
+
+use anyhow::Result;
+use clap::{Parser, Subcommand};
+
+#[derive(Parser)]
+#[command(
+    name = "keel",
+    version,
+    about = "A gated harness for AI-assisted delivery — one store, many agents",
+    long_about = "keel is a conductor, not an agent loop. It owns the knowledge store,\n\
+                  the structural map of the repository, and the projections that every\n\
+                  coding agent reads — and it tells you when they have drifted apart."
+)]
+struct Cli {
+    #[command(subcommand)]
+    command: Command,
+}
+
+#[derive(Subcommand)]
+enum Command {
+    /// Scaffold .keel/, seed the store, build the first map
+    Init {
+        /// Re-scaffold over an existing .keel/ (store files are kept)
+        #[arg(long)]
+        force: bool,
+        /// Skip the interview and accept seeded defaults
+        #[arg(long, short = 'y')]
+        yes: bool,
+    },
+    /// Rebuild the symbol index and the generated maps
+    Map {
+        /// Override map.budget_lines for this run
+        #[arg(long)]
+        budget: Option<usize>,
+        #[arg(long)]
+        json: bool,
+    },
+    /// The knowledge store and its projections
+    #[command(subcommand)]
+    Store(StoreCmd),
+    /// Show whether the store, map and projections are current
+    Status,
+    /// Manage the pre-commit hook that enforces `store check`
+    #[command(subcommand)]
+    Hook(HookCmd),
+    /// Author and inspect specs
+    #[command(subcommand)]
+    Spec(SpecCmd),
+    /// Compute the blast radius and scaffold plan.md + tasks.md
+    Plan {
+        /// Spec slug; optional when there is only one spec
+        slug: Option<String>,
+        /// How far to walk the reverse-import graph
+        #[arg(long)]
+        depth: Option<usize>,
+    },
+    /// Run a gate and record its verdict
+    #[command(subcommand)]
+    Gate(GateCmd),
+    /// Record a human decision on a stage
+    Approve {
+        slug: Option<String>,
+        /// Which stage is being signed off
+        #[arg(long, default_value = "spec")]
+        stage: String,
+        /// Record a rejection instead of an approval
+        #[arg(long)]
+        reject: bool,
+        /// Why
+        #[arg(long)]
+        note: Option<String>,
+    },
+    /// Show the approval history and current standing
+    Approvals { slug: Option<String> },
+    /// Execute a task through an agent, capture evidence, run G2/G2.5/G3
+    Run {
+        /// Spec slug; optional when there is only one spec
+        slug: Option<String>,
+        /// Task id from tasks.md, e.g. T-1
+        #[arg(long)]
+        task: Option<String>,
+        /// Driver id; defaults to the configured default
+        #[arg(long)]
+        driver: Option<String>,
+        /// Gate the working tree as it stands instead of invoking an agent
+        #[arg(long)]
+        no_driver: bool,
+        #[arg(long)]
+        json: bool,
+    },
+    /// Print a run's trajectory in sequence order
+    Replay {
+        run: Option<String>,
+        #[arg(long)]
+        json: bool,
+    },
+    /// List runs
+    Runs {
+        /// Print only the most recent run id
+        #[arg(long)]
+        latest: bool,
+    },
+    /// Write an evidence bundle, or verify one
+    Export {
+        /// Run id; defaults to the most recent
+        run: Option<String>,
+        /// Verify this bundle instead of writing one
+        #[arg(long)]
+        verify: Option<String>,
+        /// Directory to write the bundle into
+        #[arg(long)]
+        out: Option<String>,
+    },
+    /// Extract failure episodes, classify them, propose lesson cards
+    Learn {
+        /// Run id; defaults to the most recent
+        run: Option<String>,
+        #[arg(long)]
+        json: bool,
+    },
+    /// Failure episodes across every run, with the attribution distribution
+    Failures {
+        #[arg(long)]
+        json: bool,
+    },
+    /// Lessons in force
+    Lessons {
+        #[arg(long)]
+        json: bool,
+    },
+    /// Accept, decline or retire a lesson
+    #[command(subcommand)]
+    Lesson(LessonCmd),
+    /// Record the current metrics as the baseline the ratchet holds
+    Ratchet {
+        /// Accept the current measurements as the new baseline
+        #[arg(long)]
+        accept: bool,
+    },
+    /// What else does this change touch?
+    Blast {
+        /// Path globs, e.g. `src/api/**`
+        targets: Vec<String>,
+        /// Start from the file(s) defining this symbol instead
+        #[arg(long)]
+        symbol: Option<String>,
+        #[arg(long)]
+        depth: Option<usize>,
+        #[arg(long)]
+        json: bool,
+    },
+}
+
+#[derive(Subcommand)]
+enum SpecCmd {
+    /// Scaffold a new spec, then run G0 on it
+    New {
+        slug: String,
+        /// Human-readable title; defaults to the slug
+        #[arg(long)]
+        title: Option<String>,
+        /// Scope globs this change may touch (repeatable)
+        #[arg(long)]
+        scope: Vec<String>,
+        #[arg(long)]
+        force: bool,
+    },
+    /// List specs with their gate verdicts
+    List,
+    /// Print the authoring prompt for an agent
+    Prompt { slug: String },
+}
+
+#[derive(Subcommand)]
+enum LessonCmd {
+    /// Promote candidate <n> from `keel learn` into a lesson card
+    Promote {
+        index: usize,
+        /// Promote despite the promotion rules, deliberately
+        #[arg(long)]
+        force: bool,
+    },
+    /// Decline candidate <n>
+    Reject {
+        index: usize,
+        #[arg(long)]
+        note: Option<String>,
+    },
+    /// Retire a lesson that has decayed
+    Demote {
+        id: String,
+        #[arg(long)]
+        reason: Option<String>,
+    },
+}
+
+#[derive(Subcommand)]
+enum GateCmd {
+    /// G0 — is this spec buildable?
+    G0 {
+        slug: Option<String>,
+        #[arg(long)]
+        json: bool,
+    },
+    /// G1 — is this plan bounded?
+    G1 {
+        slug: Option<String>,
+        #[arg(long)]
+        json: bool,
+    },
+    /// G4 — has this run been learned from?
+    G4 {
+        run: Option<String>,
+        #[arg(long)]
+        json: bool,
+    },
+}
+
+#[derive(Subcommand)]
+enum StoreCmd {
+    /// Render the store into CLAUDE.md, AGENTS.md and the rest
+    Render {
+        /// Show what would be written without writing it
+        #[arg(long)]
+        dry_run: bool,
+        /// Render only this adapter
+        #[arg(long)]
+        adapter: Option<String>,
+    },
+    /// Report drift, staleness and budget breaches (exit 1 if any)
+    Check {
+        #[arg(long)]
+        json: bool,
+    },
+    /// Capture hand-edits out of generated files and restore the projection
+    Reconcile {
+        /// Adapter ids or output paths; defaults to everything drifted
+        targets: Vec<String>,
+    },
+}
+
+#[derive(Subcommand)]
+enum HookCmd {
+    /// Install the pre-commit hook
+    Install,
+    /// Remove the pre-commit hook
+    Uninstall,
+}
+
+fn main() {
+    let code = match run() {
+        Ok(code) => code,
+        Err(e) => {
+            eprintln!("keel: {e:#}");
+            2
+        }
+    };
+    std::process::exit(code);
+}
+
+fn run() -> Result<i32> {
+    let cli = Cli::parse();
+    match cli.command {
+        Command::Init { force, yes } => {
+            cmd::init::run(force, yes)?;
+            Ok(0)
+        }
+        Command::Map { budget, json } => {
+            cmd::map::run(budget, json)?;
+            Ok(0)
+        }
+        Command::Store(StoreCmd::Render { dry_run, adapter }) => {
+            cmd::store::render(dry_run, adapter)?;
+            Ok(0)
+        }
+        Command::Store(StoreCmd::Check { json }) => cmd::store::check(json),
+        Command::Store(StoreCmd::Reconcile { targets }) => {
+            cmd::store::reconcile(targets)?;
+            Ok(0)
+        }
+        Command::Status => cmd::status::run(),
+        Command::Hook(HookCmd::Install) => {
+            cmd::hook::install()?;
+            Ok(0)
+        }
+        Command::Hook(HookCmd::Uninstall) => {
+            cmd::hook::uninstall()?;
+            Ok(0)
+        }
+        Command::Spec(SpecCmd::New { slug, title, scope, force }) => {
+            cmd::spec::new(&slug, title, scope, force)
+        }
+        Command::Spec(SpecCmd::List) => cmd::spec::list(),
+        Command::Spec(SpecCmd::Prompt { slug }) => cmd::spec::print_prompt(&slug),
+        Command::Plan { slug, depth } => cmd::plan::run(slug, depth),
+        Command::Gate(GateCmd::G0 { slug, json }) => cmd::gate::g0(slug, json),
+        Command::Gate(GateCmd::G1 { slug, json }) => cmd::gate::g1(slug, json),
+        Command::Gate(GateCmd::G4 { run, json }) => cmd::learn::g4(run, json),
+        Command::Learn { run, json } => cmd::learn::learn(run, json),
+        Command::Failures { json } => cmd::learn::failures(json),
+        Command::Lessons { json } => cmd::learn::list(json),
+        Command::Lesson(LessonCmd::Promote { index, force }) => cmd::learn::promote(index, force),
+        Command::Lesson(LessonCmd::Reject { index, note }) => cmd::learn::reject(index, note),
+        Command::Lesson(LessonCmd::Demote { id, reason }) => cmd::learn::demote(id, reason),
+        Command::Approve { slug, stage, reject, note } => {
+            cmd::approve::run(slug, stage, reject, note)
+        }
+        Command::Approvals { slug } => cmd::approve::show(slug),
+        Command::Blast { targets, symbol, depth, json } => {
+            cmd::blast::run(targets, symbol, depth, json)
+        }
+        Command::Run { slug, task, driver, no_driver, json } => {
+            cmd::run::run(cmd::run::Options { slug, task, driver, no_driver, json })
+        }
+        Command::Replay { run, json } => cmd::run::replay(run, json),
+        Command::Runs { latest } => cmd::run::list(latest),
+        Command::Export { run, verify, out } => cmd::run::export(run, verify, out),
+        Command::Ratchet { accept } => cmd::ratchet::run(accept),
+    }
+}

@@ -1,0 +1,10 @@
+{
+  "schema": "keel.run/1",
+  "id": "2026-08-22-e6a",
+  "spec": "agent-driver",
+  "keel_version": "0.1.0",
+  "store_hash": "c2333028ecfbd48eda1fcc1ce333f2f0234686ea4426ef80a3a062a7af928254",
+  "started_at": "2026-08-22T07:23:14.893013+02:00",
+  "finished_at": "2026-08-22T07:23:40.738882+02:00",
+  "verdict": "fail"
+}

@@ -1,0 +1,16 @@
+$ cargo clippy --all-targets --quiet
+
+warning: unneeded `return` statement
+  --> src/hashing.rs:22:5
+   |
+22 |     return &hex[..hex.len().min(12)];
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.94.0/index.html#needless_return
+   = note: `#[warn(clippy::needless_return)]` on by default
+help: remove `return`
+   |
+22 -     return &hex[..hex.len().min(12)];
+22 +     &hex[..hex.len().min(12)]
+   |
+

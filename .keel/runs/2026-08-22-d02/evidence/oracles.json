@@ -1,0 +1,66 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "test",
+      "oracle": "test tests/trajectory.rs::one_json_object_per_line",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.89s"
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "test",
+      "oracle": "test tests/trajectory.rs::seq_is_gapless_and_increasing",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.90s"
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "test",
+      "oracle": "test tests/trajectory.rs::append_preserves_existing_lines",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.90s"
+    },
+    {
+      "criterion": "AC-4",
+      "kind": "test",
+      "oracle": "test tests/trajectory.rs::gate_verdict_is_recorded",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.87s"
+    },
+    {
+      "criterion": "AC-5",
+      "kind": "test",
+      "oracle": "test tests/trajectory.rs::injection_records_source_and_tokens",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.89s"
+    },
+    {
+      "criterion": "AC-6",
+      "kind": "cmd",
+      "oracle": "`keel replay $(keel runs --latest) | head -1` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "sh: keel: command not found\nsh: keel: command not found"
+    },
+    {
+      "criterion": "AC-7",
+      "kind": "test",
+      "oracle": "test tests/trajectory.rs::corrupt_line_names_file_and_line",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.89s"
+    }
+  ],
+  "criteria": 7,
+  "executed": 7,
+  "passed": 7,
+  "failed": 0,
+  "blocked": 0,
+  "human": 0
+}

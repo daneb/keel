@@ -1,0 +1,17 @@
+{"t":"2026-08-22T07:25:06.827807+02:00","seq":1,"kind":"run_start","spec":"trajectory-log","keel_version":"0.1.0","store_hash":"c2333028ecfbd48eda1fcc1ce333f2f0234686ea4426ef80a3a062a7af928254"}
+{"t":"2026-08-22T07:25:06.827865+02:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":184,"bytes":736}
+{"t":"2026-08-22T07:25:06.827888+02:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
+{"t":"2026-08-22T07:25:06.827924+02:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":7493,"bytes":29970}
+{"t":"2026-08-22T07:25:06.828020+02:00","seq":5,"kind":"inject","source":".keel/specs/trajectory-log/spec.md","tokens":647,"bytes":2587}
+{"t":"2026-08-22T07:25:06.948226+02:00","seq":6,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
+{"t":"2026-08-22T07:25:13.748224+02:00","seq":7,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
+{"t":"2026-08-22T07:25:13.900263+02:00","seq":8,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
+{"t":"2026-08-22T07:25:19.954306+02:00","seq":9,"kind":"oracle","criterion":"AC-1","oracle":"test tests/trajectory.rs::one_json_object_per_line","verdict":"pass","exit_code":0}
+{"t":"2026-08-22T07:25:19.954326+02:00","seq":10,"kind":"oracle","criterion":"AC-2","oracle":"test tests/trajectory.rs::seq_is_gapless_and_increasing","verdict":"pass","exit_code":0}
+{"t":"2026-08-22T07:25:19.954332+02:00","seq":11,"kind":"oracle","criterion":"AC-3","oracle":"test tests/trajectory.rs::append_preserves_existing_lines","verdict":"pass","exit_code":0}
+{"t":"2026-08-22T07:25:19.954335+02:00","seq":12,"kind":"oracle","criterion":"AC-4","oracle":"test tests/trajectory.rs::gate_verdict_is_recorded","verdict":"pass","exit_code":0}
+{"t":"2026-08-22T07:25:19.954337+02:00","seq":13,"kind":"oracle","criterion":"AC-5","oracle":"test tests/trajectory.rs::injection_records_source_and_tokens","verdict":"pass","exit_code":0}
+{"t":"2026-08-22T07:25:19.954340+02:00","seq":14,"kind":"oracle","criterion":"AC-6","oracle":"`keel replay $(keel runs --latest) | head -1` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-08-22T07:25:19.954343+02:00","seq":15,"kind":"oracle","criterion":"AC-7","oracle":"test tests/trajectory.rs::corrupt_line_names_file_and_line","verdict":"pass","exit_code":0}
+{"t":"2026-08-22T07:25:26.865838+02:00","seq":16,"kind":"gate","gate":"G2","verdict":"fail","result":"gates/G2.json"}
+{"t":"2026-08-22T07:25:26.865866+02:00","seq":17,"kind":"run_end","verdict":"fail","duration_ms":20043}

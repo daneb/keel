@@ -1,0 +1,11 @@
+$ cargo test --quiet
+
+error[E0425]: cannot find function `this_does_not_exist` in this scope
+  --> src/paths.rs:52:39
+   |
+52 |     pub fn broken(&self) -> PathBuf { this_does_not_exist() }
+   |                                       ^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+For more information about this error, try `rustc --explain E0425`.
+error: could not compile `keel` (bin "keel") due to 1 previous error
+error: could not compile `keel` (bin "keel" test) due to 1 previous error

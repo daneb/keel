@@ -1,0 +1,85 @@
+# keel configuration — schema keel.config/1
+# Budgets are enforced, not advised. Lower them until they hurt.
+
+schema = "keel.config/1"
+
+[map]
+budget_lines = 400
+codemap_budget_lines = 150
+max_file_bytes = 1048576
+codemap_min_files = 2
+exclude = []
+
+[store]
+steering_budget_lines = 300
+
+[[adapter]]
+id = "claude"
+out = "CLAUDE.md"
+budget = 180
+sections = [
+    "conventions",
+    "tech",
+    "structure",
+    "product",
+    "lessons",
+]
+enabled = true
+
+[[adapter]]
+id = "agents"
+out = "AGENTS.md"
+budget = 180
+sections = [
+    "conventions",
+    "tech",
+    "structure",
+    "product",
+    "lessons",
+]
+enabled = true
+
+[[adapter]]
+id = "kiro"
+out = ".kiro/steering/keel.md"
+budget = 200
+sections = [
+    "conventions",
+    "tech",
+    "structure",
+    "product",
+    "lessons",
+]
+enabled = true
+
+[[adapter]]
+id = "copilot"
+out = ".github/copilot-instructions.md"
+budget = 120
+sections = [
+    "conventions",
+    "tech",
+    "structure",
+    "product",
+    "lessons",
+]
+enabled = true
+
+[verify]
+build = "cargo build --quiet"
+test = "cargo test --quiet"
+lint = "cargo clippy --all-targets --quiet"
+
+[oracle]
+test_cmd = "cargo test --quiet --test {file} -- --exact {name}"
+doctest_cmd = "cargo test --doc --quiet"
+
+[[ratchet]]
+id = "clippy-warnings"
+cmd = "cargo clippy --all-targets -q 2>&1 | grep -c '^warning' || true"
+direction = "down"
+
+[[ratchet]]
+id = "tests-passing"
+cmd = "cargo test --quiet 2>&1 | grep -o '[0-9]* passed' | awk '{s+=$1} END {print s}'"
+direction = "up"
