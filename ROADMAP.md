@@ -37,18 +37,27 @@ All three Phase-2/3 specs are `status: implemented` with their oracles passing.
       specs, runs and shared stores, each finding naming the command that fixes
       it.
 
+- [x] **Parallel execution of a wave.** `keel run --waves` gives each task its
+      own git worktree at the same base commit, runs the wave's drivers
+      concurrently, then applies their patches to the main tree one at a time in
+      task order — so a conflict is a reported conflict, not whichever process
+      finished last. G1's `wave-isolation` refuses a plan where two tasks in one
+      wave claim the same file, which is the cheap way to find that out.
+- [x] **Human-intervention minutes.** `keel metrics` reports elapsed time from a
+      run starting to a person deciding, and how many finished runs asked for a
+      human and never got one. Labelled as elapsed wall clock rather than
+      effort, because that is what it is.
+
 ### Still open in Phase 5
 
-- [ ] **Parallel execution of a wave.** Waves are computed and reported; keel
-      runs tasks serially. Real parallelism needs a git worktree per task and a
-      merge strategy, neither of which exists.
 - [ ] **Drivers for Kiro, Copilot and `pi`.** The conformance suite makes adding
       one cheap to validate; nobody has written them.
 - [ ] **Shared stores over git.** `[[shared]]` takes a path — a sibling
       checkout, a submodule, a vendored copy. Fetching and pinning a remote
       store is not built.
-- [ ] **Human-intervention minutes per task.** The one metric from PLAN.md §5
-      not surfaced: keel records human decisions but not the time they cost.
+- [ ] **Wave execution needs a commit to branch from.** `--waves` uses
+      `git worktree`, so it refuses on a repository with no HEAD. Serial runs
+      still work there.
 
 ## Debts
 

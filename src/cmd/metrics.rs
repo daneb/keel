@@ -44,6 +44,11 @@ pub struct Metrics {
     pub tokens_total: usize,
     pub tokens_per_run: f64,
     pub human_decisions: usize,
+    /// Minutes between a run starting and each human decision on it — the
+    /// closest honest proxy keel has for what a person's involvement cost.
+    pub human_minutes_total: f64,
+    pub human_minutes_per_run: f64,
+    pub runs_awaiting_a_human: usize,
     pub lessons_in_force: usize,
     pub lessons_enforced: usize,
     pub lesson_fires: usize,
@@ -91,14 +96,38 @@ pub fn run(threshold: usize, json: bool) -> Result<i32> {
 
         let events = trajectory::read(&run.trajectory_path()).unwrap_or_default();
         m.tokens_total += trajectory::token_total(&events);
-        m.human_decisions += events
-            .iter()
-            .filter(|e| e.payload.kind() == "human")
-            .count();
+        let humans: Vec<&crate::trajectory::Event> =
+            events.iter().filter(|e| e.payload.kind() == "human").collect();
+        m.human_decisions += humans.len();
+
+        // Wall-clock from the run starting to a person deciding. It is a proxy
+        // and a generous one — a decision made the next morning counts the night
+        // — so it is reported as elapsed time, never as effort.
+        if let (Some(first), Some(last)) = (events.first(), humans.last())
+            && let (Ok(start), Ok(end)) = (
+                chrono::DateTime::parse_from_rfc3339(&first.t),
+                chrono::DateTime::parse_from_rfc3339(&last.t),
+            )
+        {
+            let minutes = (end - start).num_seconds() as f64 / 60.0;
+            if minutes >= 0.0 {
+                m.human_minutes_total += minutes;
+            }
+        }
+        // A finished run whose gates asked for a person and never got one.
+        if humans.is_empty()
+            && run.meta.finished_at.is_some()
+            && events.iter().any(|e| matches!(&e.payload,
+                crate::trajectory::Payload::Gate { gate, verdict, .. }
+                    if gate == "G3" && verdict != "pass"))
+        {
+            m.runs_awaiting_a_human += 1;
+        }
         episodes.extend(failure::extract(&paths, &run)?);
     }
 
     m.tokens_per_run = if m.runs == 0 { 0.0 } else { m.tokens_total as f64 / m.runs as f64 };
+    m.human_minutes_per_run = if m.runs == 0 { 0.0 } else { m.human_minutes_total / m.runs as f64 };
 
     let d = failure::distribution(&episodes);
     m.failure_classes = d.by_class;
@@ -168,6 +197,18 @@ fn report(m: &Metrics, cfg: &Config) {
     println!("  {:>8} tokens total", m.tokens_total);
     println!("  {:>8.0} tokens per run", m.tokens_per_run);
     println!("  {:>8} human decision(s) recorded", m.human_decisions);
+    println!(
+        "  {:>8.0} minutes elapsed to a human decision, {:.0} per run",
+        m.human_minutes_total, m.human_minutes_per_run
+    );
+    println!("           (elapsed wall clock, not effort — a decision made the next");
+    println!("            morning counts the night)");
+    if m.runs_awaiting_a_human > 0 {
+        println!(
+            "  {:>8} finished run(s) where G3 asked for a person and none answered",
+            m.runs_awaiting_a_human
+        );
+    }
 
     println!("\nlessons");
     println!(

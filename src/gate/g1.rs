@@ -44,6 +44,7 @@ pub fn run(
         total_budget(spec, tasks),
         task_exit_conditions(tasks),
         task_dependencies(tasks),
+        wave_isolation(tasks),
         task_files_in_scope(spec, tasks),
         rollback_stated(plan),
         blast_radius_declared(plan),
@@ -282,6 +283,51 @@ fn task_dependencies(tasks: &Tasks) -> Check {
             )
         }
     }
+}
+
+/// Tasks in the same wave must not claim the same files.
+///
+/// A wave is the set keel may run concurrently, each in its own worktree. Two
+/// tasks editing one file in parallel produce patches that conflict on the way
+/// back, and the conflict surfaces after both agents have done their work
+/// rather than before either started. Declaring the overlap is cheap; hitting
+/// it is not.
+fn wave_isolation(tasks: &Tasks) -> Check {
+    let Ok(waves) = tasks.waves() else {
+        return Check::blocked("wave-isolation", "the dependency graph is not orderable");
+    };
+    let mut clashes: Vec<String> = Vec::new();
+    for (n, wave) in waves.iter().enumerate() {
+        for (i, a) in wave.iter().enumerate() {
+            for b in wave.iter().skip(i + 1) {
+                let shared: Vec<&String> =
+                    a.files.iter().filter(|f| b.files.contains(f)).collect();
+                if !shared.is_empty() {
+                    clashes.push(format!(
+                        "wave {}: {} and {} both claim {}",
+                        n + 1,
+                        a.id,
+                        b.id,
+                        shared.iter().map(|s| s.as_str()).collect::<Vec<_>>().join(", ")
+                    ));
+                }
+            }
+        }
+    }
+    if clashes.is_empty() {
+        return Check::pass(
+            "wave-isolation",
+            format!("{} wave(s), no file claimed twice within one", waves.len()),
+        );
+    }
+    Check::fail(
+        "wave-isolation",
+        "no two tasks in a wave touch the same file",
+        format!(
+            "{} — add a `depends_on` to order them",
+            super::join_capped(&clashes, 4)
+        ),
+    )
 }
 
 fn task_files_in_scope(spec: &Spec, tasks: &Tasks) -> Check {

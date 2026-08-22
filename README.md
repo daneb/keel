@@ -356,16 +356,21 @@ worse than no rule: everyone downstream still believes it is in force. Shared
 content is hashed into the store hash, so a platform change marks your
 projections stale rather than reaching nobody.
 
-**Waves are reported, not faked.** `keel tasks` groups tasks by `depends_on`
-into waves and tells you how many could proceed together. keel then runs them
-one at a time and says so: two agents editing one working tree is a bug factory,
-and real parallelism needs a worktree each, which is not built.
+**Waves run in parallel, in isolation.** `keel tasks` groups tasks by
+`depends_on`; `keel run --waves` gives each task in a wave its own git worktree
+at the same base commit, runs their drivers concurrently, and then applies the
+patches to your tree one at a time in task order — so a conflict is reported as
+a conflict rather than resolved by whichever agent finished last.
+
+G1 refuses a plan where two tasks in the same wave claim the same file, because
+finding that out before two agents have done their work is considerably cheaper
+than after. `keel run` without `--waves` stays serial and single-tasked.
 
 **Gate theatre is measured.** `keel metrics` aggregates across runs — gate pass
-rates, failure-class distribution, tokens per run, lesson fires — and names
-every check that has never failed in N runs, because PLAN.md §6 is explicit
-that a gate which cannot fail should be deleted or tightened. Some are correctly
-always-true; the point is to look.
+rates, failure-class distribution, tokens per run, lesson fires, elapsed time to
+a human decision — and names every check that has never failed in N runs,
+because PLAN.md §6 is explicit that a gate which cannot fail should be deleted
+or tightened. Some are correctly always-true; the point is to look.
 
 ## Budgets are invariants
 

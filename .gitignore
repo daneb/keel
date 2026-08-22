@@ -10,3 +10,6 @@
 
 # Transient: re-proposed by `keel learn` from the runs themselves.
 .keel/candidates.json
+
+# Worktrees are created and removed per wave; git tracks them itself.
+.keel/worktrees/

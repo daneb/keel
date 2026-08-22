@@ -1,10 +1,10 @@
 {
   "schema": "keel.gate/1",
   "gate": "G1",
-  "run": "2026-08-22-ffe",
+  "run": "2026-08-22-08c",
   "spec": "trajectory-log",
   "verdict": "pass",
-  "generated_at": "2026-08-22T20:16:14.870948+02:00",
+  "generated_at": "2026-08-22T21:26:36.012427+02:00",
   "checks": [
     {
       "id": "schema",
@@ -64,7 +64,12 @@
     {
       "id": "task-dependencies",
       "verdict": "pass",
-      "detail": "2 wave(s), widths 1/2"
+      "detail": "3 wave(s), widths 1/1/1"
+    },
+    {
+      "id": "wave-isolation",
+      "verdict": "pass",
+      "detail": "3 wave(s), no file claimed twice within one"
     },
     {
       "id": "task-files-in-scope",

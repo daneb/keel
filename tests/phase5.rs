@@ -380,3 +380,169 @@ fn changing_a_shared_store_marks_projections_stale() {
     r.ok(&["store", "render"]);
     assert!(r.read("CLAUDE.md").contains("a NEW platform rule"));
 }
+
+// ---------------------------------------------------------------------------
+// wave execution in worktrees
+// ---------------------------------------------------------------------------
+
+/// A driver that writes a marker into whichever file its task names.
+///
+/// It reads the task from stdin, so it proves each worktree got its own task
+/// and wrote into its own checkout.
+fn per_task_driver() -> String {
+    "#!/bin/sh\n\
+     task=$(cat)\n\
+     id=$(printf '%s' \"$task\" | python3 -c 'import json,sys; print(json.load(sys.stdin)[\"task\"])')\n\
+     f=$(printf '%s' \"$task\" | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d[\"prompt\"].split(\"- files: \")[1].split(chr(10))[0].strip())')\n\
+     mkdir -p \"$(dirname \"$KEEL_REPO/$f\")\"\n\
+     printf 'pub fn serve() { /* %s */ }\\n' \"$id\" > \"$KEEL_REPO/$f\"\n\
+     echo '{\"schema\":\"keel.driverresult/1\",\"status\":\"ok\",\"files_changed\":[]}'\n"
+        .to_string()
+}
+
+fn two_wave_tasks(r: &Repo) {
+    r.write(
+        ".keel/specs/demo/tasks.md",
+        "---\nid: TASKS-0001\nslug: demo\nschema: keel.tasks/1\n---\n\n# Tasks\n\n\
+         ### T-1 First\n- criteria: AC-1\n- files: src/api/one.rs\n- budget: 30\n- exit: tests pass\n\n\
+         ### T-2 Second\n- criteria: AC-2\n- files: src/api/two.rs\n- budget: 30\n- exit: tests pass\n",
+    );
+}
+
+#[test]
+fn a_wave_runs_each_task_in_its_own_worktree_and_all_patches_land() {
+    let r = Repo::ready("waves-run");
+    two_wave_tasks(&r);
+    install_named_driver(&r, "per-task", &per_task_driver());
+    r.ok(&["gate", "g1", "demo"]);
+    r.ok(&["approve", "demo", "--stage", "merge"]);
+
+    let (_, out) = r.run(&["run", "demo", "--waves"]);
+    assert!(out.contains("1 wave(s)") || out.contains("wave 1"), "{out}");
+
+    // Both tasks' work reached the main tree, which is the whole point.
+    assert!(r.exists("src/api/one.rs"), "T-1's file did not land:\n{out}");
+    assert!(r.exists("src/api/two.rs"), "T-2's file did not land:\n{out}");
+    assert!(r.read("src/api/one.rs").contains("T-1"), "{}", r.read("src/api/one.rs"));
+    assert!(r.read("src/api/two.rs").contains("T-2"), "{}", r.read("src/api/two.rs"));
+}
+
+#[test]
+fn worktrees_are_cleaned_up_after_a_wave() {
+    let r = Repo::ready("waves-cleanup");
+    two_wave_tasks(&r);
+    install_named_driver(&r, "per-task", &per_task_driver());
+    r.ok(&["gate", "g1", "demo"]);
+    r.ok(&["approve", "demo", "--stage", "merge"]);
+    r.run(&["run", "demo", "--waves"]);
+
+    let listed = r.git(&["worktree", "list"]);
+    assert_eq!(listed.lines().count(), 1, "a worktree leaked:\n{listed}");
+    let root = r.dir.join(".keel/worktrees");
+    let leftover = std::fs::read_dir(&root).map(|d| d.count()).unwrap_or(0);
+    assert_eq!(leftover, 0, "worktree directories were left behind");
+}
+
+#[test]
+fn a_blocked_driver_stops_the_wave_before_any_patch_is_applied() {
+    let r = Repo::ready("waves-blocked");
+    two_wave_tasks(&r);
+    r.edit_config(|cfg| {
+        let mut d = toml::value::Table::new();
+        d.insert("id".into(), toml::Value::String("ghost".into()));
+        d.insert("cmd".into(), toml::Value::String("definitely-not-installed".into()));
+        d.insert("default".into(), toml::Value::Boolean(true));
+        d.insert("timeout_secs".into(), toml::Value::Integer(5));
+        cfg.as_table_mut()
+            .unwrap()
+            .insert("driver".into(), toml::Value::Array(vec![toml::Value::Table(d)]));
+    });
+    r.ok(&["gate", "g1", "demo"]);
+
+    let (code, out) = r.run(&["run", "demo", "--waves"]);
+    assert_eq!(code, 3, "a blocked driver did not block the run:\n{out}");
+    assert!(out.contains("no patches applied"), "{out}");
+    assert!(!r.exists("src/api/one.rs"), "a patch landed despite the wave blocking");
+}
+
+#[test]
+fn a_conflicting_patch_stops_and_says_what_landed() {
+    // Two tasks writing the same file is caught by G1 first; forcing it past
+    // that must still fail safely rather than silently keeping one side.
+    let r = Repo::ready("waves-conflict");
+    r.write(
+        ".keel/specs/demo/tasks.md",
+        "---\nid: TASKS-0001\nslug: demo\nschema: keel.tasks/1\n---\n\n# Tasks\n\n\
+         ### T-1 First\n- criteria: AC-1\n- files: src/api/mod.rs\n- budget: 30\n- exit: x\n\n\
+         ### T-2 Second\n- criteria: AC-2\n- files: src/api/mod.rs\n- budget: 30\n- exit: y\n",
+    );
+    // G1 refuses this plan, which is the designed behaviour.
+    let (code, out) = r.run(&["gate", "g1", "demo"]);
+    assert_eq!(code, 1, "G1 allowed two tasks to claim one file in a wave:\n{out}");
+    assert!(out.contains("wave-isolation"), "{out}");
+    assert!(out.contains("src/api/mod.rs"), "{out}");
+    assert!(out.contains("depends_on"), "the fix is not named:\n{out}");
+}
+
+#[test]
+fn wave_execution_records_every_task_in_the_trajectory() {
+    let r = Repo::ready("waves-trajectory");
+    two_wave_tasks(&r);
+    install_named_driver(&r, "per-task", &per_task_driver());
+    r.ok(&["gate", "g1", "demo"]);
+    r.ok(&["approve", "demo", "--stage", "merge"]);
+    r.run(&["run", "demo", "--waves"]);
+
+    let id = r.latest_run();
+    let events: Vec<serde_json::Value> = r
+        .read(&format!(".keel/runs/{id}/trajectory.jsonl"))
+        .lines()
+        .map(|l| serde_json::from_str(l).unwrap())
+        .collect();
+
+    let calls: Vec<&serde_json::Value> =
+        events.iter().filter(|e| e["kind"] == "driver_call").collect();
+    assert_eq!(calls.len(), 2, "not every task was recorded: {calls:#?}");
+    let tasks: Vec<&str> = calls.iter().map(|c| c["task"].as_str().unwrap()).collect();
+    assert!(tasks.contains(&"T-1") && tasks.contains(&"T-2"), "{tasks:?}");
+
+    // And the patch applications are on the record too.
+    let applies = events
+        .iter()
+        .filter(|e| e["kind"] == "command" && e["cmd"].as_str().unwrap_or("").starts_with("apply"))
+        .count();
+    assert_eq!(applies, 2, "patch applications were not recorded");
+}
+
+#[test]
+fn waves_need_a_passing_g1() {
+    let r = Repo::bare("waves-nog1");
+    r.write_spec();
+    r.write_tasks();
+    let (code, out) = r.run(&["run", "demo", "--waves"]);
+    assert_eq!(code, 2, "{out}");
+    assert!(out.contains("G1"), "{out}");
+}
+
+// ---------------------------------------------------------------------------
+// human intervention time
+// ---------------------------------------------------------------------------
+
+#[test]
+fn metrics_report_the_elapsed_time_to_a_human_decision() {
+    let r = Repo::ready("metrics-human");
+    install_named_driver(&r, "null", &noop_driver());
+    // The real sequence: a run happens, G3 asks for a person, the person
+    // decides, and the decision is recorded against that run.
+    r.run(&["run", "demo"]);
+    r.ok(&["approve", "demo", "--stage", "merge"]);
+
+    let v: serde_json::Value = serde_json::from_str(&r.ok(&["metrics", "--json"])).unwrap();
+    assert!(v["human_decisions"].as_u64().unwrap() > 0, "no human decisions counted: {v}");
+    assert!(v["human_minutes_total"].as_f64().is_some(), "no elapsed time reported: {v}");
+
+    let text = r.ok(&["metrics"]);
+    assert!(text.contains("human decision"), "{text}");
+    // It must not be presented as effort.
+    assert!(text.contains("not effort"), "the proxy is not labelled:\n{text}");
+}

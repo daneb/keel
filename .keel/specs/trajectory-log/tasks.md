@@ -21,7 +21,7 @@ schema: keel.tasks/1
 
 ### T-3 Replay and corrupt-line handling
 - criteria: AC-6, AC-7
-- depends_on: T-1
+- depends_on: T-2
 - files: src/cmd/run.rs, src/trajectory/mod.rs
 - budget: 45
 - exit: `keel replay` prints events in seq order; a corrupt line exits non-zero naming the line

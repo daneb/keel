@@ -385,3 +385,273 @@ pub fn export(target: Option<String>, verify: Option<String>, out: Option<String
     println!("{}", archive.display());
     Ok(0)
 }
+
+// ---------------------------------------------------------------------------
+// wave execution
+// ---------------------------------------------------------------------------
+
+/// Run every task, wave by wave, each in its own git worktree.
+///
+/// Tasks within a wave run concurrently because G1 has already established they
+/// claim no file in common. Their patches are applied to the main tree
+/// afterwards, one at a time and in task order, so a conflict is a reported
+/// conflict rather than whichever process finished last.
+pub fn run_waves(opts: Options) -> Result<i32> {
+    let started = Instant::now();
+    let paths = Paths::require_init()?;
+    let cfg = Config::load(&paths.config())?;
+    let slug = crate::cmd::gate::resolve_slug(&paths, opts.slug)?;
+    let spec = Spec::load(&paths, &slug)?;
+    let plan = Plan::load(&paths, &slug).ok();
+    let tasks = Tasks::load(&paths, &slug)?;
+
+    match gate::previous(&paths, &slug, "G1") {
+        Some(r) if r.verdict == Verdict::Pass => {}
+        Some(r) => bail!("G1 is {} for `{slug}` — fix the plan first", r.verdict.glyph()),
+        None => bail!("G1 has not run for `{slug}`"),
+    }
+
+    let waves = tasks
+        .waves()
+        .map_err(|stuck| anyhow::anyhow!("dependency cycle among {}", stuck.join(", ")))?;
+    let driver = driver::select(&cfg, opts.driver.as_deref())?;
+    let base = crate::worktree::base_commit(&paths)?;
+
+    if crate::worktree::is_dirty(&paths) {
+        // Not fatal, but what comes back will be their work interleaved with
+        // several agents', and nobody should discover that afterwards.
+        println!("  note: the working tree is dirty; task patches will be folded into it\n");
+    }
+
+    let store_hash = store::store_hash_with_shared(&paths, &cfg)?;
+    let mut run = Run::create(&paths, &slug, None, Some(driver.id.clone()), &store_hash)?;
+    let mut traj = run.open_trajectory()?;
+    println!("run {} — {} task(s) in {} wave(s), base {}\n", run.meta.id, tasks.tasks.len(), waves.len(), &base[..base.len().min(8)]);
+
+    traj.append(Payload::RunStart {
+        spec: slug.clone(),
+        task: None,
+        driver: Some(driver.id.clone()),
+        keel_version: env!("CARGO_PKG_VERSION").to_string(),
+        store_hash: store_hash.clone(),
+    })?;
+
+    let prompt_base = build_prompt(&paths, &cfg, &spec, None, None, &mut traj)?;
+
+    for (n, wave) in waves.iter().enumerate() {
+        println!("wave {} — {} task(s)", n + 1, wave.len());
+
+        // Each thread owns its worktree and its driver invocation. Nothing is
+        // shared but immutable inputs, so there is no ordering to get wrong.
+        let outcomes: Vec<TaskOutcome> = std::thread::scope(|scope| {
+            let handles: Vec<_> = wave
+                .iter()
+                .map(|task| {
+                    let paths = &paths;
+                    let driver = &driver;
+                    let base = &base;
+                    let prompt_base = &prompt_base;
+                    let run_id = run.meta.id.clone();
+                    let spec = &spec;
+                    scope.spawn(move || execute_task(paths, driver, spec, task, &run_id, base, prompt_base))
+                })
+                .collect();
+            handles.into_iter().map(|h| h.join().unwrap_or_else(|_| TaskOutcome::panicked())).collect()
+        });
+
+        // Record, then apply in task order for a deterministic result.
+        for o in &outcomes {
+            traj.append(Payload::DriverCall {
+                driver: driver.id.clone(),
+                task: Some(o.task.clone()),
+                prompt_tokens: o.prompt_tokens,
+            })?;
+            traj.append(Payload::DriverResult {
+                driver: driver.id.clone(),
+                status: o.status.clone(),
+                files_changed: Some(o.files.len()),
+                detail: o.detail.clone(),
+            })?;
+            println!(
+                "  {:<6} {:<9} {:>4} file(s)  {:.1}s{}",
+                o.task,
+                o.status,
+                o.files.len(),
+                o.elapsed,
+                o.detail.as_ref().map(|d| format!("  — {d}")).unwrap_or_default()
+            );
+        }
+
+        if let Some(blocked) = outcomes.iter().find(|o| o.status == "blocked") {
+            traj.append(Payload::RunEnd {
+                verdict: "blocked".into(),
+                duration_ms: started.elapsed().as_millis() as u64,
+            })?;
+            run.finish("blocked")?;
+            println!(
+                "\nrun BLOCKED — {} could not run ({}); no patches applied from this wave",
+                blocked.task,
+                blocked.detail.clone().unwrap_or_default()
+            );
+            return Ok(Verdict::Blocked.exit_code());
+        }
+
+        for o in &outcomes {
+            if o.patch.trim().is_empty() {
+                continue;
+            }
+            if let Err(e) = crate::worktree::apply(&paths, &o.patch) {
+                traj.append(Payload::Command {
+                    cmd: format!("apply {}", o.task),
+                    exit_code: 1,
+                    evidence: Some(format!("{e:#}")),
+                })?;
+                traj.append(Payload::RunEnd {
+                    verdict: "fail".into(),
+                    duration_ms: started.elapsed().as_millis() as u64,
+                })?;
+                run.finish("fail")?;
+                println!("\n{}'s patch does not apply: {e:#}", o.task);
+                println!("The tree holds the tasks applied before it. Resolve, then re-run.");
+                return Ok(Verdict::Fail.exit_code());
+            }
+            traj.append(Payload::Command {
+                cmd: format!("apply {}", o.task),
+                exit_code: 0,
+                evidence: Some(format!("{} file(s)", o.files.len())),
+            })?;
+        }
+        println!();
+    }
+
+    // Gates judge the combined result once, which is the thing being merged.
+    let mut verdicts = Vec::new();
+    for name in ["G2", "G2.5", "G3"] {
+        let result = match name {
+            "G2" => gate::g2::run(&paths, &cfg, &spec, plan.as_ref(), &run, &mut traj)?,
+            "G2.5" => gate::g25::run(&paths, &cfg, &spec, &run)?,
+            _ => gate::g3::run(&paths, &cfg, &spec, &run)?,
+        };
+        result.write(&run.gates_dir())?;
+        traj.append(Payload::Gate {
+            gate: result.gate.clone(),
+            verdict: result.verdict.glyph().to_lowercase(),
+            result: format!("gates/{}.json", result.gate),
+        })?;
+        println!("\n{} — {}", result.gate, slug);
+        for c in &result.checks {
+            println!("{}", c.line());
+        }
+        let (p, f, b) = result.counts();
+        println!("{} {} — {p} passed, {f} failed, {b} blocked", result.gate, result.verdict.glyph());
+        verdicts.push(result.verdict);
+        if result.verdict == Verdict::Fail && name != "G3" {
+            println!("\nstopping: {name} failed");
+            break;
+        }
+    }
+
+    let overall = if verdicts.contains(&Verdict::Fail) {
+        Verdict::Fail
+    } else if verdicts.contains(&Verdict::Blocked) {
+        Verdict::Blocked
+    } else {
+        Verdict::Pass
+    };
+    traj.append(Payload::RunEnd {
+        verdict: overall.glyph().to_lowercase(),
+        duration_ms: started.elapsed().as_millis() as u64,
+    })?;
+    run.finish(&overall.glyph().to_lowercase())?;
+
+    println!("\nrun {} — {}", run.meta.id, overall.glyph());
+    println!("evidence: {}", paths.rel(&run.dir).display());
+    Ok(overall.exit_code())
+}
+
+struct TaskOutcome {
+    task: String,
+    status: String,
+    detail: Option<String>,
+    files: Vec<String>,
+    patch: String,
+    prompt_tokens: usize,
+    elapsed: f64,
+}
+
+impl TaskOutcome {
+    fn panicked() -> Self {
+        Self {
+            task: "?".into(),
+            status: "blocked".into(),
+            detail: Some("the worker thread panicked".into()),
+            files: vec![],
+            patch: String::new(),
+            prompt_tokens: 0,
+            elapsed: 0.0,
+        }
+    }
+}
+
+fn execute_task(
+    paths: &Paths,
+    driver_cfg: &crate::config::Driver,
+    spec: &Spec,
+    task: &crate::plan::Task,
+    run_id: &str,
+    base: &str,
+    prompt_base: &str,
+) -> TaskOutcome {
+    let started = Instant::now();
+    let mut wt = match crate::worktree::Worktree::create(paths, &task.id, base) {
+        Ok(w) => w,
+        Err(e) => {
+            return TaskOutcome {
+                task: task.id.clone(),
+                status: "blocked".into(),
+                detail: Some(format!("no worktree: {e:#}")),
+                files: vec![],
+                patch: String::new(),
+                prompt_tokens: 0,
+                elapsed: started.elapsed().as_secs_f64(),
+            };
+        }
+    };
+
+    let prompt = format!(
+        "{prompt_base}\n## Task\n\n**{} {}**\n\n- criteria: {}\n- files: {}\n- budget: {} lines\n- done when: {}\n",
+        task.id,
+        task.title,
+        task.criteria.join(", "),
+        task.files.join(", "),
+        task.budget.unwrap_or(0),
+        task.exit.clone().unwrap_or_default()
+    );
+    let prompt_tokens = estimate_tokens(&prompt);
+
+    let dtask = DriverTask::new(
+        run_id,
+        &spec.front.slug,
+        Some(task.id.clone()),
+        prompt,
+        spec.front.scope.clone(),
+        task.budget,
+        wt.paths.repo.to_string_lossy().to_string(),
+    );
+
+    // The adapter lives in the real repository; the work happens in the worktree.
+    let inv = driver::run_in(paths, &wt.paths, driver_cfg, &dtask);
+    let files = wt.changed_files().unwrap_or_default();
+    let patch = wt.patch().unwrap_or_default();
+    let _ = wt.remove();
+
+    TaskOutcome {
+        task: task.id.clone(),
+        status: inv.result.status_str().to_string(),
+        detail: inv.result.detail.clone(),
+        files,
+        patch,
+        prompt_tokens,
+        elapsed: started.elapsed().as_secs_f64(),
+    }
+}

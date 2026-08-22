@@ -23,6 +23,7 @@ mod review;
 mod run;
 mod spec;
 mod store;
+mod worktree;
 mod trajectory;
 
 use anyhow::Result;
@@ -133,6 +134,9 @@ enum Command {
         /// Gate the working tree as it stands instead of invoking an agent
         #[arg(long)]
         no_driver: bool,
+        /// Run every task, wave by wave, each in its own git worktree
+        #[arg(long)]
+        waves: bool,
         #[arg(long)]
         json: bool,
     },
@@ -462,8 +466,9 @@ fn run() -> Result<i32> {
         Command::Blast { targets, symbol, depth, json } => {
             cmd::blast::run(targets, symbol, depth, json)
         }
-        Command::Run { slug, task, driver, no_driver, json } => {
-            cmd::run::run(cmd::run::Options { slug, task, driver, no_driver, json })
+        Command::Run { slug, task, driver, no_driver, waves, json } => {
+            let opts = cmd::run::Options { slug, task, driver, no_driver, json };
+            if waves { cmd::run::run_waves(opts) } else { cmd::run::run(opts) }
         }
         Command::Replay { run, json } => cmd::run::replay(run, json),
         Command::Runs { latest, prune, keep, apply } => {
