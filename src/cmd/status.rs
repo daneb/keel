@@ -23,7 +23,7 @@ fn count_codemaps(dir: &std::path::Path) -> usize {
 pub fn run() -> Result<i32> {
     let paths = Paths::require_init()?;
     let cfg = Config::load(&paths.config())?;
-    let store_hash = store::store_hash(&paths)?;
+    let store_hash = store::store_hash_with_shared(&paths, &cfg)?;
 
     println!("keel — {}\n", paths.repo.display());
 

@@ -34,6 +34,7 @@ pub fn run(paths: &Paths, cfg: &Config, spec: &Spec) -> Result<GateResult> {
         oracle_mix(spec),
         human_cost(spec),
         store_drift(paths, cfg)?,
+        shared_stores_check(paths, cfg),
     ];
     checks.extend(run_plugins(paths, cfg, "G0", Some(&spec.front.slug)));
     Ok(GateResult::new("G0", Some(spec.front.slug.clone()), checks))
@@ -283,8 +284,46 @@ fn human_cost(spec: &Spec) -> Check {
     )
 }
 
+/// A required shared store that does not resolve.
+///
+/// This fails rather than warns. A platform rule that silently stops applying
+/// because a path moved is worse than no rule at all: everyone downstream still
+/// believes it is in force, and the gate that was supposed to notice is the one
+/// that shrugged.
+pub fn shared_stores_check(paths: &Paths, cfg: &Config) -> Check {
+    let stores = crate::store::shared(paths, cfg);
+    if stores.is_empty() {
+        return Check::pass("shared-stores", "none configured");
+    }
+    let missing_required: Vec<String> = stores
+        .iter()
+        .filter(|s| s.missing && s.required)
+        .map(|s| format!("{} ({})", s.id, s.root.display()))
+        .collect();
+    let missing_optional: Vec<String> = stores
+        .iter()
+        .filter(|s| s.missing && !s.required)
+        .map(|s| s.id.clone())
+        .collect();
+
+    if !missing_required.is_empty() {
+        return Check::fail(
+            "shared-stores",
+            "every required shared store resolves",
+            format!("{} — its rules are not in force", missing_required.join(", ")),
+        );
+    }
+    if !missing_optional.is_empty() {
+        return Check::blocked(
+            "shared-stores",
+            format!("optional store(s) absent: {}", missing_optional.join(", ")),
+        );
+    }
+    Check::pass("shared-stores", format!("{} resolved", stores.len()))
+}
+
 fn store_drift(paths: &Paths, cfg: &Config) -> Result<Check> {
-    let hash = store::store_hash(paths)?;
+    let hash = store::store_hash_with_shared(paths, cfg)?;
     let reports = drift::check_all(paths, cfg, &hash)?;
     let bad: Vec<String> = reports
         .iter()

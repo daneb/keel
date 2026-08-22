@@ -69,12 +69,31 @@ enum Command {
     Store(StoreCmd),
     /// Show whether the store, map and projections are current
     Status,
+    /// The harness measured across runs: pass rates, failures, tokens, theatre
+    Metrics {
+        /// Runs a check must survive without failing to count as theatre
+        #[arg(long, default_value = "20")]
+        threshold: usize,
+        #[arg(long)]
+        json: bool,
+    },
+    /// Check the health of the whole harness in one place
+    Doctor {
+        #[arg(long)]
+        json: bool,
+    },
     /// Manage the pre-commit hook that enforces `store check`
     #[command(subcommand)]
     Hook(HookCmd),
     /// Author and inspect specs
     #[command(subcommand)]
     Spec(SpecCmd),
+    /// Show a plan's tasks grouped into dependency waves
+    Tasks {
+        slug: Option<String>,
+        #[arg(long)]
+        json: bool,
+    },
     /// Compute the blast radius and scaffold plan.md + tasks.md
     Plan {
         /// Spec slug; optional when there is only one spec
@@ -220,6 +239,9 @@ enum Command {
         #[arg(long)]
         json: bool,
     },
+    /// Inspect and conformance-check agent drivers
+    #[command(subcommand)]
+    Driver(DriverCmd),
     /// Serve the retrieval layer over MCP on stdio
     Mcp,
     /// Measure retrieval against reading whole files
@@ -259,6 +281,18 @@ enum SpecCmd {
     List,
     /// Print the authoring prompt for an agent
     Prompt { slug: String },
+}
+
+#[derive(Subcommand)]
+enum DriverCmd {
+    /// Configured drivers and whether keel can reach them
+    List,
+    /// Run the conformance suite against a driver, in a scratch repository
+    Check {
+        id: Option<String>,
+        #[arg(long)]
+        json: bool,
+    },
 }
 
 #[derive(Subcommand)]
@@ -380,6 +414,8 @@ fn run() -> Result<i32> {
             Ok(0)
         }
         Command::Status => cmd::status::run(),
+        Command::Doctor { json } => cmd::doctor::run(json),
+        Command::Metrics { threshold, json } => cmd::metrics::run(threshold, json),
         Command::Hook(HookCmd::Install) => {
             cmd::hook::install()?;
             Ok(0)
@@ -394,6 +430,7 @@ fn run() -> Result<i32> {
         Command::Spec(SpecCmd::List) => cmd::spec::list(),
         Command::Spec(SpecCmd::Prompt { slug }) => cmd::spec::print_prompt(&slug),
         Command::Plan { slug, depth } => cmd::plan::run(slug, depth),
+        Command::Tasks { slug, json } => cmd::tasks::run(slug, json),
         Command::Gate(GateCmd::G0 { slug, json }) => cmd::gate::g0(slug, json),
         Command::Gate(GateCmd::G1 { slug, json }) => cmd::gate::g1(slug, json),
         Command::Gate(GateCmd::G4 { run, json }) => cmd::learn::g4(run, json),
@@ -415,6 +452,8 @@ fn run() -> Result<i32> {
         Command::Refs { name, json } => cmd::retrieve::refs(name, json),
         Command::Importers { path, json } => cmd::retrieve::importers(path, json),
         Command::Slice { task, slug, json } => cmd::retrieve::slice(slug, task, json),
+        Command::Driver(DriverCmd::List) => cmd::driver::list(),
+        Command::Driver(DriverCmd::Check { id, json }) => cmd::driver::check(id, json),
         Command::Mcp => {
             mcp::serve()?;
             Ok(0)

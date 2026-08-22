@@ -22,7 +22,7 @@ use crate::config::Config;
 use crate::paths::Paths;
 use crate::run::Run;
 use crate::spec::Spec;
-use crate::store::{self, StoreDoc};
+use crate::store::StoreDoc;
 use anyhow::Result;
 
 /// Calls that replace behaviour with a canned answer.
@@ -60,7 +60,7 @@ pub fn run(
     }
 
     checks.push(conventions_present(paths)?);
-    checks.push(lessons_in_force(paths)?);
+    checks.push(lessons_in_force(paths, cfg)?);
     checks.extend(reviewer_findings(paths, cfg, spec, run, &base)?);
     checks.extend(run_plugins(paths, cfg, "G2.5", Some(&spec.front.slug)));
 
@@ -94,7 +94,7 @@ fn reviewer_findings(
     let conventions = StoreDoc::read_optional(&paths.conventions())?
         .map(|d| d.body)
         .unwrap_or_default();
-    let lessons: Vec<String> = crate::lesson::list(paths)?
+    let lessons: Vec<String> = crate::lesson::in_force(paths, cfg)?
         .iter()
         .filter_map(|l| l.rule().map(|r| format!("{}: {r}", l.front.id)))
         .collect();
@@ -268,15 +268,23 @@ fn conventions_present(paths: &Paths) -> Result<Check> {
 
 /// Lessons are injected by keel, never left for the agent to find (P6: only
 /// 5.4% of failure recoveries began by consulting documentation).
-fn lessons_in_force(paths: &Paths) -> Result<Check> {
-    let lessons = store::lessons(paths)?;
+fn lessons_in_force(paths: &Paths, cfg: &Config) -> Result<Check> {
+    let lessons = crate::lesson::list_all(paths, cfg)?;
     if lessons.is_empty() {
         // The check ran and found no lesson to violate. That is vacuously true,
         // not "I could not look" — blocking here would leave G2.5 permanently
         // blocked until Phase 3, which teaches people to ignore `blocked`.
         return Ok(Check::pass("lessons", "no lessons in force yet (Phase 3 populates these)"));
     }
-    Ok(Check::pass("lessons", format!("{} lesson(s) in force", lessons.len())))
+    let shared = lessons.iter().filter(|l| l.is_shared()).count();
+    Ok(Check::pass(
+        "lessons",
+        format!(
+            "{} lesson(s) in force{}",
+            lessons.len(),
+            if shared > 0 { format!(", {shared} from a shared store") } else { String::new() }
+        ),
+    ))
 }
 
 /// The patch text to review, excluding keel's own artefacts.

@@ -20,3 +20,9 @@
 {"t":"2026-08-22T19:23:34.232760+02:00","seq":20,"kind":"human","stage":"spec","decision":"approved","by":"Dane Balia","note":"AC-3 oracle corrected: the schema target only exists inside an archive"}
 {"t":"2026-08-22T19:23:56.246265+02:00","seq":21,"kind":"human","stage":"spec","decision":"approved","by":"Dane Balia","note":"implemented; re-verified"}
 {"t":"2026-08-22T19:23:56.253892+02:00","seq":22,"kind":"human","stage":"plan","decision":"approved","by":"Dane Balia","note":"radius recomputed after implementation"}
+{"t":"2026-08-22T20:04:45.867667+02:00","seq":23,"kind":"human","stage":"spec","decision":"approved","by":"Dane Balia","note":"verified after implementation"}
+{"t":"2026-08-22T20:04:45.877563+02:00","seq":24,"kind":"human","stage":"plan","decision":"approved","by":"Dane Balia","note":"verified after implementation"}
+{"t":"2026-08-22T20:04:45.887702+02:00","seq":25,"kind":"human","stage":"merge","decision":"approved","by":"Dane Balia","note":"verified after implementation"}
+{"t":"2026-08-22T20:16:14.931458+02:00","seq":26,"kind":"human","stage":"spec","decision":"approved","by":"Dane Balia","note":"phase 5"}
+{"t":"2026-08-22T20:16:14.939556+02:00","seq":27,"kind":"human","stage":"plan","decision":"approved","by":"Dane Balia","note":"phase 5"}
+{"t":"2026-08-22T20:16:14.947700+02:00","seq":28,"kind":"human","stage":"merge","decision":"approved","by":"Dane Balia","note":"phase 5"}

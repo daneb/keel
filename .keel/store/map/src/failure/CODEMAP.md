@@ -12,7 +12,7 @@ generated: true
 
 2 files · 767 lines · 55 symbols
 
-**`src/failure/mod.rs`** · 573 lines · imported by 4
+**`src/failure/mod.rs`** · 573 lines · imported by 5
 - `pub mod taxonomy;` — evidence available for telling an agentic failure from a flaky environment.  <sub>L8</sub>
 - `pub enum Signal`  <sub>L20</sub>
 - `pub struct Recovery`  <sub>L78</sub>

@@ -340,11 +340,14 @@ fn suggest_oracle(class: Class, _scope: &str) -> Option<String> {
 // ---------------------------------------------------------------------------
 
 pub fn list(paths: &Paths) -> Result<Vec<Lesson>> {
-    let dir = paths.lessons();
+    read_dir_lessons(&paths.lessons())
+}
+
+fn read_dir_lessons(dir: &Path) -> Result<Vec<Lesson>> {
     if !dir.is_dir() {
         return Ok(vec![]);
     }
-    let mut files: Vec<PathBuf> = std::fs::read_dir(&dir)?
+    let mut files: Vec<PathBuf> = std::fs::read_dir(dir)?
         .filter_map(|e| e.ok().map(|e| e.path()))
         .filter(|p| {
             p.extension().and_then(|e| e.to_str()) == Some("md")
@@ -353,6 +356,52 @@ pub fn list(paths: &Paths) -> Result<Vec<Lesson>> {
         .collect();
     files.sort();
     files.iter().map(|p| Lesson::read(p)).collect()
+}
+
+/// A lesson, and where it came from.
+#[derive(Debug, Clone)]
+pub struct Sourced {
+    pub lesson: Lesson,
+    /// `None` for this repository's own lessons; the shared store id otherwise.
+    pub from: Option<String>,
+}
+
+impl Sourced {
+    pub fn is_shared(&self) -> bool {
+        self.from.is_some()
+    }
+}
+
+/// Every lesson in force: this repository's, layered over any shared stores.
+///
+/// **Local wins.** A local lesson with the same id as a shared one shadows it —
+/// a repository must be able to say "not here" about a platform rule, and doing
+/// so by shadowing an id is visible in a way that silently ignoring it is not.
+pub fn list_all(paths: &Paths, cfg: &crate::config::Config) -> Result<Vec<Sourced>> {
+    let mut out: Vec<Sourced> = Vec::new();
+
+    for s in crate::store::shared(paths, cfg) {
+        if s.missing {
+            continue; // reported by `keel doctor` and by the G0/G2 store checks
+        }
+        for lesson in read_dir_lessons(&s.lessons_dir())? {
+            out.push(Sourced { lesson, from: Some(s.id.clone()) });
+        }
+    }
+
+    for lesson in list(paths)? {
+        // Local shadows shared, by id.
+        out.retain(|e| e.lesson.front.id != lesson.front.id);
+        out.push(Sourced { lesson, from: None });
+    }
+    out.sort_by(|a, b| a.lesson.front.id.cmp(&b.lesson.front.id));
+    Ok(out)
+}
+
+/// Lessons in force as plain values, for callers that do not care where a rule
+/// came from — the gate checks and the injector.
+pub fn in_force(paths: &Paths, cfg: &crate::config::Config) -> Result<Vec<Lesson>> {
+    Ok(list_all(paths, cfg)?.into_iter().map(|s| s.lesson).collect())
 }
 
 fn next_id(paths: &Paths) -> Result<String> {
@@ -498,6 +547,49 @@ mod tests {
             recovery: None,
             evidence: None,
         }
+    }
+
+    #[test]
+    fn a_local_lesson_shadows_a_shared_one_with_the_same_id() {
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static C: AtomicUsize = AtomicUsize::new(0);
+        let root = std::env::temp_dir().join(format!(
+            "keel-shared-{}-{}", std::process::id(), C.fetch_add(1, Ordering::Relaxed)
+        ));
+        let repo = root.join("repo");
+        let platform = root.join("platform/store");
+        std::fs::create_dir_all(repo.join(".keel/store/lessons")).unwrap();
+        std::fs::create_dir_all(platform.join("lessons")).unwrap();
+
+        let card = |id: &str, rule: &str| format!(
+            "---\nid: {id}\nschema: keel.lesson/1\nclass: CONV-VIOLATION\nscope: repo\n\
+             occurrences: 2\nrule_kind: prompt-injection\nverified_at: 2999-01-01\n\
+             decay: 90d\nsources: []\nstages:\n  - implement\n---\n\n**Rule** {rule}\n"
+        );
+        std::fs::write(platform.join("lessons/L-0001.md"), card("L-0001", "platform says X")).unwrap();
+        std::fs::write(platform.join("lessons/L-0002.md"), card("L-0002", "platform says Y")).unwrap();
+        std::fs::write(repo.join(".keel/store/lessons/L-0001.md"), card("L-0001", "here we say Z")).unwrap();
+
+        let paths = Paths { repo: repo.clone() };
+        let mut cfg = crate::config::Config::default();
+        cfg.shared.push(crate::config::SharedStore {
+            id: "platform".into(),
+            path: "../platform/store".into(),
+            required: true,
+        });
+
+        let all = list_all(&paths, &cfg).unwrap();
+        assert_eq!(all.len(), 2, "expected the shadowed pair plus one shared: {all:?}");
+
+        let l1 = all.iter().find(|s| s.lesson.front.id == "L-0001").unwrap();
+        assert!(!l1.is_shared(), "the local lesson did not win");
+        assert_eq!(l1.lesson.rule().as_deref(), Some("here we say Z"));
+
+        let l2 = all.iter().find(|s| s.lesson.front.id == "L-0002").unwrap();
+        assert!(l2.is_shared(), "the shared-only lesson lost its provenance");
+        assert_eq!(l2.from.as_deref(), Some("platform"));
+
+        let _ = std::fs::remove_dir_all(&root);
     }
 
     #[test]

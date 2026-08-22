@@ -43,6 +43,7 @@ pub fn run(
         task_budgets(tasks, cfg),
         total_budget(spec, tasks),
         task_exit_conditions(tasks),
+        task_dependencies(tasks),
         task_files_in_scope(spec, tasks),
         rollback_stated(plan),
         blast_radius_declared(plan),
@@ -255,6 +256,32 @@ fn task_exit_conditions(tasks: &Tasks) -> Check {
         "every task states an exit condition",
         format!("no exit condition on: {}", super::join_capped(&missing, 5)),
     )
+}
+
+/// Dependencies must name real tasks and must be orderable.
+fn task_dependencies(tasks: &Tasks) -> Check {
+    let dangling = tasks.dangling_dependencies();
+    if !dangling.is_empty() {
+        return Check::fail(
+            "task-dependencies",
+            "every dependency names a task in this plan",
+            format!("unknown: {}", super::join_capped(&dangling, 5)),
+        );
+    }
+    match tasks.waves() {
+        Err(stuck) => Check::fail(
+            "task-dependencies",
+            "the dependency graph is orderable",
+            format!("cycle among {} — a plan that cannot be ordered is not a plan", stuck.join(", ")),
+        ),
+        Ok(waves) => {
+            let widths: Vec<String> = waves.iter().map(|w| w.len().to_string()).collect();
+            Check::pass(
+                "task-dependencies",
+                format!("{} wave(s), widths {}", waves.len(), widths.join("/")),
+            )
+        }
+    }
 }
 
 fn task_files_in_scope(spec: &Spec, tasks: &Tasks) -> Check {

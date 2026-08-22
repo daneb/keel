@@ -41,9 +41,32 @@ pub struct Config {
     /// An adversarial reviewer for G2.5. Absent means the heuristics stand alone.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub review: Option<Reviewer>,
+    /// Stores shared across repositories — platform conventions and lessons.
+    #[serde(default, rename = "shared")]
+    pub shared: Vec<SharedStore>,
     /// Metrics that may improve and must not regress.
     #[serde(default = "default_ratchets", rename = "ratchet")]
     pub ratchets: Vec<Ratchet>,
+}
+
+/// A store belonging to another repository, layered underneath this one.
+///
+/// This is the piece that scales keel across a portfolio: platform conventions
+/// and lessons written once, applying everywhere, with each repository free to
+/// add to them but not to silently drop them.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SharedStore {
+    pub id: String,
+    /// Path to another `.keel/store` directory — a sibling checkout, a git
+    /// submodule, or a vendored copy.
+    pub path: String,
+    /// Whether a missing shared store fails the gate rather than warning.
+    ///
+    /// Defaults to true, and the default is the whole point: a governance rule
+    /// that silently stops applying because a path moved is worse than no rule,
+    /// because everyone still believes it is in force.
+    #[serde(default = "default_true")]
+    pub required: bool,
 }
 
 /// A second agent pass, run in critique mode over the diff (PLAN.md G2.5).
@@ -322,6 +345,7 @@ impl Default for Config {
             learn: LearnConfig::default(),
             retrieve: RetrieveConfig::default(),
             review: None,
+            shared: vec![],
             ratchets: default_ratchets(),
         }
     }

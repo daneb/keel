@@ -28,7 +28,7 @@ generated: true
 - `fn round_trips()`  <sub>L188</sub>
 - `fn every_payload_kind_round_trips()`  <sub>L195</sub>
 
-**`src/trajectory/mod.rs`** · 234 lines · imported by 6
+**`src/trajectory/mod.rs`** · 234 lines · imported by 7
 - `pub mod event;` — the sequence invariant.  <sub>L8</sub>
 - `pub struct Trajectory`  <sub>L16</sub>
 - `impl Trajectory`  <sub>L22</sub>

@@ -23,15 +23,15 @@ impl Section {
 }
 
 /// Build all sections an adapter asked for, in its declared order.
-fn collect(paths: &Paths, adapter: &Adapter) -> Result<Vec<Section>> {
+fn collect(paths: &Paths, cfg: &Config, adapter: &Adapter) -> Result<Vec<Section>> {
     let mut out = Vec::new();
     for id in &adapter.sections {
         let section = match id.as_str() {
             "product" => doc_section(paths, id, "What this is", paths.product())?,
             "tech" => doc_section(paths, id, "Stack and constraints", paths.tech())?,
-            "conventions" => doc_section(paths, id, "House rules", paths.conventions())?,
+            "conventions" => conventions_section(paths, cfg)?,
             "structure" => doc_section(paths, id, "Repository map", paths.structure())?,
-            "lessons" => lessons_section(paths)?,
+            "lessons" => lessons_section(paths, cfg)?,
             _ => None,
         };
         if let Some(s) = section
@@ -89,22 +89,66 @@ fn strip_generated_notice(body: &str) -> String {
         .join("\n")
 }
 
-fn lessons_section(paths: &Paths) -> Result<Option<Section>> {
-    let lessons = store::lessons(paths)?;
+/// House rules: shared stores first, then this repository's.
+///
+/// Order is the precedence statement. Platform rules read as the ground the
+/// local ones are added to, and a local rule that contradicts one above it is
+/// visible as a contradiction rather than hidden by a merge.
+fn conventions_section(paths: &Paths, cfg: &Config) -> Result<Option<Section>> {
+    let mut body = String::new();
+    let mut sources: Vec<String> = Vec::new();
+
+    for sh in store::shared(paths, cfg) {
+        if sh.missing {
+            // Loud, in the projection itself: an agent reading this must know a
+            // rule set it was supposed to be held to did not load.
+            body.push_str(&format!(
+                "> **Shared store `{}` did not load** from `{}`. Rules it carries are \
+                 NOT in force in this render.\n\n",
+                sh.id,
+                sh.root.display()
+            ));
+            continue;
+        }
+        let Some(doc) = StoreDoc::read_optional(&sh.conventions())? else { continue };
+        let text = doc.body_without_title().trim().to_string();
+        if text.is_empty() { continue; }
+        body.push_str(&format!("### From `{}` (shared)\n\n{}\n\n", sh.id, text));
+        sources.push(sh.conventions().to_string_lossy().to_string());
+    }
+
+    if let Some(doc) = StoreDoc::read_optional(&paths.conventions())? {
+        let text = strip_generated_notice(doc.body_without_title());
+        if !text.trim().is_empty() {
+            if !sources.is_empty() {
+                body.push_str("### This repository\n\n");
+            }
+            body.push_str(text.trim());
+            body.push('\n');
+        }
+        sources.push(paths.rel(&paths.conventions()).to_string_lossy().to_string());
+    }
+
+    if body.trim().is_empty() { return Ok(None); }
+    Ok(Some(Section {
+        title: "House rules".to_string(),
+        source: sources.join(", "),
+        body: demote_headings(&body).trim().to_string(),
+    }))
+}
+
+fn lessons_section(paths: &Paths, cfg: &Config) -> Result<Option<Section>> {
+    let lessons = crate::lesson::list_all(paths, cfg)?;
     if lessons.is_empty() { return Ok(None); }
     let mut body = String::new();
-    for l in &lessons {
-        let id = l.front.id.clone().unwrap_or_else(|| {
-            l.path.file_stem().map(|s| s.to_string_lossy().to_string()).unwrap_or_default()
-        });
-        let scope = l.front.scope.clone().unwrap_or_else(|| "repo".into());
-        let rule = l
-            .body
-            .lines()
-            .find(|line| line.trim_start().starts_with("**Rule**"))
-            .map(|l| l.trim().trim_start_matches("**Rule**").trim().to_string())
-            .unwrap_or_else(|| first_prose_line(&l.body));
-        body.push_str(&format!("- **{id}** ({scope}) — {rule}\n"));
+    for entry in &lessons {
+        let l = &entry.lesson;
+        let origin = match &entry.from {
+            Some(id) => format!("{}, shared:{id}", l.front.scope),
+            None => l.front.scope.clone(),
+        };
+        let rule = l.rule().unwrap_or_else(|| first_prose_line(&l.body));
+        body.push_str(&format!("- **{}** ({origin}) — {rule}\n", l.front.id));
     }
     Ok(Some(Section {
         title: "Lessons in force".into(),
@@ -122,8 +166,7 @@ fn first_prose_line(body: &str) -> String {
 }
 
 pub fn render_builtin(paths: &Paths, cfg: &Config, adapter: &Adapter) -> Result<(String, bool)> {
-    let sections = collect(paths, adapter)?;
-    let _ = cfg;
+    let sections = collect(paths, cfg, adapter)?;
 
     let preamble = preamble(adapter);
     // Per section: `## Title` + a blank line before and after.

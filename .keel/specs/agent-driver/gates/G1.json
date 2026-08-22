@@ -1,10 +1,10 @@
 {
   "schema": "keel.gate/1",
   "gate": "G1",
-  "run": "2026-08-22-54c",
+  "run": "2026-08-22-306",
   "spec": "agent-driver",
   "verdict": "pass",
-  "generated_at": "2026-08-22T19:23:56.234219+02:00",
+  "generated_at": "2026-08-22T20:16:14.914806+02:00",
   "checks": [
     {
       "id": "schema",
@@ -14,7 +14,7 @@
     {
       "id": "g0-passed",
       "verdict": "pass",
-      "detail": "G0 passed in run 2026-08-21-1cd"
+      "detail": "G0 passed in run 2026-08-22-35e"
     },
     {
       "id": "spec-approved",
@@ -62,6 +62,11 @@
       "detail": "every task states when it is done"
     },
     {
+      "id": "task-dependencies",
+      "verdict": "pass",
+      "detail": "1 wave(s), widths 3"
+    },
+    {
       "id": "task-files-in-scope",
       "verdict": "pass",
       "detail": "all task files inside the declared scope"
@@ -74,12 +79,12 @@
     {
       "id": "blast-radius-declared",
       "verdict": "pass",
-      "detail": "5 file(s) at depth 2, 1268 lines"
+      "detail": "7 file(s) at depth 2, 1716 lines"
     },
     {
       "id": "blast-radius-current",
       "verdict": "pass",
-      "detail": "5 files, 1268 lines — matches a fresh computation"
+      "detail": "7 files, 1716 lines — matches a fresh computation"
     }
   ]
 }

@@ -44,7 +44,7 @@ pub fn run(opts: Options) -> Result<i32> {
         None => bail!("G1 has not run for `{slug}` — run `keel gate g1 {slug}` first"),
     }
 
-    let store_hash = store::store_hash(&paths)?;
+    let store_hash = store::store_hash_with_shared(&paths, &cfg)?;
     let selected_driver = if opts.no_driver {
         None
     } else {
@@ -70,7 +70,7 @@ pub fn run(opts: Options) -> Result<i32> {
     })?;
 
     // --- context, recorded as it is assembled --------------------------------
-    let prompt = build_prompt(&paths, &spec, tasks.as_ref(), opts.task.as_deref(), &mut traj)?;
+    let prompt = build_prompt(&paths, &cfg, &spec, tasks.as_ref(), opts.task.as_deref(), &mut traj)?;
 
     // --- the agent -----------------------------------------------------------
     if let Some(d) = selected_driver {
@@ -202,6 +202,7 @@ pub fn run(opts: Options) -> Result<i32> {
 /// prompt is built, not summarised afterwards.
 fn build_prompt(
     paths: &Paths,
+    cfg: &Config,
     spec: &Spec,
     tasks: Option<&Tasks>,
     task_id: Option<&str>,
@@ -244,7 +245,7 @@ fn build_prompt(
     // A lesson that compiles into a gate check is deliberately *not* injected:
     // it is already enforced, and injecting it would spend context re-stating
     // something that cannot be violated without failing G2.
-    let lessons = crate::lesson::list(paths)?;
+    let lessons = crate::lesson::in_force(paths, cfg)?;
     let selected = crate::lesson::for_injection(&lessons, "implement", &spec.front.scope);
     let mut ledger = crate::lesson::usage::Ledger::load(paths)?;
     for lesson in &selected {

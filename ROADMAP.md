@@ -17,20 +17,38 @@ All three Phase-2/3 specs are `status: implemented` with their oracles passing.
 
 ## Phase 5 — breadth (ongoing, not a milestone)
 
-- [ ] **Drivers beyond `claude-code`.** PLAN.md §6 says the driver interface
-      should be proven against ≥2 tools *before* Phase 5 — it has been proven
-      against one. Kiro, Copilot, Codex, `pi`. The contract is deliberately
-      thin; if a second driver needs a contract change, that is the finding.
-- [ ] **Task dependency waves.** Independent tasks in parallel, dependent ones
-      sequential. `tasks.md` has no `depends_on` field yet.
-- [ ] **Cross-repo store.** Shared conventions and lessons as a submodule or
-      package, with local override precedence. This is the piece that scales to
-      a portfolio and turns keel into a governance instrument.
-- [ ] **Metrics surface.** Gate pass rates, failure-class distribution, lesson
-      hit rate, tokens/task, human-intervention minutes/task. `keel failures`
-      and `keel bench` are the first two; nothing aggregates across time.
-- [ ] **`keel doctor`.** Health of index, drift, decayed lessons, orphaned specs.
-      Today these are spread across `status`, `lessons` and `store check`.
+- [x] **A second driver, and a way to check any driver.** `codex` is written
+      against a deliberately different CLI shape (argv positional, not stdin) and
+      the contract did not move. `keel driver check` runs any driver through a
+      conformance suite in a scratch repository. It found a real bug on its first
+      run: relative adapter paths were resolved against the working directory
+      rather than the configuring repository.
+- [x] **Task dependency waves.** `depends_on` in `tasks.md`, waves computed
+      topologically, cycles and dangling dependencies failing G1, `keel tasks`
+      showing the order. Execution stays serial and says so.
+- [x] **Cross-repo store.** `[[shared]]` layers another repository's store
+      underneath this one — conventions above local, lessons enforced and
+      injected, local shadowing by id. A missing required store fails doctor, G0
+      and G2 and is stated in the projection.
+- [x] **Metrics surface.** `keel metrics` — gate pass rates, failure classes,
+      attribution, tokens per run, lesson fires, and the checks that have never
+      failed in N runs.
+- [x] **`keel doctor`.** Index, projections, verify config, drivers, lessons,
+      specs, runs and shared stores, each finding naming the command that fixes
+      it.
+
+### Still open in Phase 5
+
+- [ ] **Parallel execution of a wave.** Waves are computed and reported; keel
+      runs tasks serially. Real parallelism needs a git worktree per task and a
+      merge strategy, neither of which exists.
+- [ ] **Drivers for Kiro, Copilot and `pi`.** The conformance suite makes adding
+      one cheap to validate; nobody has written them.
+- [ ] **Shared stores over git.** `[[shared]]` takes a path — a sibling
+      checkout, a submodule, a vendored copy. Fetching and pinning a remote
+      store is not built.
+- [ ] **Human-intervention minutes per task.** The one metric from PLAN.md §5
+      not surfaced: keel records human decisions but not the time they cost.
 
 ## Debts
 

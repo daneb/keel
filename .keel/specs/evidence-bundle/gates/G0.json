@@ -1,10 +1,10 @@
 {
   "schema": "keel.gate/1",
   "gate": "G0",
-  "run": "2026-08-22-746",
+  "run": "2026-08-22-216",
   "spec": "evidence-bundle",
   "verdict": "pass",
-  "generated_at": "2026-08-22T19:23:34.222725+02:00",
+  "generated_at": "2026-08-22T20:16:14.952262+02:00",
   "checks": [
     {
       "id": "schema",
@@ -80,6 +80,11 @@
       "id": "store-drift",
       "verdict": "pass",
       "detail": "4 projections current"
+    },
+    {
+      "id": "shared-stores",
+      "verdict": "pass",
+      "detail": "none configured"
     }
   ]
 }

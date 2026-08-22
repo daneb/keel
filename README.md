@@ -10,8 +10,8 @@ what is owed is in [ROADMAP.md](ROADMAP.md); the decisions that had a real
 alternative are in [`.keel/store/decisions/`](.keel/store/decisions/ADR-0000-index.md). This repository currently
 implements **Phase 0 — Store and map**, **Phase 1 — Spec → Plan → Tasks with
 G0/G1**, **Phase 2 — Execution, evidence and G2/G2.5/G3**, **Phase 3 —
-Failure classification and lesson promotion, G4**, and **Phase 4 — the
-retrieval service**.
+Failure classification and lesson promotion, G4**, **Phase 4 — the retrieval
+service**, and the first slice of **Phase 5 — breadth**.
 
 > **Phase 0** — *Every AI session in any tool starts from the same, current,
 > budget-bounded picture of this repo — and I can tell when that picture has
@@ -30,6 +30,9 @@ retrieval service**.
 >
 > **Phase 4** — *Agents work from symbols, not files, in every tool — and I can
 > see the token cost fall.*
+>
+> **Phase 5** — *New tools, new checks and new repos plug in without touching
+> the spine.*
 
 ## Install
 
@@ -97,6 +100,17 @@ keel importers src/core.rs    # who imports it
 keel slice T-1                # everything one task needs, budget-fitted
 keel bench                    # measured token drop vs reading whole files
 keel mcp                      # the same queries over MCP, on stdio
+```
+
+### Breadth (Phase 5)
+
+```bash
+keel doctor              # is the whole harness in working order?
+keel metrics             # pass rates, failure classes, tokens, gate theatre
+keel driver list         # configured drivers, and whether keel can reach them
+keel driver check <id>   # conformance suite, in a scratch repo
+keel tasks               # the plan as dependency waves
+keel runs --prune        # bound the audit trail without breaking provenance
 ```
 
 ## What it produces
@@ -304,6 +318,54 @@ It measures **cost, not answer quality**. The published comparison reporting
 ~10× fewer tokens also reports 83% answer quality against 92%; you buy an order
 of magnitude of context for some recall on the hardest queries, and the full
 read is always still there. Phase 4 accepts anything at or above 3×.
+
+## Plugging in without touching the spine
+
+**Drivers are checkable.** `keel driver check` runs a driver through a fixed set
+of probes — does it start, read the task, emit a `keel.driverresult/1`, report
+what it actually did, and respect an explicit instruction to change nothing —
+in a **scratch repository**, never your tree. A driver keel cannot reach is
+`blocked`, not non-conformant: an adapter for a tool you have not installed says
+nothing about the contract.
+
+Writing the second driver is what tested the claim. `codex` takes its prompt as
+an argv positional rather than on stdin; the adapter absorbed the difference and
+the contract did not move. The harness did find a real bug on its first run —
+a relative adapter path was resolved against the working directory rather than
+the repository that configured it.
+
+**Other repositories' stores layer underneath yours.**
+
+```toml
+[[shared]]
+id = "platform"
+path = "../platform-standards/.keel/store"
+required = true
+```
+
+Shared conventions render above local ones — platform rules as the ground yours
+are added to — and shared lessons are enforced and injected alongside your own.
+**Local wins**: a local lesson with the same id shadows the shared one, which is
+a visible decision where quietly ignoring it is not. A shared card is not yours
+to demote.
+
+`required = true` is the default and is the whole point. A missing required
+store fails `keel doctor`, fails G0 and G2, *and* says so in the projection
+itself — because a governance rule that stops applying because a path moved is
+worse than no rule: everyone downstream still believes it is in force. Shared
+content is hashed into the store hash, so a platform change marks your
+projections stale rather than reaching nobody.
+
+**Waves are reported, not faked.** `keel tasks` groups tasks by `depends_on`
+into waves and tells you how many could proceed together. keel then runs them
+one at a time and says so: two agents editing one working tree is a bug factory,
+and real parallelism needs a worktree each, which is not built.
+
+**Gate theatre is measured.** `keel metrics` aggregates across runs — gate pass
+rates, failure-class distribution, tokens per run, lesson fires — and names
+every check that has never failed in N runs, because PLAN.md §6 is explicit
+that a gate which cannot fail should be deleted or tightened. Some are correctly
+always-true; the point is to look.
 
 ## Budgets are invariants
 

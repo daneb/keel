@@ -194,6 +194,9 @@ fn enforced_share(lessons: &[Lesson]) -> Check {
 
 /// The direct counter to unbounded `CLAUDE.md` growth: a lesson that has done
 /// nothing for its decay period goes to demotion review.
+/// Only local lessons decay here. A shared card is governed by the repository
+/// that publishes it; demoting it from a consumer would be editing somebody
+/// else's store, and G4 failing on it would make every consumer permanently red.
 fn decay_review(paths: &Paths, lessons: &[Lesson]) -> Result<Check> {
     let ledger = lesson::usage::Ledger::load(paths)?;
     let stale: Vec<String> = lessons

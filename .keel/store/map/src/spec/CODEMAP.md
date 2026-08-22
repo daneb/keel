@@ -44,22 +44,6 @@ generated: true
 - `fn non_zero_expectations_are_legal()`  <sub>L191</sub>
 - `fn parses_the_other_kinds()`  <sub>L199</sub>
 
-**`src/spec/ears.rs`** · 318 lines · imported by 2
-- `pub enum Pattern`  <sub>L10</sub>
-- `impl Pattern`  <sub>L25</sub>
-- `pub fn name(&self) -> &'static str`  <sub>L26</sub>
-- `pub enum Conformance`  <sub>L39</sub>
-- `pub fn classify(statement: &str) -> Conformance` — is not decoration: it is the visible difference between a requirement and a  <sub>L51</sub>
-- `const AMBIGUOUS: &[&str] = &[` — are the worst offenders because they read like verbs while naming no  <sub>L113</sub>
-- `pub struct Ambiguity`  <sub>L129</sub>
-- `pub fn ambiguities(statement: &str) -> Vec<Ambiguity>` — and `about` does not fire on a URL. Text inside backticks is exempt: a  <sub>L140</sub>
-- `fn is_whole_word(s: &str, at: usize, len: usize) -> bool`  <sub>L170</sub>
-- `fn strip_code_spans(s: &str) -> String` — Remove `` `code spans` `` — identifiers are not prose and must not be  <sub>L182</sub>
-- `fn normalise(s: &str) -> String`  <sub>L196</sub>
-- `fn truncate(s: &str, max: usize) -> String`  <sub>L211</sub>
-- `mod tests`  <sub>L217</sub>
-- `fn accepts_the_five_ears_patterns()`  <sub>L235</sub>
-
 **`src/spec/placeholder.rs`** · 233 lines · imported by 3
 - `pub fn scan(text: &str) -> Vec<String>` — positive costs one pair of backticks; a false negative lets a template  <sub>L21</sub>
 - `pub fn has_placeholder(text: &str) -> bool`  <sub>L61</sub>
@@ -75,4 +59,20 @@ generated: true
 - `fn shell_syntax_is_not_a_placeholder()`  <sub>L188</sub>
 - `fn two_snake_case_identifiers_do_not_form_a_span()`  <sub>L206</sub>
 - `fn real_italic_scaffold_is_still_caught()`  <sub>L216</sub>
+
+**`src/spec/ears.rs`** · 318 lines · imported by 2
+- `pub enum Pattern`  <sub>L10</sub>
+- `impl Pattern`  <sub>L25</sub>
+- `pub fn name(&self) -> &'static str`  <sub>L26</sub>
+- `pub enum Conformance`  <sub>L39</sub>
+- `pub fn classify(statement: &str) -> Conformance` — is not decoration: it is the visible difference between a requirement and a  <sub>L51</sub>
+- `const AMBIGUOUS: &[&str] = &[` — are the worst offenders because they read like verbs while naming no  <sub>L113</sub>
+- `pub struct Ambiguity`  <sub>L129</sub>
+- `pub fn ambiguities(statement: &str) -> Vec<Ambiguity>` — and `about` does not fire on a URL. Text inside backticks is exempt: a  <sub>L140</sub>
+- `fn is_whole_word(s: &str, at: usize, len: usize) -> bool`  <sub>L170</sub>
+- `fn strip_code_spans(s: &str) -> String` — Remove `` `code spans` `` — identifiers are not prose and must not be  <sub>L182</sub>
+- `fn normalise(s: &str) -> String`  <sub>L196</sub>
+- `fn truncate(s: &str, max: usize) -> String`  <sub>L211</sub>
+- `mod tests`  <sub>L217</sub>
+- `fn accepts_the_five_ears_patterns()`  <sub>L235</sub>
 

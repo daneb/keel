@@ -52,9 +52,11 @@ impl Ledger {
 
     /// Days since last use, counting from `verified_at` when never used —
     /// a lesson that has never fired is still aging.
+    /// Never negative: a lesson dated in the future is not yet due, and casting
+    /// a negative day count to an unsigned type made it maximally overdue.
     pub fn idle_days(&self, id: &str, verified_at: &str) -> i64 {
         let since = self.last_used(id).unwrap_or_else(|| verified_at.to_string());
-        days_between(&since, &crate::store::today())
+        days_between(&since, &crate::store::today()).max(0)
     }
 }
 
@@ -89,6 +91,12 @@ mod tests {
         let today = crate::store::today();
         assert_eq!(l.idle_days("L-1", &today), 0);
         assert!(l.idle_days("L-1", "2020-01-01") > 2000, "an unused lesson must still age");
+    }
+
+    #[test]
+    fn a_future_verification_date_is_not_overdue() {
+        let l = Ledger::default();
+        assert_eq!(l.idle_days("L-1", "2999-01-01"), 0, "a future date wrapped into overdue");
     }
 
     #[test]

@@ -1,10 +1,10 @@
 {
   "schema": "keel.gate/1",
   "gate": "G0",
-  "run": "2026-08-21-1cd",
+  "run": "2026-08-22-35e",
   "spec": "agent-driver",
   "verdict": "pass",
-  "generated_at": "2026-08-21T20:26:21.695587+02:00",
+  "generated_at": "2026-08-22T20:16:14.909735+02:00",
   "checks": [
     {
       "id": "schema",
@@ -80,6 +80,11 @@
       "id": "store-drift",
       "verdict": "pass",
       "detail": "4 projections current"
+    },
+    {
+      "id": "shared-stores",
+      "verdict": "pass",
+      "detail": "none configured"
     }
   ]
 }

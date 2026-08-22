@@ -104,6 +104,8 @@ pub struct Task {
     pub budget: Option<usize>,
     /// The condition under which this task is done.
     pub exit: Option<String>,
+    /// Task ids that must complete before this one starts.
+    pub depends_on: Vec<String>,
     pub line: usize,
     /// Field keys that were not recognised, so typos are loud.
     pub unknown_fields: Vec<String>,
@@ -139,6 +141,54 @@ impl Tasks {
 
     pub fn total_budget(&self) -> usize {
         self.tasks.iter().filter_map(|t| t.budget).sum()
+    }
+
+    /// Group tasks into dependency waves: everything in wave *n* can proceed
+    /// once every wave before it has completed (PLAN.md Phase 5, Kiro's model).
+    ///
+    /// Returns `Err` naming the tasks involved in a cycle, because a plan whose
+    /// dependencies cannot be ordered is not a plan.
+    pub fn waves(&self) -> std::result::Result<Vec<Vec<&Task>>, Vec<String>> {
+        let ids: Vec<&str> = self.tasks.iter().map(|t| t.id.as_str()).collect();
+        let mut remaining: Vec<&Task> = self.tasks.iter().collect();
+        let mut done: Vec<&str> = Vec::new();
+        let mut waves: Vec<Vec<&Task>> = Vec::new();
+
+        while !remaining.is_empty() {
+            let (ready, blocked): (Vec<&Task>, Vec<&Task>) = remaining.iter().partition(|t| {
+                t.depends_on
+                    .iter()
+                    // A dependency on something that does not exist is caught by
+                    // G1; here it must not also stall the whole computation.
+                    .filter(|d| ids.contains(&d.as_str()))
+                    .all(|d| done.contains(&d.as_str()))
+            });
+            if ready.is_empty() {
+                let mut stuck: Vec<String> = blocked.iter().map(|t| t.id.clone()).collect();
+                stuck.sort();
+                return Err(stuck);
+            }
+            for t in &ready {
+                done.push(&t.id);
+            }
+            waves.push(ready);
+            remaining = blocked;
+        }
+        Ok(waves)
+    }
+
+    /// Dependencies naming a task that does not exist.
+    pub fn dangling_dependencies(&self) -> Vec<String> {
+        let ids: Vec<&str> = self.tasks.iter().map(|t| t.id.as_str()).collect();
+        let mut out = Vec::new();
+        for t in &self.tasks {
+            for d in &t.depends_on {
+                if !ids.contains(&d.as_str()) {
+                    out.push(format!("{} → {d}", t.id));
+                }
+            }
+        }
+        out
     }
 }
 
@@ -178,6 +228,7 @@ fn parse_tasks(body: &str, offset: usize) -> Vec<Task> {
             "criteria" | "criterion" => t.criteria = split_list(value),
             "files" | "file" => t.files = split_list(value),
             "budget" | "budget_lines" => t.budget = parse_budget(value),
+            "depends_on" | "depends" | "after" => t.depends_on = split_list(value),
             "exit" | "exit_condition" => {
                 if !value.is_empty() { t.exit = Some(value.to_string()); }
             }
@@ -341,7 +392,9 @@ pub fn render_tasks(spec: &Spec) -> Result<String> {
         "# Tasks\n\n\
          Each task must name the criteria it satisfies, the files it touches, a line\n\
          budget and an exit condition. G1 checks all four, and checks that every\n\
-         criterion in the spec is covered by at least one task.\n\n",
+         criterion in the spec is covered by at least one task.\n\n\
+         Add `- depends_on: T-1` where order matters. Tasks with no dependency on\n\
+         each other form a wave; `keel tasks` shows them.\n\n",
     );
     for (n, c) in spec.criteria.iter().enumerate() {
         body.push_str(&format!(
@@ -410,6 +463,61 @@ Prose after the tasks.
         assert_eq!(parse_budget("~80"), Some(80));
         assert_eq!(parse_budget("none"), None);
         assert_eq!(parse_budget("0"), None, "a zero budget is not a budget");
+    }
+
+    fn with_deps(body: &str) -> Tasks {
+        Tasks::parse(
+            Path::new("tasks.md"),
+            &format!("---\nid: TASKS-0001\nslug: demo\n---\n\n# Tasks\n\n{body}"),
+        )
+        .unwrap()
+    }
+
+    #[test]
+    fn independent_tasks_share_a_wave() {
+        let t = with_deps(
+            "### T-1 A\n- criteria: AC-1\n- budget: 10\n\n             ### T-2 B\n- criteria: AC-2\n- budget: 10\n",
+        );
+        let waves = t.waves().unwrap();
+        assert_eq!(waves.len(), 1, "independent tasks were serialised");
+        assert_eq!(waves[0].len(), 2);
+    }
+
+    #[test]
+    fn a_dependency_creates_a_later_wave() {
+        let t = with_deps(
+            "### T-1 A\n- criteria: AC-1\n- budget: 10\n\n             ### T-2 B\n- criteria: AC-2\n- budget: 10\n- depends_on: T-1\n\n             ### T-3 C\n- criteria: AC-3\n- budget: 10\n",
+        );
+        let waves = t.waves().unwrap();
+        assert_eq!(waves.len(), 2);
+        // T-1 and T-3 are independent; T-2 waits.
+        assert_eq!(waves[0].len(), 2);
+        assert_eq!(waves[1][0].id, "T-2");
+    }
+
+    #[test]
+    fn a_chain_produces_one_wave_per_link() {
+        let t = with_deps(
+            "### T-1 A\n- budget: 10\n\n             ### T-2 B\n- budget: 10\n- depends_on: T-1\n\n             ### T-3 C\n- budget: 10\n- depends_on: T-2\n",
+        );
+        assert_eq!(t.waves().unwrap().len(), 3);
+    }
+
+    #[test]
+    fn a_cycle_is_reported_with_the_tasks_in_it() {
+        let t = with_deps(
+            "### T-1 A\n- budget: 10\n- depends_on: T-2\n\n             ### T-2 B\n- budget: 10\n- depends_on: T-1\n",
+        );
+        let stuck = t.waves().unwrap_err();
+        assert_eq!(stuck, vec!["T-1".to_string(), "T-2".to_string()]);
+    }
+
+    #[test]
+    fn a_dependency_on_a_missing_task_is_reported_not_a_stall() {
+        let t = with_deps("### T-1 A\n- budget: 10\n- depends_on: T-9\n");
+        assert_eq!(t.dangling_dependencies(), vec!["T-1 → T-9".to_string()]);
+        // And it must still produce waves rather than deadlock.
+        assert_eq!(t.waves().unwrap().len(), 1);
     }
 
     #[test]

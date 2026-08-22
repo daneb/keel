@@ -88,3 +88,33 @@ direction = "down"
 id = "tests-passing"
 cmd = "cargo test --quiet 2>&1 | grep -o '[0-9]* passed' | awk '{s+=$1} END {print s}'"
 direction = "up"
+
+# The null driver: no model, always contract-correct. The fixed point of the
+# conformance suite — if `keel driver check noop` fails, the harness is wrong.
+[[driver]]
+id = "noop"
+cmd = ".keel/drivers/noop"
+default = false
+timeout_secs = 30
+
+[[driver]]
+id = "claude-code"
+cmd = ".keel/drivers/claude-code"
+default = true
+timeout_secs = 900
+
+# A second real tool, with a deliberately different CLI shape (prompt as an
+# argv positional rather than stdin) — PLAN.md §6 asks for the interface to be
+# proven against two tools before Phase 5 breadth.
+[[driver]]
+id = "codex"
+cmd = ".keel/drivers/codex"
+default = false
+timeout_secs = 900
+
+# Example — layering another repository's store underneath this one:
+#
+#   [[shared]]
+#   id = "platform"
+#   path = "../platform-standards/.keel/store"
+#   required = true      # a missing required store fails doctor, G0 and G2

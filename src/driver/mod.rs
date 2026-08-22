@@ -8,6 +8,7 @@
 //! that ran and could not do the job is an agentic failure. Getting this wrong
 //! teaches the Phase 3 failure taxonomy to learn from noise.
 
+pub mod conform;
 pub mod contract;
 
 use crate::config::{Config, Driver as DriverConfig};
@@ -34,6 +35,22 @@ pub struct Invocation {
 /// `blocked` result so it lands in the trajectory and on the gate report rather
 /// than aborting the run.
 pub fn run(paths: &Paths, driver: &DriverConfig, task: &DriverTask) -> Invocation {
+    run_in(paths, paths, driver, task)
+}
+
+/// Run a driver whose adapter lives in `home` against a working tree at `cwd`.
+///
+/// These are the same directory in normal use, and different exactly once: the
+/// conformance suite runs a driver against a scratch repository. A driver
+/// command like `.keel/drivers/codex` is relative to the repository that
+/// *configured* it, not to wherever the child happens to be started — resolving
+/// it against `cwd` made every driver unreachable under conformance.
+pub fn run_in(
+    home: &Paths,
+    cwd: &Paths,
+    driver: &DriverConfig,
+    task: &DriverTask,
+) -> Invocation {
     let started = Instant::now();
     let timeout = Duration::from_secs(driver.timeout_secs);
 
@@ -41,7 +58,7 @@ pub fn run(paths: &Paths, driver: &DriverConfig, task: &DriverTask) -> Invocatio
     if parts.is_empty() {
         return blocked(started, format!("driver `{}` has an empty cmd", driver.id));
     }
-    let program = parts.remove(0);
+    let program = resolve_program(home, &parts.remove(0));
 
     let payload = match serde_json::to_string(task) {
         Ok(p) => p,
@@ -51,9 +68,9 @@ pub fn run(paths: &Paths, driver: &DriverConfig, task: &DriverTask) -> Invocatio
     let mut command = Command::new(&program);
     command
         .args(&parts)
-        .current_dir(&paths.repo)
-        .env("KEEL_REPO", &paths.repo)
-        .env("KEEL_STORE", paths.store())
+        .current_dir(&cwd.repo)
+        .env("KEEL_REPO", &cwd.repo)
+        .env("KEEL_STORE", cwd.store())
         .env("KEEL_RUN", &task.run)
         .env("KEEL_SPEC", &task.spec)
         .stdin(Stdio::piped())
@@ -163,6 +180,21 @@ fn kill_group(child: &mut std::process::Child, pid: u32) {
     let _ = child.kill();
 }
 
+/// A relative adapter path is resolved against the configuring repository; a
+/// bare name (`claude`, `npx`) is left alone for `PATH` to find.
+fn resolve_program(home: &Paths, program: &str) -> String {
+    let p = std::path::Path::new(program);
+    if p.is_absolute() || !program.contains('/') {
+        return program.to_string();
+    }
+    let candidate = home.repo.join(p);
+    if candidate.exists() {
+        candidate.to_string_lossy().to_string()
+    } else {
+        program.to_string()
+    }
+}
+
 fn blocked(started: Instant, detail: String) -> Invocation {
     Invocation {
         result: DriverResult::blocked(detail),
@@ -187,5 +219,32 @@ pub fn select<'a>(cfg: &'a Config, id: Option<&str>) -> Result<&'a DriverConfig>
         0 => bail!("no drivers configured — add a [[driver]] block to .keel/keel.toml"),
         1 => Ok(&cfg.drivers[0]),
         _ => bail!("several drivers configured and none is default — pass --driver <id>"),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_relative_adapter_resolves_against_the_configuring_repo() {
+        let dir = std::env::temp_dir().join(format!("keel-resolve-{}", std::process::id()));
+        std::fs::create_dir_all(dir.join(".keel/drivers")).unwrap();
+        std::fs::write(dir.join(".keel/drivers/x"), "#!/bin/sh\n").unwrap();
+        let home = Paths { repo: dir.clone() };
+
+        let resolved = resolve_program(&home, ".keel/drivers/x");
+        assert!(std::path::Path::new(&resolved).is_absolute(), "{resolved}");
+        assert!(resolved.ends_with(".keel/drivers/x"));
+
+        // A bare name is PATH's business, not keel's.
+        assert_eq!(resolve_program(&home, "claude"), "claude");
+        // An absolute path is left alone.
+        assert_eq!(resolve_program(&home, "/usr/bin/env"), "/usr/bin/env");
+        // A relative path that does not exist is passed through, so the error
+        // the caller sees is the shell's, not a rewritten one.
+        assert_eq!(resolve_program(&home, "./nope/x"), "./nope/x");
+
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }

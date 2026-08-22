@@ -186,6 +186,19 @@ pub fn reject(index: usize, note: Option<String>) -> Result<i32> {
 
 pub fn demote(id: String, reason: Option<String>) -> Result<i32> {
     let paths = Paths::require_init()?;
+    let cfg = Config::load(&paths.config())?;
+
+    // A shared lesson belongs to the store that publishes it. Shadow it with a
+    // local card of the same id if this repository genuinely disagrees — that
+    // is a visible decision, where deleting somebody else's rule is not.
+    if let Some(s) = lesson::list_all(&paths, &cfg)?.iter().find(|s| s.lesson.front.id == id)
+        && let Some(from) = &s.from
+    {
+        bail!(
+            "`{id}` comes from the shared store `{from}` and is not this repository's to demote.\n\
+             Shadow it with a local lesson of the same id, or change it where it is published."
+        );
+    }
     let reason = reason.unwrap_or_else(|| "unused past its decay period".to_string());
     let dest = lesson::demote(&paths, &id, &reason)?;
     println!("  demoted {id} — {reason}");
@@ -196,7 +209,15 @@ pub fn demote(id: String, reason: Option<String>) -> Result<i32> {
 
 pub fn list(json: bool) -> Result<i32> {
     let paths = Paths::require_init()?;
-    let lessons = lesson::list(&paths)?;
+    let cfg = Config::load(&paths.config())?;
+    let sourced = lesson::list_all(&paths, &cfg)?;
+    let lessons: Vec<&crate::lesson::Lesson> = sourced.iter().map(|s| &s.lesson).collect();
+    let origin = |id: &str| {
+        sourced
+            .iter()
+            .find(|s| s.lesson.front.id == id)
+            .and_then(|s| s.from.clone())
+    };
     let ledger = lesson::usage::Ledger::load(&paths)?;
 
     if json {
@@ -213,6 +234,7 @@ pub fn list(json: bool) -> Result<i32> {
                     "idle_days": ledger.idle_days(&l.front.id, &l.front.verified_at),
                     "decay": l.front.decay,
                     "sources": l.front.sources,
+                    "shared_from": origin(&l.front.id),
                 })
             })
             .collect();
@@ -228,19 +250,21 @@ pub fn list(json: bool) -> Result<i32> {
     let mut stale = 0;
     for l in &lessons {
         let idle = ledger.idle_days(&l.front.id, &l.front.verified_at);
-        let overdue = idle as u64 > l.decay_days();
+        // Shared cards are not ours to retire, so not ours to nag about.
+        let overdue = origin(&l.front.id).is_none() && idle as u64 > l.decay_days();
         if overdue {
             stale += 1;
         }
         println!(
-            "  {:<8} {:<16} {:<18} {:>2} run(s)  {:<14} idle {:>3}d{}",
+            "  {:<8} {:<16} {:<18} {:>2} run(s)  {:<14} idle {:>3}d{}{}",
             l.front.id,
             l.front.class,
             l.front.scope,
             l.front.occurrences,
             if l.oracle().is_some() { "gate-check" } else { "prompt" },
             idle,
-            if overdue { "  DECAYED" } else { "" }
+            if overdue { "  DECAYED" } else { "" },
+            origin(&l.front.id).map(|o| format!("  shared:{o}")).unwrap_or_default()
         );
         if let Some(t) = l.trigger() {
             println!("           when: {t}");
@@ -250,10 +274,12 @@ pub fn list(json: bool) -> Result<i32> {
         }
     }
     let enforced = lessons.iter().filter(|l| l.oracle().is_some()).count();
+    let shared = sourced.iter().filter(|s| s.is_shared()).count();
     println!(
-        "\n  {} lesson(s), {enforced} enforced as gate checks, {} injected as prompts",
+        "\n  {} lesson(s), {enforced} enforced as gate checks, {} injected as prompts{}",
         lessons.len(),
-        lessons.len() - enforced
+        lessons.len() - enforced,
+        if shared > 0 { format!(", {shared} from a shared store") } else { String::new() }
     );
     if stale > 0 {
         println!("  {stale} past decay — `keel lesson demote <id>`");

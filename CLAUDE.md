@@ -1,4 +1,4 @@
-<!-- keel:generated schema=keel.projection/1 adapter=claude store=cd24e058f858 body=95b29c34a477 -->
+<!-- keel:generated schema=keel.projection/1 adapter=claude store=7f85ef731574 body=a49d1cbce64b -->
 <!-- Source of truth: .keel/store/ — regenerate with `keel store render`. Edits here are drift and will be reported by `keel store check`. -->
 
 # Project context
@@ -49,54 +49,58 @@ _Versions that cannot move, platforms that must keep working, dependencies that 
 
 ## Repository map
 
-**77 files · 1300 symbols · 18832 lines** — rust 77
+**83 files · 1393 symbols · 20659 lines** — rust 83
 
 Files are ordered by import-graph centrality, not alphabetically. Signatures only; read a body with the file path and line number. Per-directory detail lives in `.keel/store/map/<dir>/CODEMAP.md`.
 
 ### Layout
 
-- `src/` — 7 files, 1904 lines · paths.rs, config.rs, hashing.rs
-- `src/cmd/` — 17 files, 2435 lines · mod.rs, learn.rs, spec.rs
-- `src/driver/` — 2 files, 454 lines · mod.rs, contract.rs
+- `src/` — 7 files, 2075 lines · paths.rs, config.rs, hashing.rs
+- `src/cmd/` — 21 files, 3129 lines · mod.rs, learn.rs, doctor.rs
+- `src/driver/` — 3 files, 741 lines · contract.rs, mod.rs, conform.rs
 - `src/evidence/` — 2 files, 423 lines · mod.rs, manifest.rs
 - `src/failure/` — 2 files, 767 lines · mod.rs, taxonomy.rs
-- `src/gate/` — 10 files, 2872 lines · mod.rs, ratchet.rs, oracle_exec.rs
-- `src/lesson/` — 2 files, 726 lines · mod.rs, usage.rs
+- `src/gate/` — 10 files, 2950 lines · mod.rs, ratchet.rs, g1.rs
+- `src/lesson/` — 2 files, 826 lines · mod.rs, usage.rs
 - `src/map/` — 9 files, 2424 lines · lang.rs, extract.rs, db.rs
 - `src/mcp/` — 1 file, 271 lines · mod.rs
-- `src/projection/` — 3 files, 672 lines · drift.rs, mod.rs, sections.rs
+- `src/projection/` — 3 files, 715 lines · drift.rs, mod.rs, sections.rs
 - `src/retrieve/` — 3 files, 763 lines · mod.rs, fallback.rs, budget.rs
 - `src/review/` — 1 file, 366 lines · mod.rs
-- `src/spec/` — 4 files, 1143 lines · mod.rs, oracle.rs, ears.rs
-- `src/store/` — 2 files, 250 lines · mod.rs, frontmatter.rs
+- `src/spec/` — 4 files, 1143 lines · mod.rs, oracle.rs, placeholder.rs
+- `src/store/` — 2 files, 314 lines · mod.rs, frontmatter.rs
 - `src/trajectory/` — 2 files, 462 lines · event.rs, mod.rs
-- `tests/` — 10 files, 2900 lines · support.rs, cli.rs, phase1.rs
+- `tests/` — 11 files, 3290 lines · support.rs, cli.rs, phase1.rs
 
 ### Key files
 
-**`src/paths.rs`** · 82 lines · imported by 47
+**`src/paths.rs`** · 82 lines · imported by 52
 - `pub struct Paths`  <sub>L10</sub>
 - `impl Paths`  <sub>L14</sub>
 - `pub fn discover() -> Result<Self>` — Find the repo root: nearest ancestor holding `.keel/`, else `.git/`, else cwd.  <sub>L16</sub>
 - `pub fn require_init() -> Result<Self>` — Like `discover`, but fails if keel has not been initialised here.  <sub>L42</sub>
 - `pub fn rel<'a>(&self, p: &'a Path) -> &'a Path` — Present `p` relative to the repo root when possible, for display.  <sub>L68</sub>
-- `pub fn scaffold(&self) -> Result<()>`  <sub>L72</sub>
 
-**`src/config.rs`** · 346 lines · imported by 33
+**`src/config.rs`** · 370 lines · imported by 37
 - `pub struct Config`  <sub>L14</sub>
-- `pub struct Reviewer`  <sub>L51</sub>
-- `pub struct SpecConfig`  <sub>L176</sub>
-- `pub struct PlanConfig`  <sub>L199</sub>
-- `pub struct MapConfig`  <sub>L236</sub>
-- `pub struct StoreConfig`  <sub>L263</sub>
+- `pub struct SharedStore`  <sub>L58</sub>
+- `pub struct Reviewer`  <sub>L74</sub>
+- `pub struct SpecConfig`  <sub>L199</sub>
+- `pub struct PlanConfig`  <sub>L222</sub>
 
 **`src/map/lang.rs`** · 317 lines · imported by 6
 - `pub struct Compiled` — The three queries keel runs over every file.  <sub>L11</sub>
 - `pub enum Lang`  <sub>L18</sub>
-- `pub fn def_query_source(&self) -> &'static str` — Query capturing `@def` (the definition node) and `@name` (its identifier).  <sub>L72</sub>
 - `pub fn symbol_kind(&self, node_kind: &str) -> Option<&'static str>` — Node kind → the short symbol kind shown in maps. `None` means "indexed  <sub>L113</sub>
 - `pub fn intern_kind(kind: &str) -> &'static str` — Symbol kinds are a closed set, so a round trip through the database should  <sub>L278</sub>
 - `pub fn unavailable() -> Vec<(&'static str, String)>` — files still get indexed, they just stop yielding symbols. Naming the casualty  <sub>L291</sub>
+
+**`src/gate/mod.rs`** · 355 lines · imported by 12
+- `pub enum Verdict`  <sub>L33</sub>
+- `pub struct Check`  <sub>L60</sub>
+- `pub struct GateResult`  <sub>L112</sub>
+- `pub fn roll_up(checks: &[Check]) -> Verdict` — misconfiguration, and reporting it as success is precisely how a pipeline  <sub>L164</sub>
+- `pub fn run_id() -> String` — `2026-08-21-7c1` — sortable by date, unique enough within a day.  <sub>L178</sub>
 
 **`src/spec/mod.rs`** · 353 lines · imported by 13
 - `pub struct SpecFront`  <sub>L20</sub>
@@ -104,15 +108,6 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub struct Criterion`  <sub>L52</sub>
 - `pub struct Spec`  <sub>L65</sub>
 - `pub fn list(paths: &Paths) -> Result<Vec<String>>` — Every spec slug present on disk, sorted.  <sub>L113</sub>
-- `fn parse_criteria(body: &str, line_offset: usize) -> Vec<Criterion>` — A criterion block is a `###` heading whose text begins with an identifier  <sub>L129</sub>
-
-**`src/gate/mod.rs`** · 355 lines · imported by 9
-- `pub enum Verdict`  <sub>L33</sub>
-- `pub struct Check`  <sub>L60</sub>
-- `pub struct GateResult`  <sub>L112</sub>
-- `pub fn roll_up(checks: &[Check]) -> Verdict` — misconfiguration, and reporting it as success is precisely how a pipeline  <sub>L164</sub>
-- `pub fn run_id() -> String` — `2026-08-21-7c1` — sortable by date, unique enough within a day.  <sub>L178</sub>
-- `pub fn run_plugins(paths: &Paths, cfg: &Config, gate: &str, slug: Option<&str>) -> Vec<Check>` — A plugin that cannot be executed yields `blocked`, never `fail`: the  <sub>L206</sub>
 
 **`src/map/extract.rs`** · 393 lines · imported by 4
 - `pub struct Symbol`  <sub>L12</sub>
@@ -120,7 +115,6 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub struct FileFacts`  <sub>L31</sub>
 - `pub struct Extractor` — Reusable per-thread parse state. Compiling a query is expensive relative to  <sub>L46</sub>
 - `pub fn unparsed(rel: &str, lang: Lang, source_len: u64, sha: String, lines: usize) -> FileFacts` — Metadata-only entry for a file that was never parsed (too large, or an  <sub>L197</sub>
-- `fn doc_comment(node: &Node, source: &[u8], lang: Lang) -> Option<String>` — First line of the doc attached to a definition: preceding comment block for  <sub>L253</sub>
 
 **`src/trajectory/event.rs`** · 228 lines · imported by 2
 - `pub enum Payload`  <sub>L12</sub>
@@ -128,13 +122,11 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub struct Event`  <sub>L109</sub>
 - `pub fn summary(&self) -> String` — A compact human rendering for `keel replay`.  <sub>L126</sub>
 - `pub fn estimate_tokens(text: &str) -> usize` — enough for the only two questions the trajectory needs to answer: is the  <sub>L157</sub>
-- `mod tests`  <sub>L162</sub>
 
-**`src/trajectory/mod.rs`** · 234 lines · imported by 6
+**`src/trajectory/mod.rs`** · 234 lines · imported by 7
 - `pub mod event;` — the sequence invariant.  <sub>L8</sub>
 - `pub struct Trajectory`  <sub>L16</sub>
 - `pub fn read(path: &Path) -> Result<Vec<Event>>` — silently skipped record: a stream you cannot fully parse cannot support the  <sub>L75</sub>
-- `fn verify_sequence(path: &Path, events: &[Event]) -> Result<()>` — Sequence numbers must start at 1 and increase by exactly 1.  <sub>L92</sub>
 - `pub fn token_total(events: &[Event]) -> usize` — Total tokens this run put in front of a model.  <sub>L109</sub>
 - `pub fn gate_verdicts(events: &[Event]) -> Vec<(String, String)>` — Every gate verdict in the stream, in order.  <sub>L114</sub>
 
@@ -144,22 +136,30 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub struct SetHasher` — Hash an ordered set of (path, content) pairs. Path is included so that a  <sub>L27</sub>
 - `pub fn new() -> Self`  <sub>L32</sub>
 - `pub fn add(&mut self, path: &str, content: &[u8])`  <sub>L34</sub>
-- `pub fn finish(self) -> String`  <sub>L42</sub>
 
-**`src/run.rs`** · 271 lines · imported by 10
+**`src/store/mod.rs`** · 177 lines · imported by 12
+- `pub struct StoreDoc`  <sub>L16</sub>
+- `pub struct Shared`  <sub>L65</sub>
+- `pub fn shared(paths: &Paths, cfg: &crate::config::Config) -> Vec<Shared>` — dropped: silently skipping it is exactly how a platform rule stops applying  <sub>L83</sub>
+- `pub fn projection_inputs(paths: &Paths) -> Result<Vec<PathBuf>>` — Every file that feeds a projection, in a stable order.  <sub>L100</sub>
+- `pub fn store_hash_with_shared(paths: &Paths, cfg: &crate::config::Config) -> Result<String>` — Shared stores are hashed too: a platform convention changing must mark this  <sub>L128</sub>
+
+**`src/run.rs`** · 271 lines · imported by 11
 - `pub struct RunMeta`  <sub>L17</sub>
 - `pub struct Run`  <sub>L37</sub>
-- `pub fn list(paths: &Paths) -> Result<Vec<String>>` — Every run id on disk, oldest first.  <sub>L145</sub>
 - `pub fn protected(paths: &Paths) -> Result<std::collections::BTreeSet<String>>` — answers "why does this rule exist?". Pruning a cited run turns the answer  <sub>L183</sub>
 - `pub struct PruneCandidate`  <sub>L214</sub>
 - `pub fn prune_plan(paths: &Paths, keep: usize) -> Result<Vec<PruneCandidate>>` — Decide what could be pruned, keeping the most recent `keep` runs and  <sub>L223</sub>
 
-**`src/store/mod.rs`** · 113 lines · imported by 11
-- `pub mod frontmatter;` — already covers them so projections invalidate correctly when they arrive).  <sub>L7</sub>
-- `pub struct StoreDoc`  <sub>L16</sub>
-- `pub fn projection_inputs(paths: &Paths) -> Result<Vec<PathBuf>>` — Every file that feeds a projection, in a stable order.  <sub>L64</sub>
+**`src/failure/mod.rs`** · 573 lines · imported by 5
+- `pub enum Signal`  <sub>L20</sub>
+- `pub struct Episode`  <sub>L84</sub>
+- `pub fn extract(paths: &Paths, run: &Run) -> Result<Vec<Episode>>` — Extract every failure episode from a completed run.  <sub>L118</sub>
+- `pub fn classify(signal: &Signal, events: &[Event]) -> (Attribution, Option<Class>, String)` — Attribution first, then class. Returns the reasoning too, because a  <sub>L220</sub>
+- `pub struct Distribution`  <sub>L384</sub>
 
-_… 278 more lines in `.keel/store/steering/structure.md`._
+
+_… 247 more lines in `.keel/store/steering/structure.md`._
 
 ## What this is
 

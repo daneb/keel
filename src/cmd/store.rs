@@ -10,7 +10,7 @@ use anyhow::{Result, bail};
 pub fn render(dry_run: bool, only: Option<String>) -> Result<()> {
     let paths = Paths::require_init()?;
     let cfg = Config::load(&paths.config())?;
-    let store_hash = store::store_hash(&paths)?;
+    let store_hash = store::store_hash_with_shared(&paths, &cfg)?;
 
     let mut any = false;
     for adapter in projection::enabled_adapters(&cfg) {
@@ -55,7 +55,7 @@ pub fn render(dry_run: bool, only: Option<String>) -> Result<()> {
 pub fn check(json: bool) -> Result<i32> {
     let paths = Paths::require_init()?;
     let cfg = Config::load(&paths.config())?;
-    let store_hash = store::store_hash(&paths)?;
+    let store_hash = store::store_hash_with_shared(&paths, &cfg)?;
     let reports = drift::check_all(&paths, &cfg, &store_hash)?;
 
     if json {
@@ -106,7 +106,7 @@ pub fn check(json: bool) -> Result<i32> {
 pub fn reconcile(targets: Vec<String>) -> Result<()> {
     let paths = Paths::require_init()?;
     let cfg = Config::load(&paths.config())?;
-    let store_hash = store::store_hash(&paths)?;
+    let store_hash = store::store_hash_with_shared(&paths, &cfg)?;
 
     let selected: Vec<_> = if targets.is_empty() {
         cfg.adapters.iter().filter(|a| a.enabled).collect()

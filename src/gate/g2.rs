@@ -101,6 +101,7 @@ pub fn run(
 
     // --- the context is still current ---------------------------------------
     checks.push(store_drift(paths, cfg)?);
+    checks.push(crate::gate::g0::shared_stores_check(paths, cfg));
 
     // --- lessons that compiled into checks ----------------------------------
     checks.extend(lesson_checks(paths, cfg, run)?);
@@ -300,7 +301,7 @@ fn baseline_ratchet(paths: &Paths, cfg: &Config, run: &Run) -> Result<Check> {
 }
 
 fn store_drift(paths: &Paths, cfg: &Config) -> Result<Check> {
-    let hash = store::store_hash(paths)?;
+    let hash = store::store_hash_with_shared(paths, cfg)?;
     let reports = drift::check_all(paths, cfg, &hash)?;
     let bad: Vec<String> = reports
         .iter()
@@ -320,7 +321,7 @@ fn store_drift(paths: &Paths, cfg: &Config) -> Result<Check> {
 /// does not need to be read, so it costs no context at all. The check carries
 /// `from: L-nnnn` so anyone can ask why it exists and get an answer.
 fn lesson_checks(paths: &Paths, cfg: &Config, run: &Run) -> Result<Vec<Check>> {
-    let lessons = crate::lesson::list(paths)?;
+    let lessons = crate::lesson::in_force(paths, cfg)?;
     let mut ledger = crate::lesson::usage::Ledger::load(paths)?;
     let mut out = Vec::new();
 

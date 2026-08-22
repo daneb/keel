@@ -14,7 +14,6 @@ use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone)]
 pub struct StoreDoc {
-    pub path: PathBuf,
     pub front: FrontMatter,
     pub body: String,
 }
@@ -25,7 +24,8 @@ impl StoreDoc {
             .with_context(|| format!("reading {}", path.display()))?;
         let (front, body) = frontmatter::split(&raw)
             .with_context(|| format!("in {}", path.display()))?;
-        Ok(Self { path: path.to_path_buf(), front, body })
+        let _ = path;
+        Ok(Self { front, body })
     }
 
     pub fn read_optional(path: &Path) -> Result<Option<Self>> {
@@ -60,6 +60,42 @@ impl StoreDoc {
     }
 }
 
+/// A shared store resolved to a directory on disk.
+#[derive(Debug, Clone)]
+pub struct Shared {
+    pub id: String,
+    pub root: PathBuf,
+    pub required: bool,
+    /// Present when the path does not resolve.
+    pub missing: bool,
+}
+
+impl Shared {
+    pub fn conventions(&self) -> PathBuf { self.root.join("steering").join("conventions.md") }
+    pub fn lessons_dir(&self) -> PathBuf { self.root.join("lessons") }
+}
+
+/// Resolve every configured shared store, relative to the repository root.
+///
+/// A store that does not resolve is returned marked `missing` rather than
+/// dropped: silently skipping it is exactly how a platform rule stops applying
+/// while everyone still believes it is in force.
+pub fn shared(paths: &Paths, cfg: &crate::config::Config) -> Vec<Shared> {
+    cfg.shared
+        .iter()
+        .map(|s| {
+            let raw = Path::new(&s.path);
+            let root = if raw.is_absolute() { raw.to_path_buf() } else { paths.repo.join(raw) };
+            Shared {
+                id: s.id.clone(),
+                missing: !root.is_dir(),
+                root,
+                required: s.required,
+            }
+        })
+        .collect()
+}
+
 /// Every file that feeds a projection, in a stable order.
 pub fn projection_inputs(paths: &Paths) -> Result<Vec<PathBuf>> {
     let mut out = Vec::new();
@@ -83,14 +119,42 @@ pub fn projection_inputs(paths: &Paths) -> Result<Vec<PathBuf>> {
     Ok(out)
 }
 
-/// Hash of everything a projection is rendered from (see hashing.rs for why
-/// this is separate from the projection's own body hash).
-pub fn store_hash(paths: &Paths) -> Result<String> {
+/// Hash of everything a projection is rendered from — this repository's store
+/// and every shared store beneath it (see hashing.rs for why this is separate
+/// from a projection's own body hash).
+///
+/// Shared stores are hashed too: a platform convention changing must mark this
+/// repository's projections stale, or the rule reaches nobody.
+pub fn store_hash_with_shared(paths: &Paths, cfg: &crate::config::Config) -> Result<String> {
     let mut h = SetHasher::new();
     for p in projection_inputs(paths)? {
         let rel = paths.rel(&p).to_string_lossy().replace('\\', "/");
-        let content = std::fs::read(&p)?;
-        h.add(&rel, &content);
+        h.add(&rel, &std::fs::read(&p)?);
+    }
+    for s in shared(paths, cfg) {
+        if s.missing {
+            // The absence is itself part of the state: a projection rendered
+            // without a required store must not look identical to one rendered
+            // with it.
+            h.add(&format!("shared:{}:missing", s.id), b"");
+            continue;
+        }
+        let mut files: Vec<PathBuf> = Vec::new();
+        if s.conventions().is_file() {
+            files.push(s.conventions());
+        }
+        if let Ok(entries) = std::fs::read_dir(s.lessons_dir()) {
+            let mut ls: Vec<PathBuf> = entries
+                .filter_map(|e| e.ok().map(|e| e.path()))
+                .filter(|p| p.extension().and_then(|e| e.to_str()) == Some("md"))
+                .collect();
+            ls.sort();
+            files.extend(ls);
+        }
+        for f in files {
+            let rel = f.strip_prefix(&s.root).unwrap_or(&f).to_string_lossy().replace('\\', "/");
+            h.add(&format!("shared:{}:{rel}", s.id), &std::fs::read(&f).unwrap_or_default());
+        }
     }
     Ok(h.finish())
 }
