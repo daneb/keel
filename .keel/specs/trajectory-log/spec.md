@@ -2,14 +2,14 @@
 id: SPEC-0001
 slug: trajectory-log
 schema: keel.spec/1
-status: draft
+status: implemented
 scope:
   - "src/trajectory/**"
   - "src/cmd/run.rs"
 budget:
   criteria: 8
   lines: 160
-verified_at: 2026-08-21
+verified_at: 2026-08-22
 ---
 
 # Append-only trajectory log

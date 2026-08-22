@@ -1,10 +1,10 @@
 {
   "schema": "keel.gate/1",
   "gate": "G1",
-  "run": "2026-08-21-a3d",
+  "run": "2026-08-22-54c",
   "spec": "agent-driver",
   "verdict": "pass",
-  "generated_at": "2026-08-21T20:29:25.228837+02:00",
+  "generated_at": "2026-08-22T19:23:56.234219+02:00",
   "checks": [
     {
       "id": "schema",
@@ -74,12 +74,12 @@
     {
       "id": "blast-radius-declared",
       "verdict": "pass",
-      "detail": "0 file(s) at depth 2, 0 lines"
+      "detail": "5 file(s) at depth 2, 1268 lines"
     },
     {
       "id": "blast-radius-current",
       "verdict": "pass",
-      "detail": "0 files, 0 lines — matches a fresh computation — no indexed file matches src/driver/**, src/cmd/run.rs (new files, or a typo)"
+      "detail": "5 files, 1268 lines — matches a fresh computation"
     }
   ]
 }

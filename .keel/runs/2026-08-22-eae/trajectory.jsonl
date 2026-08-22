@@ -17,3 +17,6 @@
 {"t":"2026-08-22T07:28:13.537494+02:00","seq":17,"kind":"gate","gate":"G4","verdict":"pass","result":"gates/G4.json"}
 {"t":"2026-08-22T07:33:30.908754+02:00","seq":18,"kind":"gate","gate":"G4","verdict":"fail","result":"gates/G4.json"}
 {"t":"2026-08-22T07:33:44.493068+02:00","seq":19,"kind":"gate","gate":"G4","verdict":"pass","result":"gates/G4.json"}
+{"t":"2026-08-22T19:23:34.232760+02:00","seq":20,"kind":"human","stage":"spec","decision":"approved","by":"Dane Balia","note":"AC-3 oracle corrected: the schema target only exists inside an archive"}
+{"t":"2026-08-22T19:23:56.246265+02:00","seq":21,"kind":"human","stage":"spec","decision":"approved","by":"Dane Balia","note":"implemented; re-verified"}
+{"t":"2026-08-22T19:23:56.253892+02:00","seq":22,"kind":"human","stage":"plan","decision":"approved","by":"Dane Balia","note":"radius recomputed after implementation"}

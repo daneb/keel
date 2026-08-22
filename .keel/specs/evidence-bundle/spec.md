@@ -2,14 +2,14 @@
 id: SPEC-0003
 slug: evidence-bundle
 schema: keel.spec/1
-status: draft
+status: implemented
 scope:
   - "src/evidence/**"
   - "src/cmd/export.rs"
 budget:
   criteria: 6
   lines: 150
-verified_at: 2026-08-21
+verified_at: 2026-08-22
 ---
 
 # Exportable evidence bundle
@@ -42,7 +42,7 @@ oracle: test tests/export.rs::bundle_contains_every_required_member
 THE SYSTEM SHALL write a `manifest.json` carrying the run id, the store hash,
 the keel version, and the SHA-256 of every archive member.
 
-oracle: schema `schemas/manifest.json` validates `manifest.json`
+oracle: test tests/export.rs::manifest_validates_against_the_published_schema
 
 ### AC-4 A bundle verifies against itself
 

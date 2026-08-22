@@ -1,0 +1,19 @@
+{"t":"2026-08-22T19:22:31.915862+02:00","seq":1,"kind":"run_start","spec":"evidence-bundle","keel_version":"0.1.0","store_hash":"83e9798a8954f21b544c549aa15931e51783972fcd1870a4fbfc1f102464a95c"}
+{"t":"2026-08-22T19:22:31.915921+02:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":184,"bytes":736}
+{"t":"2026-08-22T19:22:31.915945+02:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
+{"t":"2026-08-22T19:22:31.915979+02:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":7158,"bytes":28630}
+{"t":"2026-08-22T19:22:31.916076+02:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
+{"t":"2026-08-22T19:22:31.916137+02:00","seq":6,"kind":"inject","source":".keel/specs/evidence-bundle/spec.md","tokens":532,"bytes":2128}
+{"t":"2026-08-22T19:22:32.028591+02:00","seq":7,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
+{"t":"2026-08-22T19:22:43.045395+02:00","seq":8,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
+{"t":"2026-08-22T19:22:45.584223+02:00","seq":9,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
+{"t":"2026-08-22T19:22:49.014856+02:00","seq":10,"kind":"oracle","criterion":"AC-1","oracle":"`keel export $(keel runs --latest) | xargs test -f` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-08-22T19:22:49.014877+02:00","seq":11,"kind":"oracle","criterion":"AC-2","oracle":"test tests/export.rs::bundle_contains_every_required_member","verdict":"pass","exit_code":0}
+{"t":"2026-08-22T19:22:49.014880+02:00","seq":12,"kind":"oracle","criterion":"AC-3","oracle":"manifest.json validates against schemas/manifest.json","verdict":"blocked"}
+{"t":"2026-08-22T19:22:49.014883+02:00","seq":13,"kind":"oracle","criterion":"AC-4","oracle":"test tests/export.rs::verify_accepts_an_intact_bundle","verdict":"pass","exit_code":0}
+{"t":"2026-08-22T19:22:49.014885+02:00","seq":14,"kind":"oracle","criterion":"AC-5","oracle":"test tests/export.rs::verify_names_the_tampered_member","verdict":"pass","exit_code":0}
+{"t":"2026-08-22T19:22:49.014887+02:00","seq":15,"kind":"oracle","criterion":"AC-6","oracle":"human: a reviewer who did not run the work states what changed and which gate failed, reading only the bundle","verdict":"human"}
+{"t":"2026-08-22T19:23:03.063480+02:00","seq":16,"kind":"gate","gate":"G2","verdict":"blocked","result":"gates/G2.json"}
+{"t":"2026-08-22T19:23:03.095306+02:00","seq":17,"kind":"gate","gate":"G2.5","verdict":"pass","result":"gates/G2.5.json"}
+{"t":"2026-08-22T19:23:03.109676+02:00","seq":18,"kind":"gate","gate":"G3","verdict":"blocked","result":"gates/G3.json"}
+{"t":"2026-08-22T19:23:03.109694+02:00","seq":19,"kind":"run_end","verdict":"blocked","duration_ms":31198}

@@ -1,10 +1,10 @@
 {
   "schema": "keel.gate/1",
   "gate": "G1",
-  "run": "2026-08-21-585",
+  "run": "2026-08-22-fcc",
   "spec": "evidence-bundle",
   "verdict": "pass",
-  "generated_at": "2026-08-21T20:29:25.244992+02:00",
+  "generated_at": "2026-08-22T19:23:56.258033+02:00",
   "checks": [
     {
       "id": "schema",
@@ -14,7 +14,7 @@
     {
       "id": "g0-passed",
       "verdict": "pass",
-      "detail": "G0 passed in run 2026-08-21-346"
+      "detail": "G0 passed in run 2026-08-22-746"
     },
     {
       "id": "spec-approved",
@@ -74,12 +74,12 @@
     {
       "id": "blast-radius-declared",
       "verdict": "pass",
-      "detail": "0 file(s) at depth 2, 0 lines"
+      "detail": "3 file(s) at depth 2, 836 lines"
     },
     {
       "id": "blast-radius-current",
       "verdict": "pass",
-      "detail": "0 files, 0 lines — matches a fresh computation — no indexed file matches src/evidence/**, src/cmd/export.rs (new files, or a typo)"
+      "detail": "3 files, 836 lines — matches a fresh computation — no indexed file matches src/cmd/export.rs (new files, or a typo)"
     }
   ]
 }

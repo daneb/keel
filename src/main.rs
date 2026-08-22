@@ -328,6 +328,7 @@ enum HookCmd {
 }
 
 fn main() {
+    restore_sigpipe();
     let code = match run() {
         Ok(code) => code,
         Err(e) => {
@@ -336,6 +337,16 @@ fn main() {
         }
     };
     std::process::exit(code);
+}
+
+/// Rust ignores `SIGPIPE`, so writing to a closed pipe returns an error and the
+/// default handler panics. For a CLI that is wrong: `keel status | head` is
+/// ordinary usage and must exit quietly, not print a panic.
+fn restore_sigpipe() {
+    #[cfg(unix)]
+    unsafe {
+        libc::signal(libc::SIGPIPE, libc::SIG_DFL);
+    }
 }
 
 fn run() -> Result<i32> {

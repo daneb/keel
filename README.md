@@ -5,7 +5,9 @@ loop**: it owns the knowledge store, the structural map of your repository, and
 the projections every coding agent reads — then tells you, loudly, when those
 have drifted apart.
 
-The full design lives in [PLAN.md](PLAN.md). This repository currently
+The full design lives in [PLAN.md](PLAN.md); what is built, what is next and
+what is owed is in [ROADMAP.md](ROADMAP.md); the decisions that had a real
+alternative are in [`.keel/store/decisions/`](.keel/store/decisions/ADR-0000-index.md). This repository currently
 implements **Phase 0 — Store and map**, **Phase 1 — Spec → Plan → Tasks with
 G0/G1**, **Phase 2 — Execution, evidence and G2/G2.5/G3**, **Phase 3 —
 Failure classification and lesson promotion, G4**, and **Phase 4 — the

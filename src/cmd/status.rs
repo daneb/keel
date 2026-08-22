@@ -78,6 +78,21 @@ pub fn run() -> Result<i32> {
         println!("codemaps   {codemaps} per-directory map(s)");
     }
 
+    // ADRs are deliberately outside the projection budget, so without a count
+    // here they would be write-only.
+    let decisions = std::fs::read_dir(paths.decisions())
+        .map(|d| {
+            d.filter_map(|e| e.ok())
+                .filter(|e| {
+                    e.file_name().to_str().is_some_and(|n| n.starts_with("ADR-") && n.ends_with(".md"))
+                })
+                .count()
+        })
+        .unwrap_or(0);
+    if decisions > 0 {
+        println!("decisions  {} ADR(s) in {}", decisions, paths.rel(&paths.decisions()).display());
+    }
+
     let lessons = store::lessons(&paths)?;
     println!("lessons    {} card{}", lessons.len(), if lessons.len() == 1 { "" } else { "s" });
 
