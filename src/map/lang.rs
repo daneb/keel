@@ -7,6 +7,13 @@
 
 use tree_sitter::{Language, Query};
 
+/// The three queries keel runs over every file.
+pub struct Compiled {
+    pub defs: Query,
+    pub imports: Query,
+    pub refs: Query,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Lang {
     Rust,
@@ -73,6 +80,23 @@ impl Lang {
         }
     }
 
+    /// Query capturing `@ref` — every identifier *used* in the file.
+    ///
+    /// Deliberately over-broad: it captures definition names too, which the
+    /// extractor then subtracts. Trying to exclude them in the query means one
+    /// negative pattern per definition form per language, and a grammar change
+    /// would silently start reporting definitions as references.
+    pub fn ref_query_source(&self) -> &'static str {
+        match self {
+            Lang::Rust => RUST_REFS,
+            Lang::Python => PYTHON_REFS,
+            Lang::JavaScript => JS_REFS,
+            Lang::TypeScript | Lang::Tsx => TS_REFS,
+            Lang::Go => GO_REFS,
+            Lang::Java => JAVA_REFS,
+        }
+    }
+
     /// Query capturing `@path` — the raw, unresolved import string.
     pub fn import_query_source(&self) -> &'static str {
         match self {
@@ -123,13 +147,47 @@ impl Lang {
     /// Compile both queries. Returns `Err` only on a genuine grammar mismatch,
     /// which the caller downgrades to "this language is unavailable this run"
     /// rather than aborting the map (P4: the index is an accelerator).
-    pub fn compile(&self) -> Result<(Query, Query), tree_sitter::QueryError> {
+    pub fn compile(&self) -> Result<Compiled, tree_sitter::QueryError> {
         let l = self.language();
-        let defs = Query::new(&l, self.def_query_source())?;
-        let imports = Query::new(&l, self.import_query_source())?;
-        Ok((defs, imports))
+        Ok(Compiled {
+            defs: Query::new(&l, self.def_query_source())?,
+            imports: Query::new(&l, self.import_query_source())?,
+            refs: Query::new(&l, self.ref_query_source())?,
+        })
     }
 }
+
+const RUST_REFS: &str = r#"
+(identifier) @ref
+(type_identifier) @ref
+(field_identifier) @ref
+"#;
+
+const PYTHON_REFS: &str = r#"
+(identifier) @ref
+"#;
+
+const JS_REFS: &str = r#"
+(identifier) @ref
+(property_identifier) @ref
+"#;
+
+const TS_REFS: &str = r#"
+(identifier) @ref
+(type_identifier) @ref
+(property_identifier) @ref
+"#;
+
+const GO_REFS: &str = r#"
+(identifier) @ref
+(type_identifier) @ref
+(field_identifier) @ref
+"#;
+
+const JAVA_REFS: &str = r#"
+(identifier) @ref
+(type_identifier) @ref
+"#;
 
 const RUST_DEFS: &str = r#"
 (function_item name: (identifier) @name) @def
@@ -212,6 +270,18 @@ const JAVA_DEFS: &str = r#"
 const JAVA_IMPORTS: &str = r#"
 (import_declaration (scoped_identifier) @path)
 "#;
+
+/// Map a stored kind string back to the fixed vocabulary.
+///
+/// Symbol kinds are a closed set, so a round trip through the database should
+/// not turn `&'static str` into an owned string for the whole index.
+pub fn intern_kind(kind: &str) -> &'static str {
+    const KINDS: &[&str] = &[
+        "fn", "struct", "enum", "trait", "mod", "type", "const", "static", "macro",
+        "impl", "class", "method", "interface", "record", "ctor",
+    ];
+    KINDS.iter().find(|k| **k == kind).copied().unwrap_or("symbol")
+}
 
 /// Languages whose queries will not compile against the linked grammars.
 ///

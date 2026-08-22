@@ -6,7 +6,7 @@
 //! the run (P4: accelerator, not dependency).
 
 use crate::map::lang::Lang;
-use tree_sitter::{Node, Parser, Query, QueryCursor, StreamingIterator};
+use tree_sitter::{Node, Parser, QueryCursor, StreamingIterator};
 
 #[derive(Debug, Clone)]
 pub struct Symbol {
@@ -19,6 +19,14 @@ pub struct Symbol {
     pub doc: Option<String>,
 }
 
+/// An identifier used in a file, with where it first appears and how often.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Reference {
+    pub name: String,
+    pub line: usize,
+    pub count: usize,
+}
+
 #[derive(Debug, Clone)]
 pub struct FileFacts {
     pub rel: String,
@@ -28,6 +36,8 @@ pub struct FileFacts {
     pub sha: String,
     pub symbols: Vec<Symbol>,
     pub imports: Vec<String>,
+    /// Identifiers used here. Filtered to repo-known symbols before indexing.
+    pub refs: Vec<Reference>,
     pub parse_ok: bool,
 }
 
@@ -35,7 +45,7 @@ pub struct FileFacts {
 /// parsing a small file, so queries are compiled once per language per thread.
 pub struct Extractor {
     parser: Parser,
-    cache: Vec<(Lang, Option<(Query, Query)>)>,
+    cache: Vec<(Lang, Option<crate::map::lang::Compiled>)>,
 }
 
 impl Extractor {
@@ -43,13 +53,13 @@ impl Extractor {
         Self { parser: Parser::new(), cache: Vec::new() }
     }
 
-    fn queries(&mut self, lang: Lang) -> Option<(&Query, &Query)> {
+    fn queries(&mut self, lang: Lang) -> Option<&crate::map::lang::Compiled> {
         if let Some(i) = self.cache.iter().position(|(l, _)| *l == lang) {
-            return self.cache[i].1.as_ref().map(|(d, i)| (d, i));
+            return self.cache[i].1.as_ref();
         }
         let compiled = lang.compile().ok();
         self.cache.push((lang, compiled));
-        self.cache.last().unwrap().1.as_ref().map(|(d, i)| (d, i))
+        self.cache.last().unwrap().1.as_ref()
     }
 
     pub fn extract(&mut self, rel: &str, lang: Lang, source: &[u8]) -> FileFacts {
@@ -63,6 +73,7 @@ impl Extractor {
             sha,
             symbols: Vec::new(),
             imports: Vec::new(),
+            refs: Vec::new(),
             parse_ok: false,
         };
 
@@ -72,7 +83,8 @@ impl Extractor {
         let Some(tree) = self.parser.parse(source, None) else { return facts };
         facts.parse_ok = !tree.root_node().has_error();
 
-        let Some((defs, imports)) = self.queries(lang) else { return facts };
+        let Some(q) = self.queries(lang) else { return facts };
+        let (defs, imports, refs_q) = (&q.defs, &q.imports, &q.refs);
 
         let mut cursor = QueryCursor::new();
         let root = tree.root_node();
@@ -137,6 +149,41 @@ impl Extractor {
             }
         }
 
+        // --- references ---------------------------------------------------
+        // Every identifier used in the file, minus the ranges that *are* the
+        // definition names. Resolution to actual symbols happens repo-wide in
+        // map::build, once every definition in the repo is known.
+        let def_name_spans: Vec<(usize, usize)> =
+            raw.iter().map(|(_, n)| (n.start_byte(), n.end_byte())).collect();
+
+        let mut cursor = QueryCursor::new();
+        let mut seen: std::collections::HashMap<String, (usize, usize)> = Default::default();
+        let mut m = cursor.matches(refs_q, root, source);
+        while let Some(mat) = m.next() {
+            for cap in mat.captures {
+                if refs_q.capture_names()[cap.index as usize] != "ref" {
+                    continue;
+                }
+                let node = cap.node;
+                if def_name_spans.contains(&(node.start_byte(), node.end_byte())) {
+                    continue;
+                }
+                let name = text(&node, source);
+                if name.is_empty() {
+                    continue;
+                }
+                let line = node.start_position().row + 1;
+                let e = seen.entry(name).or_insert((line, 0));
+                e.0 = e.0.min(line);
+                e.1 += 1;
+            }
+        }
+        facts.refs = seen
+            .into_iter()
+            .map(|(name, (line, count))| Reference { name, line, count })
+            .collect();
+        facts.refs.sort_by(|a, b| a.name.cmp(&b.name));
+
         facts
     }
 }
@@ -150,7 +197,7 @@ impl Default for Extractor {
 pub fn unparsed(rel: &str, lang: Lang, source_len: u64, sha: String, lines: usize) -> FileFacts {
     FileFacts {
         rel: rel.to_string(), lang, lines, bytes: source_len, sha,
-        symbols: Vec::new(), imports: Vec::new(), parse_ok: false,
+        symbols: Vec::new(), imports: Vec::new(), refs: Vec::new(), parse_ok: false,
     }
 }
 
@@ -302,6 +349,38 @@ impl Widget {
         assert!(f.imports.contains(&"./alpha.js".to_string()));
         assert!(f.imports.contains(&"./beta".to_string()));
         assert!(f.symbols.iter().any(|s| s.name == "go"));
+    }
+
+    #[test]
+    fn references_exclude_the_definitions_themselves() {
+        let mut ex = Extractor::new();
+        let f = ex.extract(
+            "a.rs",
+            Lang::Rust,
+            b"fn helper() {}\nfn main() { helper(); helper(); }\n",
+        );
+        let by_name = |n: &str| f.refs.iter().find(|r| r.name == n).cloned();
+        let helper = by_name("helper").expect("helper is used and must be a reference");
+        assert_eq!(helper.count, 2, "call sites were not counted");
+        assert_eq!(helper.line, 2, "the first use is on line 2");
+        assert!(by_name("main").is_none(), "a definition name was reported as a reference");
+    }
+
+    #[test]
+    fn references_are_found_in_every_language() {
+        let cases: Vec<(Lang, &[u8], &str)> = vec![
+            (Lang::Python, b"def helper():\n    pass\ndef go():\n    return helper()\n", "helper"),
+            (Lang::JavaScript, b"function helper(){}\nfunction go(){ helper(); }\n", "helper"),
+            (Lang::Go, b"package m\nfunc helper() {}\nfunc Go() { helper() }\n", "helper"),
+        ];
+        for (lang, src, name) in cases {
+            let mut ex = Extractor::new();
+            let f = ex.extract("a", lang, src);
+            assert!(
+                f.refs.iter().any(|r| r.name == name),
+                "{} found no reference to {name}", lang.name()
+            );
+        }
     }
 
     #[test]

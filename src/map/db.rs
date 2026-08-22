@@ -9,7 +9,7 @@ use anyhow::{Context, Result};
 use rusqlite::{Connection, params};
 use std::path::Path;
 
-pub const SCHEMA_VERSION: &str = "keel.index/1";
+pub const SCHEMA_VERSION: &str = "keel.index/2";
 
 const SCHEMA: &str = r#"
 CREATE TABLE meta (
@@ -51,6 +51,15 @@ CREATE TABLE edges (
     dst INTEGER NOT NULL REFERENCES files(id),
     PRIMARY KEY (src, dst)
 );
+CREATE TABLE refs (
+    id      INTEGER PRIMARY KEY,
+    file_id INTEGER NOT NULL REFERENCES files(id),
+    name    TEXT NOT NULL,
+    line    INTEGER NOT NULL,
+    count   INTEGER NOT NULL
+);
+CREATE INDEX idx_refs_name ON refs(name);
+CREATE INDEX idx_refs_file ON refs(file_id);
 CREATE INDEX idx_symbols_name ON symbols(name);
 CREATE INDEX idx_symbols_file ON symbols(file_id);
 CREATE INDEX idx_files_dir  ON files(dir);
@@ -106,6 +115,9 @@ impl Index {
             let mut ins_imp = tx.prepare(
                 "INSERT INTO imports (file_id, raw, resolved_file) VALUES (?1, ?2, ?3)",
             )?;
+            let mut ins_ref = tx.prepare(
+                "INSERT INTO refs (file_id, name, line, count) VALUES (?1, ?2, ?3, ?4)",
+            )?;
             let mut ins_edge = tx.prepare("INSERT OR IGNORE INTO edges (src, dst) VALUES (?1, ?2)")?;
             let mut ins_meta = tx.prepare("INSERT OR REPLACE INTO meta (key, value) VALUES (?1, ?2)")?;
 
@@ -125,6 +137,9 @@ impl Index {
                 }
                 for raw in &f.imports {
                     ins_imp.execute(params![i as i64, raw, None::<i64>])?;
+                }
+                for r in &f.refs {
+                    ins_ref.execute(params![i as i64, r.name, r.line as i64, r.count as i64])?;
                 }
             }
             for (a, b) in edges {
@@ -146,6 +161,87 @@ impl Index {
             Some(r) => Some(r.get(0)?),
             None => None,
         })
+    }
+
+    /// Every indexed file's path and content hash, for skipping unchanged
+    /// files on a reindex.
+    pub fn shas(&self) -> Result<std::collections::HashMap<String, String>> {
+        let mut stmt = self.conn.prepare("SELECT path, sha FROM files")?;
+        let rows = stmt.query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))?;
+        let mut out = std::collections::HashMap::new();
+        for row in rows {
+            let (p, s) = row?;
+            out.insert(p, s);
+        }
+        Ok(out)
+    }
+
+    /// Reconstruct one file's facts from the index, so an unchanged file need
+    /// not be parsed again.
+    pub fn facts_for(&self, path: &str) -> Result<Option<crate::map::extract::FileFacts>> {
+        use crate::map::extract::{FileFacts, Reference, Symbol};
+        let mut stmt = self.conn.prepare(
+            "SELECT id, lang, lines, bytes, sha, parse_ok FROM files WHERE path = ?1",
+        )?;
+        let mut rows = stmt.query(params![path])?;
+        let Some(row) = rows.next()? else { return Ok(None) };
+        let id: i64 = row.get(0)?;
+        let lang_name: String = row.get(1)?;
+        let Some(lang) = crate::map::lang::Lang::all().iter().find(|l| l.name() == lang_name).copied()
+        else {
+            return Ok(None);
+        };
+        let mut facts = FileFacts {
+            rel: path.to_string(),
+            lang,
+            lines: row.get::<_, i64>(2)? as usize,
+            bytes: row.get::<_, i64>(3)? as u64,
+            sha: row.get(4)?,
+            symbols: Vec::new(),
+            imports: Vec::new(),
+            refs: Vec::new(),
+            parse_ok: row.get::<_, i64>(5)? != 0,
+        };
+
+        let mut stmt = self.conn.prepare(
+            "SELECT name, kind, parent, start_line, end_line, signature, doc
+             FROM symbols WHERE file_id = ?1 ORDER BY start_line",
+        )?;
+        let syms = stmt.query_map(params![id], |r| {
+            Ok(Symbol {
+                name: r.get(0)?,
+                // Kinds are a fixed vocabulary; leaking the DB string keeps the
+                // struct's &'static str honest.
+                kind: crate::map::lang::intern_kind(&r.get::<_, String>(1)?),
+                parent: r.get(2)?,
+                start_line: r.get::<_, i64>(3)? as usize,
+                end_line: r.get::<_, i64>(4)? as usize,
+                signature: r.get(5)?,
+                doc: r.get(6)?,
+            })
+        })?;
+        for s in syms {
+            facts.symbols.push(s?);
+        }
+
+        let mut stmt = self.conn.prepare("SELECT raw FROM imports WHERE file_id = ?1")?;
+        let imports = stmt.query_map(params![id], |r| r.get::<_, String>(0))?;
+        for i in imports {
+            facts.imports.push(i?);
+        }
+
+        let mut stmt = self.conn.prepare("SELECT name, line, count FROM refs WHERE file_id = ?1")?;
+        let refs = stmt.query_map(params![id], |r| {
+            Ok(Reference {
+                name: r.get(0)?,
+                line: r.get::<_, i64>(1)? as usize,
+                count: r.get::<_, i64>(2)? as usize,
+            })
+        })?;
+        for r in refs {
+            facts.refs.push(r?);
+        }
+        Ok(Some(facts))
     }
 
     pub fn counts(&self) -> Result<(usize, usize)> {

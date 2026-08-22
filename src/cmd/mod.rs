@@ -1,4 +1,5 @@
 pub mod approve;
+pub mod bench;
 pub mod blast;
 pub mod gate;
 pub mod hook;
@@ -9,5 +10,6 @@ pub mod status;
 pub mod store;
 pub mod plan;
 pub mod ratchet;
+pub mod retrieve;
 pub mod run;
 pub mod spec;

@@ -14,9 +14,11 @@ mod gate;
 mod lesson;
 mod hashing;
 mod map;
+mod mcp;
 mod paths;
 mod plan;
 mod projection;
+mod retrieve;
 mod run;
 mod spec;
 mod store;
@@ -55,6 +57,9 @@ enum Command {
         /// Override map.budget_lines for this run
         #[arg(long)]
         budget: Option<usize>,
+        /// Re-parse everything instead of reusing unchanged files
+        #[arg(long)]
+        full: bool,
         #[arg(long)]
         json: bool,
     },
@@ -159,6 +164,58 @@ enum Command {
         /// Accept the current measurements as the new baseline
         #[arg(long)]
         accept: bool,
+    },
+    /// A file's skeleton — signatures, no bodies
+    Outline {
+        path: String,
+        #[arg(long)]
+        json: bool,
+    },
+    /// A symbol's signature, doc and location
+    Symbol {
+        name: String,
+        #[arg(long)]
+        json: bool,
+    },
+    /// A symbol's body, on demand
+    Source {
+        name: String,
+        /// Which definition, when a name is defined more than once
+        #[arg(long, default_value = "1")]
+        nth: usize,
+        /// Why the whole body is needed; required above the line limit
+        #[arg(long)]
+        justify: Option<String>,
+        #[arg(long)]
+        json: bool,
+    },
+    /// Where a symbol is used
+    Refs {
+        name: String,
+        #[arg(long)]
+        json: bool,
+    },
+    /// Which files import a path
+    Importers {
+        path: String,
+        #[arg(long)]
+        json: bool,
+    },
+    /// Everything one task needs, budget-fitted
+    Slice {
+        /// Task id, e.g. T-1
+        task: String,
+        #[arg(long)]
+        slug: Option<String>,
+        #[arg(long)]
+        json: bool,
+    },
+    /// Serve the retrieval layer over MCP on stdio
+    Mcp,
+    /// Measure retrieval against reading whole files
+    Bench {
+        #[arg(long)]
+        json: bool,
     },
     /// What else does this change touch?
     Blast {
@@ -288,8 +345,8 @@ fn run() -> Result<i32> {
             cmd::init::run(force, yes)?;
             Ok(0)
         }
-        Command::Map { budget, json } => {
-            cmd::map::run(budget, json)?;
+        Command::Map { budget, full, json } => {
+            cmd::map::run(budget, full, json)?;
             Ok(0)
         }
         Command::Store(StoreCmd::Render { dry_run, adapter }) => {
@@ -329,6 +386,19 @@ fn run() -> Result<i32> {
             cmd::approve::run(slug, stage, reject, note)
         }
         Command::Approvals { slug } => cmd::approve::show(slug),
+        Command::Outline { path, json } => cmd::retrieve::outline(path, json),
+        Command::Symbol { name, json } => cmd::retrieve::symbol(name, json),
+        Command::Source { name, nth, justify, json } => {
+            cmd::retrieve::source(name, nth, justify, json)
+        }
+        Command::Refs { name, json } => cmd::retrieve::refs(name, json),
+        Command::Importers { path, json } => cmd::retrieve::importers(path, json),
+        Command::Slice { task, slug, json } => cmd::retrieve::slice(slug, task, json),
+        Command::Mcp => {
+            mcp::serve()?;
+            Ok(0)
+        }
+        Command::Bench { json } => cmd::bench::run(json),
         Command::Blast { targets, symbol, depth, json } => {
             cmd::blast::run(targets, symbol, depth, json)
         }

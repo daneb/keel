@@ -12,7 +12,7 @@ generated: true
 
 2 files · 462 lines · 37 symbols
 
-**`src/trajectory/event.rs`** · 228 lines · imported by 1
+**`src/trajectory/event.rs`** · 228 lines · imported by 2
 - `pub enum Payload`  <sub>L12</sub>
 - `impl Payload`  <sub>L83</sub>
 - `pub fn kind(&self) -> &'static str`  <sub>L84</sub>
@@ -28,7 +28,7 @@ generated: true
 - `fn round_trips()`  <sub>L188</sub>
 - `fn every_payload_kind_round_trips()`  <sub>L195</sub>
 
-**`src/trajectory/mod.rs`** · 234 lines · imported by 5
+**`src/trajectory/mod.rs`** · 234 lines · imported by 6
 - `pub mod event;` — the sequence invariant.  <sub>L8</sub>
 - `pub struct Trajectory`  <sub>L16</sub>
 - `impl Trajectory`  <sub>L22</sub>

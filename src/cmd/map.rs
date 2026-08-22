@@ -5,10 +5,10 @@ use crate::map::MapReport;
 use crate::paths::Paths;
 use anyhow::Result;
 
-pub fn run(budget: Option<usize>, json: bool) -> Result<()> {
+pub fn run(budget: Option<usize>, full: bool, json: bool) -> Result<()> {
     let paths = Paths::require_init()?;
     let cfg = Config::load(&paths.config())?;
-    let report = crate::map::build(&paths, &cfg, budget)?;
+    let report = crate::map::build_with(&paths, &cfg, budget, full)?;
 
     if json {
         println!("{}", serde_json::json!({
@@ -20,6 +20,8 @@ pub fn run(budget: Option<usize>, json: bool) -> Result<()> {
             "structure_lines": report.structure_lines,
             "structure_budget": report.structure_budget,
             "codemaps": report.codemaps,
+            "reused": report.reused,
+            "refs": report.refs,
             "degraded": report.degraded.iter().map(|(l, _)| *l).collect::<Vec<_>>(),
         }));
     } else {
@@ -34,9 +36,12 @@ pub fn print_report(r: &MapReport) {
         .collect::<Vec<_>>()
         .join(", ");
     println!(
-        "  {} files · {} symbols · {} import edges  ({} ms)",
-        r.files, r.symbols, r.edges, r.elapsed_ms
+        "  {} files · {} symbols · {} references · {} import edges  ({} ms)",
+        r.files, r.symbols, r.refs, r.edges, r.elapsed_ms
     );
+    if r.reused > 0 {
+        println!("  {} unchanged file(s) reused from the previous index", r.reused);
+    }
     if !langs.is_empty() {
         println!("  {langs}");
     }

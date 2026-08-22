@@ -36,9 +36,29 @@ pub struct Config {
     pub oracle: OracleConfig,
     #[serde(default)]
     pub learn: LearnConfig,
+    #[serde(default)]
+    pub retrieve: RetrieveConfig,
     /// Metrics that may improve and must not regress.
     #[serde(default = "default_ratchets", rename = "ratchet")]
     pub ratchets: Vec<Ratchet>,
+}
+
+/// The budget governor's limits (PLAN.md P4).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
+pub struct RetrieveConfig {
+    /// Token ceiling on a single retrieval answer.
+    pub query_tokens: usize,
+    /// Token ceiling on a task slice, which is deliberately larger.
+    pub slice_tokens: usize,
+    /// Lines a body may be before reading it needs a recorded justification.
+    pub max_unjustified_lines: usize,
+}
+
+impl Default for RetrieveConfig {
+    fn default() -> Self {
+        Self { query_tokens: 2_000, slice_tokens: 6_000, max_unjustified_lines: 300 }
+    }
 }
 
 /// Thresholds for the learning gate.
@@ -280,6 +300,7 @@ impl Default for Config {
             verify: VerifyConfig::default(),
             oracle: OracleConfig::default(),
             learn: LearnConfig::default(),
+            retrieve: RetrieveConfig::default(),
             ratchets: default_ratchets(),
         }
     }

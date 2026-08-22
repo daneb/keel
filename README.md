@@ -7,8 +7,9 @@ have drifted apart.
 
 The full design lives in [PLAN.md](PLAN.md). This repository currently
 implements **Phase 0 — Store and map**, **Phase 1 — Spec → Plan → Tasks with
-G0/G1**, **Phase 2 — Execution, evidence and G2/G2.5/G3**, and **Phase 3 —
-Failure classification and lesson promotion, G4**.
+G0/G1**, **Phase 2 — Execution, evidence and G2/G2.5/G3**, **Phase 3 —
+Failure classification and lesson promotion, G4**, and **Phase 4 — the
+retrieval service**.
 
 > **Phase 0** — *Every AI session in any tool starts from the same, current,
 > budget-bounded picture of this repo — and I can tell when that picture has
@@ -24,6 +25,9 @@ Failure classification and lesson promotion, G4**.
 >
 > **Phase 3** — *Recurring mistakes stop recurring, because the second
 > occurrence turns into a gate check rather than a paragraph.*
+>
+> **Phase 4** — *Agents work from symbols, not files, in every tool — and I can
+> see the token cost fall.*
 
 ## Install
 
@@ -78,6 +82,19 @@ keel lesson promote <n> # accept a candidate (refused on a single occurrence)
 keel lesson reject <n>
 keel lessons            # what is in force, and what has decayed
 keel lesson demote <id> # retire a decayed lesson, keeping why
+```
+
+### Retrieval (Phase 4)
+
+```bash
+keel outline src/api/mod.rs   # signatures, no bodies
+keel symbol Guard             # where it is defined, and what it looks like
+keel source Guard             # the body, on demand
+keel refs Guard               # who uses it
+keel importers src/core.rs    # who imports it
+keel slice T-1                # everything one task needs, budget-fitted
+keel bench                    # measured token drop vs reading whole files
+keel mcp                      # the same queries over MCP, on stdio
 ```
 
 ## What it produces
@@ -237,6 +254,55 @@ period goes to demotion review, and G4 fails until it is demoted or re-verified.
 Demoting archives the card with the reason, so nobody re-promotes it next
 quarter. This is the direct counter to unbounded `CLAUDE.md` growth.
 
+## Retrieve, don't read
+
+The same seven queries are exposed twice — as a CLI, and as an MCP server over
+stdio — so there is one retrieval implementation and no way for the surfaces to
+drift. Register it with any MCP client:
+
+```json
+{ "mcpServers": { "keel": { "command": "keel", "args": ["mcp"] } } }
+```
+
+Progressive disclosure is the default: outline before source, signature before
+body, metadata before implementation. Every answer carries its own token cost.
+A body over `retrieve.max_unjustified_lines` is refused unless you pass
+`--justify "<why>"`, and the justification lands in the run's trajectory — keel
+cannot stop an agent reading a 2,000-line file, but it can make doing so cost a
+sentence a reviewer will later read.
+
+**The index is an accelerator, never a dependency.** Absent, stale, or a
+language with no grammar: every query falls through to ripgrep and *says so*.
+An answer labelled `ripgrep` is textual, not structural. Silently degrading
+from symbols to grep is how an agent ends up confidently wrong about a codebase.
+
+`keel map` reuses files whose content hash is unchanged — 128 ms → 39 ms on this
+repository — and `--full` re-parses everything.
+
+## Measured, not claimed
+
+```
+task                                                  retrieval       read   ratio
+----------------------------------------------------------------------------------
+What is the public surface of the projection layer?         574       2588    4.5×
+Where is `store_hash` defined and who calls it?             128      10862   84.9×
+What breaks if the Paths type changes?                      423      13916   32.9×
+How does a gate verdict get recorded?                       878       5169    5.9×
+What does the failure classifier do with a blocked ch…      850       7414    8.7×
+----------------------------------------------------------------------------------
+total                                                      2853      39949   14.0×
+```
+
+`keel bench` runs a fixed set of five questions about this repository and
+compares the tokens retrieval costs against the tokens the file reads that would
+otherwise answer them cost — both counted with the same estimator, both on your
+machine, now. No vendor numbers.
+
+It measures **cost, not answer quality**. The published comparison reporting
+~10× fewer tokens also reports 83% answer quality against 92%; you buy an order
+of magnitude of context for some recall on the hardest queries, and the full
+read is always still there. Phase 4 accepts anything at or above 3×.
+
 ## Budgets are invariants
 
 Every generated artefact has a hard line budget and is fitted to it — the
@@ -259,7 +325,7 @@ output rather than silently yielding an empty map.
 
 ## Not built yet
 
-The MCP retrieval service, incremental reindexing, task dependency waves, and
-drivers beyond `claude-code` — Phases 4–5 in [PLAN.md](PLAN.md). Each phase is
-designed to be a complete daily driver on its own; nothing built here is waiting
-on them.
+Task dependency waves, a cross-repo store, drivers beyond `claude-code`, and the
+metrics surface — Phase 5 in [PLAN.md](PLAN.md), which is ongoing rather than a
+milestone. From Phase 3 onward the schemas (`keel.gate/1`, `keel.spec/1`,
+`keel.lesson/1`, the trajectory events) are versioned and additive-only.
