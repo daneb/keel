@@ -3,7 +3,7 @@
 # `keel-cli` by a different owner again. The binary installed here is still
 # `keel` -- only the package name differs.
 name = "keel-harness"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2024"
 description = "A gated harness for AI-assisted delivery: auditable stopping conditions and durable memory across coding agents."
 license = "MIT OR Apache-2.0"
