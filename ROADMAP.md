@@ -50,8 +50,10 @@ All three Phase-2/3 specs are `status: implemented` with their oracles passing.
 
 ### Still open in Phase 5
 
-- [ ] **Drivers for Kiro, Copilot and `pi`.** The conformance suite makes adding
-      one cheap to validate; nobody has written them.
+- [x] **Drivers for Kiro and Copilot.** Both written against the real CLIs and
+      passing conformance 6/6, and both verified end to end on a real task —
+      Copilot in 24s, Kiro in 14s, each producing a strictly in-scope change that
+      satisfied its oracle. `pi` deliberately not written.
 - [ ] **Shared stores over git.** `[[shared]]` takes a path — a sibling
       checkout, a submodule, a vendored copy. Fetching and pinning a remote
       store is not built.

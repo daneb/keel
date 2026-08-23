@@ -37,6 +37,26 @@ impl Scratch {
             .with_context(|| format!("creating {}", dir.display()))?;
         std::fs::write(dir.join("src/lib.rs"), "pub fn answer() -> u32 { 41 }\n")?;
         std::fs::write(dir.join("README.md"), "A scratch repository for driver conformance.\n")?;
+
+        // A real git repository, because drivers report what they changed by
+        // asking git. Probing them somewhere git knows nothing about would test
+        // the adapter under conditions it will never meet, and `reports-changes`
+        // would be vacuous.
+        for args in [
+            vec!["init", "-q"],
+            vec!["config", "user.email", "conformance@keel.local"],
+            vec!["config", "user.name", "keel conformance"],
+            vec!["add", "-A"],
+            vec!["commit", "-q", "-m", "conformance base"],
+        ] {
+            let out = std::process::Command::new("git").args(&args).current_dir(&dir).output();
+            match out {
+                Ok(o) if o.status.success() => {}
+                // git missing is not a conformance failure; the probes that do
+                // not need it still run.
+                _ => break,
+            }
+        }
         Ok(Self { paths: Paths { repo: dir } })
     }
 
@@ -58,6 +78,10 @@ fn collect(dir: &Path, root: &Path, out: &mut Vec<String>) {
     let Ok(entries) = std::fs::read_dir(dir) else { return };
     for e in entries.filter_map(|e| e.ok()) {
         let p = e.path();
+        // The scratch repo's own .git is not something a driver "changed".
+        if p.file_name().and_then(|n| n.to_str()) == Some(".git") {
+            continue;
+        }
         if p.is_dir() {
             collect(&p, root, out);
         } else if let Ok(rel) = p.strip_prefix(root) {
@@ -209,6 +233,14 @@ mod tests {
             assert!(s.changed_files().contains(&"src/lib.rs".to_string()));
         }
         assert!(!path.exists(), "a conformance scratch repo outlived its run");
+    }
+
+    #[test]
+    fn the_scratch_repo_is_a_git_repo() {
+        let s = Scratch::new("git").unwrap();
+        assert!(s.paths.repo.join(".git").exists(), "drivers report changes via git");
+        // …and .git is not itself reported as a change the driver made.
+        assert!(!s.changed_files().iter().any(|f| f.starts_with(".git/")));
     }
 
     #[test]

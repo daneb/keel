@@ -2,7 +2,7 @@
 id: MAP-src-cmd
 scope: dir:src/cmd
 owner: agent
-verified_at: 2026-08-22
+verified_at: 2026-08-23
 generated: true
 ---
 

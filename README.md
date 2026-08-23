@@ -328,11 +328,17 @@ in a **scratch repository**, never your tree. A driver keel cannot reach is
 `blocked`, not non-conformant: an adapter for a tool you have not installed says
 nothing about the contract.
 
-Writing the second driver is what tested the claim. `codex` takes its prompt as
-an argv positional rather than on stdin; the adapter absorbed the difference and
-the contract did not move. The harness did find a real bug on its first run —
-a relative adapter path was resolved against the working directory rather than
-the repository that configured it.
+Four adapters ship: `claude-code`, `codex`, `copilot` and `kiro`, plus a null
+driver that is the conformance suite's fixed point. They differ in the ways that
+matter — Claude takes its prompt on stdin, Codex and Kiro take it as an argv
+positional, Copilot takes it as a flag — and none of that reached the contract.
+Each adapter is ~40 lines over a shared helper, and the invocation is a single
+marked line you can correct.
+
+Copilot and Kiro are verified against the real CLIs: 6/6 conformance probes, and
+a real task end to end in 24s and 14s respectively. Enterprise auth is inherited
+from the environment — `COPILOT_GITHUB_TOKEN`/`GH_HOST` for Copilot,
+`kiro-cli login --license pro --identity-provider …` for Kiro Identity Center.
 
 **Other repositories' stores layer underneath yours.**
 

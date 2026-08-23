@@ -1,50 +1,27 @@
 #!/bin/sh
 # keel driver — OpenAI Codex CLI.
 #
-# Written to test the claim in PLAN.md §5 that a new tool plugs in without
-# touching the spine. Codex differs from claude-code in the way that matters:
-# the prompt is an argv positional rather than stdin, and it wants an explicit
-# non-interactive flag. Neither required a contract change — the adapter absorbs
-# both, which is what "thin driver" is supposed to mean.
+# The adapter that tested PLAN.md §6's claim: Codex takes its prompt as an argv
+# positional rather than on stdin, and the contract did not have to move.
 #
-# Requires: codex on PATH, python3, git.
+# ── INVOCATION ─────────────────────────────────────────────────────────────
+#   codex exec --skip-git-repo-check "<prompt>"
+# `exec` is Codex's non-interactive mode; the prompt is positional.
+# ───────────────────────────────────────────────────────────────────────────
 set -u
-
-emit() {
-  printf '{"schema":"keel.driverresult/1","status":"%s","files_changed":%s,"detail":"%s"}\n' \
-    "$1" "${3:-[]}" "$(printf '%s' "$2" | sed 's/\\/\\\\/g; s/"/\\"/g' | tr -d '\n')"
-}
+. "$(dirname "$0")/_common.sh"
 
 task=$(cat)
 
-command -v codex >/dev/null 2>&1 || { emit blocked "codex is not on PATH"; exit 0; }
-command -v python3 >/dev/null 2>&1 || { emit blocked "python3 is not on PATH"; exit 0; }
+keel_require python3
+keel_require codex "npm install -g @openai/codex"
 
-prompt=$(printf '%s' "$task" | python3 -c '
-import json, sys
-t = json.load(sys.stdin)
-out = [t["prompt"], "", "Stay strictly inside this scope: " + ", ".join(t.get("scope", []))]
-if t.get("budget_lines"):
-    out.append("Keep the whole change under %d lines." % t["budget_lines"])
-out.append("Edit the working tree directly. Do not commit.")
-print("\n".join(out))
-') || { emit blocked "could not read the task JSON"; exit 0; }
+prompt=$(keel_prompt "$task") || { keel_emit blocked "could not read the task JSON"; exit 0; }
+before=$(keel_dirty_count)
 
-before=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
-
-# exec subcommand is Codex's non-interactive mode; the prompt is positional.
 if ! out=$(codex exec --skip-git-repo-check "$prompt" 2>&1); then
-  emit blocked "codex exited non-zero: $(printf '%s' "$out" | tail -c 400)"
+  keel_emit blocked "codex exited non-zero: $(printf '%s' "$out" | tail -c 400)"
   exit 0
 fi
 
-files=$(git status --porcelain 2>/dev/null \
-  | awk '{ $1=""; sub(/^ /, ""); print }' \
-  | python3 -c 'import json,sys; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')
-
-after=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
-if [ "$before" = "$after" ] && [ "$after" = "0" ]; then
-  emit failed "codex ran but changed nothing" "$files"
-  exit 0
-fi
-emit ok "codex completed" "$files"
+keel_finish "$before" "codex" "$task"

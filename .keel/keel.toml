@@ -118,3 +118,15 @@ timeout_secs = 900
 #   id = "platform"
 #   path = "../platform-standards/.keel/store"
 #   required = true      # a missing required store fails doctor, G0 and G2
+
+[[driver]]
+id = "copilot"
+cmd = ".keel/drivers/copilot"
+default = false
+timeout_secs = 900
+
+[[driver]]
+id = "kiro"
+cmd = ".keel/drivers/kiro"
+default = false
+timeout_secs = 900
