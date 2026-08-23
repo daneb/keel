@@ -1,7 +1,25 @@
 [package]
-name = "keel"
-version = "0.2.0"
+# `keel` on crates.io is held by an unrelated 2018 Kubernetes client, and
+# `keel-cli` by a different owner again. The binary installed here is still
+# `keel` -- only the package name differs.
+name = "keel-harness"
+version = "0.2.1"
 edition = "2024"
+description = "A gated harness for AI-assisted delivery: auditable stopping conditions and durable memory across coding agents."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/daneb/keel"
+homepage = "https://daneb.github.io/keel/"
+documentation = "https://github.com/daneb/keel/blob/master/GETTING-STARTED.md"
+readme = "README.md"
+keywords = ["agents", "codegen", "gates", "provenance", "harness"]
+categories = ["development-tools", "command-line-utilities"]
+# keel runs itself, so .keel/ holds hundreds of run and evidence files that
+# have no business in a published package.
+exclude = [".keel/", "docs/", "target/"]
+
+[[bin]]
+name = "keel"
+path = "src/main.rs"
 
 [dependencies]
 anyhow = "1.0.104"

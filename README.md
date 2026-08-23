@@ -296,3 +296,14 @@ Honest limits before you trust it: G2's *green* path is under-exercised (11%
 pass across 18 runs, because keel was developed inside keel), and every number
 here comes from keel measuring itself in one session. See
 [ROADMAP.md](ROADMAP.md#known-weak-spots).
+
+## Licence
+
+Dual-licensed under either of
+
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE))
+- MIT licence ([LICENSE-MIT](LICENSE-MIT))
+
+at your option. Unless you explicitly state otherwise, any contribution
+intentionally submitted for inclusion in the work by you shall be dual-licensed
+as above, without any additional terms or conditions.

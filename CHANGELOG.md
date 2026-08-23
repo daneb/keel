@@ -7,6 +7,34 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.2.1] - 2026-08-23
+
+Packaging only. No functional change to keel itself.
+
+### Added
+
+- Dual MIT / Apache-2.0 licensing, with `LICENSE-MIT` and `LICENSE-APACHE`.
+  The repository previously carried no licence at all, which left it
+  all-rights-reserved by default.
+- Package metadata crates.io requires: description, licence, repository,
+  homepage, documentation, keywords and categories.
+
+### Changed
+
+- The published package is named **`keel-harness`**. Both `keel` and
+  `keel-cli` were already taken on crates.io by unrelated projects. The
+  installed binary is still `keel` — only the package name differs:
+
+  ```sh
+  cargo install keel-harness   # installs a binary called `keel`
+  ```
+
+### Fixed
+
+- `.keel/`, `docs/` and `target/` are excluded from the package. keel runs
+  itself, so `.keel/` held 242 run and evidence files that were being swept
+  into the crate — 345 files packaged before, 103 after.
+
 ## [0.2.0] - 2026-08-23
 
 First public release. All five phases of [PLAN.md](PLAN.md) are built.
@@ -59,4 +87,5 @@ its own. The full accounting is in [ROADMAP.md](ROADMAP.md).
   They accrue with use and are not manufactured.
 - macOS only. The `cfg(windows)` branches compile and are unexercised.
 
+[0.2.1]: https://github.com/daneb/keel/releases/tag/v0.2.1
 [0.2.0]: https://github.com/daneb/keel/releases/tag/v0.2.0

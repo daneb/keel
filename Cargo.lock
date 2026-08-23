@@ -1095,8 +1095,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "keel"
-version = "0.2.0"
+name = "keel-harness"
+version = "0.2.1"
 dependencies = [
  "anyhow",
  "chrono",
