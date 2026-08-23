@@ -7,7 +7,7 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
-## [Unreleased]
+## [0.3.0] - 2026-08-23
 
 ### Added
 
@@ -118,6 +118,7 @@ its own. The full accounting is in [ROADMAP.md](ROADMAP.md).
   They accrue with use and are not manufactured.
 - macOS only. The `cfg(windows)` branches compile and are unexercised.
 
+[0.3.0]: https://github.com/daneb/keel/releases/tag/v0.3.0
 [0.2.2]: https://github.com/daneb/keel/releases/tag/v0.2.2
 [0.2.1]: https://github.com/daneb/keel/releases/tag/v0.2.1
 [0.2.0]: https://github.com/daneb/keel/releases/tag/v0.2.0
