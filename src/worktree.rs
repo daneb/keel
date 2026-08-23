@@ -113,10 +113,20 @@ pub fn apply(paths: &Paths, patch: &str) -> Result<()> {
 }
 
 /// The commit a wave's worktrees branch from.
+///
+/// A worktree must branch from something, so `--waves` needs one commit to
+/// exist. That is a precondition rather than a limitation — but the raw git
+/// error for it is three lines about ambiguous arguments, which tells an
+/// operator nothing about what to do.
 pub fn base_commit(paths: &Paths) -> Result<String> {
-    let head = git(&paths.repo, &["rev-parse", "HEAD"])
-        .context("a worktree needs a commit to branch from; this repository has none")?;
-    Ok(head.trim().to_string())
+    match git(&paths.repo, &["rev-parse", "HEAD"]) {
+        Ok(head) => Ok(head.trim().to_string()),
+        Err(_) => bail!(
+            "`--waves` gives each task its own git worktree, and a worktree must branch \
+             from a commit — this repository has none yet.\n\
+             Make one commit, or run without `--waves` to execute tasks serially."
+        ),
+    }
 }
 
 /// Whether the tree has changes that a wave would fold its own patches into.

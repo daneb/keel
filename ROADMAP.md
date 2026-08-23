@@ -57,11 +57,15 @@ All three Phase-2/3 specs are `status: implemented` with their oracles passing.
 - [ ] **Shared stores over git.** `[[shared]]` takes a path — a sibling
       checkout, a submodule, a vendored copy. Fetching and pinning a remote
       store is not built.
-- [ ] **Wave execution needs a commit to branch from.** `--waves` uses
-      `git worktree`, so it refuses on a repository with no HEAD. Serial runs
-      still work there.
+_(Wave execution needs one commit to exist, because a worktree must branch from
+something. That is documented behaviour with a clear message, not an open item.)_
 
 ## Debts
+
+_Windows is out of scope: this is a macOS tool for a macOS user. The `cfg(windows)`
+branches are compiled but will stay unexercised, and that is a decision rather
+than an omission._
+
 
 Taken deliberately, recorded so they are not rediscovered as surprises.
 
@@ -99,8 +103,6 @@ Taken deliberately, recorded so they are not rediscovered as surprises.
 - [ ] **One human oracle has never been exercised.** `evidence-bundle` AC-6
       ("a reviewer who did not run the work states what changed") is legal,
       counted, and still awaiting an actual reviewer.
-- [ ] **Windows is compiled, not tested.** Process-group kill, `taskkill` and
-      the `cmd /C` shell paths are `cfg`'d and unexercised.
 - [ ] **Lesson count is thin.** 3 in force against the ≥5 the Phase 3 exit
       criterion wants. The number accrues with use and should not be
       manufactured ([ADR-0006](.keel/store/decisions/ADR-0006-promotion-needs-distinct-runs.md)).
