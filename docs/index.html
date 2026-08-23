@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>keel — a conductor, not an agent loop</title>
+<meta name="description" content="keel owns the auditable stopping conditions and the durable memory that AI coding agents don't. Specs with falsifiable oracles, gates with three verdicts, evidence you can hand to an auditor.">
+<meta property="og:title" content="keel">
+<meta property="og:description" content="A conductor, not an agent loop. Gates, evidence and durable memory for AI-assisted delivery.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%231b2f28'/><path d='M18 62h64M28 62c0-14 8-24 22-24s22 10 22 24' stroke='%23d9a75c' stroke-width='7' fill='none' stroke-linecap='round'/></svg>">
+<style>
+:root{
+  --paper:#e7efe1; --card:#f6faf2; --ink:#16241e; --body:#3d5148; --muted:#6d8478;
+  --soft:#c3dcc4; --sage:#7ea88a; --deep:#2c4b3f; --hull:#1b2f28;
+  --brass:#a8762f; --brass-lt:#d9a75c;
+  --rule:#c9dbc5; --grid:rgba(45,90,70,.075); --shadow:rgba(22,49,38,.10);
+  --blue-line:#4d7d68;
+}
+:root:not([data-theme=light]) {
+  @media (prefers-color-scheme: dark){
+    --paper:#101a16; --card:#16241e; --ink:#e8f2e8; --body:#b3c9bb; --muted:#7f9a8b;
+    --soft:#2c4b3f; --sage:#6f9a80; --deep:#c3dcc4; --hull:#0b120f;
+    --brass:#d9a75c; --brass-lt:#e8c88c;
+    --rule:#25392f; --grid:rgba(150,210,180,.055); --shadow:rgba(0,0,0,.4);
+    --blue-line:#7ab294;
+  }
+}
+:root[data-theme=dark]{
+  --paper:#101a16; --card:#16241e; --ink:#e8f2e8; --body:#b3c9bb; --muted:#7f9a8b;
+  --soft:#2c4b3f; --sage:#6f9a80; --deep:#c3dcc4; --hull:#0b120f;
+  --brass:#d9a75c; --brass-lt:#e8c88c;
+  --rule:#25392f; --grid:rgba(150,210,180,.055); --shadow:rgba(0,0,0,.4);
+  --blue-line:#7ab294;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--paper); color:var(--body);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),
+                   linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:34px 34px;
+}
+.wrap{max-width:1080px; margin:0 auto; padding:0 28px}
+h1,h2,h3{font-family:"Space Grotesk",sans-serif; color:var(--ink); line-height:1.15; margin:0}
+a{color:var(--deep)}
+
+/* technical label */
+.tag{
+  font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600;
+  letter-spacing:.19em; text-transform:uppercase; color:var(--brass);
+  display:flex; align-items:center; gap:11px; margin-bottom:20px;
+}
+.tag::after{content:""; height:1px; flex:1; background:linear-gradient(90deg,var(--rule),transparent)}
+
+/* ── header ─────────────────────────────────────────────── */
+header{border-bottom:1px solid var(--rule); position:sticky; top:0; z-index:50;
+  background:color-mix(in srgb,var(--paper) 88%,transparent); backdrop-filter:blur(12px)}
+header .wrap{display:flex; align-items:center; justify-content:space-between; height:62px}
+.brand{display:flex; align-items:center; gap:10px; font-family:"Space Grotesk",sans-serif;
+  font-weight:700; font-size:20px; color:var(--ink); text-decoration:none; letter-spacing:-.02em}
+nav{display:flex; gap:26px; align-items:center}
+nav a{font-size:14px; color:var(--muted); text-decoration:none; font-weight:500}
+nav a:hover{color:var(--ink)}
+.gh{border:1px solid var(--rule); border-radius:7px; padding:6px 13px; color:var(--ink)!important}
+@media(max-width:720px){ nav a:not(.gh){display:none} }
+
+/* ── hero ───────────────────────────────────────────────── */
+.hero{padding:76px 0 40px; position:relative; overflow:hidden}
+h1{font-size:clamp(52px,9vw,92px); letter-spacing:-.045em; font-weight:700}
+.lede{font-size:clamp(20px,2.6vw,26px); color:var(--ink); max-width:30ch;
+  margin:20px 0 0; font-weight:500; line-height:1.35}
+.sub{max-width:56ch; margin:20px 0 0; font-size:17.5px}
+.hero-grid{display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center}
+@media(max-width:900px){ .hero-grid{grid-template-columns:1fr; gap:20px} }
+
+.cta{display:flex; gap:12px; flex-wrap:wrap; margin-top:32px; align-items:center}
+.btn{display:inline-flex; align-items:center; gap:8px; padding:11px 20px; border-radius:8px;
+  font-weight:600; font-size:15px; text-decoration:none; border:1px solid transparent}
+.btn-p{background:var(--hull); color:#eaf3ea; box-shadow:0 2px 10px var(--shadow)}
+:root[data-theme=dark] .btn-p, :root:not([data-theme=light]) .btn-p{}
+.btn-p:hover{background:var(--deep)}
+.btn-s{border-color:var(--rule); color:var(--ink); background:var(--card)}
+.btn-s:hover{border-color:var(--sage)}
+
+code,kbd,pre{font-family:"IBM Plex Mono",monospace}
+.hero-grid>*,.grid>*,.metrics>*,.gate>*{min-width:0}
+.cmd{min-width:0; background:var(--card); border:1px solid var(--rule); border-radius:8px;
+  padding:13px 16px; font-size:14px; color:var(--ink); display:flex; gap:11px;
+  align-items:center; margin-top:26px; overflow-x:auto}
+.cmd .p{color:var(--brass); user-select:none; font-weight:600}
+.cmd code{white-space:nowrap}
+
+/* ── ship drawings ──────────────────────────────────────── */
+.plate{background:var(--card); border:1px solid var(--rule); border-radius:12px;
+  padding:18px; box-shadow:0 1px 3px var(--shadow); position:relative}
+.plate svg{display:block; width:100%; height:auto}
+.plate figcaption{font-family:"IBM Plex Mono",monospace; font-size:10.5px;
+  letter-spacing:.13em; text-transform:uppercase; color:var(--muted);
+  margin-top:12px; padding-top:11px; border-top:1px solid var(--rule);
+  display:flex; justify-content:space-between; gap:12px}
+.hull-line{fill:none; stroke:var(--blue-line); stroke-width:2.4; stroke-linejoin:round}
+.station{stroke:var(--sage); stroke-width:1; opacity:.6}
+.keel-line{stroke:var(--brass); stroke-width:7; fill:none; stroke-linecap:round}
+.dim{stroke:var(--muted); stroke-width:.9; opacity:.75}
+.dim-t{font-family:"IBM Plex Mono",monospace; font-size:10px; fill:var(--muted);
+  letter-spacing:.09em; text-transform:uppercase}
+.brass-t{fill:var(--brass); font-weight:600}
+.wl{stroke:var(--sage); stroke-width:1; stroke-dasharray:7 5; opacity:.8}
+
+/* ── sections ───────────────────────────────────────────── */
+section{padding:82px 0; border-top:1px solid var(--rule)}
+section:nth-of-type(even){background:color-mix(in srgb,var(--sage) 9%,var(--paper))}
+h2{font-size:clamp(30px,4.2vw,42px); letter-spacing:-.03em}
+.intro{max-width:62ch; margin-top:18px; font-size:18px}
+
+.grid{display:grid; gap:18px; margin-top:44px}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:880px){ .g3{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:620px){ .g3,.g2{grid-template-columns:1fr} }
+
+.card{background:var(--card); border:1px solid var(--rule); border-radius:11px;
+  padding:24px; position:relative; transition:border-color .18s, transform .18s}
+.card:hover{border-color:var(--sage); transform:translateY(-2px)}
+.card .n{font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600;
+  color:var(--brass); letter-spacing:.15em}
+.card h3{font-size:19.5px; margin:9px 0 9px; letter-spacing:-.015em}
+.card p{margin:0; font-size:15.2px; line-height:1.6}
+.card .ico{position:absolute; top:20px; right:20px; opacity:.5}
+
+/* gates */
+.gates{display:flex; flex-direction:column; gap:0; margin-top:44px;
+  border:1px solid var(--rule); border-radius:12px; overflow:hidden; background:var(--card)}
+.gate{display:grid; grid-template-columns:86px 1fr; gap:22px; padding:22px 26px;
+  border-bottom:1px solid var(--rule); align-items:start}
+.gate:last-child{border-bottom:none}
+.gate .id{font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:23px;
+  color:var(--brass); letter-spacing:-.02em}
+.gate h3{font-size:17px; margin-bottom:5px}
+.gate p{margin:0; font-size:15px}
+@media(max-width:620px){ .gate{grid-template-columns:1fr; gap:6px} }
+
+.verdicts{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:22px}
+@media(max-width:620px){ .verdicts{grid-template-columns:1fr} }
+.v{border:1px solid var(--rule); border-radius:9px; padding:16px 18px; background:var(--card)}
+.v .vn{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:14px; margin-bottom:5px}
+.v p{margin:0; font-size:14.4px}
+.v-pass .vn{color:#3d8a5f} .v-fail .vn{color:#b4543f} .v-block .vn{color:var(--brass)}
+
+/* metrics */
+.metrics{display:grid; grid-template-columns:repeat(4,1fr); gap:0; margin-top:44px;
+  border:1px solid var(--rule); border-radius:12px; overflow:hidden; background:var(--card)}
+@media(max-width:820px){ .metrics{grid-template-columns:repeat(2,1fr)} }
+.m{padding:26px 22px; border-right:1px solid var(--rule); border-bottom:1px solid var(--rule)}
+.m .val{font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:36px;
+  color:var(--ink); letter-spacing:-.035em; line-height:1}
+.m .lbl{font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--muted); margin-top:9px}
+.m .note{font-size:13.5px; margin-top:8px; color:var(--muted); line-height:1.5}
+
+pre{background:var(--card); border:1px solid var(--rule); border-radius:11px;
+  padding:22px; overflow-x:auto; font-size:14px; line-height:1.75; color:var(--ink); margin:0}
+pre .c{color:var(--muted)} pre .k{color:var(--brass); font-weight:500}
+
+.split{display:grid; grid-template-columns:300px 1fr; gap:34px; align-items:center}
+.split>*{min-width:0}
+@media(max-width:760px){ .split{grid-template-columns:1fr; gap:22px} }
+.honest{background:var(--card); border:1px solid var(--rule); border-left:3px solid var(--brass);
+  border-radius:11px; padding:28px 30px; margin-top:36px}
+.honest ul{margin:16px 0 0; padding-left:20px}
+.honest li{margin-bottom:11px; font-size:15.5px}
+.honest li:last-child{margin-bottom:0}
+.honest strong{color:var(--ink)}
+
+footer{border-top:1px solid var(--rule); padding:44px 0; color:var(--muted); font-size:14.5px}
+footer .wrap{display:flex; justify-content:space-between; gap:22px; flex-wrap:wrap; align-items:center}
+footer a{color:var(--body)}
+</style>
+</head>
+<body>
+
+<header><div class="wrap">
+  <a class="brand" href="#top">
+    <svg width="26" height="26" viewBox="0 0 100 100" aria-hidden="true">
+      <rect width="100" height="100" rx="20" fill="var(--hull)"/>
+      <path d="M20 64h60M30 64c0-15 8-26 20-26s20 11 20 26" stroke="var(--brass-lt)"
+            stroke-width="7" fill="none" stroke-linecap="round"/>
+    </svg>
+    keel
+  </a>
+  <nav>
+    <a href="#what">What it is</a>
+    <a href="#parts">Components</a>
+    <a href="#gates">Gates</a>
+    <a href="#evidence">Evidence</a>
+    <a href="#start">Get started</a>
+    <a class="gh" href="https://github.com/daneb/keel">GitHub</a>
+  </nav>
+</div></header>
+
+<div id="top" class="hero"><div class="wrap hero-grid">
+  <div>
+    <div class="tag">Rust · macOS · v0.2.0</div>
+    <h1>keel</h1>
+    <p class="lede">A conductor, not an agent loop.</p>
+    <p class="sub">The keel is the one member every rib bolts to — the part that decides
+      whether a hull holds its shape under load. Coding agents are good at writing code
+      and bad at knowing when to stop. keel owns the two things they don't: <strong>auditable
+      stopping conditions</strong>, and <strong>memory that outlives the session</strong>.</p>
+    <div class="cmd"><span class="p">$</span><code>cargo install --git https://github.com/daneb/keel</code></div>
+    <div class="cta">
+      <a class="btn btn-p" href="#start">Get started</a>
+      <a class="btn btn-s" href="https://github.com/daneb/keel">Read the source</a>
+    </div>
+  </div>
+
+  <figure class="plate" style="margin:0">
+    <svg viewBox="0 0 900 330" role="img" aria-label="Blueprint side elevation of a ship's hull with the keel highlighted">
+      <defs>
+        <clipPath id="hull">
+          <path d="M70,104 C280,120 620,116 838,86 C848,120 844,152 836,170
+                   C800,218 690,244 540,246 L232,246
+                   C132,246 82,198 70,104 Z"/>
+        </clipPath>
+      </defs>
+
+      <!-- stations and waterlines, clipped to the hull -->
+      <g clip-path="url(#hull)">
+        <g class="station">
+          <path d="M150 0v330M230 0v330M310 0v330M390 0v330M470 0v330
+                   M550 0v330M630 0v330M710 0v330M790 0v330"/>
+          <path d="M0 130h900M0 165h900M0 200h900"/>
+        </g>
+      </g>
+
+      <!-- hull outline -->
+      <path class="hull-line" d="M70,104 C280,120 620,116 838,86 C848,120 844,152 836,170
+                                 C800,218 690,244 540,246 L232,246
+                                 C132,246 82,198 70,104 Z"/>
+
+      <!-- designed waterline -->
+      <path class="wl" d="M34,200 H872"/>
+      <text class="dim-t" x="34" y="192">DWL</text>
+
+      <!-- the keel -->
+      <path class="keel-line" d="M212,246 H556 C660,244 742,232 792,214"/>
+      <g fill="var(--brass)" opacity=".85">
+        <circle cx="250" cy="246" r="2.6"/><circle cx="316" cy="246" r="2.6"/>
+        <circle cx="382" cy="246" r="2.6"/><circle cx="448" cy="246" r="2.6"/>
+        <circle cx="514" cy="245" r="2.6"/><circle cx="578" cy="243" r="2.6"/>
+        <circle cx="642" cy="239" r="2.6"/><circle cx="706" cy="233" r="2.6"/>
+      </g>
+      <path class="dim" d="M300,246 L300,292"/>
+      <text class="dim-t brass-t" x="300" y="308" text-anchor="middle">KEEL</text>
+
+      <!-- length dimension -->
+      <g class="dim">
+        <path d="M70,318 H838M70,312v12M838,312v12"/>
+      </g>
+      <text class="dim-t" x="454" y="310" text-anchor="middle"
+            style="fill:var(--muted)">EVERY FRAME BOLTS TO IT</text>
+
+      <text class="dim-t" x="856" y="80" text-anchor="end">STEM</text>
+      <text class="dim-t" x="46" y="98">STERN</text>
+    </svg>
+    <figcaption><span>Plate I — Side elevation</span><span>Sheer · stations · keel</span></figcaption>
+  </figure>
+</div></div>
+
+<section id="what"><div class="wrap">
+  <div class="tag">The problem</div>
+  <h2>Agents don't know when to stop</h2>
+  <p class="intro">An agent will happily rewrite a module you never mentioned, declare
+    victory on a test it weakened, and forget by Tuesday what it learned on Monday.
+    None of that is a model failure — it's a missing harness. keel supplies the harness
+    and stays out of the way of the model.</p>
+
+  <div class="grid g2" style="margin-top:38px">
+    <div class="card">
+      <div class="n">01</div>
+      <h3>Stopping conditions you can audit</h3>
+      <p>Every acceptance criterion carries a falsifiable oracle — a command, a test, a
+        schema, a doctest, or a named human. A gate that cannot fail is not a gate,
+        so keel reports which of its own checks have never fired.</p>
+    </div>
+    <div class="card">
+      <div class="n">02</div>
+      <h3>Memory that outlives the session</h3>
+      <p>Knowledge lives in a durable store and is projected into whatever file your
+        agent reads. Recurring mistakes are classified, and the ones that recur across
+        <em>distinct</em> runs become gate checks rather than more prose to ignore.</p>
+    </div>
+  </div>
+</div></section>
+
+<section id="parts"><div class="wrap">
+  <div class="tag">Components</div>
+  <h2>Six parts, one spine</h2>
+  <p class="intro">Each is useful alone. The wire schemas between them are frozen and
+    additive-only, so a new agent or a new check plugs in without touching the spine.</p>
+
+  <div class="grid g3">
+    <div class="card"><div class="n">KNOWLEDGE</div>
+      <h3>Store &amp; projections</h3>
+      <p>One durable source, rendered per agent. Two hashes: one goes stale when the
+        source moves, one refuses to overwrite a human edit.</p></div>
+    <div class="card"><div class="n">STRUCTURE</div>
+      <h3>Symbol index</h3>
+      <p>tree-sitter across 8 languages. Agents work from outlines and symbols, and
+        pull a full body only when they need one.</p></div>
+    <div class="card"><div class="n">ARTEFACTS</div>
+      <h3>Spec → plan → tasks</h3>
+      <p>Reviewable files, not chat scrollback. Requirements in EARS; every criterion
+        carries an oracle that can say no.</p></div>
+    <div class="card"><div class="n">GATES</div>
+      <h3>G0 – G4</h3>
+      <p>Five checkpoints, three verdicts. Blast radius is computed from the import
+        graph and rechecked, not taken on trust.</p></div>
+    <div class="card"><div class="n">EVIDENCE</div>
+      <h3>Trajectory &amp; bundle</h3>
+      <p>An event stream per run, exportable and re-verifiable against its manifest.
+        Approvals bind to the artefact's hash.</p></div>
+    <div class="card"><div class="n">LEARNING</div>
+      <h3>Failures → lessons</h3>
+      <p>Episodes are classified and promoted only on a second occurrence in a
+        separate run, and only with a human decision.</p></div>
+  </div>
+</div></section>
+
+<section id="gates"><div class="wrap">
+  <div class="tag">Gates</div>
+  <h2>Where the load is carried</h2>
+  <p class="intro">Each gate answers one question and refuses to answer it vaguely.</p>
+
+  <div class="gates">
+    <div class="gate"><div class="id">G0</div><div>
+      <h3>Is the spec answerable?</h3>
+      <p>Every requirement falsifiable, every criterion carrying an oracle. A spec that
+        cannot fail cannot pass either.</p></div></div>
+    <div class="gate"><div class="id">G1</div><div>
+      <h3>Is the plan honest about its reach?</h3>
+      <p>Blast radius computed from the import graph and compared with what the plan
+        declared — not with what it hoped.</p></div></div>
+    <div class="gate"><div class="id">G2</div><div>
+      <h3>Did the work stay inside its scope, and does it build?</h3>
+      <p>Build, lint, tests, line budget, blast radius, store drift, baseline ratchet.
+        G2.5 adds test-invalidation review: a test that mocks away the behaviour under
+        test is worse than no test.</p></div></div>
+    <div class="gate"><div class="id">G3</div><div>
+      <h3>Could a reviewer actually check this?</h3>
+      <p>Evidence complete, change reviewable in size, earlier gates green, a human
+        verdict where one was required.</p></div></div>
+    <div class="gate"><div class="id">G4</div><div>
+      <h3>Did we learn anything that should become a rule?</h3>
+      <p>Episodes classified, promotions proposed, decay reviewed. G4 forces the
+        decision; it does not make it for you.</p></div></div>
+  </div>
+
+  <div class="verdicts">
+    <div class="v v-pass"><div class="vn">pass · exit 0</div>
+      <p>The checks ran and held.</p></div>
+    <div class="v v-fail"><div class="vn">fail · exit 1</div>
+      <p>A check ran and said no.</p></div>
+    <div class="v v-block"><div class="vn">blocked · exit 3</div>
+      <p>A check could not run. It never silently passes, and it is never counted
+         as an agentic failure.</p></div>
+  </div>
+</div></section>
+
+<section id="evidence"><div class="wrap">
+  <div class="tag">Evidence</div>
+  <h2>Numbers, and where they came from</h2>
+  <p class="intro">All of these are measured by keel on real repositories. The
+    provenance matters as much as the value.</p>
+
+  <div class="metrics">
+    <div class="m"><div class="val">14.6×</div><div class="lbl">Less context</div>
+      <div class="note">At 100% recall on keel's retrieval benchmark.</div></div>
+    <div class="m"><div class="val">1.25<span style="font-size:20px"> s</span></div>
+      <div class="lbl">To index 5,705 files</div>
+      <div class="note">Cold, across eight languages.</div></div>
+    <div class="m"><div class="val">359</div><div class="lbl">Tests · 0 warnings</div>
+      <div class="note">Clippy clean at <code>-D warnings</code>.</div></div>
+    <div class="m"><div class="val">11 → 54%</div><div class="lbl">G2 pass rate</div>
+      <div class="note">Inside keel vs. on a real project. The low number was the
+        artefact.</div></div>
+  </div>
+
+  <figure class="plate" style="margin:44px 0 0">
+    <div class="split">
+      <svg viewBox="0 0 300 300" role="img" aria-label="Blueprint midship cross-section showing the keel at the centreline">
+        <path class="dim" style="stroke-dasharray:6 5" d="M150,28 V286"/>
+        <text class="dim-t" x="150" y="20" text-anchor="middle">℄</text>
+        <g class="station">
+          <path d="M40,110 H260M40,150 H260M40,190 H260M40,228 H260"/>
+        </g>
+        <path class="hull-line" d="M44,64 C40,140 56,206 118,244 C132,252 142,256 150,258"/>
+        <path class="hull-line" d="M256,64 C260,140 244,206 182,244 C168,252 158,256 150,258"/>
+        <path class="hull-line" d="M44,64 H256"/>
+        <path class="keel-line" d="M150,250 V284"/>
+        <text class="dim-t brass-t" x="150" y="298" text-anchor="middle">KEEL</text>
+        <text class="dim-t" x="36" y="58" text-anchor="start">DECK</text>
+      </svg>
+      <div>
+        <h3 style="font-size:21px; margin-bottom:12px">The check to scrutinise first</h3>
+        <p style="font-size:15.5px; margin:0">keel's own metrics flag
+          <code>G2/store-drift</code>: it has never failed in 26 runs across two
+          repositories. That is either a check that is correctly always-true here, or
+          gate theatre. A harness that measures other people's work should be able to
+          say which — so it says so, on its own front page.</p>
+      </div>
+    </div>
+    <figcaption><span>Plate II — Midship section</span><span>Body plan · centreline · keel</span></figcaption>
+  </figure>
+</div></section>
+
+<section id="start"><div class="wrap">
+  <div class="tag">Get started</div>
+  <h2>Five commands</h2>
+  <p class="intro">Point keel at a repository and take one small change all the way
+    through. The <a href="https://github.com/daneb/keel/blob/master/GETTING-STARTED.md">getting-started
+    guide</a> walks the same path with commentary.</p>
+
+<pre><span class="c"># install</span>
+cargo install --git https://github.com/daneb/keel
+
+<span class="c"># set up the store, index the repo, render projections</span>
+<span class="k">keel</span> init
+<span class="k">keel</span> map
+
+<span class="c"># describe one change, then let the gates argue with you</span>
+<span class="k">keel</span> spec new short-invocation
+<span class="k">keel</span> gate g0 short-invocation
+
+<span class="c"># plan it, run it, and export what happened</span>
+<span class="k">keel</span> plan short-invocation
+<span class="k">keel</span> run  short-invocation
+<span class="k">keel</span> export --verify</pre>
+
+  <div class="honest">
+    <h3 style="font-size:19px">Before you trust it on real work</h3>
+    <ul>
+      <li><strong>macOS only.</strong> The Windows branches compile and are unexercised.
+        That is a decision, not an oversight.</li>
+      <li><strong>G2.5 passes on heuristics</strong> unless you configure an adversarial
+        reviewer. Configure one.</li>
+      <li><strong>Three lessons in force</strong> against the five the design wants.
+        They accrue with use, and they are not manufactured.</li>
+      <li><strong>The evidence is thin and young</strong> — two repositories, one
+        operator. The <a href="https://github.com/daneb/keel/blob/master/ROADMAP.md">roadmap</a>
+        keeps a full accounting of what is deferred and why.</li>
+    </ul>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div>keel — a gated harness for AI-assisted delivery.</div>
+  <div><a href="https://github.com/daneb/keel">GitHub</a> ·
+       <a href="https://github.com/daneb/keel/blob/master/ROADMAP.md">Roadmap</a> ·
+       <a href="https://github.com/daneb/keel/blob/master/CHANGELOG.md">Changelog</a></div>
+</div></footer>
+
+</body>
+</html>

@@ -2,6 +2,8 @@
 
 A gated harness for AI-assisted delivery.
 
+**[daneb.github.io/keel](https://daneb.github.io/keel/)**
+
 keel is a **conductor, not an agent loop**. It does not implement a model
 adapter, a tool registry or an inference loop — Claude Code, Codex, Copilot and
 Kiro already do that, and they will keep out-shipping any loop written alone.
