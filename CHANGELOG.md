@@ -7,6 +7,24 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.2.2] - 2026-08-23
+
+Documentation only. No change to keel's behaviour.
+
+### Fixed
+
+- The README diagrams are legible in both GitHub themes. The architecture
+  diagram filled its subgraphs near-white and the sequence diagram pinned
+  `theme:base` with near-black message text — each correct in exactly one
+  theme, and the sequence messages were invisible on a dark page. Node text
+  now sits on opaque fills whose contrast no page theme can affect; anything
+  drawn on the page background inherits GitHub's theme instead of fixing a
+  colour. Both were rendered at `-t default` and `-t dark` and read before
+  landing.
+- The install instructions say `cargo install keel-harness`. Version 0.2.1
+  was published before that change, so the crates.io page for it still
+  recommends installing from git.
+
 ## [0.2.1] - 2026-08-23
 
 Packaging only. No functional change to keel itself.
@@ -87,5 +105,6 @@ its own. The full accounting is in [ROADMAP.md](ROADMAP.md).
   They accrue with use and are not manufactured.
 - macOS only. The `cfg(windows)` branches compile and are unexercised.
 
+[0.2.2]: https://github.com/daneb/keel/releases/tag/v0.2.2
 [0.2.1]: https://github.com/daneb/keel/releases/tag/v0.2.1
 [0.2.0]: https://github.com/daneb/keel/releases/tag/v0.2.0
