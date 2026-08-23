@@ -172,6 +172,8 @@ pre .c{color:var(--muted)} pre .k{color:var(--brass); font-weight:500}
 .split{display:grid; grid-template-columns:300px 1fr; gap:34px; align-items:center}
 .split>*{min-width:0}
 @media(max-width:760px){ .split{grid-template-columns:1fr; gap:22px} }
+.instnote{font-size:13.5px; color:var(--muted); margin:9px 0 0; line-height:1.5}
+.instnote code{font-size:12.5px; color:var(--body)}
 .honest{background:var(--card); border:1px solid var(--rule); border-left:3px solid var(--brass);
   border-radius:11px; padding:28px 30px; margin-top:36px}
 .honest ul{margin:16px 0 0; padding-left:20px}
@@ -207,14 +209,15 @@ footer a{color:var(--body)}
 
 <div id="top" class="hero"><div class="wrap hero-grid">
   <div>
-    <div class="tag">Rust · macOS · v0.2.0</div>
+    <div class="tag">Rust · macOS · v0.2.1</div>
     <h1>keel</h1>
     <p class="lede">A conductor, not an agent loop.</p>
     <p class="sub">The keel is the one member every rib bolts to — the part that decides
       whether a hull holds its shape under load. Coding agents are good at writing code
       and bad at knowing when to stop. keel owns the two things they don't: <strong>auditable
       stopping conditions</strong>, and <strong>memory that outlives the session</strong>.</p>
-    <div class="cmd"><span class="p">$</span><code>cargo install --git https://github.com/daneb/keel</code></div>
+    <div class="cmd"><span class="p">$</span><code>cargo install keel-harness</code></div>
+    <p class="instnote">Installs a binary called <code>keel</code>. The <code>keel</code> and <code>keel-cli</code> names on crates.io belong to unrelated projects.</p>
     <div class="cta">
       <a class="btn btn-p" href="#start">Get started</a>
       <a class="btn btn-s" href="https://github.com/daneb/keel">Read the source</a>
@@ -429,7 +432,7 @@ footer a{color:var(--body)}
     guide</a> walks the same path with commentary.</p>
 
 <pre><span class="c"># install</span>
-cargo install --git https://github.com/daneb/keel
+cargo install keel-harness      <span class="c"># binary is called `keel`</span>
 
 <span class="c"># set up the store, index the repo, render projections</span>
 <span class="k">keel</span> init
@@ -461,10 +464,12 @@ cargo install --git https://github.com/daneb/keel
 </div></section>
 
 <footer><div class="wrap">
-  <div>keel — a gated harness for AI-assisted delivery.</div>
+  <div>keel — a gated harness for AI-assisted delivery.<br>
+       <span style="font-size:13px">Dual-licensed MIT or Apache-2.0.</span></div>
   <div><a href="https://github.com/daneb/keel">GitHub</a> ·
        <a href="https://github.com/daneb/keel/blob/master/ROADMAP.md">Roadmap</a> ·
-       <a href="https://github.com/daneb/keel/blob/master/CHANGELOG.md">Changelog</a></div>
+       <a href="https://github.com/daneb/keel/blob/master/CHANGELOG.md">Changelog</a> ·
+       <a href="https://crates.io/crates/keel-harness">crates.io</a></div>
 </div></footer>
 
 </body>

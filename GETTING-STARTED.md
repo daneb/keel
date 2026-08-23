@@ -4,7 +4,7 @@ Ten minutes to a gated change. You need `cargo`, `git`, and — for the last
 section — an agent CLI.
 
 ```bash
-cargo install --path .
+cargo install keel-harness   # or, from a checkout: cargo install --path .
 ```
 
 ---

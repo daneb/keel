@@ -4,6 +4,13 @@ A gated harness for AI-assisted delivery.
 
 **[daneb.github.io/keel](https://daneb.github.io/keel/)**
 
+```sh
+cargo install keel-harness   # installs a binary called `keel`
+```
+
+The `keel` and `keel-cli` names on crates.io belong to unrelated projects,
+so the package publishes as `keel-harness`. Only the package name differs.
+
 keel is a **conductor, not an agent loop**. It does not implement a model
 adapter, a tool registry or an inference loop — Claude Code, Codex, Copilot and
 Kiro already do that, and they will keep out-shipping any loop written alone.
