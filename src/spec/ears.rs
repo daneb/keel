@@ -125,6 +125,26 @@ const AMBIGUOUS: &[&str] = &[
     "usually", "typically", "normally", "roughly", "approximately", "about",
 ];
 
+/// Terms that are only vague when they quantify.
+///
+/// "about 5 items" hedges a number; "observations about coaching" is a
+/// preposition and decides nothing either way. Flagging the second cost a real
+/// spec a real G0 failure, and a check that cries wolf is a check people learn
+/// to route around.
+const QUANTITATIVE_ONLY: &[&str] = &["about"];
+
+/// Does a quantity follow the term at `after`?
+fn quantifies(lower: &str, after: usize) -> bool {
+    let rest = lower[after..].trim_start();
+    let word = rest.split_whitespace().next().unwrap_or("");
+    word.starts_with(|c: char| c.is_ascii_digit())
+        || matches!(
+            word.trim_end_matches(|c: char| !c.is_alphanumeric()),
+            "one" | "two" | "three" | "four" | "five" | "six" | "seven" | "eight"
+                | "nine" | "ten" | "half" | "twice" | "dozen"
+        )
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Ambiguity {
     pub term: String,
@@ -148,6 +168,9 @@ pub fn ambiguities(statement: &str) -> Vec<Ambiguity> {
             let at = from + rel;
             from = at + term.len();
             if !is_whole_word(&lower, at, term.len()) {
+                continue;
+            }
+            if QUANTITATIVE_ONLY.contains(&term) && !quantifies(&lower, at + term.len()) {
                 continue;
             }
             let ctx_start = lower[..at].rfind(' ').map(|i| i + 1).unwrap_or(0);
@@ -211,6 +234,27 @@ fn normalise(s: &str) -> String {
 fn truncate(s: &str, max: usize) -> String {
     if s.chars().count() <= max { return s.to_string(); }
     s.chars().take(max.saturating_sub(1)).chain(['…']).collect()
+}
+
+#[cfg(test)]
+mod about_tests {
+    use super::*;
+
+    #[test]
+    fn about_is_ambiguous_only_when_it_quantifies() {
+        // The preposition decides nothing either way — it is not a hedge.
+        assert!(ambiguities("THE SYSTEM SHALL keep its assessment about coaching separate.").is_empty());
+        assert!(ambiguities("WHEN a report is written it SHALL say what it is about.").is_empty());
+        // Quantifying is still a hedge.
+        assert!(ambiguities("THE SYSTEM SHALL return about 5 results.").iter().any(|a| a.term == "about"));
+        assert!(ambiguities("THE SYSTEM SHALL wait about ten seconds.").iter().any(|a| a.term == "about"));
+    }
+
+    #[test]
+    fn other_hedges_are_untouched() {
+        assert!(ambiguities("THE SYSTEM SHALL handle errors appropriately.").len() >= 2);
+        assert!(ambiguities("THE SYSTEM SHALL be roughly correct.").iter().any(|a| a.term == "roughly"));
+    }
 }
 
 #[cfg(test)]

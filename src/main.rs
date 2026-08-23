@@ -336,6 +336,17 @@ enum GateCmd {
         #[arg(long)]
         json: bool,
     },
+    /// G2/G2.5/G3 — is the working tree verified, reviewed and decidable?
+    ///
+    /// These three judge a change rather than a document, so they run together
+    /// over the tree as it stands. `keel run` runs the same gates after an
+    /// agent produces the diff; this is the same thing without the agent.
+    #[command(name = "g2", alias = "g2.5", alias = "g25", alias = "g3")]
+    G2 {
+        slug: Option<String>,
+        #[arg(long)]
+        json: bool,
+    },
     /// G4 — has this run been learned from?
     G4 {
         run: Option<String>,
@@ -437,6 +448,13 @@ fn run() -> Result<i32> {
         Command::Tasks { slug, json } => cmd::tasks::run(slug, json),
         Command::Gate(GateCmd::G0 { slug, json }) => cmd::gate::g0(slug, json),
         Command::Gate(GateCmd::G1 { slug, json }) => cmd::gate::g1(slug, json),
+        Command::Gate(GateCmd::G2 { slug, json }) => cmd::run::run(cmd::run::Options {
+            slug,
+            task: None,
+            driver: None,
+            no_driver: true,
+            json,
+        }),
         Command::Gate(GateCmd::G4 { run, json }) => cmd::learn::g4(run, json),
         Command::Learn { run, json } => cmd::learn::learn(run, json),
         Command::Failures { json } => cmd::learn::failures(json),

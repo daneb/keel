@@ -355,16 +355,137 @@ impl Config {
     pub fn load(path: &Path) -> Result<Self> {
         let raw = std::fs::read_to_string(path)
             .with_context(|| format!("reading {}", path.display()))?;
-        let cfg: Config = toml::from_str(&raw)
-            .with_context(|| format!("parsing {}", path.display()))?;
+        let cfg: Config = toml::from_str(&raw).map_err(|e| {
+            // serde reports the Rust type it could not build, which names
+            // nothing the reader can see in their own file. The commonest way
+            // to hit this is putting build/test/lint under [gate].
+            let hint = match e.to_string() {
+                m if m.contains("GateConfig") => {
+                    "\n\nhint: build/test/lint go under [verify]. [gate] takes only [[gate.check]] entries."
+                }
+                m if m.contains("VerifyConfig") => {
+                    "\n\nhint: [verify] takes build, test and lint as strings."
+                }
+                _ => "",
+            };
+            anyhow::anyhow!("{e}{hint}")
+        })
+        .with_context(|| format!("parsing {}", path.display()))?;
         Ok(cfg)
+    }
+
+    /// A config seeded for the stack `keel init` detected.
+    ///
+    /// The defaults on these structs are Rust's, because keel is written in
+    /// Rust — which meant every other repository got `cargo test` written into
+    /// its oracle template and discovered it at the first gate. A stack keel
+    /// does not recognise gets empty commands rather than a guess: an unset
+    /// command reports `blocked`, which is honest, whereas a wrong one wastes
+    /// a run before saying anything useful.
+    pub fn for_stack(markers: &[String]) -> Self {
+        let has = |needle: &str| markers.iter().any(|m| m.contains(needle));
+        let mut cfg = Self::default();
+
+        let (verify, oracle) = if has("Cargo") {
+            (
+                ("cargo build --quiet", "cargo test --quiet", "cargo clippy --all-targets --quiet"),
+                ("cargo test --quiet -- --exact {name}", "cargo test --doc --quiet"),
+            )
+        } else if has("Bun") {
+            // `bun test --test-name-pattern` exits 0 when it matches nothing,
+            // so the obvious template would make every missing test read as a
+            // passing oracle. Require a pass AND no failures.
+            (
+                ("bunx tsc --noEmit", "bun test", "bunx tsc --noEmit"),
+                (
+                    "out=$(bun test --test-name-pattern '{name}' 2>&1); echo \"$out\" | grep -qE '[1-9][0-9]* pass' && echo \"$out\" | grep -qE '0 fail'",
+                    "",
+                ),
+            )
+        } else if has("Go (modules)") {
+            (
+                ("go build ./...", "go test ./...", "go vet ./..."),
+                ("go test -run '^{name}$' ./... 2>&1 | grep -qv '^no test files'", ""),
+            )
+        } else if has("Python") {
+            (
+                ("", "pytest -q", "ruff check ."),
+                // -k matches nothing silently; require a collected test.
+                ("pytest -q -k '{name}' 2>&1 | grep -qE '[1-9][0-9]* passed'", ""),
+            )
+        } else {
+            (("", "", ""), ("", ""))
+        };
+
+        let set = |v: &str| (!v.is_empty()).then(|| v.to_string());
+        cfg.verify.build = set(verify.0);
+        cfg.verify.test = set(verify.1);
+        cfg.verify.lint = set(verify.2);
+        cfg.oracle.test_cmd = oracle.0.to_string();
+        cfg.oracle.doctest_cmd = oracle.1.to_string();
+        cfg
     }
 
     pub fn save(&self, path: &Path) -> Result<()> {
         let body = toml::to_string_pretty(self)?;
-        let doc = format!("# keel configuration — schema {CONFIG_SCHEMA}\n\
-                           # Budgets are enforced, not advised. Lower them until they hurt.\n\n{body}");
+        let doc = format!(
+            "# keel configuration — schema {CONFIG_SCHEMA}\n\
+             # Budgets are enforced, not advised. Lower them until they hurt.\n\
+             #\n\
+             # build/test/lint go under [verify] — they are what G2 runs.\n\
+             # [gate] is for extra checks of your own ([[gate.check]]).\n\
+             # [oracle] is how a spec's `oracle: test` lines are executed.\n\n{body}"
+        );
         std::fs::write(path, doc).with_context(|| format!("writing {}", path.display()))?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod stack_tests {
+    use super::*;
+
+    fn m(v: &[&str]) -> Vec<String> {
+        v.iter().map(|s| s.to_string()).collect()
+    }
+
+    #[test]
+    fn a_bun_repo_is_not_seeded_with_cargo() {
+        let cfg = Config::for_stack(&m(&["Bun/TypeScript"]));
+        assert_eq!(cfg.verify.test.as_deref(), Some("bun test"));
+        assert!(!cfg.oracle.test_cmd.contains("cargo"));
+        // `bun test --test-name-pattern` exits 0 on no match, so the oracle
+        // must demand a pass rather than trusting the exit code.
+        assert!(cfg.oracle.test_cmd.contains("pass"));
+        assert!(cfg.oracle.test_cmd.contains("fail"));
+    }
+
+    #[test]
+    fn a_rust_repo_still_gets_cargo() {
+        let cfg = Config::for_stack(&m(&["Rust (Cargo)"]));
+        assert_eq!(cfg.verify.build.as_deref(), Some("cargo build --quiet"));
+        assert!(cfg.oracle.test_cmd.starts_with("cargo test"));
+    }
+
+    #[test]
+    fn an_unknown_stack_is_left_blank_rather_than_guessed() {
+        let cfg = Config::for_stack(&m(&["Docker", "Make"]));
+        assert_eq!(cfg.verify.build, None);
+        assert_eq!(cfg.verify.test, None);
+        // Blank means the check reports blocked, which is honest. A wrong
+        // command would waste a run before saying anything useful.
+        assert!(cfg.oracle.test_cmd.is_empty());
+    }
+
+    #[test]
+    fn the_saved_config_says_where_build_and_test_go() {
+        let dir = std::env::temp_dir().join(format!("keel-cfg-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("keel.toml");
+        Config::for_stack(&m(&["Rust (Cargo)"])).save(&path).unwrap();
+        let text = std::fs::read_to_string(&path).unwrap();
+        assert!(text.contains("[verify]"), "{text}");
+        assert!(text.contains("build/test/lint go under [verify]"), "{text}");
+        std::fs::remove_dir_all(&dir).ok();
     }
 }

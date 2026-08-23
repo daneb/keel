@@ -22,13 +22,13 @@ pub fn run(force: bool, assume_yes: bool) -> Result<()> {
     }
     paths.scaffold()?;
 
+    let detected = detect_stack(&paths.repo);
+
     let cfg_path = paths.config();
     if !cfg_path.exists() {
-        Config::default().save(&cfg_path)?;
+        Config::for_stack(&detected).save(&cfg_path)?;
         println!("  created {}", paths.rel(&cfg_path).display());
     }
-
-    let detected = detect_stack(&paths.repo);
     let interactive = !assume_yes && std::io::stdin().is_terminal();
 
     let purpose = if interactive {
@@ -103,6 +103,8 @@ fn detect_stack(root: &Path) -> Vec<String> {
     let mut found = Vec::new();
     let markers: &[(&str, &str)] = &[
         ("Cargo.toml", "Rust (Cargo)"),
+        ("bun.lock", "Bun/TypeScript"),
+        ("bun.lockb", "Bun/TypeScript"),
         ("package.json", "Node/TypeScript (npm)"),
         ("pyproject.toml", "Python (pyproject)"),
         ("requirements.txt", "Python (requirements)"),
@@ -115,7 +117,12 @@ fn detect_stack(root: &Path) -> Vec<String> {
         (".github/workflows", "GitHub Actions"),
     ];
     for (file, label) in markers {
-        if root.join(file).exists() {
+        if root.join(file).exists() && !found.iter().any(|f: &String| f == label) {
+            // A Bun repo has a package.json too; the lockfile is the stronger
+            // signal and is listed first, so do not also claim npm.
+            if label.starts_with("Node/") && found.iter().any(|f| f.starts_with("Bun/")) {
+                continue;
+            }
             found.push(label.to_string());
         }
     }
