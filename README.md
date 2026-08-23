@@ -57,7 +57,6 @@ flowchart TB
     end
 
     Agents["<b>Agents</b><br/>claude-code · codex · copilot · kiro"]
-
     Gates["<b>Gates</b> — pass · fail · blocked<br/>G0 buildable → G1 bounded → G2 verified<br/>G2.5 reviewed → G3 decided → G4 learned"]
 
     subgraph EV["Evidence — replay or it didn't happen"]
@@ -82,13 +81,15 @@ flowchart TB
     Learn -->|"without one: injected"| Store
     Bundle ==> You
 
-    classDef know fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#111827
-    classDef struc fill:#ccfbf1,stroke:#0d9488,stroke-width:2px,color:#111827
-    classDef arte fill:#ede9fe,stroke:#7c3aed,stroke-width:2px,color:#111827
-    classDef gate fill:#fef3c7,stroke:#d97706,stroke-width:3px,color:#111827
-    classDef evid fill:#e5e7eb,stroke:#4b5563,stroke-width:2px,color:#111827
-    classDef learn fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#111827
-    classDef ext fill:#dcfce7,stroke:#16a34a,stroke-width:3px,color:#111827
+    %% Deep, opaque fills with white text: legibility comes from the contrast
+    %% between text and its own fill, which no page theme can change.
+    classDef know  fill:#1d4ed8,stroke:#93c5fd,stroke-width:2px,color:#ffffff
+    classDef struc fill:#0f766e,stroke:#5eead4,stroke-width:2px,color:#ffffff
+    classDef arte  fill:#6d28d9,stroke:#c4b5fd,stroke-width:2px,color:#ffffff
+    classDef gate  fill:#b45309,stroke:#fcd34d,stroke-width:3px,color:#ffffff
+    classDef evid  fill:#475569,stroke:#cbd5e1,stroke-width:2px,color:#ffffff
+    classDef learn fill:#b91c1c,stroke:#fca5a5,stroke-width:2px,color:#ffffff
+    classDef ext   fill:#15803d,stroke:#86efac,stroke-width:3px,color:#ffffff
 
     class Store,Proj know
     class Index,Retr struc
@@ -98,10 +99,12 @@ flowchart TB
     class Learn learn
     class You,Agents ext
 
-    style KN fill:#f8fafc,stroke:#94a3b8,color:#334155
-    style ST fill:#f8fafc,stroke:#94a3b8,color:#334155
-    style AR fill:#f8fafc,stroke:#94a3b8,color:#334155
-    style EV fill:#f8fafc,stroke:#94a3b8,color:#334155
+    %% Subgraphs: stroke only. A fill here would be a page-coloured block that
+    %% is right in exactly one theme.
+    style KN fill:transparent,stroke:#94a3b8,stroke-dasharray:4 3
+    style ST fill:transparent,stroke:#94a3b8,stroke-dasharray:4 3
+    style AR fill:transparent,stroke:#94a3b8,stroke-dasharray:4 3
+    style EV fill:transparent,stroke:#94a3b8,stroke-dasharray:4 3
 ```
 
 | | Component | Owns | Fails loudly when |
@@ -118,12 +121,6 @@ flowchart TB
 ## A run, end to end
 
 ```mermaid
-%%{init: {'theme':'base','themeVariables':{
-  'primaryColor':'#fef3c7','primaryTextColor':'#111827','primaryBorderColor':'#d97706',
-  'lineColor':'#4b5563','actorBkg':'#dbeafe','actorBorder':'#2563eb','actorTextColor':'#111827',
-  'signalColor':'#374151','signalTextColor':'#111827','labelBoxBkgColor':'#ede9fe',
-  'labelBoxBorderColor':'#7c3aed','labelTextColor':'#111827','noteBkgColor':'#dcfce7',
-  'noteBorderColor':'#16a34a','noteTextColor':'#111827','sequenceNumberColor':'#ffffff'}}}%%
 sequenceDiagram
     autonumber
     actor You
