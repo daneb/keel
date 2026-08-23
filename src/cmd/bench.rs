@@ -80,8 +80,11 @@ fn tasks() -> Vec<Task> {
             answer_files: vec!["src/projection/mod.rs", "src/projection/drift.rs"],
         },
         Task {
-            question: "Where is `store_hash` defined and who calls it?",
-            retrieval: vec![Query::Symbol("store_hash"), Query::Refs("store_hash")],
+            question: "Where is `store_hash_with_shared` defined and who calls it?",
+            retrieval: vec![
+                Query::Symbol("store_hash_with_shared"),
+                Query::Refs("store_hash_with_shared"),
+            ],
             baseline_files: vec![
                 "src/store/mod.rs", "src/projection/mod.rs", "src/cmd/store.rs",
                 "src/gate/g0.rs", "src/gate/g2.rs", "src/cmd/status.rs",
@@ -140,6 +143,17 @@ pub fn run(json: bool) -> Result<i32> {
                 Query::Refs(n) => r.refs(n)?,
                 Query::Importers(p) => r.importers(p)?,
             };
+            // A fixed task set rots as the code moves. A task asking about a
+            // symbol that no longer exists reads as bad retrieval when it is
+            // really a stale benchmark, so say which it is.
+            if a.source == crate::retrieve::Source::Ripgrep {
+                anyhow::bail!(
+                    "task \"{}\" fell back to ripgrep: the index could not answer it. \
+                     Either the index is stale (`keel map`) or the task names a symbol \
+                     that no longer exists and the benchmark needs updating.",
+                    t.question
+                );
+            }
             retrieval_tokens += a.tokens;
             surfaced.push_str(&a.text);
         }

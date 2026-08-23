@@ -88,6 +88,11 @@ Taken deliberately, recorded so they are not rediscovered as surprises.
 
 ### Outstanding
 
+- [ ] **The benchmark's task set rots.** It names symbols by hand, so a rename
+      makes a task silently read as bad retrieval. `keel bench` now fails loudly
+      when a task falls through to ripgrep, which is the symptom — but somebody
+      still has to fix the task. Caught exactly this way when `store_hash`
+      became `store_hash_with_shared`.
 - [ ] **Answer quality proper.** Recall says retrieval surfaced the right files.
       Whether a model answers correctly from them needs a task set with
       known-good answers ([ADR-0012](.keel/store/decisions/ADR-0012-bench-measures-cost-not-quality.md)).
