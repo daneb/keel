@@ -46,6 +46,7 @@ impl Resolver {
             Lang::Rust => self.resolve_rust(from_rel, raw),
             Lang::Java => self.resolve_java(raw),
             Lang::Go => self.resolve_go(raw),
+            Lang::CSharp => self.resolve_csharp(raw),
         }
     }
 
@@ -149,6 +150,21 @@ impl Resolver {
         best.map(|(_, i)| i)
     }
 
+    fn resolve_csharp(&self, raw: &str) -> Option<usize> {
+        // A `using` names a namespace, which conventionally mirrors a directory
+        // -- but unlike a Go import path it carries no repository prefix, so the
+        // directory ends with the namespace rather than the other way round.
+        //
+        // A namespace spans several files and this returns one, so blast radius
+        // through a `using` is a floor, not a ceiling.
+        let as_path = raw.replace('.', "/");
+        self.by_stem
+            .iter()
+            .filter(|(stem, _)| parent_dir(stem).ends_with(&as_path))
+            .min_by_key(|(stem, _)| stem.len())
+            .and_then(|(_, v)| v.first().copied())
+    }
+
     fn unique_by_name(&self, name: &str) -> Option<usize> {
         match self.by_name.get(name) {
             Some(v) if v.len() == 1 => Some(v[0]),
@@ -220,8 +236,21 @@ mod tests {
         ["src/main.rs", "src/api/mod.rs", "src/api/routes.rs", "src/core/auth.rs",
          "web/app/index.ts", "web/app/alpha.ts", "pkg/thing/thing.go",
          "py/pkg/__init__.py", "py/pkg/util.py",
-         "java/com/acme/Foo.java"]
+         "java/com/acme/Foo.java",
+         "cs/Acme/Widgets/Widget.cs", "cs/Acme/Widgets/Spinner.cs"]
             .iter().map(|s| s.to_string()).collect()
+    }
+
+    #[test]
+    fn csharp_using_resolves_through_the_namespace_directory() {
+        let r = Resolver::new(&files());
+        // The namespace maps onto the directory holding it.
+        let hit = r.resolve("cs/Acme/App.cs", Lang::CSharp, "Acme.Widgets");
+        assert!(hit.is_some(), "Acme.Widgets should resolve into cs/Acme/Widgets");
+
+        // A namespace we do not have is external, not a wrong guess.
+        assert_eq!(r.resolve("cs/Acme/App.cs", Lang::CSharp, "System.Text.Json"), None);
+        assert_eq!(r.resolve("cs/Acme/App.cs", Lang::CSharp, "System"), None);
     }
 
     #[test]

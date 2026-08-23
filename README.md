@@ -288,7 +288,7 @@ Three subprocess contracts, all JSON, all language-agnostic.
 
 ## Languages
 
-Rust, Python, JavaScript, TypeScript/TSX, Go, Java — via tree-sitter. A file
+Rust, Python, JavaScript, TypeScript/TSX, Go, Java, C# — via tree-sitter. A file
 that will not parse is still indexed as metadata; a grammar whose queries stop
 compiling is named in `keel map` output rather than silently yielding nothing.
 

@@ -324,6 +324,81 @@ impl Widget {
     }
 
     #[test]
+    fn extracts_csharp_symbols() {
+        let src = br#"
+using System;
+using Acme.Widgets.Core;
+
+namespace Acme.Widgets
+{
+    /// <summary>A spinning thing.</summary>
+    public interface IWidget { void Spin(); }
+
+    public delegate void WidgetHandler(object sender);
+
+    public enum Colour { Red, Green }
+
+    public struct Point { public int X; }
+
+    public record Money(decimal Amount);
+
+    public record struct Tiny(int N);
+
+    public class Widget : IWidget
+    {
+        public Widget(int turns) { }
+        public string Name { get; set; }
+        public void Spin() { }
+    }
+}
+"#;
+        let mut ex = Extractor::new();
+        let f = ex.extract("src/Widget.cs", Lang::CSharp, src);
+        assert!(f.parse_ok);
+
+        let kind = |n: &str| {
+            f.symbols
+                .iter()
+                .find(|s| s.name == n)
+                .unwrap_or_else(|| panic!("no symbol {n}; got {:?}",
+                    f.symbols.iter().map(|s| &s.name).collect::<Vec<_>>()))
+                .kind
+        };
+        assert_eq!(kind("Widget"), "class");
+        assert_eq!(kind("IWidget"), "interface");
+        assert_eq!(kind("Point"), "struct");
+        assert_eq!(kind("Colour"), "enum");
+        assert_eq!(kind("WidgetHandler"), "delegate");
+        assert_eq!(kind("Name"), "property");
+        assert_eq!(kind("Spin"), "method");
+        // `record struct` parses as a plain record_declaration.
+        assert_eq!(kind("Money"), "record");
+        assert_eq!(kind("Tiny"), "record");
+
+        // A constructor shares its name with its class, so assert the kind is
+        // present rather than that the name lookup finds it first.
+        assert!(f.symbols.iter().any(|s| s.kind == "ctor" && s.name == "Widget"));
+        assert!(f.symbols.iter().any(|s| s.kind == "namespace"));
+    }
+
+    #[test]
+    fn extracts_csharp_imports() {
+        let mut ex = Extractor::new();
+        let f = ex.extract(
+            "src/Widget.cs",
+            Lang::CSharp,
+            b"using System;\nusing Acme.Widgets.Core;\nclass C {}\n",
+        );
+        assert!(f.parse_ok);
+        assert!(f.imports.iter().any(|i| i == "System"), "got {:?}", f.imports);
+        assert!(
+            f.imports.iter().any(|i| i == "Acme.Widgets.Core"),
+            "got {:?}",
+            f.imports
+        );
+    }
+
+    #[test]
     fn extracts_rust_imports() {
         let mut ex = Extractor::new();
         let f = ex.extract("src/lib.rs", Lang::Rust, b"use crate::alpha::Beta;\nmod gamma;\n");

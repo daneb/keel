@@ -7,6 +7,19 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [Unreleased]
+
+### Added
+
+- **C# is indexed.** `.cs` files yield namespaces, classes, interfaces,
+  structs, enums, records, delegates, methods, constructors and properties,
+  and `using` directives become import edges so blast radius reaches through
+  them. `keel init` recognises a `.sln` or `.csproj` and records `C# (.NET)`.
+
+  A `using` names a namespace rather than a file, so it resolves to one
+  representative file in that namespace's directory. Blast radius through a
+  `using` is therefore a floor, not a ceiling.
+
 ## [0.2.2] - 2026-08-23
 
 Documentation only. No change to keel's behaviour.

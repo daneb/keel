@@ -23,6 +23,7 @@ pub enum Lang {
     Tsx,
     Go,
     Java,
+    CSharp,
 }
 
 impl Lang {
@@ -35,6 +36,7 @@ impl Lang {
             Lang::Tsx => "tsx",
             Lang::Go => "go",
             Lang::Java => "java",
+            Lang::CSharp => "csharp",
         }
     }
 
@@ -48,12 +50,13 @@ impl Lang {
             "tsx" => Lang::Tsx,
             "go" => Lang::Go,
             "java" => Lang::Java,
+            "cs" => Lang::CSharp,
             _ => return None,
         })
     }
 
     pub fn all() -> &'static [Lang] {
-        &[Lang::Rust, Lang::Python, Lang::JavaScript, Lang::TypeScript, Lang::Tsx, Lang::Go, Lang::Java]
+        &[Lang::Rust, Lang::Python, Lang::JavaScript, Lang::TypeScript, Lang::Tsx, Lang::Go, Lang::Java, Lang::CSharp]
     }
 
     pub fn language(&self) -> Language {
@@ -65,6 +68,7 @@ impl Lang {
             Lang::Tsx => tree_sitter_typescript::LANGUAGE_TSX.into(),
             Lang::Go => tree_sitter_go::LANGUAGE.into(),
             Lang::Java => tree_sitter_java::LANGUAGE.into(),
+            Lang::CSharp => tree_sitter_c_sharp::LANGUAGE.into(),
         }
     }
 
@@ -77,6 +81,7 @@ impl Lang {
             Lang::TypeScript | Lang::Tsx => TS_DEFS,
             Lang::Go => GO_DEFS,
             Lang::Java => JAVA_DEFS,
+            Lang::CSharp => CSHARP_DEFS,
         }
     }
 
@@ -94,6 +99,7 @@ impl Lang {
             Lang::TypeScript | Lang::Tsx => TS_REFS,
             Lang::Go => GO_REFS,
             Lang::Java => JAVA_REFS,
+            Lang::CSharp => CSHARP_REFS,
         }
     }
 
@@ -105,6 +111,7 @@ impl Lang {
             Lang::JavaScript | Lang::TypeScript | Lang::Tsx => JS_IMPORTS,
             Lang::Go => GO_IMPORTS,
             Lang::Java => JAVA_IMPORTS,
+            Lang::CSharp => CSHARP_IMPORTS,
         }
     }
 
@@ -140,6 +147,11 @@ impl Lang {
             // java
             "record_declaration" => "record",
             "constructor_declaration" => "ctor",
+            // c#
+            "struct_declaration" => "struct",
+            "property_declaration" => "property",
+            "namespace_declaration" => "namespace",
+            "delegate_declaration" => "delegate",
             _ => return None,
         })
     }
@@ -271,6 +283,31 @@ const JAVA_IMPORTS: &str = r#"
 (import_declaration (scoped_identifier) @path)
 "#;
 
+const CSHARP_REFS: &str = r#"
+(identifier) @ref
+"#;
+
+const CSHARP_DEFS: &str = r#"
+(class_declaration name: (identifier) @name) @def
+(interface_declaration name: (identifier) @name) @def
+(struct_declaration name: (identifier) @name) @def
+(enum_declaration name: (identifier) @name) @def
+(record_declaration name: (identifier) @name) @def
+(delegate_declaration name: (identifier) @name) @def
+(method_declaration name: (identifier) @name) @def
+(constructor_declaration name: (identifier) @name) @def
+(property_declaration name: (identifier) @name) @def
+(namespace_declaration name: (identifier) @name) @def
+(namespace_declaration name: (qualified_name) @name) @def
+"#;
+
+// `record struct Tiny(int N)` parses as a plain record_declaration, so it is
+// already covered above rather than needing a pattern of its own.
+const CSHARP_IMPORTS: &str = r#"
+(using_directive (identifier) @path)
+(using_directive (qualified_name) @path)
+"#;
+
 /// Map a stored kind string back to the fixed vocabulary.
 ///
 /// Symbol kinds are a closed set, so a round trip through the database should
@@ -279,6 +316,7 @@ pub fn intern_kind(kind: &str) -> &'static str {
     const KINDS: &[&str] = &[
         "fn", "struct", "enum", "trait", "mod", "type", "const", "static", "macro",
         "impl", "class", "method", "interface", "record", "ctor",
+        "property", "namespace", "delegate",
     ];
     KINDS.iter().find(|k| **k == kind).copied().unwrap_or("symbol")
 }

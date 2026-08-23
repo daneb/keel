@@ -119,6 +119,17 @@ fn detect_stack(root: &Path) -> Vec<String> {
             found.push(label.to_string());
         }
     }
+    // A .sln or .csproj is named after the project, not after itself, so it
+    // needs a scan rather than a fixed filename.
+    if let Ok(entries) = std::fs::read_dir(root)
+        && entries.flatten().any(|e| {
+            let n = e.file_name();
+            let n = n.to_string_lossy();
+            n.ends_with(".sln") || n.ends_with(".csproj")
+        })
+    {
+        found.push("C# (.NET)".to_string());
+    }
     found
 }
 
