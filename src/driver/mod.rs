@@ -8,6 +8,7 @@
 //! that ran and could not do the job is an agentic failure. Getting this wrong
 //! teaches the Phase 3 failure taxonomy to learn from noise.
 
+pub mod builtin;
 pub mod conform;
 pub mod contract;
 
@@ -204,6 +205,75 @@ fn blocked(started: Instant, detail: String) -> Invocation {
 }
 
 /// The driver to use: the named one, else the configured default.
+/// Write every reference driver script into `.keel/drivers/`, and append a
+/// `[[driver]]` entry for any that config does not already have.
+///
+/// Idempotent: an existing script is kept, not overwritten, unless `force` is
+/// set — the same rule `keel init` already uses for steering docs, so re-running
+/// this after hand-editing a driver does not clobber the edit by accident.
+///
+/// `keel.toml` is edited by *appending text*, never by loading it into
+/// `Config` and writing the struct back out. A full round-trip through
+/// `toml::to_string_pretty` has no memory of comments or section order —
+/// `Config` does not store either — so it would silently strip every comment
+/// in the file and shuffle every section on a command whose only job is to
+/// add what is missing. `cfg` is read to know what already exists; it is
+/// never the thing written.
+///
+/// Returns one line per file or config entry touched, for the caller to print.
+pub fn scaffold(paths: &Paths, cfg: &Config, force: bool) -> Result<Vec<String>> {
+    let dir = paths.keel().join("drivers");
+    std::fs::create_dir_all(&dir)?;
+    let mut lines = Vec::new();
+    let mut to_register: Vec<(&'static str, &'static str, bool, u64)> = Vec::new();
+
+    for b in builtin::ALL {
+        let path = dir.join(b.filename);
+        if path.exists() && !force {
+            lines.push(format!("  kept    drivers/{}", b.filename));
+        } else {
+            std::fs::write(&path, b.content)?;
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o755))?;
+            }
+            lines.push(format!("  created drivers/{}", b.filename));
+        }
+
+        if let Some(id) = b.driver_id
+            && !cfg.drivers.iter().any(|d| d.id == id)
+        {
+            to_register.push((id, b.filename, b.default, b.timeout_secs));
+            lines.push(format!("  added   [[driver]] {id} to keel.toml"));
+        }
+    }
+
+    if !to_register.is_empty() {
+        append_driver_entries(&paths.config(), &to_register)?;
+    }
+    Ok(lines)
+}
+
+/// Append `[[driver]]` TOML blocks to the end of `keel.toml`'s raw text.
+fn append_driver_entries(
+    cfg_path: &std::path::Path,
+    entries: &[(&'static str, &'static str, bool, u64)],
+) -> Result<()> {
+    let mut existing = std::fs::read_to_string(cfg_path)
+        .map_err(|e| anyhow::anyhow!("reading {}: {e}", cfg_path.display()))?;
+    if !existing.ends_with('\n') {
+        existing.push('\n');
+    }
+    for (id, filename, default, timeout_secs) in entries {
+        existing.push_str(&format!(
+            "\n[[driver]]\nid = \"{id}\"\ncmd = \".keel/drivers/{filename}\"\ndefault = {default}\ntimeout_secs = {timeout_secs}\n"
+        ));
+    }
+    std::fs::write(cfg_path, existing)
+        .map_err(|e| anyhow::anyhow!("writing {}: {e}", cfg_path.display()))
+}
+
 pub fn select<'a>(cfg: &'a Config, id: Option<&str>) -> Result<&'a DriverConfig> {
     if let Some(id) = id {
         return cfg
@@ -225,6 +295,94 @@ pub fn select<'a>(cfg: &'a Config, id: Option<&str>) -> Result<&'a DriverConfig>
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn scaffold_writes_every_reference_script_and_registers_it() {
+        let dir = std::env::temp_dir().join(format!("keel-scaffold-{}", std::process::id()));
+        std::fs::create_dir_all(dir.join(".keel")).unwrap();
+        let home = Paths { repo: dir.clone() };
+        let cfg = Config { drivers: vec![], ..Default::default() };
+        cfg.save(&home.config()).unwrap();
+
+        let lines = scaffold(&home, &cfg, false).unwrap();
+        // scaffold appends to keel.toml as text; re-load to see what landed,
+        // the same way a real caller (init, `keel driver scaffold`) would.
+        let cfg = Config::load(&home.config()).unwrap();
+        assert!(lines.iter().any(|l| l.contains("created drivers/claude-code")));
+        assert!(lines.iter().any(|l| l.contains("created drivers/kiro")));
+        // _common.sh is sourced by the others, not a driver of its own.
+        assert!(!cfg.drivers.iter().any(|d| d.id == "_common.sh"));
+
+        for id in ["claude-code", "codex", "copilot", "kiro", "noop"] {
+            let d = cfg.drivers.iter().find(|d| d.id == id).unwrap_or_else(|| panic!("no {id} entry"));
+            let script = dir.join(&d.cmd);
+            assert!(script.is_file(), "{id}'s script was not written: {}", script.display());
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                let mode = std::fs::metadata(&script).unwrap().permissions().mode();
+                assert_ne!(mode & 0o111, 0, "{id}'s script is not executable");
+            }
+        }
+        assert!(cfg.drivers.iter().find(|d| d.id == "claude-code").unwrap().default);
+        assert!(!cfg.drivers.iter().find(|d| d.id == "kiro").unwrap().default);
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn scaffold_neither_overwrites_a_hand_edit_nor_reregisters_it_twice() {
+        let dir = std::env::temp_dir().join(format!("keel-scaffold-idem-{}", std::process::id()));
+        std::fs::create_dir_all(dir.join(".keel/drivers")).unwrap();
+        std::fs::write(dir.join(".keel/drivers/kiro"), "#!/bin/sh\necho mine\n").unwrap();
+        let home = Paths { repo: dir.clone() };
+        let cfg = Config {
+            drivers: vec![DriverConfig {
+                id: "kiro".into(),
+                cmd: ".keel/drivers/kiro".into(),
+                default: false,
+                timeout_secs: 900,
+            }],
+            ..Default::default()
+        };
+        cfg.save(&home.config()).unwrap();
+        let toml_before = std::fs::read_to_string(home.config()).unwrap();
+
+        scaffold(&home, &cfg, false).unwrap();
+        assert_eq!(
+            std::fs::read_to_string(dir.join(".keel/drivers/kiro")).unwrap(),
+            "#!/bin/sh\necho mine\n",
+            "an existing script must survive a non-forced scaffold"
+        );
+
+        let toml_after = std::fs::read_to_string(home.config()).unwrap();
+        // Append-only: the bytes already on disk -- including kiro's own
+        // entry, in its original position -- must be an untouched prefix.
+        // A full round-trip through Config would instead reformat and
+        // reorder the whole file, which is the bug this guards against.
+        assert!(
+            toml_after.starts_with(&toml_before),
+            "scaffold must only append; the original file content must survive as a prefix.\nbefore:\n{toml_before}\nafter:\n{toml_after}"
+        );
+
+        let cfg = Config::load(&home.config()).unwrap();
+        assert_eq!(
+            cfg.drivers.iter().filter(|d| d.id == "kiro").count(),
+            1,
+            "an already-configured driver must not gain a second [[driver]] entry"
+        );
+        // The other four were genuinely missing, so they are the ones scaffold
+        // should have added.
+        for id in ["claude-code", "codex", "copilot", "noop"] {
+            assert_eq!(
+                cfg.drivers.iter().filter(|d| d.id == id).count(),
+                1,
+                "{id} was missing and should have been added exactly once"
+            );
+        }
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 
     #[test]
     fn a_relative_adapter_resolves_against_the_configuring_repo() {

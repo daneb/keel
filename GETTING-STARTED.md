@@ -138,6 +138,43 @@ keel run rate-limit                     # serial
 keel run rate-limit --waves             # one git worktree per task
 ```
 
+### Using a driver other than Claude Code
+
+`keel init` writes the reference scripts for `claude-code`, `codex`,
+`copilot`, `kiro` and `noop` into `.keel/drivers/`, and registers all five as
+`[[driver]]` entries in `keel.toml` — `claude-code` is `default = true`, the
+rest are one flag away:
+
+```bash
+keel run rate-limit --driver kiro
+keel run rate-limit --driver copilot
+```
+
+**If `.keel/drivers/` is empty on a repository you already ran `keel init`
+in** — most often because that repository was set up before this scaffolding
+existed, or the directory was cleaned by hand — `keel init` will refuse to
+touch it again (`.keel already exists — pass --force`). Reach for the
+narrower command instead:
+
+```bash
+keel driver scaffold
+```
+
+This writes any reference script that is missing and adds any `[[driver]]`
+entry that is missing, without touching a script you have already edited.
+`keel driver check <id>` then tells you whether the agent itself is reachable
+— it runs the real vendor CLI against a scratch repository, so a `blocked`
+verdict there means the CLI is not on this machine's `PATH`, not that keel is
+missing anything. Each expects a specific CLI, not just a similarly-named one
+— `copilot` needs the agentic `copilot` CLI (`npm i -g @github/copilot`), not
+`gh copilot suggest`, which only proposes shell commands and cannot edit files.
+
+Each script is a thin adapter over its vendor CLI, not the CLI itself — read
+[`assets/drivers/kiro`](assets/drivers/kiro) or
+[`assets/drivers/copilot`](assets/drivers/copilot) before assuming one is
+wrong for your setup. They are a starting point, meant to be edited; running
+`keel driver check` again after an edit is how you confirm it still conforms.
+
 ---
 
 ## 5. Let it learn
@@ -153,6 +190,55 @@ keel metrics      # pass rates, failure classes, gate theatre
 A lesson needs **two occurrences in distinct runs** before it can be promoted.
 Give it an oracle and it becomes a G2 check that costs no context; without one
 it is injected as a prompt.
+
+---
+
+## Sharing one set of rules across repositories
+
+`[[shared]]` lets several repositories enforce one set of platform
+conventions and lessons, written once. It is a filesystem path — a sibling
+checkout, a git submodule, or a vendored copy — not a service keel runs; the
+fetching is git's job, keel's job is enforcing what is there.
+
+Point a repository at another one's `.keel/store`:
+
+```toml
+# .keel/keel.toml
+shared = [
+    { id = "platform", path = "../platform-rules/.keel/store", required = true },
+]
+```
+
+Rules from `conventions.md` and enforced lessons in the shared store are
+folded into every projection here, alongside this repository's own. Run
+`keel map` (or let the pre-commit hook do it) to pick up a change on either
+side.
+
+**Two rules, both deliberate, both loud:**
+
+- **Local shadows shared.** A local lesson with the same id as a shared one
+  replaces it — a repository can say "not here" about a platform rule, and
+  that shows up in review as an ordinary diff. A shared card is not a
+  consumer's to demote silently.
+- **A missing required store fails loudly**, not silently. If `platform-rules`
+  moves or is not checked out, `keel doctor` and G0/G2 report it, and the
+  rendered `CLAUDE.md` says so inline:
+
+  > **Shared store `platform` did not load** ... rules it carries are NOT in
+  > force in this render.
+
+  So an agent reading only the projection learns that rules it is supposedly
+  held to did not load, rather than silently coaching without them. Set
+  `required = false` only for a store whose absence is genuinely fine to work
+  without.
+
+"Across the machine" in practice means: check out the shared repository once,
+per machine, at a path every consumer repository can reach with a relative or
+absolute `path` — a sibling directory under one parent folder is the simplest
+layout. There is no keel-specific sync step beyond `git pull` on the shared
+checkout and `keel map` on each consumer. See
+[ADR-0015](.keel/store/decisions/ADR-0015-local-shadows-shared.md) for the
+reasoning behind both rules above.
 
 ---
 

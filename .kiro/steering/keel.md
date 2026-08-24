@@ -1,4 +1,4 @@
-<!-- keel:generated schema=keel.projection/1 adapter=kiro store=e58f00592f5b body=c1e06e716f4e -->
+<!-- keel:generated schema=keel.projection/1 adapter=kiro store=2e9dd48231c1 body=e0517288cd7f -->
 <!-- Source of truth: .keel/store/ — regenerate with `keel store render`. Edits here are drift and will be reported by `keel store check`. -->
 
 # Project context
@@ -49,15 +49,15 @@ _Versions that cannot move, platforms that must keep working, dependencies that 
 
 ## Repository map
 
-**84 files · 1459 symbols · 22049 lines** — rust 84
+**85 files · 1467 symbols · 22319 lines** — rust 85
 
 Files are ordered by import-graph centrality, not alphabetically. Signatures only; read a body with the file path and line number. Per-directory detail lives in `.keel/store/map/<dir>/CODEMAP.md`.
 
 ### Layout
 
-- `src/` — 8 files, 2645 lines · paths.rs, config.rs, hashing.rs
-- `src/cmd/` — 21 files, 3484 lines · mod.rs, run.rs, learn.rs
-- `src/driver/` — 3 files, 773 lines · contract.rs, mod.rs, conform.rs
+- `src/` — 8 files, 2661 lines · paths.rs, config.rs, hashing.rs
+- `src/cmd/` — 21 files, 3510 lines · mod.rs, run.rs, learn.rs
+- `src/driver/` — 4 files, 1001 lines · mod.rs, contract.rs, conform.rs
 - `src/evidence/` — 2 files, 423 lines · mod.rs, manifest.rs
 - `src/failure/` — 2 files, 767 lines · mod.rs, taxonomy.rs
 - `src/gate/` — 10 files, 3031 lines · mod.rs, ratchet.rs, g1.rs
@@ -81,12 +81,12 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub fn require_init() -> Result<Self>` — Like `discover`, but fails if keel has not been initialised here.  <sub>L42</sub>
 - `pub fn rel<'a>(&self, p: &'a Path) -> &'a Path` — Present `p` relative to the repo root when possible, for display.  <sub>L68</sub>
 
-**`src/config.rs`** · 491 lines · imported by 37
+**`src/config.rs`** · 494 lines · imported by 37
 - `pub struct Config`  <sub>L14</sub>
-- `pub struct SharedStore`  <sub>L58</sub>
-- `pub struct Reviewer`  <sub>L74</sub>
-- `pub struct SpecConfig`  <sub>L199</sub>
-- `pub struct PlanConfig`  <sub>L222</sub>
+- `pub struct SharedStore`  <sub>L61</sub>
+- `pub struct Reviewer`  <sub>L77</sub>
+- `pub struct SpecConfig`  <sub>L202</sub>
+- `pub struct PlanConfig`  <sub>L225</sub>
 
 **`src/map/lang.rs`** · 355 lines · imported by 6
 - `pub struct Compiled` — The three queries keel runs over every file.  <sub>L11</sub>

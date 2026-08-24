@@ -28,7 +28,10 @@ pub struct Config {
     /// extension point that Phase 3 uses to turn a lesson into a check.
     #[serde(default)]
     pub gate: std::collections::BTreeMap<String, GateConfig>,
-    #[serde(default = "default_drivers", rename = "driver")]
+    // A TOML array-of-tables and a plain value cannot share a key: an
+    // empty `driver = []` here would collide with the very first appended
+    // `[[driver]]` block driver::scaffold writes, and refuse to parse.
+    #[serde(default = "default_drivers", rename = "driver", skip_serializing_if = "Vec::is_empty")]
     pub drivers: Vec<Driver>,
     #[serde(default)]
     pub verify: VerifyConfig,

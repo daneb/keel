@@ -25,10 +25,25 @@ pub fn run(force: bool, assume_yes: bool) -> Result<()> {
     let detected = detect_stack(&paths.repo);
 
     let cfg_path = paths.config();
-    if !cfg_path.exists() {
+    let is_new_config = !cfg_path.exists();
+    if is_new_config {
         Config::for_stack(&detected).save(&cfg_path)?;
         println!("  created {}", paths.rel(&cfg_path).display());
     }
+
+    // Drivers ship as reference scripts embedded in the binary, not as files
+    // `init` writes once and forgets. A fresh config already has claude-code's
+    // [[driver]] entry from Config::default; scaffold writes the *script* that
+    // entry points at, and appends entries for the others so `--driver kiro`
+    // is a flag away instead of a hand-edited TOML block. It edits keel.toml
+    // by appending text, not by reloading and re-saving Config, which would
+    // otherwise be indistinguishable from is_new_config below and would strip
+    // any comment already in the file.
+    let cfg = Config::load(&cfg_path)?;
+    for line in crate::driver::scaffold(&paths, &cfg, false)? {
+        println!("{line}");
+    }
+
     let interactive = !assume_yes && std::io::stdin().is_terminal();
 
     let purpose = if interactive {

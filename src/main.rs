@@ -300,6 +300,18 @@ enum DriverCmd {
         #[arg(long)]
         json: bool,
     },
+    /// Write the reference driver scripts into .keel/drivers/ and register
+    /// any that are missing from keel.toml
+    ///
+    /// `keel init` already does this for a new repository. Run it directly
+    /// when .keel/ exists but .keel/drivers/ is empty or missing an agent —
+    /// keel init bails on an already-initialised repo rather than reaching
+    /// into it, so this is the way back in.
+    Scaffold {
+        /// Overwrite scripts that already exist
+        #[arg(long)]
+        force: bool,
+    },
 }
 
 #[derive(Subcommand)]
@@ -482,6 +494,7 @@ fn run() -> Result<i32> {
         Command::Importers { path, json } => cmd::retrieve::importers(path, json),
         Command::Slice { task, slug, json } => cmd::retrieve::slice(slug, task, json),
         Command::Driver(DriverCmd::List) => cmd::driver::list(),
+        Command::Driver(DriverCmd::Scaffold { force }) => cmd::driver::scaffold(force),
         Command::Driver(DriverCmd::Check { id, json }) => cmd::driver::check(id, json),
         Command::Mcp => {
             mcp::serve()?;

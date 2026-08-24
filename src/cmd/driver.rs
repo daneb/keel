@@ -1,9 +1,20 @@
-//! `keel driver list|check` — the drivers available, and whether they conform.
+//! `keel driver list|check|scaffold` — the drivers available, whether they
+//! conform, and getting the reference scripts onto disk in the first place.
 
 use crate::config::Config;
 use crate::driver::conform;
 use crate::paths::Paths;
 use anyhow::Result;
+
+pub fn scaffold(force: bool) -> Result<i32> {
+    let paths = Paths::require_init()?;
+    let cfg = Config::load(&paths.config())?;
+    for line in crate::driver::scaffold(&paths, &cfg, force)? {
+        println!("{line}");
+    }
+    println!("\nrun `keel driver list` to see what is reachable, or `keel run <slug> --driver <id>`.");
+    Ok(0)
+}
 
 pub fn list() -> Result<i32> {
     let paths = Paths::require_init()?;
