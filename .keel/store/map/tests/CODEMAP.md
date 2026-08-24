@@ -2,7 +2,7 @@
 id: MAP-tests
 scope: dir:tests
 owner: agent
-verified_at: 2026-08-23
+verified_at: 2026-08-24
 generated: true
 ---
 

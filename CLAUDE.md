@@ -1,4 +1,4 @@
-<!-- keel:generated schema=keel.projection/1 adapter=claude store=dc524ead537a body=d1555df80dd0 -->
+<!-- keel:generated schema=keel.projection/1 adapter=claude store=e58f00592f5b body=15ea97d0b1c0 -->
 <!-- Source of truth: .keel/store/ — regenerate with `keel store render`. Edits here are drift and will be reported by `keel store check`. -->
 
 # Project context
@@ -49,25 +49,25 @@ _Versions that cannot move, platforms that must keep working, dependencies that 
 
 ## Repository map
 
-**84 files · 1433 symbols · 21486 lines** — rust 84
+**84 files · 1459 symbols · 22049 lines** — rust 84
 
 Files are ordered by import-graph centrality, not alphabetically. Signatures only; read a body with the file path and line number. Per-directory detail lives in `.keel/store/map/<dir>/CODEMAP.md`.
 
 ### Layout
 
-- `src/` — 8 files, 2347 lines · paths.rs, config.rs, hashing.rs
-- `src/cmd/` — 21 files, 3440 lines · mod.rs, run.rs, learn.rs
+- `src/` — 8 files, 2645 lines · paths.rs, config.rs, hashing.rs
+- `src/cmd/` — 21 files, 3484 lines · mod.rs, run.rs, learn.rs
 - `src/driver/` — 3 files, 773 lines · contract.rs, mod.rs, conform.rs
 - `src/evidence/` — 2 files, 423 lines · mod.rs, manifest.rs
 - `src/failure/` — 2 files, 767 lines · mod.rs, taxonomy.rs
-- `src/gate/` — 10 files, 2996 lines · mod.rs, ratchet.rs, g1.rs
+- `src/gate/` — 10 files, 3031 lines · mod.rs, ratchet.rs, g1.rs
 - `src/lesson/` — 2 files, 826 lines · mod.rs, usage.rs
-- `src/map/` — 9 files, 2424 lines · lang.rs, extract.rs, db.rs
+- `src/map/` — 9 files, 2566 lines · lang.rs, extract.rs, db.rs
 - `src/mcp/` — 1 file, 271 lines · mod.rs
 - `src/projection/` — 3 files, 715 lines · drift.rs, mod.rs, sections.rs
 - `src/retrieve/` — 3 files, 763 lines · mod.rs, fallback.rs, budget.rs
 - `src/review/` — 1 file, 366 lines · mod.rs
-- `src/spec/` — 4 files, 1143 lines · mod.rs, oracle.rs, placeholder.rs
+- `src/spec/` — 4 files, 1187 lines · mod.rs, ears.rs, oracle.rs
 - `src/store/` — 2 files, 314 lines · mod.rs, frontmatter.rs
 - `src/trajectory/` — 2 files, 462 lines · event.rs, mod.rs
 - `tests/` — 11 files, 3456 lines · support.rs, cli.rs, phase1.rs
@@ -81,19 +81,19 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub fn require_init() -> Result<Self>` — Like `discover`, but fails if keel has not been initialised here.  <sub>L42</sub>
 - `pub fn rel<'a>(&self, p: &'a Path) -> &'a Path` — Present `p` relative to the repo root when possible, for display.  <sub>L68</sub>
 
-**`src/config.rs`** · 370 lines · imported by 37
+**`src/config.rs`** · 491 lines · imported by 37
 - `pub struct Config`  <sub>L14</sub>
 - `pub struct SharedStore`  <sub>L58</sub>
 - `pub struct Reviewer`  <sub>L74</sub>
 - `pub struct SpecConfig`  <sub>L199</sub>
 - `pub struct PlanConfig`  <sub>L222</sub>
 
-**`src/map/lang.rs`** · 317 lines · imported by 6
+**`src/map/lang.rs`** · 355 lines · imported by 6
 - `pub struct Compiled` — The three queries keel runs over every file.  <sub>L11</sub>
 - `pub enum Lang`  <sub>L18</sub>
-- `pub fn symbol_kind(&self, node_kind: &str) -> Option<&'static str>` — Node kind → the short symbol kind shown in maps. `None` means "indexed  <sub>L113</sub>
-- `pub fn intern_kind(kind: &str) -> &'static str` — Symbol kinds are a closed set, so a round trip through the database should  <sub>L278</sub>
-- `pub fn unavailable() -> Vec<(&'static str, String)>` — files still get indexed, they just stop yielding symbols. Naming the casualty  <sub>L291</sub>
+- `pub fn symbol_kind(&self, node_kind: &str) -> Option<&'static str>` — Node kind → the short symbol kind shown in maps. `None` means "indexed  <sub>L120</sub>
+- `pub fn intern_kind(kind: &str) -> &'static str` — Symbol kinds are a closed set, so a round trip through the database should  <sub>L315</sub>
+- `pub fn unavailable() -> Vec<(&'static str, String)>` — files still get indexed, they just stop yielding symbols. Naming the casualty  <sub>L329</sub>
 
 **`src/gate/mod.rs`** · 355 lines · imported by 12
 - `pub enum Verdict`  <sub>L33</sub>
@@ -109,7 +109,7 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub struct Spec`  <sub>L65</sub>
 - `pub fn list(paths: &Paths) -> Result<Vec<String>>` — Every spec slug present on disk, sorted.  <sub>L113</sub>
 
-**`src/map/extract.rs`** · 393 lines · imported by 4
+**`src/map/extract.rs`** · 468 lines · imported by 4
 - `pub struct Symbol`  <sub>L12</sub>
 - `pub struct Reference`  <sub>L24</sub>
 - `pub struct FileFacts`  <sub>L31</sub>
@@ -144,12 +144,12 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub fn projection_inputs(paths: &Paths) -> Result<Vec<PathBuf>>` — Every file that feeds a projection, in a stable order.  <sub>L100</sub>
 - `pub fn store_hash_with_shared(paths: &Paths, cfg: &crate::config::Config) -> Result<String>` — Shared stores are hashed too: a platform convention changing must mark this  <sub>L128</sub>
 
-**`src/run.rs`** · 271 lines · imported by 11
+**`src/run.rs`** · 272 lines · imported by 11
 - `pub struct RunMeta`  <sub>L17</sub>
 - `pub struct Run`  <sub>L37</sub>
-- `pub fn protected(paths: &Paths) -> Result<std::collections::BTreeSet<String>>` — answers "why does this rule exist?". Pruning a cited run turns the answer  <sub>L183</sub>
-- `pub struct PruneCandidate`  <sub>L214</sub>
-- `pub fn prune_plan(paths: &Paths, keep: usize) -> Result<Vec<PruneCandidate>>` — Decide what could be pruned, keeping the most recent `keep` runs and  <sub>L223</sub>
+- `pub fn protected(paths: &Paths) -> Result<std::collections::BTreeSet<String>>` — answers "why does this rule exist?". Pruning a cited run turns the answer  <sub>L184</sub>
+- `pub struct PruneCandidate`  <sub>L215</sub>
+- `pub fn prune_plan(paths: &Paths, keep: usize) -> Result<Vec<PruneCandidate>>` — Decide what could be pruned, keeping the most recent `keep` runs and  <sub>L224</sub>
 
 **`src/failure/mod.rs`** · 573 lines · imported by 5
 - `pub enum Signal`  <sub>L20</sub>
