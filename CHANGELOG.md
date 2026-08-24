@@ -7,6 +7,38 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.3.2] - 2026-08-24
+
+### Fixed
+
+- **Every driver but a hand-authored one was unusable on a fresh install.**
+  The reference scripts for `claude-code`, `codex`, `copilot`, `kiro` and
+  `noop` lived only in this repository's own `.keel/drivers/`, excluded from
+  the published crate. `cargo install keel-harness` followed by `keel init`
+  produced a config pointing the *default* driver at a script that existed
+  nowhere. The scripts now ship embedded in the binary (`assets/drivers/*`)
+  and `keel init` writes them into `.keel/drivers/`, registering all five.
+  For a repository already initialised before this fix, `keel driver
+  scaffold` is the recovery path — it writes what is missing without
+  touching a script you have already edited.
+- `keel driver scaffold` edits `keel.toml` by appending text, never by
+  reloading and re-saving the whole config — an earlier version of this fix
+  round-tripped through `Config`, which does not remember comments or
+  section order, and would have silently deleted every comment in the file
+  the first time someone ran a command whose only job was adding a driver.
+- An empty `[[driver]]` list no longer serializes as `driver = []`, which
+  collided with the very first driver block `scaffold` tried to append and
+  failed to parse.
+
+### Added
+
+- `keel driver scaffold [--force]` — write missing reference driver scripts
+  and register missing `[[driver]]` entries on an already-initialised
+  repository, where `keel init` correctly refuses to run again.
+- GETTING-STARTED.md documents drivers other than Claude Code and shared
+  stores (`[[shared]]`) for the first time, both re-verified end to end
+  before being written down rather than assumed correct from the design.
+
 ## [0.3.1] - 2026-08-24
 
 Found by putting keel to real work on a second project's real branch, not
@@ -157,6 +189,7 @@ its own. The full accounting is in [ROADMAP.md](ROADMAP.md).
   They accrue with use and are not manufactured.
 - macOS only. The `cfg(windows)` branches compile and are unexercised.
 
+[0.3.2]: https://github.com/daneb/keel/releases/tag/v0.3.2
 [0.3.1]: https://github.com/daneb/keel/releases/tag/v0.3.1
 [0.3.0]: https://github.com/daneb/keel/releases/tag/v0.3.0
 [0.2.2]: https://github.com/daneb/keel/releases/tag/v0.2.2
