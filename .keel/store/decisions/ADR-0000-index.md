@@ -37,6 +37,7 @@ what the code does, which the code already provides.
 | [ADR-0020](ADR-0020-human-time-is-elapsed-not-effort.md) | 5 | Human-intervention time is elapsed, never effort |
 | [ADR-0021](ADR-0021-review-stage-clears-a-blocked-check.md) | field | A fourth approval stage clears G2.5's blocked check, bound to the flagged lines |
 | [ADR-0022](ADR-0022-no-driver-diffs-from-the-branch-point.md) | field | `--no-driver` diffs from where the branch left trunk, not from HEAD |
+| [ADR-0023](ADR-0023-drivers-ship-embedded-and-config-is-appended-not-rewritten.md) | field | Driver scripts ship embedded; `keel.toml` is edited by appending text, never rewritten |
 
 **Not recorded here.** Decisions the plan already fixes (EARS, the gate pipeline
 shape, the four attribution codes) are PLAN.md's, not keel's. An ADR that only
