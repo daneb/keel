@@ -7,6 +7,45 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.3.1] - 2026-08-24
+
+Found by putting keel to real work on a second project's real branch, not
+just gating uncommitted diffs against itself.
+
+### Fixed
+
+- **`--no-driver` no longer gates an empty diff.** Gating an already-committed
+  branch diffed HEAD against HEAD, so blast-radius and line-budget silently
+  passed on nothing. It now diffs from the merge-base with the repository's
+  trunk; `--base <ref>` overrides. A driver run is unaffected.
+- **`reviewable-size`'s file count matched its own line count.** The fail
+  message was counting keel's own untracked run evidence as part of the
+  diff under review.
+- **`keel init` no longer seeds Rust commands into every stack.** `cargo test`
+  was the default oracle regardless of what `init` detected. `Config::for_stack`
+  seeds from the detected stack; an unrecognised one gets blank commands
+  (which report `blocked`, honestly) rather than a wrong guess. Bun's oracle
+  guards the same `bun test --test-name-pattern` vacuous-match hole the Rust
+  default was written to avoid; Go and pytest get the same treatment.
+- **`about` is only ambiguous when it quantifies.** G0 rejected "its
+  assessment about coaching" as hedging; a preposition decides nothing.
+- The seeded config now says where `build`/`test`/`lint` go, and a config
+  parse error naming a Rust struct now carries a plain-language hint.
+
+### Added
+
+- **`keel gate g2`** — G2, G2.5 and G3 judge a change rather than a document,
+  so they only ran inside `keel run`. `--no-driver` already did this; the
+  command a person would actually type just failed with "unrecognized
+  subcommand" and named no alternative. `g2.5` and `g3` are aliases.
+- **`keel approve --stage review <slug>`** clears G2.5's test-invalidation
+  block once a human has looked at the flagged lines, bound to their SHA-256
+  — a newly added mock supersedes the acknowledgement rather than inheriting
+  it. Previously a blocked check stayed blocked on every subsequent run with
+  no way to record that someone had examined it.
+- Bun is detected as its own stack (`bun.lock`/`bun.lockb`), not folded into
+  npm.
+
 ## [0.3.0] - 2026-08-23
 
 ### Added
@@ -118,6 +157,7 @@ its own. The full accounting is in [ROADMAP.md](ROADMAP.md).
   They accrue with use and are not manufactured.
 - macOS only. The `cfg(windows)` branches compile and are unexercised.
 
+[0.3.1]: https://github.com/daneb/keel/releases/tag/v0.3.1
 [0.3.0]: https://github.com/daneb/keel/releases/tag/v0.3.0
 [0.2.2]: https://github.com/daneb/keel/releases/tag/v0.2.2
 [0.2.1]: https://github.com/daneb/keel/releases/tag/v0.2.1
