@@ -69,18 +69,18 @@ fn reviewable_size(paths: &Paths, cfg: &Config, run: &Run) -> Check {
     let Ok(d) = diff::against(paths, &base) else {
         return Check::blocked("reviewable-size", "could not read the diff");
     };
-    let churn: usize = d
-        .files
-        .iter()
-        .filter(|f| !super::g2::is_incidental_for(cfg, &f.path))
-        .map(|f| f.churn())
-        .sum();
+    let reviewable: Vec<_> = d.files.iter().filter(|f| !super::g2::is_incidental_for(cfg, &f.path)).collect();
+    let churn: usize = reviewable.iter().map(|f| f.churn()).sum();
     let max = cfg.plan.max_reviewable_lines;
     if churn > max {
         return Check::fail(
             "reviewable-size",
             format!("at most {max} lines for one human review"),
-            format!("{churn} lines across {} files — split it, or raise the limit knowing what you are buying", d.files.len()),
+            // Same filter as `churn`: keel's own run evidence (`.keel/runs/**`,
+            // created by the very act of gating) is untracked until committed,
+            // and counting it here would tell a reviewer their diff touches
+            // dozens of files it does not.
+            format!("{churn} lines across {} files — split it, or raise the limit knowing what you are buying", reviewable.len()),
         );
     }
     Check::pass("reviewable-size", format!("{churn}/{max} reviewable lines"))

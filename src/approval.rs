@@ -48,12 +48,25 @@ fn log_path(paths: &Paths, slug: &str) -> PathBuf {
 pub fn artefact_path(paths: &Paths, slug: &str, stage: &str) -> PathBuf {
     match stage {
         "plan" => crate::plan::Plan::path_for(paths, slug),
+        // The review stage signs off on the exact lines G2.5 flagged, not on
+        // the spec. Binding it to the flag file is what makes the sign-off
+        // precise: acknowledge these doubles, and a newly added one supersedes
+        // the acknowledgement instead of inheriting it.
+        "review" => review_flags_path(paths, slug),
         _ => Spec::path_for(paths, slug),
     }
 }
 
+/// Where G2.5 records the lines its test-invalidation heuristic flagged.
+pub fn review_flags_path(paths: &Paths, slug: &str) -> PathBuf {
+    Spec::path_for(paths, slug)
+        .parent()
+        .unwrap_or(&paths.repo)
+        .join("review-flags.txt")
+}
+
 /// Stages a human can sign off on, in pipeline order.
-pub const STAGES: &[&str] = &["spec", "plan", "merge"];
+pub const STAGES: &[&str] = &["spec", "plan", "review", "merge"];
 
 /// Hash of the artefact a stage signs off on. For the plan stage this covers
 /// `tasks.md` too — approving a plan whose task list can then change freely
@@ -255,5 +268,35 @@ mod tests {
         assert_eq!(h.len(), 2, "an approval overwrote its predecessor");
         assert_eq!(h[0].note.as_deref(), Some("first"));
         assert_eq!(latest(&t.0, "demo", "spec").unwrap().unwrap().note.as_deref(), Some("second"));
+    }
+
+    #[test]
+    fn a_review_acknowledgement_is_superseded_by_a_new_mock() {
+        let t = Tmp::new();
+        let flags = review_flags_path(&t.0, "demo");
+        std::fs::write(&flags, "test.ts: const stubGateway = ...\n").unwrap();
+
+        // Nothing signed off yet.
+        assert!(matches!(standing(&t.0, "demo", "review").unwrap(), Standing::Absent));
+
+        record(&t.0, "demo", "review", Decision::Approved, None, Some("stubs the LLM, not the unit".into())).unwrap();
+        assert!(
+            matches!(standing(&t.0, "demo", "review").unwrap(), Standing::Current { .. }),
+            "an acknowledgement should stand while the flagged lines are unchanged"
+        );
+
+        // A newly added double changes the flags, so the sign-off no longer applies.
+        std::fs::write(&flags, "test.ts: const stubGateway = ...\ntest.ts: jest.mock('./db')\n").unwrap();
+        assert!(
+            matches!(standing(&t.0, "demo", "review").unwrap(), Standing::Superseded { .. }),
+            "a new mock must supersede the previous acknowledgement, not inherit it"
+        );
+    }
+
+    #[test]
+    fn review_signs_off_on_the_flags_not_the_spec() {
+        let t = Tmp::new();
+        assert!(artefact_path(&t.0, "demo", "review").ends_with("review-flags.txt"));
+        assert!(STAGES.contains(&"review"));
     }
 }

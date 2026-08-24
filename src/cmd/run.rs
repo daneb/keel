@@ -22,6 +22,8 @@ pub struct Options {
     pub driver: Option<String>,
     /// Gate an existing working tree instead of invoking an agent.
     pub no_driver: bool,
+    /// Diff against this ref instead of the inferred base.
+    pub base: Option<String>,
     pub json: bool,
 }
 
@@ -51,12 +53,20 @@ pub fn run(opts: Options) -> Result<i32> {
         Some(driver::select(&cfg, opts.driver.as_deref())?)
     };
 
+    // With a driver, the agent's work is uncommitted, so HEAD is the right
+    // base. Without one, the work is usually already committed on a branch —
+    // diffing that against HEAD compares a tree with itself, so every
+    // diff-based check would pass on an empty diff. Diff from where the
+    // branch left the trunk instead.
+    let run_base = crate::worktree::gate_base(&paths, opts.base.as_deref(), opts.no_driver)?;
+
     let mut run = Run::create(
         &paths,
         &slug,
         opts.task.clone(),
         selected_driver.map(|d| d.id.clone()),
         &store_hash,
+        Some(run_base),
     )?;
     let mut traj = run.open_trajectory()?;
     println!("run {}\n", run.meta.id);
@@ -415,7 +425,9 @@ pub fn run_waves(opts: Options) -> Result<i32> {
         .waves()
         .map_err(|stuck| anyhow::anyhow!("dependency cycle among {}", stuck.join(", ")))?;
     let driver = driver::select(&cfg, opts.driver.as_deref())?;
-    let base = crate::worktree::base_commit(&paths)?;
+    // Without a driver the work is usually already committed on a branch, so
+    // diff from where that branch left the trunk rather than from HEAD.
+    let base = crate::worktree::gate_base(&paths, opts.base.as_deref(), opts.no_driver)?;
 
     if crate::worktree::is_dirty(&paths) {
         // Not fatal, but what comes back will be their work interleaved with
@@ -424,7 +436,7 @@ pub fn run_waves(opts: Options) -> Result<i32> {
     }
 
     let store_hash = store::store_hash_with_shared(&paths, &cfg)?;
-    let mut run = Run::create(&paths, &slug, None, Some(driver.id.clone()), &store_hash)?;
+    let mut run = Run::create(&paths, &slug, None, Some(driver.id.clone()), &store_hash, Some(base.clone()))?;
     let mut traj = run.open_trajectory()?;
     println!("run {} — {} task(s) in {} wave(s), base {}\n", run.meta.id, tasks.tasks.len(), waves.len(), &base[..base.len().min(8)]);
 

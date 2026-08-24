@@ -121,12 +121,71 @@ pub fn apply(paths: &Paths, patch: &str) -> Result<()> {
 pub fn base_commit(paths: &Paths) -> Result<String> {
     match git(&paths.repo, &["rev-parse", "HEAD"]) {
         Ok(head) => Ok(head.trim().to_string()),
+        // Not `--waves`-specific any more: this also backs a single-task run's
+        // gate base, so the message no longer names one caller.
         Err(_) => bail!(
-            "`--waves` gives each task its own git worktree, and a worktree must branch \
-             from a commit — this repository has none yet.\n\
-             Make one commit, or run without `--waves` to execute tasks serially."
+            "keel needs at least one commit to diff a run against — this repository has none yet.\n\
+             Make one commit and try again."
         ),
     }
+}
+
+/// The commit a gate should diff against.
+///
+/// With a driver, the agent's work is uncommitted, so HEAD is the right base.
+/// Without one (`--no-driver`) the work is usually already committed on a
+/// branch — and diffing that against HEAD compares a tree with itself, so every
+/// diff-based check passes on an empty diff. A gate that reports green because
+/// it looked at nothing is worse than one that fails.
+///
+/// So when gating a branch, the base is where that branch left the trunk.
+/// `explicit` (from `--base`) always wins; if no trunk can be identified, this
+/// falls back to HEAD and the caller is no worse off than before.
+pub fn gate_base(paths: &Paths, explicit: Option<&str>, branch_point: bool) -> Result<String> {
+    if let Some(r) = explicit {
+        let resolved = git(&paths.repo, &["rev-parse", r])
+            .with_context(|| format!("--base {r} is not a commit this repository knows"))?;
+        return Ok(resolved.trim().to_string());
+    }
+    let head = base_commit(paths)?;
+    if !branch_point {
+        return Ok(head);
+    }
+
+    let current = git(&paths.repo, &["rev-parse", "--abbrev-ref", "HEAD"])
+        .unwrap_or_default()
+        .trim()
+        .to_string();
+    for trunk in trunk_candidates(paths) {
+        if trunk == current {
+            continue;
+        }
+        if let Ok(mb) = git(&paths.repo, &["merge-base", &trunk, "HEAD"]) {
+            let mb = mb.trim().to_string();
+            // Only useful if the branch actually diverged from that trunk.
+            if !mb.is_empty() && mb != head {
+                return Ok(mb);
+            }
+        }
+    }
+    Ok(head)
+}
+
+/// Trunk names to try, most authoritative first.
+fn trunk_candidates(paths: &Paths) -> Vec<String> {
+    let mut out = Vec::new();
+    if let Ok(sym) = git(&paths.repo, &["symbolic-ref", "--short", "refs/remotes/origin/HEAD"]) {
+        let s = sym.trim().to_string();
+        if !s.is_empty() {
+            out.push(s);
+        }
+    }
+    for name in ["main", "master", "origin/main", "origin/master"] {
+        if git(&paths.repo, &["rev-parse", "--verify", name]).is_ok() {
+            out.push(name.to_string());
+        }
+    }
+    out
 }
 
 /// Whether the tree has changes that a wave would fold its own patches into.
@@ -186,6 +245,45 @@ mod tests {
             git(&dir, &args).unwrap();
         }
         Paths { repo: dir }
+    }
+
+    #[test]
+    fn gate_base_finds_the_branch_point_not_head() {
+        let p = repo();
+        let trunk_commit = base_commit(&p).unwrap();
+        git(&p.repo, &["checkout", "-q", "-b", "feature"]).unwrap();
+        std::fs::write(p.repo.join("a.txt"), "one\ntwo\n").unwrap();
+        git(&p.repo, &["add", "-A"]).unwrap();
+        git(&p.repo, &["commit", "-q", "-m", "feature work"]).unwrap();
+
+        // branch_point = true (as --no-driver passes) must land on the trunk
+        // commit, not on the feature branch's own HEAD -- landing on HEAD is
+        // exactly what makes a committed branch diff against itself and every
+        // check pass on nothing.
+        let base = gate_base(&p, None, true).unwrap();
+        assert_eq!(base, trunk_commit, "should diff from where the branch left master, not from HEAD");
+
+        // branch_point = false (a driver run) keeps the old HEAD behaviour --
+        // an agent's uncommitted work is diffed from where it started.
+        let head_base = gate_base(&p, None, false).unwrap();
+        assert_eq!(head_base, base_commit(&p).unwrap());
+        assert_ne!(head_base, trunk_commit);
+
+        let _ = std::fs::remove_dir_all(&p.repo);
+    }
+
+    #[test]
+    fn explicit_base_always_wins() {
+        let p = repo();
+        let trunk_commit = base_commit(&p).unwrap();
+        git(&p.repo, &["checkout", "-q", "-b", "feature"]).unwrap();
+        std::fs::write(p.repo.join("a.txt"), "changed\n").unwrap();
+        git(&p.repo, &["add", "-A"]).unwrap();
+        git(&p.repo, &["commit", "-q", "-m", "work"]).unwrap();
+
+        let explicit = gate_base(&p, Some("HEAD"), true).unwrap();
+        assert_ne!(explicit, trunk_commit, "--base HEAD must not be overridden by branch-point inference");
+        let _ = std::fs::remove_dir_all(&p.repo);
     }
 
     #[test]

@@ -47,6 +47,7 @@ impl Run {
         task: Option<String>,
         driver: Option<String>,
         store_hash: &str,
+        base: Option<String>,
     ) -> Result<Self> {
         let id = crate::gate::run_id();
         let dir = paths.runs().join(&id);
@@ -67,7 +68,7 @@ impl Run {
             started_at: chrono::Local::now().to_rfc3339(),
             finished_at: None,
             verdict: None,
-            base_commit: head_commit(paths),
+            base_commit: base.or_else(|| head_commit(paths)),
         };
         let run = Self { dir, meta };
         run.save()?;

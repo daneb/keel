@@ -134,6 +134,9 @@ enum Command {
         /// Gate the working tree as it stands instead of invoking an agent
         #[arg(long)]
         no_driver: bool,
+        /// Diff against this ref instead of the inferred base
+        #[arg(long)]
+        base: Option<String>,
         /// Run every task, wave by wave, each in its own git worktree
         #[arg(long)]
         waves: bool,
@@ -344,6 +347,9 @@ enum GateCmd {
     #[command(name = "g2", alias = "g2.5", alias = "g25", alias = "g3")]
     G2 {
         slug: Option<String>,
+        /// Diff against this ref instead of the branch point
+        #[arg(long)]
+        base: Option<String>,
         #[arg(long)]
         json: bool,
     },
@@ -448,11 +454,12 @@ fn run() -> Result<i32> {
         Command::Tasks { slug, json } => cmd::tasks::run(slug, json),
         Command::Gate(GateCmd::G0 { slug, json }) => cmd::gate::g0(slug, json),
         Command::Gate(GateCmd::G1 { slug, json }) => cmd::gate::g1(slug, json),
-        Command::Gate(GateCmd::G2 { slug, json }) => cmd::run::run(cmd::run::Options {
+        Command::Gate(GateCmd::G2 { slug, base, json }) => cmd::run::run(cmd::run::Options {
             slug,
             task: None,
             driver: None,
             no_driver: true,
+            base,
             json,
         }),
         Command::Gate(GateCmd::G4 { run, json }) => cmd::learn::g4(run, json),
@@ -484,8 +491,8 @@ fn run() -> Result<i32> {
         Command::Blast { targets, symbol, depth, json } => {
             cmd::blast::run(targets, symbol, depth, json)
         }
-        Command::Run { slug, task, driver, no_driver, waves, json } => {
-            let opts = cmd::run::Options { slug, task, driver, no_driver, json };
+        Command::Run { slug, task, driver, no_driver, waves, base, json } => {
+            let opts = cmd::run::Options { slug, task, driver, no_driver, base, json };
             if waves { cmd::run::run_waves(opts) } else { cmd::run::run(opts) }
         }
         Command::Replay { run, json } => cmd::run::replay(run, json),

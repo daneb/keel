@@ -50,7 +50,7 @@ pub fn run(
     match diff::against(paths, &base) {
         Ok(d) => {
             let patch = read_patch(paths, cfg, &base);
-            checks.push(test_invalidation(run, &d, patch.as_deref())?);
+            checks.push(test_invalidation(paths, spec, run, &d, patch.as_deref())?);
             checks.push(test_movement(cfg, &d));
         }
         Err(e) => {
@@ -163,7 +163,13 @@ fn reviewer_findings(
 }
 
 /// Look for mocks and weakened assertions *added* by this change.
-fn test_invalidation(run: &Run, d: &diff::Diff, patch: Option<&str>) -> Result<Check> {
+fn test_invalidation(
+    paths: &Paths,
+    spec: &Spec,
+    run: &Run,
+    d: &diff::Diff,
+    patch: Option<&str>,
+) -> Result<Check> {
     let Some(patch) = patch else {
         return Ok(Check::blocked("test-invalidation", "could not read the patch text"));
     };
@@ -201,8 +207,35 @@ fn test_invalidation(run: &Run, d: &diff::Diff, patch: Option<&str>) -> Result<C
         &if hits.is_empty() { "no added mocks or weakened assertions\n".to_string() } else { hits.join("\n") },
     )?;
 
+    // Record the flagged lines where an approval can bind to them, so a human
+    // can say "I looked, these are fine" and have that survive exactly as long
+    // as the flags do.
+    let flags_path = crate::approval::review_flags_path(paths, &spec.front.slug);
+    if let Some(dir) = flags_path.parent() {
+        let _ = std::fs::create_dir_all(dir);
+    }
+    let _ = std::fs::write(
+        &flags_path,
+        if hits.is_empty() { String::new() } else { format!("{}\n", hits.join("\n")) },
+    );
+
+    let reviewed = !hits.is_empty()
+        && matches!(
+            crate::approval::standing(paths, &spec.front.slug, "review"),
+            Ok(crate::approval::Standing::Current { .. })
+        );
+
     let mut check = if hits.is_empty() {
         Check::pass("test-invalidation", "no mocks or weakened assertions added")
+    } else if reviewed {
+        let who = match crate::approval::standing(paths, &spec.front.slug, "review") {
+            Ok(crate::approval::Standing::Current { by, .. }) => by,
+            _ => "a reviewer".to_string(),
+        };
+        Check::pass(
+            "test-invalidation",
+            format!("{} flagged line(s) reviewed and accepted by {who}", hits.len()),
+        )
     } else {
         // Deliberately `blocked`, not `fail`: a legitimate mock exists, and a
         // heuristic that fails the gate on every test double would be routed
@@ -210,8 +243,10 @@ fn test_invalidation(run: &Run, d: &diff::Diff, patch: Option<&str>) -> Result<C
         Check::blocked(
             "test-invalidation",
             format!(
-                "{} added line(s) mock or weaken behaviour — confirm the test still tests: {}",
+                "{} added line(s) mock or weaken behaviour — confirm the test still tests, \
+                 then `keel approve --stage review {}`: {}",
                 hits.len(),
+                spec.front.slug,
                 super::join_capped(&hits, 3)
             ),
         )
