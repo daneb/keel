@@ -209,7 +209,7 @@ footer a{color:var(--body)}
 
 <div id="top" class="hero"><div class="wrap hero-grid">
   <div>
-    <div class="tag">Rust · macOS · v0.2.1</div>
+    <div class="tag">Rust · macOS · v0.4.0</div>
     <h1>keel</h1>
     <p class="lede">A conductor, not an agent loop.</p>
     <p class="sub">The keel is the one member every rib bolts to — the part that decides
@@ -358,8 +358,9 @@ footer a{color:var(--body)}
     <div class="gate"><div class="id">G2</div><div>
       <h3>Did the work stay inside its scope, and does it build?</h3>
       <p>Build, lint, tests, line budget, blast radius, store drift, baseline ratchet.
-        G2.5 adds test-invalidation review: a test that mocks away the behaviour under
-        test is worse than no test.</p></div></div>
+        G2.5 adds test-invalidation review, and grades the diff for security defects —
+        a model, a scanner, or both — where <code>high</code>/<code>critical</code>
+        block the gate.</p></div></div>
     <div class="gate"><div class="id">G3</div><div>
       <h3>Could a reviewer actually check this?</h3>
       <p>Evidence complete, change reviewable in size, earlier gates green, a human

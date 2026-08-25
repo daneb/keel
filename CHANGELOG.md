@@ -7,6 +7,66 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.4.0] - 2026-08-25
+
+### Added
+
+- **Security review at G2.5.** The adversarial reviewer now also grades
+  findings for security defects — injection, authz, crypto misuse, secret
+  exposure, unsafe input handling, resource exhaustion — judging only the
+  added and modified lines. `critical`/`high` fail the gate; `medium`/`low`
+  are recorded without blocking. Grade and severity are separate fields:
+  severity decides whether a finding blocks, grade decides how dangerous it
+  is, so the check can distinguish a hardcoded credential from a missing
+  hardening comment rather than collapsing both into one flag.
+- **`[[review]]` is an array.** Configure as many reviewers as you want — a
+  model, a static scanner, a house-style script — each answering the same
+  `keel.reviewrequest/1` → `keel.reviewresult/1` contract. A reviewer's `id`
+  names its check, prefixes its findings, and names its evidence file, so a
+  third reviewer is a config entry, never a change to keel.
+- **A semgrep adapter** ships embedded (`keel init` writes it to
+  `.keel/sast/`), scanning only the files a diff touches. keel ships no
+  scanner — semgrep is yours to install; its absence reports `blocked`,
+  never a silent pass.
+- **`keel approve --stage security <slug>`** accepts graded findings
+  deliberately, bound to the SHA-256 of their identity (category, grade,
+  file, line) rather than the reviewer's prose — a reworded finding keeps
+  the acceptance, a genuinely new one supersedes it.
+- **A secrets gate check** (`.keel/checks/secrets`, gitleaks) scans git
+  history and the uncommitted diff, because `keel run` commits build/test/
+  lint/driver output as evidence, and a secret any of those commands prints
+  becomes a committed artefact.
+- **A `cargo-audit` gate check** — a known RustSec advisory fails G2.
+- **CI** — build/test/clippy, a weekly advisory re-check, and a secrets scan,
+  all invoking the same plugins the local gates run.
+- **`keel driver scaffold`** writes missing reference driver scripts (and now
+  the SAST adapter) into an already-initialised repository, where `keel init`
+  correctly refuses to run again.
+- **SECURITY.md** — the threat model this project had but had never written
+  down, most importantly that `.keel/keel.toml` is executable code.
+
+### Fixed
+
+- **`keel plan` no longer runs against a spec G0 has rejected.** It had no
+  check at all beyond "scope is non-empty" — `keel run` already refused
+  without a passing G1 for the equivalent reason.
+- **A driver timeout now holds on Linux.** `kill_group` shelled out to
+  `kill -KILL -<pgid>`, which BSD's `kill` accepts and procps-ng does not;
+  the group kill silently did nothing on every CI runner. Now a direct
+  `libc::kill`. The timeout also no longer depends on that kill succeeding:
+  reader threads return over a channel with a bounded drain instead of an
+  unbounded `join`.
+- **A reviewer's exit code was ignored.** A reviewer reporting failure
+  (e.g. "the scanner is not installed") alongside an empty findings list
+  read as a clean pass. A non-zero exit is now `blocked`.
+- The seeded config now says where build/test/lint go, and a config parse
+  error naming a Rust struct carries a plain-language hint.
+
+### Changed
+
+- **Breaking:** `[review]` as a table no longer parses; it is `[[review]]`,
+  an array. Pre-1.0; the error names the fix.
+
 ## [0.3.2] - 2026-08-24
 
 ### Fixed
@@ -189,6 +249,7 @@ its own. The full accounting is in [ROADMAP.md](ROADMAP.md).
   They accrue with use and are not manufactured.
 - macOS only. The `cfg(windows)` branches compile and are unexercised.
 
+[0.4.0]: https://github.com/daneb/keel/releases/tag/v0.4.0
 [0.3.2]: https://github.com/daneb/keel/releases/tag/v0.3.2
 [0.3.1]: https://github.com/daneb/keel/releases/tag/v0.3.1
 [0.3.0]: https://github.com/daneb/keel/releases/tag/v0.3.0

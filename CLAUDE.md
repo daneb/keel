@@ -1,4 +1,4 @@
-<!-- keel:generated schema=keel.projection/1 adapter=claude store=c54c58f9f38a body=a4bd72ddbc6a -->
+<!-- keel:generated schema=keel.projection/1 adapter=claude store=8f42c2a88dd8 body=3819a20683eb -->
 <!-- Source of truth: .keel/store/ — regenerate with `keel store render`. Edits here are drift and will be reported by `keel store check`. -->
 
 # Project context
@@ -49,14 +49,14 @@ _Versions that cannot move, platforms that must keep working, dependencies that 
 
 ## Repository map
 
-**85 files · 1481 symbols · 22707 lines** — rust 85
+**85 files · 1482 symbols · 22740 lines** — rust 85
 
 Files are ordered by import-graph centrality, not alphabetically. Signatures only; read a body with the file path and line number. Per-directory detail lives in `.keel/store/map/<dir>/CODEMAP.md`.
 
 ### Layout
 
 - `src/` — 8 files, 2687 lines · paths.rs, config.rs, hashing.rs
-- `src/cmd/` — 21 files, 3510 lines · mod.rs, run.rs, learn.rs
+- `src/cmd/` — 21 files, 3523 lines · mod.rs, run.rs, learn.rs
 - `src/driver/` — 4 files, 1071 lines · mod.rs, contract.rs, conform.rs
 - `src/evidence/` — 2 files, 423 lines · mod.rs, manifest.rs
 - `src/failure/` — 2 files, 767 lines · mod.rs, taxonomy.rs
@@ -70,7 +70,7 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `src/spec/` — 4 files, 1187 lines · mod.rs, ears.rs, oracle.rs
 - `src/store/` — 2 files, 314 lines · mod.rs, frontmatter.rs
 - `src/trajectory/` — 2 files, 462 lines · event.rs, mod.rs
-- `tests/` — 11 files, 3463 lines · support.rs, cli.rs, phase1.rs
+- `tests/` — 11 files, 3483 lines · support.rs, cli.rs, phase1.rs
 
 ### Key files
 
@@ -95,7 +95,7 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub fn intern_kind(kind: &str) -> &'static str` — Symbol kinds are a closed set, so a round trip through the database should  <sub>L315</sub>
 - `pub fn unavailable() -> Vec<(&'static str, String)>` — files still get indexed, they just stop yielding symbols. Naming the casualty  <sub>L329</sub>
 
-**`src/gate/mod.rs`** · 355 lines · imported by 12
+**`src/gate/mod.rs`** · 355 lines · imported by 13
 - `pub enum Verdict`  <sub>L33</sub>
 - `pub struct Check`  <sub>L60</sub>
 - `pub struct GateResult`  <sub>L112</sub>

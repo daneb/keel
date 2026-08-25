@@ -19,8 +19,9 @@ keel sits above them and owns the two things none of them give you:
 
 New here? Start with **[GETTING-STARTED.md](GETTING-STARTED.md)** — about ten
 minutes. The full design is [PLAN.md](PLAN.md), what is deferred and why is
-[ROADMAP.md](ROADMAP.md), and the decisions that had a real alternative are in
-[`.keel/store/decisions/`](.keel/store/decisions/ADR-0000-index.md).
+[ROADMAP.md](ROADMAP.md), the decisions that had a real alternative are in
+[`.keel/store/decisions/`](.keel/store/decisions/ADR-0000-index.md), and the
+threat model is [SECURITY.md](SECURITY.md).
 
 ---
 
@@ -147,7 +148,7 @@ sequenceDiagram
     A-->>K: keel.driverresult/1 + a diff
 
     K->>G: G2 — build, test, lint, every oracle, scope, budget, ratchet
-    K->>G: G2.5 — mocks added? tests untouched? reviewer findings?
+    K->>G: G2.5 — mocks added? tests untouched? findings graded — HIGH blocks?
     K->>G: G3 — earlier gates green, diff reviewable, human verdict
     G-->>You: one verdict per check, with its evidence
 

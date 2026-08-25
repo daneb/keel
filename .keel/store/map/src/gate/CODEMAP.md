@@ -12,7 +12,7 @@ generated: true
 
 10 files · 3137 lines · 183 symbols
 
-**`src/gate/mod.rs`** · 355 lines · imported by 12
+**`src/gate/mod.rs`** · 355 lines · imported by 13
 - `pub mod g0;` — `pass` is the gate theatre this whole design exists to prevent.  <sub>L13</sub>
 - `pub mod g1;`  <sub>L14</sub>
 - `pub mod g2;`  <sub>L15</sub>

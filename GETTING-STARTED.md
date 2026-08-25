@@ -119,9 +119,12 @@ keel run rate-limit --no-driver
 ```
 
 That runs G2 (build, test, lint, every oracle executed, diff inside scope, line
-budget, ratchet), G2.5 (mocks added? tests untouched?) and G3 (evidence
-complete, diff reviewable, human verdict). You get a verdict per check with the
-evidence behind it.
+budget, ratchet), G2.5 (mocks added? tests untouched? every configured
+`[[review]]` pass — a model, a scanner, both — graded for security defects,
+with `high`/`critical` failing the gate) and G3 (evidence complete, diff
+reviewable, human verdict). You get a verdict per check with the evidence
+behind it. See [SECURITY.md](SECURITY.md) for the full threat model and how
+to configure a reviewer.
 
 ```bash
 keel approve rate-limit --stage merge   # the G3 decision
