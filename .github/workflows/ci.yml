@@ -38,6 +38,15 @@ jobs:
       - name: Build
         run: cargo build --quiet
 
+      # The retrieval benchmark measures this repository's own index, because
+      # its task set names real symbols here -- a synthetic fixture would
+      # measure nothing. The index is a build artefact and gitignored, so a
+      # fresh checkout has none and the benchmark cannot run. Building it here
+      # is what makes CI verify the published 14.6x-at-100%-recall claim rather
+      # than skip past it.
+      - name: Build the symbol index
+        run: ./target/debug/keel map
+
       - name: Test
         run: cargo test --quiet
 
