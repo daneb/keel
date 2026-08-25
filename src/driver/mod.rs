@@ -24,6 +24,10 @@ use std::time::{Duration, Instant};
 /// driver is not held up, long enough not to spin.
 const POLL_INTERVAL: Duration = Duration::from_millis(25);
 
+/// How long to keep draining a timed-out driver's pipes before giving up on
+/// them. Killing the process group should already have closed both.
+const DRAIN_GRACE: Duration = Duration::from_millis(500);
+
 pub struct Invocation {
     pub result: DriverResult,
     pub elapsed: Duration,
@@ -102,12 +106,21 @@ pub fn run_in(
         let _ = stdin.write_all(payload.as_bytes());
     }
 
-    // Drain both pipes on their own threads. A driver that fills the 64KB pipe
-    // buffer deadlocks against a parent that waits before reading.
+    // Drain both pipes on their own threads: a driver that fills the 64KB pipe
+    // buffer deadlocks against a parent that waits before reading. They hand
+    // the text back over a channel rather than a JoinHandle, because a join
+    // cannot be given a deadline and the timeout path must not wait on a pipe
+    // that something surviving still holds open.
     let mut stdout_pipe = child.stdout.take();
     let mut stderr_pipe = child.stderr.take();
-    let stdout_reader = std::thread::spawn(move || read_all(&mut stdout_pipe));
-    let stderr_reader = std::thread::spawn(move || read_all(&mut stderr_pipe));
+    let (out_tx, out_rx) = std::sync::mpsc::channel();
+    let (err_tx, err_rx) = std::sync::mpsc::channel();
+    std::thread::spawn(move || {
+        let _ = out_tx.send(read_all(&mut stdout_pipe));
+    });
+    std::thread::spawn(move || {
+        let _ = err_tx.send(read_all(&mut stderr_pipe));
+    });
 
     // Poll for exit against the deadline, keeping the Child here so it can be
     // killed — `wait_with_output` gives that handle away and cannot be interrupted.
@@ -129,8 +142,21 @@ pub fn run_in(
         }
     }
 
-    let stdout = stdout_reader.join().unwrap_or_default();
-    let stderr = stderr_reader.join().unwrap_or_default().trim().to_string();
+    // A driver that exited on its own closed both pipes, so these arrive at
+    // once. After a timeout they may never arrive at all: killing the process
+    // group is meant to close them, and a surviving grandchild would keep
+    // stdout open regardless. Bounding the wait is what makes the timeout hold
+    // even when killing the tree did not work — losing a driver's dying words
+    // is a fair price for a deadline that is actually a deadline.
+    let (stdout, stderr) = if timed_out {
+        (
+            out_rx.recv_timeout(DRAIN_GRACE).unwrap_or_default(),
+            err_rx.recv_timeout(DRAIN_GRACE).unwrap_or_default(),
+        )
+    } else {
+        (out_rx.recv().unwrap_or_default(), err_rx.recv().unwrap_or_default())
+    };
+    let stderr = stderr.trim().to_string();
 
     if timed_out {
         let mut inv = blocked(
@@ -169,7 +195,16 @@ fn read_all<R: std::io::Read>(pipe: &mut Option<R>) -> String {
 /// processes that had nothing to do with keel.
 #[cfg(unix)]
 fn kill_group(child: &mut std::process::Child, pid: u32) {
-    let _ = Command::new("kill").args(["-KILL", &format!("-{pid}")]).output();
+    // `libc::kill` rather than shelling out to `kill -KILL -<pgid>`: a negative
+    // pid means "the whole process group" to the syscall, unambiguously, while
+    // the *command* spells that differently across implementations — BSD kill
+    // accepts `-KILL -123`, procps-ng reads the second argument as another
+    // option and needs `-s KILL -- -123`. Shelling out therefore killed the
+    // group on macOS and silently did nothing on Linux, where the surviving
+    // grandchild held stdout open and the timeout stopped being a timeout.
+    unsafe {
+        libc::kill(-(pid as i32), libc::SIGKILL);
+    }
     let _ = child.kill();
 }
 
