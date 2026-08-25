@@ -126,6 +126,13 @@ fn reviewer_findings(
         return Ok(vec![Check::blocked("reviewer", why)]);
     }
 
+    // Written on every path, including the empty one: a run that finds nothing
+    // must change the file too, so an acceptance recorded against yesterday's
+    // HIGH does not sit there looking current.
+    let security: Vec<&crate::review::Finding> =
+        review.result.findings.iter().filter(|f| f.grade.is_some()).collect();
+    record_security_findings(paths, &spec.front.slug, &security)?;
+
     if review.result.findings.is_empty() {
         let mut c = Check::pass(
             "reviewer",
@@ -141,6 +148,13 @@ fn reviewer_findings(
 
     // One check per finding, so each is separately visible on the gate report
     // and separately classifiable by the Phase 3 taxonomy.
+    // A person may accept the graded findings as they stand. The acceptance is
+    // bound to this exact set, so tomorrow's different HIGH supersedes it.
+    let accepted = matches!(
+        crate::approval::standing(paths, &spec.front.slug, "security"),
+        Ok(crate::approval::Standing::Current { .. })
+    );
+
     let mut out = Vec::new();
     let took = format!("{:.1}s", review.elapsed.as_secs_f64());
     for f in &review.result.findings {
@@ -149,17 +163,74 @@ fn reviewer_findings(
             "" => f.detail.clone(),
             w => format!("{w} — {}", f.detail),
         };
-        let mut check = if f.severity == crate::review::Severity::Fail && !reviewer.advisory {
-            Check::fail(&id, "no defect of this kind", format!("{detail} [reviewed in {took}]"))
-        } else {
+
+        let mut check = match f.grade {
+            // A graded finding is a security finding, and grade decides, not
+            // severity: HIGH and CRITICAL are defects, the rest are a look.
+            // Grading and blocking are separate axes on purpose — see
+            // review::Grade.
+            Some(g) if g.blocks() => {
+                let detail = format!("[{}] {detail}", g.label());
+                if reviewer.advisory {
+                    Check::blocked(&id, detail)
+                } else if accepted {
+                    Check::pass(&id, format!("{detail} — accepted at --stage security"))
+                } else {
+                    Check::fail(
+                        &id,
+                        "no high-severity security finding in this change",
+                        format!(
+                            "{detail} [reviewed in {took}] — fix it, or accept these findings \
+                             deliberately with `keel approve --stage security {}`",
+                            spec.front.slug
+                        ),
+                    )
+                }
+            }
+            Some(g) => Check::blocked(&id, format!("[{}] {detail}", g.label())),
+            None if f.severity == crate::review::Severity::Fail && !reviewer.advisory => {
+                Check::fail(&id, "no defect of this kind", format!("{detail} [reviewed in {took}]"))
+            }
             // Advisory mode, or the reviewer's own "concern": a look, not a block.
-            Check::blocked(&id, detail)
+            None => Check::blocked(&id, detail),
         };
         check.evidence = Some(evidence.clone());
         check.from = Some("reviewer".into());
         out.push(check);
     }
     Ok(out)
+}
+
+/// Record which security findings exist, for an approval to bind to.
+///
+/// Identity only — category, grade, file and line — sorted, so the same
+/// findings hash the same however the reviewer ordered or worded them this run.
+/// The prose lives in the run's `review.json`, which is evidence rather than a
+/// hash target.
+fn record_security_findings(
+    paths: &Paths,
+    slug: &str,
+    findings: &[&crate::review::Finding],
+) -> Result<()> {
+    let mut rows: Vec<serde_json::Value> = findings
+        .iter()
+        .map(|f| {
+            serde_json::json!({
+                "id": f.id,
+                "grade": f.grade,
+                "file": f.file,
+                "line": f.line,
+            })
+        })
+        .collect();
+    rows.sort_by_key(|v| v.to_string());
+
+    let path = crate::approval::security_findings_path(paths, slug);
+    if let Some(dir) = path.parent() {
+        std::fs::create_dir_all(dir)?;
+    }
+    std::fs::write(&path, format!("{}\n", serde_json::to_string_pretty(&rows)?))?;
+    Ok(())
 }
 
 /// Look for mocks and weakened assertions *added* by this change.

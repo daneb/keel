@@ -88,6 +88,68 @@ the declared scope regardless of what the agent believed it was doing.
 
 ---
 
+## Reviewing the code keel helps produce
+
+The studies are consistent that AI-generated code carries security defects at a
+meaningful rate, and keel exists to put agents to work. So G2.5 reviews the
+**diff** for security defects — the added and modified lines, not the repository
+around them. Pre-existing weaknesses are not this change's findings, and
+reporting them buries the ones that are.
+
+The reviewer grades what it finds, and the grade decides what happens:
+
+| Grade | Meaning | Effect |
+| --- | --- | --- |
+| `critical` | Exploitable as written | **G2.5 fails** |
+| `high` | Exploitable given a reachable caller | **G2.5 fails** |
+| `medium` | Needs a condition not shown in the diff | Recorded, does not block |
+| `low` | Hardening | Recorded, does not block |
+
+Categories the reviewer is asked for: `injection`, `authz`, `crypto`,
+`secret-exposure`, `unsafe-input`, `resource-exhaustion`.
+
+Grading and blocking are deliberately separate axes. `severity` in
+`keel.reviewresult/1` says whether a finding blocks; `grade` says how dangerous
+it is. A hardcoded credential and a missing hardening comment are not the same
+thing, and one fail/concern flag cannot say so.
+
+### When a HIGH is found
+
+Fix it. That is the expected path and there is no shortcut worth taking instead.
+
+When it is genuinely a false positive, or genuinely not reachable, accept it
+deliberately and on the record:
+
+```sh
+keel approve --stage security <slug> --note "why this is not exploitable here"
+```
+
+The acceptance binds to the SHA-256 of `security-findings.json`, which records
+finding **identity** — category, grade, file and line — and not the reviewer's
+prose. Two consequences, both intended:
+
+- Rewording is not a new finding. The same defect described differently next
+  week does not spuriously re-open a decision you already made.
+- **A different finding is not covered by an old acceptance.** A new `high` at
+  another line changes the file, supersedes the approval, and fails the gate
+  again. You cannot accept one HIGH and inherit that acceptance over the next
+  one.
+
+Fixing the findings empties the file, which also supersedes the acceptance —
+so a stale approval never sits there looking current.
+
+### What this does not do
+
+The reviewer is a language model reading a diff. It finds what a careful
+reviewer reading the same diff would find, and misses what they would miss. It
+is not a substitute for a SAST tool over the whole repository, for dependency
+scanning (`cargo-audit` covers that at G2), or for a penetration test. A
+deterministic scanner over changed files is the intended next layer, and is not
+built yet.
+
+Set `advisory = true` under `[review]` to grade without blocking while you are
+calibrating the reviewer on an existing codebase.
+
 ## What keel does defend
 
 These are deliberate, tested properties rather than incidental ones:
@@ -116,5 +178,7 @@ Named so the absence is a known state rather than an assumption:
 - No license or dependency-source policy (`cargo-deny` is not wired in).
 - No fuzzing of the parsers that take untrusted input, most importantly the
   driver result parser.
+- No deterministic SAST over changed files. The G2.5 security review is a model
+  reading the diff; a pattern-based scanner alongside it is the next layer.
 - The `cfg(windows)` branches compile but are unexercised; keel is developed and
   tested on macOS, and CI runs Linux.

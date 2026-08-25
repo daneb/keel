@@ -53,8 +53,24 @@ pub fn artefact_path(paths: &Paths, slug: &str, stage: &str) -> PathBuf {
         // precise: acknowledge these doubles, and a newly added one supersedes
         // the acknowledgement instead of inheriting it.
         "review" => review_flags_path(paths, slug),
+        // Likewise for security: accepting a HIGH accepts *those* findings, and
+        // a different one supersedes the acceptance rather than inheriting it.
+        "security" => security_findings_path(paths, slug),
         _ => Spec::path_for(paths, slug),
     }
+}
+
+/// Where G2.5 records the security findings the reviewer graded.
+///
+/// Deliberately holds finding *identity* — category, grade and location — and
+/// not the reviewer's prose. A model rewords the same finding between runs, and
+/// an approval that hashed the wording would be superseded by a synonym while
+/// missing an actual new finding at the same location.
+pub fn security_findings_path(paths: &Paths, slug: &str) -> PathBuf {
+    Spec::path_for(paths, slug)
+        .parent()
+        .unwrap_or(&paths.repo)
+        .join("security-findings.json")
 }
 
 /// Where G2.5 records the lines its test-invalidation heuristic flagged.
@@ -66,7 +82,7 @@ pub fn review_flags_path(paths: &Paths, slug: &str) -> PathBuf {
 }
 
 /// Stages a human can sign off on, in pipeline order.
-pub const STAGES: &[&str] = &["spec", "plan", "review", "merge"];
+pub const STAGES: &[&str] = &["spec", "plan", "review", "security", "merge"];
 
 /// Hash of the artefact a stage signs off on. For the plan stage this covers
 /// `tasks.md` too — approving a plan whose task list can then change freely

@@ -51,11 +51,52 @@ pub enum Severity {
     Concern,
 }
 
+/// How bad a finding is, separately from whether it blocks.
+///
+/// `severity` is policy — does this stop the gate. `grade` is assessment — how
+/// dangerous is it. They are different axes and conflating them is why security
+/// findings are usually either all-blocking or all-advisory: a hardcoded
+/// credential and a missing `# nosec` comment are not the same thing, and a
+/// single fail/concern flag cannot say so.
+///
+/// Added rather than folded into `Severity` because `keel.reviewresult/1` is
+/// frozen and additive-only. An optional field a reviewer may omit is additive;
+/// new variants on an existing enum would break every reviewer that does not
+/// know them.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Grade {
+    Low,
+    Medium,
+    High,
+    Critical,
+}
+
+impl Grade {
+    /// Grades that fail a gate rather than merely being recorded.
+    pub fn blocks(&self) -> bool {
+        matches!(self, Grade::High | Grade::Critical)
+    }
+
+    pub fn label(&self) -> &'static str {
+        match self {
+            Grade::Low => "LOW",
+            Grade::Medium => "MEDIUM",
+            Grade::High => "HIGH",
+            Grade::Critical => "CRITICAL",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Finding {
     /// Short kebab-case category, e.g. `test-invalidation`.
     pub id: String,
     pub severity: Severity,
+    /// How dangerous, where the reviewer graded it. Absent on findings that are
+    /// not security-relevant, which is most of them.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub grade: Option<Grade>,
     pub detail: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file: Option<String>,
@@ -100,13 +141,38 @@ finding: the suite is green and the code is wrong.
   convention-breach — a violation of the house rules or a lesson listed below.
   missing-coverage — a stated criterion with no corresponding test change.
 
+Then review the same diff for SECURITY defects, which are graded separately. \
+Judge only the added and modified lines — pre-existing weaknesses are not this \
+change's findings, and reporting them buries the ones that are. Categories:
+  injection — untrusted input reaching a shell, SQL, a template, a path, or a \
+deserialiser without validation or parameterisation.
+  authz — a check that is missing, applied after the effect, or trivially \
+bypassable.
+  crypto — home-rolled cryptography, a weak or fixed algorithm, a predictable \
+seed, a hardcoded key or IV.
+  secret-exposure — a credential in source, in a log line, in an error message, \
+or written to a file the repository commits.
+  unsafe-input — a parser or decoder handed untrusted bytes with no bound on \
+size, depth, or recursion.
+  resource-exhaustion — an unbounded allocation, read, or loop driven by input \
+the caller controls.
+
 Reply with one JSON object and nothing else:
-{\"schema\":\"keel.reviewresult/1\",\"findings\":[{\"id\":\"test-invalidation\",\
-\"severity\":\"fail\",\"detail\":\"<what and why>\",\"file\":\"<path>\",\"line\":<n>}],\
-\"summary\":\"<one sentence>\"}
+{\"schema\":\"keel.reviewresult/1\",\"findings\":[{\"id\":\"injection\",\
+\"severity\":\"fail\",\"grade\":\"high\",\"detail\":\"<what and why>\",\
+\"file\":\"<path>\",\"line\":<n>}],\"summary\":\"<one sentence>\"}
 
 severity is \"fail\" for a defect that should block, \"concern\" for something a \
-human should look at. An empty findings list is a valid and common answer.";
+human should look at.
+
+grade is required on every security finding and omitted on the others. Use \
+\"critical\" for a defect that is exploitable as written, \"high\" for one \
+exploitable given a reachable caller, \"medium\" where exploitation needs a \
+condition not shown in the diff, \"low\" for hardening. Grade what the diff \
+shows, not what you imagine around it: an inflated grade spends a human's \
+attention, and spending it twice on nothing is how the check gets turned off.
+
+An empty findings list is a valid and common answer.";
 
 pub struct Review {
     pub result: ReviewResult,
@@ -307,6 +373,45 @@ mod tests {
             "summary": "one weakened test"
         })
         .to_string()
+    }
+
+    #[test]
+    fn a_graded_security_finding_round_trips() {
+        let raw = serde_json::json!({
+            "schema": RESULT_SCHEMA,
+            "findings": [{
+                "id": "injection",
+                "severity": "fail",
+                "grade": "high",
+                "detail": "task.repo is interpolated into a shell string",
+                "file": "src/driver/mod.rs",
+                "line": 73
+            }],
+            "summary": "one injection"
+        })
+        .to_string();
+        let r = parse_result(&raw).unwrap();
+        assert_eq!(r.findings[0].grade, Some(Grade::High));
+        assert!(r.findings[0].grade.unwrap().blocks());
+    }
+
+    #[test]
+    fn grade_is_optional_so_older_reviewers_still_parse() {
+        // `grade` was added to a frozen schema. A reviewer that has never heard
+        // of it must keep working, or the freeze meant nothing.
+        let r = parse_result(&good()).unwrap();
+        assert_eq!(r.findings[0].grade, None);
+    }
+
+    #[test]
+    fn only_high_and_critical_block() {
+        assert!(!Grade::Low.blocks());
+        assert!(!Grade::Medium.blocks());
+        assert!(Grade::High.blocks());
+        assert!(Grade::Critical.blocks());
+        // Ordered, so a caller can ask for "at least high".
+        assert!(Grade::Critical > Grade::High);
+        assert!(Grade::High > Grade::Medium);
     }
 
     #[test]

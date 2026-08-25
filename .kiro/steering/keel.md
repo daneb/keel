@@ -1,4 +1,4 @@
-<!-- keel:generated schema=keel.projection/1 adapter=kiro store=ccb05b592056 body=1b2bacfaa073 -->
+<!-- keel:generated schema=keel.projection/1 adapter=kiro store=1819cbb7a2ab body=b699e1515dd2 -->
 <!-- Source of truth: .keel/store/ — regenerate with `keel store render`. Edits here are drift and will be reported by `keel store check`. -->
 
 # Project context
@@ -49,24 +49,24 @@ _Versions that cannot move, platforms that must keep working, dependencies that 
 
 ## Repository map
 
-**85 files · 1468 symbols · 22354 lines** — rust 85
+**85 files · 1477 symbols · 22546 lines** — rust 85
 
 Files are ordered by import-graph centrality, not alphabetically. Signatures only; read a body with the file path and line number. Per-directory detail lives in `.keel/store/map/<dir>/CODEMAP.md`.
 
 ### Layout
 
-- `src/` — 8 files, 2661 lines · paths.rs, config.rs, hashing.rs
+- `src/` — 8 files, 2677 lines · paths.rs, config.rs, hashing.rs
 - `src/cmd/` — 21 files, 3510 lines · mod.rs, run.rs, learn.rs
 - `src/driver/` — 4 files, 1036 lines · mod.rs, contract.rs, conform.rs
 - `src/evidence/` — 2 files, 423 lines · mod.rs, manifest.rs
 - `src/failure/` — 2 files, 767 lines · mod.rs, taxonomy.rs
-- `src/gate/` — 10 files, 3031 lines · mod.rs, ratchet.rs, g1.rs
+- `src/gate/` — 10 files, 3102 lines · mod.rs, ratchet.rs, g1.rs
 - `src/lesson/` — 2 files, 826 lines · mod.rs, usage.rs
 - `src/map/` — 9 files, 2566 lines · lang.rs, extract.rs, db.rs
 - `src/mcp/` — 1 file, 271 lines · mod.rs
 - `src/projection/` — 3 files, 715 lines · drift.rs, mod.rs, sections.rs
 - `src/retrieve/` — 3 files, 763 lines · mod.rs, fallback.rs, budget.rs
-- `src/review/` — 1 file, 366 lines · mod.rs
+- `src/review/` — 1 file, 471 lines · mod.rs
 - `src/spec/` — 4 files, 1187 lines · mod.rs, ears.rs, oracle.rs
 - `src/store/` — 2 files, 314 lines · mod.rs, frontmatter.rs
 - `src/trajectory/` — 2 files, 462 lines · event.rs, mod.rs
