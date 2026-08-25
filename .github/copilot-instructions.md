@@ -1,4 +1,4 @@
-<!-- keel:generated schema=keel.projection/1 adapter=copilot store=2e9dd48231c1 body=133be122d953 -->
+<!-- keel:generated schema=keel.projection/1 adapter=copilot store=ccb05b592056 body=075422e6be50 -->
 <!-- Source of truth: .keel/store/ — regenerate with `keel store render`. Edits here are drift and will be reported by `keel store check`. -->
 
 # Project context
@@ -49,7 +49,7 @@ _Versions that cannot move, platforms that must keep working, dependencies that 
 
 ## Repository map
 
-**85 files · 1467 symbols · 22319 lines** — rust 85
+**85 files · 1468 symbols · 22354 lines** — rust 85
 
 Files are ordered by import-graph centrality, not alphabetically. Signatures only; read a body with the file path and line number. Per-directory detail lives in `.keel/store/map/<dir>/CODEMAP.md`.
 
@@ -57,7 +57,7 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 
 - `src/` — 8 files, 2661 lines · paths.rs, config.rs, hashing.rs
 - `src/cmd/` — 21 files, 3510 lines · mod.rs, run.rs, learn.rs
-- `src/driver/` — 4 files, 1001 lines · mod.rs, contract.rs, conform.rs
+- `src/driver/` — 4 files, 1036 lines · mod.rs, contract.rs, conform.rs
 - `src/evidence/` — 2 files, 423 lines · mod.rs, manifest.rs
 - `src/failure/` — 2 files, 767 lines · mod.rs, taxonomy.rs
 - `src/gate/` — 10 files, 3031 lines · mod.rs, ratchet.rs, g1.rs

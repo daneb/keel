@@ -1,0 +1,14 @@
+[
+  {
+    "id": "clippy-warnings",
+    "direction": "down",
+    "value": 0,
+    "baseline": 0
+  },
+  {
+    "id": "tests-passing",
+    "direction": "up",
+    "value": 374,
+    "baseline": 358
+  }
+]

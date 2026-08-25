@@ -1,0 +1,11 @@
+{
+  "schema": "keel.run/1",
+  "id": "2026-08-25-696",
+  "spec": "evidence-bundle",
+  "keel_version": "0.3.1",
+  "store_hash": "2e9dd48231c1573753207ec94a77ba0e9ab4f933256c7744efc549bc94c76663",
+  "started_at": "2026-08-25T10:58:54.003817+02:00",
+  "finished_at": "2026-08-25T10:59:52.938563+02:00",
+  "verdict": "fail",
+  "base_commit": "7a389d5f3ec9bd9cce63f5042199959d3309db33"
+}

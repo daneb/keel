@@ -75,3 +75,32 @@ jobs:
             blocked) echo "::warning::advisory check could not run — see the detail above" ;;
             *)       echo "::error::known advisories in the dependency tree"; exit 1 ;;
           esac
+
+  secrets:
+    name: secrets
+    runs-on: ubuntu-latest
+    steps:
+      # Full history: the check scans every commit, and a shallow clone would
+      # quietly reduce that to "the tip looked fine".
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install gitleaks
+        run: |
+          version=8.30.1
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${version}/gitleaks_${version}_linux_x64.tar.gz" \
+            | tar -xz -C /usr/local/bin gitleaks
+          gitleaks version
+
+      # The same check plugin G2 runs, so the two cannot drift.
+      - name: Scan for credentials
+        run: |
+          result="$(./.keel/checks/secrets)"
+          echo "$result"
+          verdict="$(printf '%s' "$result" | python3 -c 'import json,sys; print(json.load(sys.stdin)["verdict"])')"
+          case "$verdict" in
+            pass)    echo "::notice::no credentials found" ;;
+            blocked) echo "::warning::the secret scan could not run — see the detail above" ;;
+            *)       echo "::error::credentials found in the repository"; exit 1 ;;
+          esac

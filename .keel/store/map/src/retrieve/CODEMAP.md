@@ -2,7 +2,7 @@
 id: MAP-src-retrieve
 scope: dir:src/retrieve
 owner: agent
-verified_at: 2026-08-24
+verified_at: 2026-08-25
 generated: true
 ---
 

@@ -2,7 +2,7 @@
 id: MAP-src-store
 scope: dir:src/store
 owner: agent
-verified_at: 2026-08-24
+verified_at: 2026-08-25
 generated: true
 ---
 

@@ -137,3 +137,10 @@ timeout_secs = 900
 [[gate.G2.check]]
 id = "cargo-audit"
 cmd = ".keel/checks/cargo-audit"
+
+# `keel run` commits build/test/lint/driver output as evidence, so a secret any
+# of those commands prints becomes a committed artefact. This is the check that
+# stops the audit trail becoming the leak. See SECURITY.md.
+[[gate.G2.check]]
+id = "secrets"
+cmd = ".keel/checks/secrets"

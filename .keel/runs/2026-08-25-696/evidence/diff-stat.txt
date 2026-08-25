@@ -1,0 +1,12 @@
+    27      0  .github/dependabot.yml
+    87      0  .keel/checks/secrets
+     7      0  .keel/keel.toml
+     2      0  .keel/runs/2026-08-25-696/evidence/build.txt
+     2      0  .keel/runs/2026-08-25-696/evidence/lint.txt
+    56      0  .keel/runs/2026-08-25-696/evidence/oracles.json
+    64      0  .keel/runs/2026-08-25-696/evidence/test.txt
+     9      0  .keel/runs/2026-08-25-696/run.json
+    15      0  .keel/runs/2026-08-25-696/trajectory.jsonl
+   120      0  SECURITY.md
+
+10 file(s), +389 -0 (389 lines of churn) against 7a389d5f3ec9bd9cce63f5042199959d3309db33

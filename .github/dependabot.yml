@@ -1,0 +1,27 @@
+# Dependency updates.
+#
+# keel gates advisories at G2 (.keel/checks/cargo-audit) and re-checks weekly in
+# CI, but an advisory only tells you a dependency became dangerous. This is the
+# other half: keeping 280-odd transitive crates from silently ageing until the
+# day one of them does.
+#
+# Grouped, because twelve separate patch PRs a week is how people learn to
+# ignore the bot.
+version: 2
+updates:
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      patch-and-minor:
+        update-types: [minor, patch]
+
+  # The workflow pins its own actions; those age too, and a stale action is how
+  # a Node 20 deprecation warning becomes a broken pipeline.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
