@@ -74,12 +74,8 @@ pub fn run(
 /// must not silently pass one.
 /// One completed review pass — the model reviewer, the SAST scanner, or both.
 struct Pass {
-    /// Check id for the pass as a whole, when it has nothing to report.
-    label: &'static str,
-    /// Prefix for each finding's check id. Not the same string as `label`:
-    /// the summary check is `reviewer`, its findings are `review:<id>`, and
-    /// those ids are load-bearing for anything reading a gate report.
-    prefix: &'static str,
+    /// The reviewer's configured id: names the pass, prefixes its findings.
+    label: String,
     findings: Vec<crate::review::Finding>,
     evidence: String,
     advisory: bool,
@@ -98,13 +94,7 @@ fn reviewer_findings(
     // things and miss different things, so neither substitutes for the other,
     // and running them through one pipeline is what keeps the grading scale and
     // the acceptance identical for both.
-    let slots: Vec<(&'static str, &'static str, &crate::config::Reviewer, &str)> = [
-        cfg.review.as_ref().map(|r| ("reviewer", "review", r, "review.json")),
-        cfg.sast.as_ref().map(|r| ("sast", "sast", r, "sast.json")),
-    ]
-    .into_iter()
-    .flatten()
-    .collect();
+    let slots = &cfg.reviewers;
 
     if slots.is_empty() {
         return Ok(vec![Check::pass(
@@ -146,10 +136,14 @@ fn reviewer_findings(
     let mut out = Vec::new();
     let mut passes = Vec::new();
 
-    for (label, prefix, slot, evidence_name) in slots {
+    for slot in slots {
+        // One id names the pass, its findings and its evidence, so a gate
+        // report reads back to a line of config.
+        let label = slot.id.as_str();
+        let evidence_name = format!("{label}.json");
         let review = crate::review::run(paths, slot, &request);
         let evidence =
-            run.write_evidence(evidence_name, &serde_json::to_string_pretty(&review.result)?)?;
+            run.write_evidence(&evidence_name, &serde_json::to_string_pretty(&review.result)?)?;
         let took = format!("{:.1}s", review.elapsed.as_secs_f64());
 
         if let Some(why) = review.blocked {
@@ -169,8 +163,7 @@ fn reviewer_findings(
             continue;
         }
         passes.push(Pass {
-            label,
-            prefix,
+            label: label.to_string(),
             findings: review.result.findings,
             evidence,
             advisory: slot.advisory,
@@ -198,7 +191,7 @@ fn reviewer_findings(
 
     for pass in &passes {
         for f in &pass.findings {
-            let id = format!("{}:{}", pass.prefix, f.id);
+            let id = format!("{}:{}", pass.label, f.id);
             let detail = match f.where_().as_str() {
                 "" => f.detail.clone(),
                 w => format!("{w} — {}", f.detail),
@@ -236,7 +229,7 @@ fn reviewer_findings(
                 None => Check::blocked(&id, detail),
             };
             check.evidence = Some(pass.evidence.clone());
-            check.from = Some(pass.label.into());
+            check.from = Some(pass.label.clone());
             out.push(check);
         }
     }

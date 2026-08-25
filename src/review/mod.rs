@@ -423,6 +423,7 @@ mod tests {
 
         let paths = Paths { repo: dir.clone() };
         let reviewer = Reviewer {
+            id: "sast".into(),
             cmd: script.to_string_lossy().to_string(),
             timeout_secs: 30,
             advisory: false,

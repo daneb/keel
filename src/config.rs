@@ -41,18 +41,15 @@ pub struct Config {
     pub learn: LearnConfig,
     #[serde(default)]
     pub retrieve: RetrieveConfig,
-    /// An adversarial reviewer for G2.5. Absent means the heuristics stand alone.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub review: Option<Reviewer>,
-    /// A deterministic scanner over the diff, run alongside `review`.
+    /// Adversarial review passes over the diff (PLAN.md G2.5).
     ///
-    /// Same shape and same contract as a reviewer, because it is the same
-    /// contract: a subprocess handed `keel.reviewrequest/1` that answers with
-    /// `keel.reviewresult/1`. Only the producer differs -- patterns rather than
-    /// a model -- and its findings are graded, recorded and accepted through
-    /// exactly the same path, so there is one process rather than two.
-    #[serde(default)]
-    pub sast: Option<Reviewer>,
+    /// An array, not a set of named slots. keel does not need to know that one
+    /// of these is a model and another is a pattern scanner — they answer the
+    /// same contract, and naming a `[sast]` slot in the spine would mean any
+    /// third kind of reviewer required a change to keel itself. P7: the
+    /// extension surface is wide, the spine is small.
+    #[serde(default, rename = "review", skip_serializing_if = "Vec::is_empty")]
+    pub reviewers: Vec<Reviewer>,
     /// Stores shared across repositories — platform conventions and lessons.
     #[serde(default, rename = "shared")]
     pub shared: Vec<SharedStore>,
@@ -84,6 +81,10 @@ pub struct SharedStore {
 /// A second agent pass, run in critique mode over the diff (PLAN.md G2.5).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Reviewer {
+    /// Names this pass on the gate report, prefixes each of its findings, and
+    /// names its evidence file. Config-supplied so a third reviewer needs no
+    /// change to keel.
+    pub id: String,
     pub cmd: String,
     #[serde(default = "default_review_timeout")]
     pub timeout_secs: u64,
@@ -356,8 +357,7 @@ impl Default for Config {
             oracle: OracleConfig::default(),
             learn: LearnConfig::default(),
             retrieve: RetrieveConfig::default(),
-            review: None,
-            sast: None,
+            reviewers: vec![],
             shared: vec![],
             ratchets: default_ratchets(),
         }

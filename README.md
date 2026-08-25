@@ -278,7 +278,7 @@ Three subprocess contracts, all JSON, all language-agnostic.
 | --- | --- | --- |
 | **Gate check** | prints a `Check` on stdout | `[[gate.G2.check]]` in `keel.toml` |
 | **Agent driver** | `keel.drivertask/1` in → `keel.driverresult/1` out | a ~40-line adapter + `[[driver]]` |
-| **Reviewer** | `keel.reviewrequest/1` in → `keel.reviewresult/1` out | `[review]` in `keel.toml` |
+| **Reviewer** | `keel.reviewrequest/1` in → `keel.reviewresult/1` out | a `[[review]]` entry — a model, a scanner, as many as you like |
 | **Shared store** | another repo's `.keel/store` | `[[shared]]` — path or submodule |
 
 `keel driver check <id>` runs any driver through conformance probes in a

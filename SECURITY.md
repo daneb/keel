@@ -138,29 +138,34 @@ prose. Two consequences, both intended:
 Fixing the findings empties the file, which also supersedes the acceptance —
 so a stale approval never sits there looking current.
 
-### Two passes, one process
+### As many reviewers as you configure
 
-Findings come from two places, and both are graded, recorded and accepted
-through exactly the same path — there is one process, not two:
-
-| Slot | What it is | Finds |
-| --- | --- | --- |
-| `[review]` | a model reading the diff | logic and context: an authorisation check applied after the effect, a bound nobody enforces |
-| `[sast]` | semgrep over the changed files | known patterns: injection, weak crypto, unsafe deserialisation |
-
-Neither substitutes for the other. Enable the scanner with:
+`[[review]]` is an array. Every entry is a subprocess answering the same
+contract — `keel.reviewrequest/1` in, `keel.reviewresult/1` out — and keel does
+not care whether a model, a pattern scanner, or your own script produced the
+findings. They are graded, recorded and accepted through one path.
 
 ```toml
-[sast]
-cmd = ".keel/sast/semgrep"
+[[review]]
+id = "model"                    # logic and context: an authorisation check
+cmd = ".keel/reviewers/claude"  # applied after the effect, a bound nobody enforces
+
+[[review]]
+id = "semgrep"                  # known patterns: injection, weak crypto,
+cmd = ".keel/sast/semgrep"      # unsafe deserialisation
 timeout_secs = 300
-advisory = false
 ```
 
-`keel init` writes that adapter; `keel driver scaffold` adds it to a repository
-initialised before it existed. It scans **only the files the diff touches** — a
-repository-wide scan reports everything already there, which buries the findings
-this change is responsible for.
+The `id` names the pass on the gate report, prefixes its findings
+(`semgrep:subprocess-shell-true`) and names its evidence file. Adding a third
+reviewer — `gosec`, `bandit`, a house-style script — is a config entry, never a
+change to keel.
+
+**keel ships no scanner.** The semgrep adapter is a 4.8KB script; semgrep itself
+is yours to install, and if it is not on `PATH` the check reports `blocked`. It
+scans **only the files the diff touches** — a repository-wide scan reports
+everything already there, which buries the findings this change is responsible
+for.
 
 Two things to know about semgrep specifically. Its registry rulesets (`p/...`)
 are fetched over the network on first use; set `SEMGREP_RULES` to a vendored
@@ -168,7 +173,7 @@ local ruleset to run fully offline. And the adapter never passes
 `--config auto`, which would send project metadata to semgrep.dev;
 `--metrics=off` is always set.
 
-If either scanner cannot run, its check is `blocked`, never `pass`. "We did not
+If a reviewer cannot run, its check is `blocked`, never `pass`. "We did not
 look" and "we looked and it is clean" are not the same verdict.
 
 ### What this does not do

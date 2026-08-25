@@ -26,10 +26,14 @@ fn install_reviewer(r: &Repo, script: &str, advisory: bool) {
     }
     r.edit_config(|cfg| {
         let mut t = toml::value::Table::new();
+        // The id names the check, its findings and its evidence file.
+        t.insert("id".into(), toml::Value::String("review".into()));
         t.insert("cmd".into(), toml::Value::String(".keel/reviewers/test".into()));
         t.insert("timeout_secs".into(), toml::Value::Integer(10));
         t.insert("advisory".into(), toml::Value::Boolean(advisory));
-        cfg.as_table_mut().unwrap().insert("review".into(), toml::Value::Table(t));
+        cfg.as_table_mut()
+            .unwrap()
+            .insert("review".into(), toml::Value::Array(vec![toml::Value::Table(t)]));
     });
 }
 
@@ -125,7 +129,7 @@ fn a_clean_review_passes_and_reports_how_long_it_took() {
     install_reviewer(&r, &scripted_reviewer("[]"), false);
     let (code, out) = r.run(&["run", "demo"]);
     assert_eq!(code, 0, "{out}");
-    assert!(out.contains("pass     reviewer"), "{out}");
+    assert!(out.contains("pass     review"), "{out}");
     assert!(out.contains("s)"), "the review duration is not reported:\n{out}");
 }
 
@@ -134,13 +138,16 @@ fn a_reviewer_that_cannot_run_blocks_rather_than_passes() {
     let r = ready("reviewer-missing");
     r.edit_config(|cfg| {
         let mut t = toml::value::Table::new();
+        t.insert("id".into(), toml::Value::String("review".into()));
         t.insert("cmd".into(), toml::Value::String("./not-a-reviewer".into()));
         t.insert("timeout_secs".into(), toml::Value::Integer(5));
-        cfg.as_table_mut().unwrap().insert("review".into(), toml::Value::Table(t));
+        cfg.as_table_mut()
+            .unwrap()
+            .insert("review".into(), toml::Value::Array(vec![toml::Value::Table(t)]));
     });
     let (code, out) = r.run(&["run", "demo"]);
     assert_eq!(code, 3, "a missing reviewer passed silently:\n{out}");
-    assert!(out.contains("BLOCKED  reviewer"), "{out}");
+    assert!(out.contains("BLOCKED  review"), "{out}");
     assert!(out.contains("could not start"), "{out}");
 }
 
@@ -151,7 +158,7 @@ fn a_reviewer_that_prints_nonsense_blocks_rather_than_fails() {
     install_reviewer(&r, "#!/bin/sh\ncat > /dev/null\necho 'I have opinions'\n", false);
     let (code, out) = r.run(&["run", "demo"]);
     assert_eq!(code, 3, "{out}");
-    assert!(out.contains("BLOCKED  reviewer"), "{out}");
+    assert!(out.contains("BLOCKED  review"), "{out}");
     assert!(out.contains("not JSON"), "{out}");
 }
 

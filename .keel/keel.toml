@@ -65,7 +65,8 @@ sections = [
 ]
 enabled = true
 
-[review]
+[[review]]
+id = "review"
 cmd = ".keel/reviewers/heuristic"
 timeout_secs = 60
 advisory = false

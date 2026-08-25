@@ -1,4 +1,4 @@
-<!-- keel:generated schema=keel.projection/1 adapter=kiro store=a11c2a0b32c7 body=35bd33854d2f -->
+<!-- keel:generated schema=keel.projection/1 adapter=kiro store=c54c58f9f38a body=f46b40c45a44 -->
 <!-- Source of truth: .keel/store/ — regenerate with `keel store render`. Edits here are drift and will be reported by `keel store check`. -->
 
 # Project context
@@ -49,7 +49,7 @@ _Versions that cannot move, platforms that must keep working, dependencies that 
 
 ## Repository map
 
-**85 files · 1481 symbols · 22706 lines** — rust 85
+**85 files · 1481 symbols · 22707 lines** — rust 85
 
 Files are ordered by import-graph centrality, not alphabetically. Signatures only; read a body with the file path and line number. Per-directory detail lives in `.keel/store/map/<dir>/CODEMAP.md`.
 
@@ -60,17 +60,17 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `src/driver/` — 4 files, 1071 lines · mod.rs, contract.rs, conform.rs
 - `src/evidence/` — 2 files, 423 lines · mod.rs, manifest.rs
 - `src/failure/` — 2 files, 767 lines · mod.rs, taxonomy.rs
-- `src/gate/` — 10 files, 3144 lines · mod.rs, ratchet.rs, g1.rs
+- `src/gate/` — 10 files, 3137 lines · mod.rs, ratchet.rs, g1.rs
 - `src/lesson/` — 2 files, 826 lines · mod.rs, usage.rs
 - `src/map/` — 9 files, 2566 lines · lang.rs, extract.rs, db.rs
 - `src/mcp/` — 1 file, 271 lines · mod.rs
 - `src/projection/` — 3 files, 715 lines · drift.rs, mod.rs, sections.rs
 - `src/retrieve/` — 3 files, 763 lines · mod.rs, fallback.rs, budget.rs
-- `src/review/` — 1 file, 544 lines · mod.rs
+- `src/review/` — 1 file, 545 lines · mod.rs
 - `src/spec/` — 4 files, 1187 lines · mod.rs, ears.rs, oracle.rs
 - `src/store/` — 2 files, 314 lines · mod.rs, frontmatter.rs
 - `src/trajectory/` — 2 files, 462 lines · event.rs, mod.rs
-- `tests/` — 11 files, 3456 lines · support.rs, cli.rs, phase1.rs
+- `tests/` — 11 files, 3463 lines · support.rs, cli.rs, phase1.rs
 
 ### Key files
 
@@ -83,10 +83,10 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 
 **`src/config.rs`** · 504 lines · imported by 37
 - `pub struct Config`  <sub>L14</sub>
-- `pub struct SharedStore`  <sub>L70</sub>
-- `pub struct Reviewer`  <sub>L86</sub>
-- `pub struct SpecConfig`  <sub>L211</sub>
-- `pub struct PlanConfig`  <sub>L234</sub>
+- `pub struct SharedStore`  <sub>L67</sub>
+- `pub struct Reviewer`  <sub>L83</sub>
+- `pub struct SpecConfig`  <sub>L212</sub>
+- `pub struct PlanConfig`  <sub>L235</sub>
 
 **`src/map/lang.rs`** · 355 lines · imported by 6
 - `pub struct Compiled` — The three queries keel runs over every file.  <sub>L11</sub>
@@ -158,19 +158,19 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub fn classify(signal: &Signal, events: &[Event]) -> (Attribution, Option<Class>, String)` — Attribution first, then class. Returns the reasoning too, because a  <sub>L220</sub>
 - `pub struct Distribution`  <sub>L384</sub>
 
-**`src/store/frontmatter.rs`** · 137 lines · imported by 5
-- `pub struct FrontMatter`  <sub>L10</sub>
-- `pub fn split_typed<T: serde::de::DeserializeOwned>(raw: &str) -> Result<(T, String)>` — Specs and plans carry structured machine fields that the loose `FrontMatter`  <sub>L36</sub>
-- `pub fn split(raw: &str) -> Result<(FrontMatter, String)>` — Split a document into front matter and body. A file with no front matter is  <sub>L52</sub>
-- `pub fn join_typed<T: Serialize>(front: &T, body: &str) -> Result<String>` — Re-join typed front matter and body into a writable document.  <sub>L84</sub>
-- `pub fn join(front: &FrontMatter, body: &str) -> Result<String>` — Re-join front matter and body into a writable document.  <sub>L90</sub>
-
 **`src/lesson/mod.rs`** · 719 lines · imported by 5
 - `pub enum RuleKind`  <sub>L29</sub>
 - `pub struct LessonFront`  <sub>L47</sub>
 - `pub struct Candidate`  <sub>L178</sub>
 - `pub fn propose(episodes: &[Episode], existing: &[Lesson]) -> Vec<Candidate>` — Distil episodes into candidates, counting occurrences across runs.  <sub>L201</sub>
 - `pub fn promote(paths: &Paths, candidate: &Candidate, force: bool) -> Result<Lesson>` — Promote a candidate into a lesson card, enforcing the promotion rules.  <sub>L418</sub>
+
+**`src/store/frontmatter.rs`** · 137 lines · imported by 5
+- `pub struct FrontMatter`  <sub>L10</sub>
+- `pub fn split_typed<T: serde::de::DeserializeOwned>(raw: &str) -> Result<(T, String)>` — Specs and plans carry structured machine fields that the loose `FrontMatter`  <sub>L36</sub>
+- `pub fn split(raw: &str) -> Result<(FrontMatter, String)>` — Split a document into front matter and body. A file with no front matter is  <sub>L52</sub>
+- `pub fn join_typed<T: Serialize>(front: &T, body: &str) -> Result<String>` — Re-join typed front matter and body into a writable document.  <sub>L84</sub>
+- `pub fn join(front: &FrontMatter, body: &str) -> Result<String>` — Re-join front matter and body into a writable document.  <sub>L90</sub>
 
 **`src/map/db.rs`** · 265 lines · imported by 7
 - `pub struct Index`  <sub>L70</sub>

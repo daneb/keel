@@ -67,6 +67,11 @@ gets switched off. The prompt says so directly, `advisory = true` exists for
 calibrating on an existing codebase, and the honest mitigation is that a human
 still decides.
 
-This layer is a model reading a diff. It finds what a careful reviewer would
-find and misses what they would miss. A deterministic scanner over changed
-files is a separate, complementary layer and is not built yet.
+A model reading a diff finds what a careful reviewer would find and misses what
+they would miss, so a deterministic scanner belongs beside it rather than after
+it. Both arrive through `[[review]]`, which is an array rather than a set of
+named slots: the first implementation added a `[sast]` section, which would
+have meant a third kind of reviewer required a change to keel itself. P7 says
+the extension surface is wide and the spine is small, and a named slot per
+category is the spine growing a category at a time. keel ships adapters, never
+scanners — semgrep is the user's to install, and its absence is `blocked`.
