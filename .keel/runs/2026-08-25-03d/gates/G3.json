@@ -1,0 +1,30 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G3",
+  "run": "2026-08-25-915",
+  "spec": "evidence-bundle",
+  "verdict": "pass",
+  "generated_at": "2026-08-25T10:16:21.369258+02:00",
+  "checks": [
+    {
+      "id": "earlier-gates",
+      "verdict": "pass",
+      "detail": "G2.5 and G2 passed"
+    },
+    {
+      "id": "reviewable-size",
+      "verdict": "pass",
+      "detail": "0/600 reviewable lines"
+    },
+    {
+      "id": "evidence-complete",
+      "verdict": "pass",
+      "detail": "trajectory, metadata and gate results present"
+    },
+    {
+      "id": "human-verdict",
+      "verdict": "pass",
+      "detail": "approved by Dane Balia at 2026-08-22T20:16:14"
+    }
+  ]
+}

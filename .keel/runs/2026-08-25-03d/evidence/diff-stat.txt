@@ -1,0 +1,11 @@
+    73      0  .keel/checks/cargo-audit
+     7      0  .keel/keel.toml
+     1      1  .keel/lesson-usage.json
+     2      0  .keel/runs/2026-08-25-03d/evidence/build.txt
+     2      0  .keel/runs/2026-08-25-03d/evidence/lint.txt
+    56      0  .keel/runs/2026-08-25-03d/evidence/oracles.json
+    64      0  .keel/runs/2026-08-25-03d/evidence/test.txt
+     9      0  .keel/runs/2026-08-25-03d/run.json
+    15      0  .keel/runs/2026-08-25-03d/trajectory.jsonl
+
+9 file(s), +229 -1 (230 lines of churn) against 10170b988067c16d67f62fac63475d9425bad310

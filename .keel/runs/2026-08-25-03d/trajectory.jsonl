@@ -1,0 +1,19 @@
+{"t":"2026-08-25T10:15:17.958323+02:00","seq":1,"kind":"run_start","spec":"evidence-bundle","keel_version":"0.3.1","store_hash":"2e9dd48231c1573753207ec94a77ba0e9ab4f933256c7744efc549bc94c76663"}
+{"t":"2026-08-25T10:15:17.958385+02:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":184,"bytes":736}
+{"t":"2026-08-25T10:15:17.958412+02:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
+{"t":"2026-08-25T10:15:17.958449+02:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6824,"bytes":27296}
+{"t":"2026-08-25T10:15:17.958571+02:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
+{"t":"2026-08-25T10:15:17.958812+02:00","seq":6,"kind":"inject","source":".keel/specs/evidence-bundle/spec.md","tokens":537,"bytes":2147}
+{"t":"2026-08-25T10:15:18.422641+02:00","seq":7,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
+{"t":"2026-08-25T10:15:50.587824+02:00","seq":8,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
+{"t":"2026-08-25T10:15:53.467649+02:00","seq":9,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
+{"t":"2026-08-25T10:15:58.355578+02:00","seq":10,"kind":"oracle","criterion":"AC-1","oracle":"`keel export $(keel runs --latest) | xargs test -f` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-08-25T10:15:58.355598+02:00","seq":11,"kind":"oracle","criterion":"AC-2","oracle":"test tests/export.rs::bundle_contains_every_required_member","verdict":"pass","exit_code":0}
+{"t":"2026-08-25T10:15:58.355602+02:00","seq":12,"kind":"oracle","criterion":"AC-3","oracle":"test tests/export.rs::manifest_validates_against_the_published_schema","verdict":"pass","exit_code":0}
+{"t":"2026-08-25T10:15:58.355605+02:00","seq":13,"kind":"oracle","criterion":"AC-4","oracle":"test tests/export.rs::verify_accepts_an_intact_bundle","verdict":"pass","exit_code":0}
+{"t":"2026-08-25T10:15:58.355607+02:00","seq":14,"kind":"oracle","criterion":"AC-5","oracle":"test tests/export.rs::verify_names_the_tampered_member","verdict":"pass","exit_code":0}
+{"t":"2026-08-25T10:15:58.355609+02:00","seq":15,"kind":"oracle","criterion":"AC-6","oracle":"human: a reviewer who did not run the work states what changed and which gate failed, reading only the bundle","verdict":"human"}
+{"t":"2026-08-25T10:16:21.323580+02:00","seq":16,"kind":"gate","gate":"G2","verdict":"pass","result":"gates/G2.json"}
+{"t":"2026-08-25T10:16:21.358591+02:00","seq":17,"kind":"gate","gate":"G2.5","verdict":"pass","result":"gates/G2.5.json"}
+{"t":"2026-08-25T10:16:21.369320+02:00","seq":18,"kind":"gate","gate":"G3","verdict":"pass","result":"gates/G3.json"}
+{"t":"2026-08-25T10:16:21.369334+02:00","seq":19,"kind":"run_end","verdict":"pass","duration_ms":63459}

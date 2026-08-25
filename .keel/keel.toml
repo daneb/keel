@@ -130,3 +130,10 @@ id = "kiro"
 cmd = ".keel/drivers/kiro"
 default = false
 timeout_secs = 900
+
+# A known RustSec advisory in the dependency tree fails G2 like any other
+# check. `blocked` if cargo-audit is absent or its database is unreachable --
+# "we did not look" must never read as "it is clean".
+[[gate.G2.check]]
+id = "cargo-audit"
+cmd = ".keel/checks/cargo-audit"

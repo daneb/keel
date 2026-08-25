@@ -1,0 +1,68 @@
+# CI for keel.
+#
+# Runs the same checks keel runs on itself, on a machine that is not the
+# author's. "374 tests pass" was previously a claim about one laptop; this is
+# what makes it a fact about the repository.
+#
+# Deliberately not `cargo fmt --check`: this codebase is hand-formatted in a
+# compact style rustfmt does not reproduce, and .keel/keel.toml declares
+# build/test/lint as the gate commands -- not fmt. CI enforces the standard the
+# project adopted, not one it invented. See release.sh for the same decision.
+
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  schedule:
+    # Advisories land against dependencies that have not changed, so the audit
+    # job needs a heartbeat rather than only running on a push.
+    - cron: '0 6 * * 1'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  verify:
+    name: build · test · lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the toolchain
+        run: rustup toolchain install stable --profile minimal --component clippy
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build
+        run: cargo build --quiet
+
+      - name: Test
+        run: cargo test --quiet
+
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+  audit:
+    name: advisories
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --locked
+
+      # Runs the same check plugin G2 runs, rather than a second, divergent
+      # definition of "audited". If the plugin's verdict rules change, CI
+      # changes with them.
+      - name: RustSec advisories
+        run: |
+          result="$(./.keel/checks/cargo-audit)"
+          echo "$result"
+          verdict="$(printf '%s' "$result" | python3 -c 'import json,sys; print(json.load(sys.stdin)["verdict"])')"
+          case "$verdict" in
+            pass)    echo "::notice::no known advisories" ;;
+            blocked) echo "::warning::advisory check could not run — see the detail above" ;;
+            *)       echo "::error::known advisories in the dependency tree"; exit 1 ;;
+          esac

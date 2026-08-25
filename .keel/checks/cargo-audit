@@ -1,0 +1,73 @@
+#!/bin/sh
+# keel gate check — RustSec advisories against Cargo.lock.
+#
+# Prints one keel.gate/1 Check on stdout. The three verdicts carry their usual
+# meanings, and the distinction is the point:
+#
+#   pass    — the advisory database was consulted and named nothing
+#   fail    — a known vulnerability is in this dependency tree
+#   blocked — the check could not run (cargo-audit absent, or no network to
+#             fetch the database). Never `fail`: "we could not look" and "we
+#             looked and it is clean" must not be the same verdict, which is
+#             exactly the gate-theatre failure keel exists to avoid.
+#
+# Warnings (unmaintained or yanked crates) are reported in the detail line but
+# do not fail the gate. An unmaintained crate is a maintenance risk, not a
+# vulnerability, and failing on it would train people to route the check out.
+set -u
+
+if ! command -v cargo-audit >/dev/null 2>&1; then
+    printf '%s\n' '{"id":"cargo-audit","verdict":"blocked","detail":"cargo-audit is not installed — `cargo install cargo-audit`. Advisories were not checked."}'
+    exit 0
+fi
+
+out=$(cargo audit --json 2>/dev/null)
+status=$?
+
+# cargo-audit exits non-zero both for "found vulnerabilities" and for hard
+# errors, so the exit code alone cannot tell those apart. Trust the JSON: no
+# parseable payload means the run itself failed.
+if [ -z "$out" ]; then
+    printf '%s\n' '{"id":"cargo-audit","verdict":"blocked","detail":"cargo audit produced no output — the advisory database may be unreachable. Advisories were not checked."}'
+    exit 0
+fi
+
+printf '%s' "$out" | python3 -c '
+import json, sys
+
+try:
+    d = json.load(sys.stdin)
+except Exception as e:
+    print(json.dumps({"id": "cargo-audit", "verdict": "blocked",
+                      "detail": "could not parse cargo audit output: %s" % e}))
+    sys.exit(0)
+
+vulns = d.get("vulnerabilities", {}) or {}
+count = vulns.get("count", 0) or 0
+crates = d.get("lockfile", {}).get("dependency-count", "?")
+
+# warnings is a dict of kind -> [entries]; count the entries, not the kinds.
+warns = d.get("warnings", {}) or {}
+nwarn = sum(len(v or []) for v in warns.values())
+warn_note = " %d advisory warning(s) (unmaintained/yanked), not failing." % nwarn if nwarn else ""
+
+if count:
+    ids = []
+    for v in (vulns.get("list") or [])[:5]:
+        adv = (v.get("advisory") or {})
+        pkg = (v.get("package") or {}).get("name", "?")
+        ids.append("%s in %s" % (adv.get("id", "?"), pkg))
+    print(json.dumps({
+        "id": "cargo-audit",
+        "verdict": "fail",
+        "expected": "no known advisories in the dependency tree",
+        "actual": "%d vulnerabilit%s: %s" % (count, "y" if count == 1 else "ies", "; ".join(ids)),
+        "detail": "run `cargo audit` for the full report, then update or vendor the affected crate." + warn_note,
+    }))
+else:
+    print(json.dumps({
+        "id": "cargo-audit",
+        "verdict": "pass",
+        "detail": "no known advisories across %s dependencies.%s" % (crates, warn_note),
+    }))
+'

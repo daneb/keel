@@ -1,0 +1,79 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G2",
+  "run": "2026-08-25-72d",
+  "spec": "evidence-bundle",
+  "verdict": "pass",
+  "generated_at": "2026-08-25T10:16:21.323467+02:00",
+  "checks": [
+    {
+      "id": "build",
+      "verdict": "pass",
+      "detail": "`cargo build --quiet` exited 0",
+      "evidence": "evidence/build.txt"
+    },
+    {
+      "id": "test",
+      "verdict": "pass",
+      "detail": "`cargo test --quiet` exited 0",
+      "evidence": "evidence/test.txt"
+    },
+    {
+      "id": "lint",
+      "verdict": "pass",
+      "detail": "`cargo clippy --all-targets --quiet` exited 0",
+      "evidence": "evidence/lint.txt"
+    },
+    {
+      "id": "oracle-coverage",
+      "verdict": "pass",
+      "detail": "5/6 oracles pass (1 awaiting human judgement)",
+      "evidence": "evidence/oracles.json"
+    },
+    {
+      "id": "blast-radius",
+      "verdict": "pass",
+      "detail": "0 changed file(s) inside scope, 3 file(s) downstream",
+      "evidence": "evidence/diff-stat.txt"
+    },
+    {
+      "id": "line-budget",
+      "verdict": "pass",
+      "detail": "0/150 lines of churn",
+      "evidence": "evidence/diff-stat.txt"
+    },
+    {
+      "id": "baseline-ratchet",
+      "verdict": "pass",
+      "detail": "2 metric(s) held, 1 improved",
+      "evidence": "evidence/ratchet.json"
+    },
+    {
+      "id": "store-drift",
+      "verdict": "pass",
+      "detail": "4 projections current"
+    },
+    {
+      "id": "shared-stores",
+      "verdict": "pass",
+      "detail": "none configured"
+    },
+    {
+      "id": "lesson:L-0002",
+      "verdict": "pass",
+      "detail": "Changes MUST leave lint and the house rules clean. holds",
+      "from": "L-0002"
+    },
+    {
+      "id": "lesson:L-0003",
+      "verdict": "pass",
+      "detail": "Changes MUST build before the run ends. holds",
+      "from": "L-0003"
+    },
+    {
+      "id": "cargo-audit",
+      "verdict": "pass",
+      "detail": "no known advisories across 282 dependencies."
+    }
+  ]
+}
