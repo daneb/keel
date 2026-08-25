@@ -138,14 +138,46 @@ prose. Two consequences, both intended:
 Fixing the findings empties the file, which also supersedes the acceptance —
 so a stale approval never sits there looking current.
 
+### Two passes, one process
+
+Findings come from two places, and both are graded, recorded and accepted
+through exactly the same path — there is one process, not two:
+
+| Slot | What it is | Finds |
+| --- | --- | --- |
+| `[review]` | a model reading the diff | logic and context: an authorisation check applied after the effect, a bound nobody enforces |
+| `[sast]` | semgrep over the changed files | known patterns: injection, weak crypto, unsafe deserialisation |
+
+Neither substitutes for the other. Enable the scanner with:
+
+```toml
+[sast]
+cmd = ".keel/sast/semgrep"
+timeout_secs = 300
+advisory = false
+```
+
+`keel init` writes that adapter; `keel driver scaffold` adds it to a repository
+initialised before it existed. It scans **only the files the diff touches** — a
+repository-wide scan reports everything already there, which buries the findings
+this change is responsible for.
+
+Two things to know about semgrep specifically. Its registry rulesets (`p/...`)
+are fetched over the network on first use; set `SEMGREP_RULES` to a vendored
+local ruleset to run fully offline. And the adapter never passes
+`--config auto`, which would send project metadata to semgrep.dev;
+`--metrics=off` is always set.
+
+If either scanner cannot run, its check is `blocked`, never `pass`. "We did not
+look" and "we looked and it is clean" are not the same verdict.
+
 ### What this does not do
 
-The reviewer is a language model reading a diff. It finds what a careful
-reviewer reading the same diff would find, and misses what they would miss. It
-is not a substitute for a SAST tool over the whole repository, for dependency
-scanning (`cargo-audit` covers that at G2), or for a penetration test. A
-deterministic scanner over changed files is the intended next layer, and is not
-built yet.
+The reviewer is a language model reading a diff, and the scanner matches known
+patterns. Between them they find what a careful reviewer and a good linter
+would find, and miss what both would miss. Neither is a substitute for a
+repository-wide audit, for dependency scanning (`cargo-audit` covers that at
+G2), or for a penetration test.
 
 Set `advisory = true` under `[review]` to grade without blocking while you are
 calibrating the reviewer on an existing codebase.
@@ -178,7 +210,5 @@ Named so the absence is a known state rather than an assumption:
 - No license or dependency-source policy (`cargo-deny` is not wired in).
 - No fuzzing of the parsers that take untrusted input, most importantly the
   driver result parser.
-- No deterministic SAST over changed files. The G2.5 security review is a model
-  reading the diff; a pattern-based scanner alongside it is the next layer.
 - The `cfg(windows)` branches compile but are unexercised; keel is developed and
   tested on macOS, and CI runs Linux.

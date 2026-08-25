@@ -242,9 +242,13 @@ pub fn run(paths: &Paths, reviewer: &Reviewer, request: &ReviewRequest) -> Revie
 
     let deadline = started + Duration::from_secs(reviewer.timeout_secs);
     let mut timed_out = false;
+    let mut status = None;
     loop {
         match child.try_wait() {
-            Ok(Some(_)) => break,
+            Ok(Some(s)) => {
+                status = Some(s);
+                break;
+            }
             Ok(None) => {
                 if Instant::now() >= deadline {
                     timed_out = true;
@@ -265,6 +269,29 @@ pub fn run(paths: &Paths, reviewer: &Reviewer, request: &ReviewRequest) -> Revie
             started,
             format!("reviewer exceeded its {}s timeout", reviewer.timeout_secs),
         );
+    }
+
+    // A reviewer that exits non-zero is saying it could not do its job, and
+    // that is `blocked` — the same discipline the driver contract has. This was
+    // previously ignored, which meant an adapter reporting "the scanner is not
+    // installed" alongside an empty findings list read as a clean pass. A check
+    // that cannot run must never be indistinguishable from one that ran and
+    // found nothing.
+    //
+    // A reviewer with findings reports them and exits 0; findings are not an
+    // error condition for the reviewer, they are its output.
+    if let Some(s) = status
+        && !s.success()
+    {
+        let code = s.code().map(|c| c.to_string()).unwrap_or_else(|| "a signal".into());
+        let why = parse_result(&stdout)
+            .ok()
+            .and_then(|r| r.summary)
+            .unwrap_or_else(|| format!("exited with {code}"));
+        return Review::blocked(started, match stderr.trim() {
+            "" => why,
+            e => format!("{why}; stderr: {}", truncate(e, 200)),
+        });
     }
 
     match parse_result(&stdout) {
@@ -373,6 +400,52 @@ mod tests {
             "summary": "one weakened test"
         })
         .to_string()
+    }
+
+    /// A scanner that cannot run must not be mistaken for a clean scan.
+    #[test]
+    fn a_reviewer_that_exits_non_zero_is_blocked_not_clean() {
+        let dir = std::env::temp_dir().join(format!("keel-rev-exit-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let script = dir.join("cannot-run");
+        std::fs::write(
+            &script,
+            "#!/bin/sh\ncat > /dev/null\n\
+             echo '{\"schema\":\"keel.reviewresult/1\",\"findings\":[],\
+             \"summary\":\"semgrep is not installed\"}'\nexit 3\n",
+        )
+        .unwrap();
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            std::fs::set_permissions(&script, std::fs::Permissions::from_mode(0o755)).unwrap();
+        }
+
+        let paths = Paths { repo: dir.clone() };
+        let reviewer = Reviewer {
+            cmd: script.to_string_lossy().to_string(),
+            timeout_secs: 30,
+            advisory: false,
+        };
+        let req = ReviewRequest {
+            schema: REQUEST_SCHEMA.into(),
+            run: "r".into(),
+            spec: "s".into(),
+            diff: "--- a/x\n+++ b/x\n".into(),
+            conventions: String::new(),
+            lessons: vec![],
+            criteria: vec![],
+            prompt: String::new(),
+            repo: dir.to_string_lossy().to_string(),
+        };
+
+        let r = run(&paths, &reviewer, &req);
+        let why = r.blocked.expect("a non-zero exit must block, not read as a clean scan");
+        // The adapter's own summary explains why, rather than a bare exit code.
+        assert!(why.contains("not installed"), "{why}");
+        assert!(r.result.findings.is_empty());
+
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]

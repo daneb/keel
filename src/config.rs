@@ -44,6 +44,15 @@ pub struct Config {
     /// An adversarial reviewer for G2.5. Absent means the heuristics stand alone.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub review: Option<Reviewer>,
+    /// A deterministic scanner over the diff, run alongside `review`.
+    ///
+    /// Same shape and same contract as a reviewer, because it is the same
+    /// contract: a subprocess handed `keel.reviewrequest/1` that answers with
+    /// `keel.reviewresult/1`. Only the producer differs -- patterns rather than
+    /// a model -- and its findings are graded, recorded and accepted through
+    /// exactly the same path, so there is one process rather than two.
+    #[serde(default)]
+    pub sast: Option<Reviewer>,
     /// Stores shared across repositories — platform conventions and lessons.
     #[serde(default, rename = "shared")]
     pub shared: Vec<SharedStore>,
@@ -348,6 +357,7 @@ impl Default for Config {
             learn: LearnConfig::default(),
             retrieve: RetrieveConfig::default(),
             review: None,
+            sast: None,
             shared: vec![],
             ratchets: default_ratchets(),
         }

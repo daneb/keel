@@ -68,3 +68,17 @@ pub const ALL: &[Builtin] = &[
         timeout_secs: 30,
     },
 ];
+
+/// Assets that are not drivers but ship the same way: written into `.keel/` by
+/// `keel init`, embedded so they exist on a fresh install rather than only in
+/// this repository.
+pub struct Asset {
+    /// Path under `.keel/`, e.g. `sast/semgrep`.
+    pub rel: &'static str,
+    pub content: &'static str,
+}
+
+pub const ASSETS: &[Asset] = &[Asset {
+    rel: "sast/semgrep",
+    content: include_str!("../../assets/sast/semgrep"),
+}];

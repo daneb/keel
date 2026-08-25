@@ -1,0 +1,118 @@
+#!/bin/sh
+# keel SAST adapter — semgrep over the files this change touched.
+#
+# Reads keel.reviewrequest/1 on stdin, writes keel.reviewresult/1 on stdout.
+# Deliberately the same contract as a reviewer: only the producer differs, so
+# findings from patterns and findings from a model are graded, recorded and
+# accepted through one path rather than two.
+#
+# Scans only the files named in the diff. A repository-wide scan reports
+# everything that was already there, which buries the findings this change is
+# responsible for -- and G2.5 judges a change, not a codebase.
+#
+# `--metrics=off`, and never `--config auto`. Registry rulesets (p/...) are
+# fetched over the network, which is a dependency worth knowing about; `auto`
+# additionally sends project metadata to semgrep.dev, which is not a reasonable
+# default for a tool that runs inside somebody's gate. Set SEMGREP_RULES to
+# point at a vendored local ruleset if you need this to run fully offline.
+set -u
+
+RULES="${SEMGREP_RULES:-p/security-audit}"
+
+request=$(cat)
+
+if ! command -v semgrep >/dev/null 2>&1; then
+    printf '%s\n' '{"schema":"keel.reviewresult/1","findings":[],"summary":"semgrep is not installed — no static scan was run"}' 
+    exit 3
+fi
+
+printf '%s' "$request" | RULES="$RULES" python3 -c '
+import json, os, subprocess, sys
+
+req = json.load(sys.stdin)
+repo = req.get("repo") or "."
+diff = req.get("diff") or ""
+
+# Files this change touched, from the unified diff. Only b/ side: a file the
+# change deleted has nothing left to scan.
+files = []
+for line in diff.splitlines():
+    if line.startswith("+++ b/"):
+        p = line[6:].strip()
+        if p and p != "/dev/null" and p not in files:
+            files.append(p)
+
+# Nothing scannable is a clean result, not an error.
+existing = [f for f in files if os.path.isfile(os.path.join(repo, f))]
+if not existing:
+    print(json.dumps({"schema": "keel.reviewresult/1", "findings": [],
+                      "summary": "no files from this change were scannable"}))
+    sys.exit(0)
+
+cmd = ["semgrep", "scan", "--config", os.environ["RULES"], "--json", "--quiet",
+       "--metrics=off", "--timeout", "30", *existing]
+try:
+    out = subprocess.run(cmd, cwd=repo, capture_output=True, text=True, timeout=240)
+except Exception as e:
+    print(json.dumps({"schema": "keel.reviewresult/1", "findings": [],
+                      "summary": "semgrep could not run: %s" % e}))
+    sys.exit(3)
+
+try:
+    data = json.loads(out.stdout)
+except Exception:
+    detail = (out.stderr or out.stdout or "no output").strip().splitlines()
+    print(json.dumps({"schema": "keel.reviewresult/1", "findings": [],
+                      "summary": "semgrep produced no parseable JSON: %s" % (detail[-1] if detail else "?")}))
+    sys.exit(3)
+
+# semgrep severity is coarse. Its metadata carries impact and confidence, which
+# together say more: an ERROR nobody can reach is not a HIGH, and a rule that
+# fires on a pattern it is only sometimes right about should not block a merge
+# on its own.
+def grade(extra):
+    sev = (extra.get("severity") or "").upper()
+    meta = extra.get("metadata") or {}
+    confidence = (meta.get("confidence") or "").upper()
+
+    # Demote only on low *confidence*. That is the axis that means "this rule is
+    # often wrong", and a noisy blocker is one people switch off.
+    #
+    # Impact is deliberately not consulted, though it is right there in the
+    # metadata: it is curated inconsistently across rules, and the first thing
+    # this adapter did when it did consult it was grade a CWE-78 command
+    # injection as medium because the rule author had written impact: LOW.
+    # A missed HIGH costs more than an extra one.
+    if sev == "ERROR":
+        return "medium" if confidence == "LOW" else "high"
+    if sev == "WARNING":
+        return "medium"
+    return "low"
+
+findings = []
+for r in data.get("results", []):
+    extra = r.get("extra") or {}
+    meta = extra.get("metadata") or {}
+    g = grade(extra)
+    rule = (r.get("check_id") or "semgrep").split(".")[-1]
+    cwe = meta.get("cwe") or []
+    cwe = cwe[0].split(":")[0] if cwe else None
+    msg = " ".join((extra.get("message") or "").split())
+    findings.append({
+        "id": rule[:60],
+        "severity": "fail" if g in ("high", "critical") else "concern",
+        "grade": g,
+        "detail": ("%s — %s" % (cwe, msg)) if cwe else msg,
+        "file": r.get("path"),
+        "line": (r.get("start") or {}).get("line"),
+    })
+
+findings.sort(key=lambda f: (f["file"] or "", f["line"] or 0, f["id"]))
+blocking = sum(1 for f in findings if f["grade"] in ("high", "critical"))
+print(json.dumps({
+    "schema": "keel.reviewresult/1",
+    "findings": findings,
+    "summary": "semgrep scanned %d changed file(s): %d finding(s), %d high or above"
+               % (len(existing), len(findings), blocking),
+}))
+'

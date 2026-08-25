@@ -287,6 +287,27 @@ pub fn scaffold(paths: &Paths, cfg: &Config, force: bool) -> Result<Vec<String>>
     if !to_register.is_empty() {
         append_driver_entries(&paths.config(), &to_register)?;
     }
+
+    // Non-driver assets ride along: they are scripts keel ships and the user
+    // owns once written, exactly like a driver, but they are wired into config
+    // by their own section rather than [[driver]].
+    for a in builtin::ASSETS {
+        let path = paths.keel().join(a.rel);
+        if let Some(dir) = path.parent() {
+            std::fs::create_dir_all(dir)?;
+        }
+        if path.exists() && !force {
+            lines.push(format!("  kept    {}", a.rel));
+        } else {
+            std::fs::write(&path, a.content)?;
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o755))?;
+            }
+            lines.push(format!("  created {}", a.rel));
+        }
+    }
     Ok(lines)
 }
 

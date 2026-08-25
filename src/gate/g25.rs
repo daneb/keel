@@ -72,6 +72,20 @@ pub fn run(
 /// The heuristics above stay regardless. A reviewer that is not configured must
 /// not silently remove the only check there was, and a reviewer that cannot run
 /// must not silently pass one.
+/// One completed review pass — the model reviewer, the SAST scanner, or both.
+struct Pass {
+    /// Check id for the pass as a whole, when it has nothing to report.
+    label: &'static str,
+    /// Prefix for each finding's check id. Not the same string as `label`:
+    /// the summary check is `reviewer`, its findings are `review:<id>`, and
+    /// those ids are load-bearing for anything reading a gate report.
+    prefix: &'static str,
+    findings: Vec<crate::review::Finding>,
+    evidence: String,
+    advisory: bool,
+    took: String,
+}
+
 fn reviewer_findings(
     paths: &Paths,
     cfg: &Config,
@@ -79,12 +93,25 @@ fn reviewer_findings(
     run: &Run,
     base: &str,
 ) -> Result<Vec<Check>> {
-    let Some(reviewer) = &cfg.review else {
+    // Two slots, one contract. `review` is a model reading the diff; `sast` is
+    // a scanner matching patterns over the same diff. They find different
+    // things and miss different things, so neither substitutes for the other,
+    // and running them through one pipeline is what keeps the grading scale and
+    // the acceptance identical for both.
+    let slots: Vec<(&'static str, &'static str, &crate::config::Reviewer, &str)> = [
+        cfg.review.as_ref().map(|r| ("reviewer", "review", r, "review.json")),
+        cfg.sast.as_ref().map(|r| ("sast", "sast", r, "sast.json")),
+    ]
+    .into_iter()
+    .flatten()
+    .collect();
+
+    if slots.is_empty() {
         return Ok(vec![Check::pass(
             "reviewer",
             "no adversarial reviewer configured — the heuristics above are the whole pass",
         )]);
-    };
+    }
 
     let diff = read_patch(paths, cfg, base).unwrap_or_default();
     if diff.trim().is_empty() {
@@ -116,38 +143,52 @@ fn reviewer_findings(
         repo: paths.repo.to_string_lossy().to_string(),
     };
 
-    let review = crate::review::run(paths, reviewer, &request);
-    let evidence = run.write_evidence(
-        "review.json",
-        &serde_json::to_string_pretty(&review.result)?,
-    )?;
+    let mut out = Vec::new();
+    let mut passes = Vec::new();
 
-    if let Some(why) = review.blocked {
-        return Ok(vec![Check::blocked("reviewer", why)]);
+    for (label, prefix, slot, evidence_name) in slots {
+        let review = crate::review::run(paths, slot, &request);
+        let evidence =
+            run.write_evidence(evidence_name, &serde_json::to_string_pretty(&review.result)?)?;
+        let took = format!("{:.1}s", review.elapsed.as_secs_f64());
+
+        if let Some(why) = review.blocked {
+            out.push(Check::blocked(label, why));
+            continue;
+        }
+        if review.result.findings.is_empty() {
+            let mut c = Check::pass(
+                label,
+                format!(
+                    "{} ({took})",
+                    review.result.summary.clone().unwrap_or_else(|| "no findings".into())
+                ),
+            );
+            c.evidence = Some(evidence);
+            out.push(c);
+            continue;
+        }
+        passes.push(Pass {
+            label,
+            prefix,
+            findings: review.result.findings,
+            evidence,
+            advisory: slot.advisory,
+            took,
+        });
     }
 
     // Written on every path, including the empty one: a run that finds nothing
     // must change the file too, so an acceptance recorded against yesterday's
-    // HIGH does not sit there looking current.
-    let security: Vec<&crate::review::Finding> =
-        review.result.findings.iter().filter(|f| f.grade.is_some()).collect();
+    // HIGH does not sit there looking current. Both passes contribute, because
+    // one acceptance covers the whole security picture of this change.
+    let security: Vec<&crate::review::Finding> = passes
+        .iter()
+        .flat_map(|p| p.findings.iter())
+        .filter(|f| f.grade.is_some())
+        .collect();
     record_security_findings(paths, &spec.front.slug, &security)?;
 
-    if review.result.findings.is_empty() {
-        let mut c = Check::pass(
-            "reviewer",
-            format!(
-                "{} ({:.1}s)",
-                review.result.summary.clone().unwrap_or_else(|| "no findings".into()),
-                review.elapsed.as_secs_f64()
-            ),
-        );
-        c.evidence = Some(evidence);
-        return Ok(vec![c]);
-    }
-
-    // One check per finding, so each is separately visible on the gate report
-    // and separately classifiable by the Phase 3 taxonomy.
     // A person may accept the graded findings as they stand. The acceptance is
     // bound to this exact set, so tomorrow's different HIGH supersedes it.
     let accepted = matches!(
@@ -155,48 +196,49 @@ fn reviewer_findings(
         Ok(crate::approval::Standing::Current { .. })
     );
 
-    let mut out = Vec::new();
-    let took = format!("{:.1}s", review.elapsed.as_secs_f64());
-    for f in &review.result.findings {
-        let id = format!("review:{}", f.id);
-        let detail = match f.where_().as_str() {
-            "" => f.detail.clone(),
-            w => format!("{w} — {}", f.detail),
-        };
+    for pass in &passes {
+        for f in &pass.findings {
+            let id = format!("{}:{}", pass.prefix, f.id);
+            let detail = match f.where_().as_str() {
+                "" => f.detail.clone(),
+                w => format!("{w} — {}", f.detail),
+            };
+            let took = &pass.took;
 
-        let mut check = match f.grade {
-            // A graded finding is a security finding, and grade decides, not
-            // severity: HIGH and CRITICAL are defects, the rest are a look.
-            // Grading and blocking are separate axes on purpose — see
-            // review::Grade.
-            Some(g) if g.blocks() => {
-                let detail = format!("[{}] {detail}", g.label());
-                if reviewer.advisory {
-                    Check::blocked(&id, detail)
-                } else if accepted {
-                    Check::pass(&id, format!("{detail} — accepted at --stage security"))
-                } else {
-                    Check::fail(
-                        &id,
-                        "no high-severity security finding in this change",
-                        format!(
-                            "{detail} [reviewed in {took}] — fix it, or accept these findings \
-                             deliberately with `keel approve --stage security {}`",
-                            spec.front.slug
-                        ),
-                    )
+            let mut check = match f.grade {
+                // A graded finding is a security finding, and grade decides,
+                // not severity: HIGH and CRITICAL are defects, the rest are a
+                // look. Grading and blocking are separate axes on purpose —
+                // see review::Grade.
+                Some(g) if g.blocks() => {
+                    let detail = format!("[{}] {detail}", g.label());
+                    if pass.advisory {
+                        Check::blocked(&id, detail)
+                    } else if accepted {
+                        Check::pass(&id, format!("{detail} — accepted at --stage security"))
+                    } else {
+                        Check::fail(
+                            &id,
+                            "no high-severity security finding in this change",
+                            format!(
+                                "{detail} [reviewed in {took}] — fix it, or accept these findings \
+                                 deliberately with `keel approve --stage security {}`",
+                                spec.front.slug
+                            ),
+                        )
+                    }
                 }
-            }
-            Some(g) => Check::blocked(&id, format!("[{}] {detail}", g.label())),
-            None if f.severity == crate::review::Severity::Fail && !reviewer.advisory => {
-                Check::fail(&id, "no defect of this kind", format!("{detail} [reviewed in {took}]"))
-            }
-            // Advisory mode, or the reviewer's own "concern": a look, not a block.
-            None => Check::blocked(&id, detail),
-        };
-        check.evidence = Some(evidence.clone());
-        check.from = Some("reviewer".into());
-        out.push(check);
+                Some(g) => Check::blocked(&id, format!("[{}] {detail}", g.label())),
+                None if f.severity == crate::review::Severity::Fail && !pass.advisory => {
+                    Check::fail(&id, "no defect of this kind", format!("{detail} [reviewed in {took}]"))
+                }
+                // Advisory mode, or the reviewer's own "concern": a look, not a block.
+                None => Check::blocked(&id, detail),
+            };
+            check.evidence = Some(pass.evidence.clone());
+            check.from = Some(pass.label.into());
+            out.push(check);
+        }
     }
     Ok(out)
 }
