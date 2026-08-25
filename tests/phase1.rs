@@ -366,13 +366,33 @@ fn a_missing_rollback_fails_g1() {
 }
 
 #[test]
+fn plan_refuses_before_g0_has_passed() {
+    let r = Repo::new("plan-order");
+    r.write_spec("demo", r.good_criteria());
+    // `keel plan` computes the blast radius and scaffolds task budgets against
+    // this spec — meaningless work if G0 has not confirmed the spec itself is
+    // sound. Deliberately never run G0.
+    let (code, out) = r.run(&["plan", "demo"]);
+    // An error propagated out of `run()` exits 2 (see main.rs) — the same code
+    // `keel run`'s identical G1 guard produces, not the gate-verdict exit codes
+    // (0/1/3) `keel gate` itself returns.
+    assert_eq!(code, 2, "a plan was scaffolded against an unapproved spec:\n{out}");
+    assert!(out.contains("G0 has not run"), "{out}");
+}
+
+#[test]
 fn g1_requires_g0_to_have_passed_first() {
     let r = Repo::new("g1-order");
     r.write_spec("demo", r.good_criteria());
-    // Plan needs a spec but we deliberately never run G0.
+    r.ok(&["gate", "g0", "demo"]);
     r.ok(&["plan", "demo"]);
     r.set_rollback("demo", "git revert");
     r.write_tasks("demo", r.good_tasks());
+    // G0 passed at plan time, but its recorded verdict is gone by the time G1
+    // runs — pruned, or the gates/ directory cleaned by hand. G1 must not trust
+    // that G0 once passed; it checks for itself, independently of `plan`'s own
+    // guard above.
+    std::fs::remove_file(r.dir.join(".keel/specs/demo/gates/G0.json")).unwrap();
     let (code, out) = r.run(&["gate", "g1", "demo"]);
     assert_eq!(code, 1, "{out}");
     assert!(out.contains("g0-passed"), "{out}");

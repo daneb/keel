@@ -1,6 +1,7 @@
 //! `keel plan <slug>` — compute the blast radius and scaffold plan + tasks.
 
 use crate::config::Config;
+use crate::gate::{self, Verdict};
 use crate::map::blast;
 use crate::map::db::Index;
 use crate::paths::Paths;
@@ -13,6 +14,18 @@ pub fn run(slug: Option<String>, depth: Option<usize>) -> Result<i32> {
     let cfg = Config::load(&paths.config())?;
     let slug = crate::cmd::gate::resolve_slug(&paths, slug)?;
     let spec = Spec::load(&paths, &slug)?;
+
+    // A plan against a spec G0 has rejected is a blast radius computed against
+    // ambiguities, missing oracles, or placeholder text that may still change —
+    // the same reason `keel run` refuses without a passing G1.
+    match gate::previous(&paths, &slug, "G0") {
+        Some(r) if r.verdict == Verdict::Pass => {}
+        Some(r) => bail!(
+            "G0 is {} for `{slug}` — fix the spec before planning (`keel gate g0 {slug}`)",
+            r.verdict.glyph()
+        ),
+        None => bail!("G0 has not run for `{slug}` — run `keel gate g0 {slug}` first"),
+    }
 
     if spec.front.scope.is_empty() {
         bail!("spec `{slug}` declares no scope — G0 would reject it, and a blast radius cannot be computed without one");
