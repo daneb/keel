@@ -271,7 +271,7 @@ fn tail(s: &str, max: usize) -> String {
         return s.trim_end().to_string();
     }
     let start = s.len() - max;
-    format!("…\n{}", &s[start..].trim_end())
+    format!("…\n{}", s[start..].trim_end())
 }
 
 #[cfg(test)]

@@ -164,7 +164,7 @@ pub fn extract(paths: &Paths, run: &Run) -> Result<Vec<Episode>> {
     }
 
     // Deterministic order, and stable ids within a run.
-    episodes.sort_by(|a, b| a.signal.key().cmp(&b.signal.key()));
+    episodes.sort_by_key(|e| e.signal.key());
     for (n, ep) in episodes.iter_mut().enumerate() {
         ep.id = format!("{}#{}", run.meta.id, n + 1);
     }
