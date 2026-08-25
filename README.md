@@ -109,7 +109,7 @@ flowchart TB
 
 | | Component | Owns | Fails loudly when |
 | --- | --- | --- | --- |
-| | **Knowledge** | The canonical store and its generated projections | A projection is hand-edited, or a shared store cannot be found |
+| | **Knowledge** | One store per repository, and its generated projections for every agent | A projection is hand-edited, or a shared store cannot be found |
 | | **Structure** | The symbol index and the seven retrieval queries | The index is stale — answers are labelled `ripgrep` |
 | | **Artefacts** | Spec, plan, tasks | A criterion has no runnable oracle |
 | | **Gates** | Every verdict, with its evidence | A stage advances without one |
@@ -168,7 +168,7 @@ PLAN.md argues these from the literature. This is what each one *is* in the code
 | | Principle | Mechanism | Fails when |
 | --- | --- | --- | --- |
 | P1 | Gates, not virtue | `gates/*.json`, `keel.gate/1` | A stage advances without a verdict |
-| P2 | One store, many agents | Store + adapters + two hashes | A projection is hand-edited |
+| P2 | One store, many agents (tools, not repos) | Store + adapters + two hashes | A projection is hand-edited |
 | P3 | Prose is not an oracle | `oracle:` on every criterion | A criterion has no runnable check |
 | P4 | Retrieve, don't read | Index + seven queries + budgets | A budget is exceeded, or a big read is unjustified |
 | P5 | Replay or it didn't happen | `trajectory.jsonl` + bundle | A verdict cannot be reproduced |

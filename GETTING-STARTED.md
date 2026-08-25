@@ -195,6 +195,21 @@ it is injected as a prompt.
 
 ## Sharing one set of rules across repositories
 
+Two different "one store" ideas are easy to run together, so to be explicit:
+
+- **Within a repository**, there is exactly one store, and every agent file —
+  `CLAUDE.md`, `AGENTS.md`, `.kiro/steering/`, `.github/copilot-instructions.md`
+  — is a generated projection of it. That is not optional and needs no
+  configuration; it is what `keel init` sets up. One store, four tools.
+- **Across repositories**, `[[shared]]` is opt-in, and covers only the parts
+  that make sense away from home: house rules (`conventions.md`) and enforced
+  lessons. `product.md` and `structure.md` stay local — one describes this
+  repository's purpose, the other is a symbol map of this codebase, and
+  neither means anything in another repo.
+
+There is no machine-wide store location. A shared store is just another
+repository's ordinary `.keel/store`, named by path.
+
 `[[shared]]` lets several repositories enforce one set of platform
 conventions and lessons, written once. It is a filesystem path — a sibling
 checkout, a git submodule, or a vendored copy — not a service keel runs; the
