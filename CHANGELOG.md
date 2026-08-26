@@ -7,6 +7,14 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.4.2] - 2026-08-26
+
+### Changed
+
+- **`keel next` supports multiple specs.** When no slug is given and several
+  specs exist, prints a summary table of each spec's pipeline stage followed
+  by guidance for every incomplete one.
+
 ## [0.4.1] - 2026-08-26
 
 ### Added
