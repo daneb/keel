@@ -277,7 +277,7 @@ fn collect_dir(dir: &Path, relative_to: &Path, out: &mut Vec<(String, Vec<u8>)>)
 
 /// Write the manifest JSON Schema to disk so the `schema` oracle can use it.
 pub fn write_schema(paths: &Paths) -> Result<PathBuf> {
-    let dir = paths.repo.join("schemas");
+    let dir = paths.keel().join("schemas");
     std::fs::create_dir_all(&dir)?;
     let p = dir.join("manifest.json");
     std::fs::write(&p, manifest::JSON_SCHEMA)?;

@@ -83,8 +83,8 @@ fn manifest_validates_against_the_published_schema() {
     }
 
     // `keel export` writes the schema; the manifest must satisfy it.
-    let schema: serde_json::Value =
-        serde_json::from_str(&r.read("schemas/manifest.json")).expect("schemas/manifest.json");
+    let schema: serde_json::Value = serde_json::from_str(&r.read(".keel/schemas/manifest.json"))
+        .expect(".keel/schemas/manifest.json");
     let validator = jsonschema::validator_for(&schema).expect("the published schema compiles");
     let errors: Vec<String> = validator.iter_errors(&manifest).map(|e| e.to_string()).collect();
     assert!(errors.is_empty(), "the manifest does not satisfy its own schema: {errors:?}");

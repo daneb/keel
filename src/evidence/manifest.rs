@@ -49,8 +49,8 @@ impl Manifest {
     }
 }
 
-/// The JSON Schema for a manifest, written to `schemas/manifest.json` so the
-/// `schema` oracle kind has something real to validate against.
+/// The JSON Schema for a manifest, written to `.keel/schemas/manifest.json` so
+/// the `schema` oracle kind has something real to validate against.
 pub const JSON_SCHEMA: &str = r##"{
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "keel evidence bundle manifest",
