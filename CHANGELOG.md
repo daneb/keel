@@ -7,6 +7,15 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.4.4] - 2026-08-26
+
+### Fixed
+
+- **`wave-isolation` no longer clashes on `files: scope`.** Tasks declaring
+  `files: scope` were treated as all claiming a literal file called "scope",
+  triggering false wave-isolation failures. The keyword is now skipped in
+  overlap detection.
+
 ## [0.4.3] - 2026-08-26
 
 ### Added
