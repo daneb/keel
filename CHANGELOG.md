@@ -7,6 +7,21 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.4.3] - 2026-08-26
+
+### Added
+
+- **`rollback-stated` falls back to the plan body.** The `## Rollback` section
+  in the plan body is now accepted when the front matter `rollback:` field is
+  empty — the scaffold has both, and a user filling in the wrong one should
+  not be punished.
+- **`files: scope` in tasks.** A task may declare `files: scope` to inherit
+  the spec's declared scope globs, useful for config-only changes where
+  enumerating individual files per-task adds no information.
+- **Exit conditions are pre-filled from oracles.** `keel plan` now pre-fills
+  each task's `exit:` field with the oracle text when the traced criterion has
+  exactly one runnable oracle.
+
 ## [0.4.2] - 2026-08-26
 
 ### Changed
