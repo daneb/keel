@@ -300,8 +300,19 @@ fn wave_isolation(tasks: &Tasks) -> Check {
     for (n, wave) in waves.iter().enumerate() {
         for (i, a) in wave.iter().enumerate() {
             for b in wave.iter().skip(i + 1) {
-                let shared: Vec<&String> =
-                    a.files.iter().filter(|f| b.files.contains(f)).collect();
+                // `files: scope` means "the spec's declared scope" — it is not
+                // an enumerable file list, so it cannot participate in overlap
+                // detection. Two tasks both declaring `scope` should be ordered
+                // with `depends_on` if they conflict, but the check cannot
+                // know whether they actually overlap without expanding globs.
+                let a_files: Vec<&String> = a.files.iter()
+                    .filter(|f| !f.eq_ignore_ascii_case("scope"))
+                    .collect();
+                let b_files: Vec<&String> = b.files.iter()
+                    .filter(|f| !f.eq_ignore_ascii_case("scope"))
+                    .collect();
+                let shared: Vec<&&String> =
+                    a_files.iter().filter(|f| b_files.contains(f)).collect();
                 if !shared.is_empty() {
                     clashes.push(format!(
                         "wave {}: {} and {} both claim {}",
