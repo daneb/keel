@@ -1,0 +1,84 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G2",
+  "run": "2026-08-26-971",
+  "spec": "g1-usability",
+  "verdict": "blocked",
+  "generated_at": "2026-08-26T15:05:45.191144+02:00",
+  "checks": [
+    {
+      "id": "build",
+      "verdict": "pass",
+      "detail": "`cargo build --quiet` exited 0",
+      "evidence": "evidence/build.txt"
+    },
+    {
+      "id": "test",
+      "verdict": "pass",
+      "detail": "`cargo test --quiet` exited 0",
+      "evidence": "evidence/test.txt"
+    },
+    {
+      "id": "lint",
+      "verdict": "pass",
+      "detail": "`cargo clippy --all-targets --quiet` exited 0",
+      "evidence": "evidence/lint.txt"
+    },
+    {
+      "id": "oracle-coverage",
+      "verdict": "pass",
+      "detail": "3/3 oracles pass (0 awaiting human judgement)",
+      "evidence": "evidence/oracles.json"
+    },
+    {
+      "id": "blast-radius",
+      "verdict": "pass",
+      "detail": "3 changed file(s) inside scope, 21 file(s) downstream",
+      "evidence": "evidence/diff-stat.txt"
+    },
+    {
+      "id": "line-budget",
+      "verdict": "pass",
+      "detail": "144/150 lines of churn",
+      "evidence": "evidence/diff-stat.txt"
+    },
+    {
+      "id": "baseline-ratchet",
+      "verdict": "pass",
+      "detail": "2 metric(s) held, 1 improved",
+      "evidence": "evidence/ratchet.json"
+    },
+    {
+      "id": "store-drift",
+      "verdict": "pass",
+      "detail": "4 projections current"
+    },
+    {
+      "id": "shared-stores",
+      "verdict": "pass",
+      "detail": "none configured"
+    },
+    {
+      "id": "lesson:L-0002",
+      "verdict": "pass",
+      "detail": "Changes MUST leave lint and the house rules clean. holds",
+      "from": "L-0002"
+    },
+    {
+      "id": "lesson:L-0003",
+      "verdict": "pass",
+      "detail": "Changes MUST build before the run ends. holds",
+      "from": "L-0003"
+    },
+    {
+      "id": "cargo-audit",
+      "verdict": "blocked",
+      "detail": "cargo-audit is not installed — `cargo install cargo-audit`. Advisories were not checked."
+    },
+    {
+      "id": "secrets",
+      "verdict": "blocked",
+      "detail": "gitleaks is not installed — `brew install gitleaks`, or see https://github.com/gitleaks/gitleaks. Nothing was scanned for credentials."
+    }
+  ]
+}

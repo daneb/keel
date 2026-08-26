@@ -1,0 +1,11 @@
+{
+  "schema": "keel.run/1",
+  "id": "2026-08-26-a21",
+  "spec": "g1-usability",
+  "keel_version": "0.4.2",
+  "store_hash": "8c7f9a4de8343be4ec8d5f1af946e67794dd760dae8a3efa0f6886a7a1310e46",
+  "started_at": "2026-08-26T15:04:41.995834+02:00",
+  "finished_at": "2026-08-26T15:05:46.169202+02:00",
+  "verdict": "fail",
+  "base_commit": "cab8174addc0ae3898615001c20ca110ce841aea"
+}

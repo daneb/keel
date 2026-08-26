@@ -1,0 +1,16 @@
+{"t":"2026-08-26T15:02:19.896742+02:00","seq":1,"kind":"run_start","spec":"g1-usability","keel_version":"0.4.2","store_hash":"8c7f9a4de8343be4ec8d5f1af946e67794dd760dae8a3efa0f6886a7a1310e46"}
+{"t":"2026-08-26T15:02:19.897527+02:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":184,"bytes":736}
+{"t":"2026-08-26T15:02:19.897763+02:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
+{"t":"2026-08-26T15:02:19.897844+02:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6970,"bytes":27878}
+{"t":"2026-08-26T15:02:19.906388+02:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
+{"t":"2026-08-26T15:02:19.906855+02:00","seq":6,"kind":"inject","source":".keel/specs/g1-usability/spec.md","tokens":526,"bytes":2102}
+{"t":"2026-08-26T15:02:20.732044+02:00","seq":7,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
+{"t":"2026-08-26T15:02:49.372230+02:00","seq":8,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
+{"t":"2026-08-26T15:02:52.141556+02:00","seq":9,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
+{"t":"2026-08-26T15:02:56.131488+02:00","seq":10,"kind":"oracle","criterion":"AC-1","oracle":"`cargo test --test phase1 rollback -- --include-ignored` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-08-26T15:02:56.131547+02:00","seq":11,"kind":"oracle","criterion":"AC-2","oracle":"`cargo test plan::tests::exit_conditions_are_prefilled` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-08-26T15:02:56.131559+02:00","seq":12,"kind":"oracle","criterion":"AC-3","oracle":"`cargo test --test phase1 files_scope` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-08-26T15:03:26.462882+02:00","seq":13,"kind":"gate","gate":"G2","verdict":"fail","result":"gates/G2.json"}
+{"t":"2026-08-26T15:03:26.463078+02:00","seq":14,"kind":"run_end","verdict":"fail","duration_ms":66684}
+{"t":"2026-08-26T15:04:10.566777+02:00","seq":15,"kind":"human","stage":"spec","decision":"approved","by":"Dane Balia"}
+{"t":"2026-08-26T15:04:36.500316+02:00","seq":16,"kind":"human","stage":"plan","decision":"approved","by":"Dane Balia"}

@@ -512,3 +512,46 @@ fn a_plugin_that_cannot_run_blocks_rather_than_fails() {
     assert_eq!(code, 3, "a missing tool must block, not fail:\n{out}");
     assert!(out.contains("BLOCKED"), "{out}");
 }
+
+#[test]
+fn rollback_in_the_body_section_is_accepted_as_a_fallback() {
+    let r = Repo::new("rollback-body");
+    r.write_spec("demo", r.good_criteria());
+    r.ok(&["gate", "g0", "demo"]);
+    r.ok(&["approve", "demo", "--stage", "spec"]);
+    r.ok(&["plan", "demo"]);
+    // Leave the front matter field empty but fill in the body section.
+    let plan = r.read(".keel/specs/demo/plan.md");
+    assert!(plan.contains("rollback: ''"), "expected empty rollback field:\n{plan}");
+    let plan = plan.replace(
+        "## Rollback\n\n_Fill in",
+        "## Rollback\n\ngit revert the merge commit\n\n_Fill in",
+    );
+    r.write(".keel/specs/demo/plan.md", &plan);
+    r.write_tasks("demo", r.good_tasks());
+    let (code, out) = r.run(&["gate", "g1", "demo"]);
+    assert_eq!(code, 0, "rollback in body should pass G1:\n{out}");
+    assert!(out.contains("rollback-stated"), "{out}");
+    assert!(out.contains("git revert"), "the body text should appear in the check detail:\n{out}");
+}
+
+#[test]
+fn files_scope_inherits_the_spec_scope() {
+    let r = Repo::new("files-scope");
+    r.write_spec("demo", r.good_criteria());
+    r.ok(&["gate", "g0", "demo"]);
+    r.ok(&["approve", "demo", "--stage", "spec"]);
+    r.ok(&["plan", "demo"]);
+    r.set_rollback("demo", "git revert");
+    // Use `files: scope` instead of naming individual files.
+    r.write_tasks("demo",
+        "### T-1 Add the limiter\n\
+         - criteria: AC-1, AC-2\n\
+         - files: scope\n\
+         - budget: 60\n\
+         - exit: tests pass\n"
+    );
+    let (code, out) = r.run(&["gate", "g1", "demo"]);
+    assert_eq!(code, 0, "`files: scope` should pass G1:\n{out}");
+    assert!(out.contains("task-files-in-scope"), "{out}");
+}

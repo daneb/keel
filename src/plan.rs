@@ -397,16 +397,26 @@ pub fn render_tasks(spec: &Spec) -> Result<String> {
          each other form a wave; `keel tasks` shows them.\n\n",
     );
     for (n, c) in spec.criteria.iter().enumerate() {
+        // When a criterion has exactly one runnable oracle, the exit condition
+        // is mechanically derivable — pre-fill it rather than demanding the
+        // user re-type what the spec already states.
+        let runnable: Vec<_> = c.oracles.iter().filter(|o| !o.is_human()).collect();
+        let exit = if runnable.len() == 1 {
+            runnable[0].summary()
+        } else {
+            "_the condition under which this task is done_".to_string()
+        };
         body.push_str(&format!(
             "### T-{} {}\n\
              - criteria: {}\n\
              - files: _name the files this task touches_\n\
              - budget: {}\n\
-             - exit: _the condition under which this task is done_\n\n",
+             - exit: {}\n\n",
             n + 1,
             c.title,
             c.id,
-            per_task.max(10)
+            per_task.max(10),
+            exit,
         ));
     }
     crate::store::frontmatter::join_typed(&front, &body)
@@ -561,5 +571,34 @@ Prose after the tasks.
         let out = replace_section("# Design\n\n## Approach\n\nText.\n", "## Blast radius", "table\n");
         assert!(out.contains("## Blast radius"));
         assert!(out.contains("Text."));
+    }
+
+    #[test]
+    fn exit_conditions_are_prefilled() {
+        use crate::spec::Spec;
+        let raw = "---\n\
+            id: SPEC-0001\nslug: lint\nschema: keel.spec/1\nstatus: draft\n\
+            scope:\n  - \"src/**\"\n\
+            budget:\n  criteria: 3\n  lines: 120\n---\n\n\
+            # Lint\n\n## Acceptance criteria\n\n\
+            ### AC-1 ESLint passes\n\n\
+            WHEN lint runs THE SYSTEM SHALL exit zero.\n\n\
+            oracle: cmd `npm run lint` exit 0\n\n\
+            ### AC-2 Config exists\n\n\
+            WHEN installed THE SYSTEM SHALL have a config file.\n\n\
+            oracle: cmd `test -f .eslintrc.json` exit 0\n\n\
+            ### AC-3 Multi oracle criterion\n\n\
+            WHEN checked THE SYSTEM SHALL pass both.\n\n\
+            oracle: cmd `true` exit 0\n\
+            oracle: cmd `false` exit 1\n";
+        let spec = Spec::parse(std::path::Path::new("spec.md"), raw).unwrap();
+        let rendered = render_tasks(&spec).unwrap();
+        // AC-1 has one runnable oracle → exit should be pre-filled.
+        assert!(rendered.contains("`npm run lint` exits 0"), "AC-1's exit was not pre-filled:\n{rendered}");
+        // AC-2 has one runnable oracle → exit should be pre-filled.
+        assert!(rendered.contains("`test -f .eslintrc.json` exits 0"), "AC-2's exit was not pre-filled:\n{rendered}");
+        // AC-3 has two oracles → should stay as placeholder.
+        assert!(rendered.contains("_the condition under which this task is done_"),
+            "AC-3 with multiple oracles should not be pre-filled:\n{rendered}");
     }
 }

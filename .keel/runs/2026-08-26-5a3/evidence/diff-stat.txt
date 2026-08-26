@@ -1,0 +1,18 @@
+     1      1  .keel/lesson-usage.json
+     2      0  .keel/runs/2026-08-26-5a3/evidence/build.txt
+     2      0  .keel/runs/2026-08-26-5a3/evidence/lint.txt
+    34      0  .keel/runs/2026-08-26-5a3/evidence/oracles.json
+    65      0  .keel/runs/2026-08-26-5a3/evidence/test.txt
+     9      0  .keel/runs/2026-08-26-5a3/run.json
+    12      0  .keel/runs/2026-08-26-5a3/trajectory.jsonl
+     2      0  .keel/specs/g1-usability/approvals.jsonl
+    90      0  .keel/specs/g1-usability/gates/G0.json
+    95      0  .keel/specs/g1-usability/gates/G1.json
+    75      0  .keel/specs/g1-usability/plan.md
+    62      0  .keel/specs/g1-usability/spec.md
+    33      0  .keel/specs/g1-usability/tasks.md
+    51      7  src/gate/g1.rs
+    41      2  src/plan.rs
+    43      0  tests/phase1.rs
+
+16 file(s), +617 -10 (627 lines of churn) against cab8174addc0ae3898615001c20ca110ce841aea

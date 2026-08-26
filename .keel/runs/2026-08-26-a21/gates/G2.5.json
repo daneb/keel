@@ -1,0 +1,37 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G2.5",
+  "run": "2026-08-26-8aa",
+  "spec": "g1-usability",
+  "verdict": "pass",
+  "generated_at": "2026-08-26T15:05:46.040858+02:00",
+  "checks": [
+    {
+      "id": "test-invalidation",
+      "verdict": "pass",
+      "detail": "no mocks or weakened assertions added",
+      "evidence": "evidence/review-test-invalidation.txt"
+    },
+    {
+      "id": "test-movement",
+      "verdict": "pass",
+      "detail": "2 code file(s), 1 test file(s)"
+    },
+    {
+      "id": "conventions",
+      "verdict": "pass",
+      "detail": "4 house rule(s) in force"
+    },
+    {
+      "id": "lessons",
+      "verdict": "pass",
+      "detail": "3 lesson(s) in force"
+    },
+    {
+      "id": "review",
+      "verdict": "pass",
+      "detail": "0 finding(s) (0.7s)",
+      "evidence": "evidence/review.json"
+    }
+  ]
+}

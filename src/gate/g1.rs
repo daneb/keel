@@ -353,6 +353,12 @@ fn task_files_in_scope(spec: &Spec, tasks: &Tasks) -> Check {
             unnamed.push(format!("{} (line {})", t.id, t.line));
             continue;
         }
+        // `files: scope` means "this task touches files within the spec's
+        // declared scope" — useful for config-only changes where enumerating
+        // individual files per-task adds no information.
+        if named.len() == 1 && named[0].eq_ignore_ascii_case("scope") {
+            continue;
+        }
         for f in named {
             if !set.is_match(f.as_str()) {
                 outside.push(format!("{} → {f}", t.id));
@@ -375,14 +381,52 @@ fn task_files_in_scope(spec: &Spec, tasks: &Tasks) -> Check {
 
 fn rollback_stated(plan: &Plan) -> Check {
     let r = plan.front.rollback.trim();
-    if r.is_empty() || is_placeholder(r) {
-        return Check::fail(
-            "rollback-stated",
-            "front matter states a rollback",
-            "rollback is empty — \"git revert\" is a legitimate answer, silence is not",
-        );
+    if !r.is_empty() && !is_placeholder(r) {
+        return Check::pass("rollback-stated", crate::gate::truncate(r, 60));
     }
-    Check::pass("rollback-stated", crate::gate::truncate(r, 60))
+    // Fall back to the `## Rollback` section in the plan body — the scaffold
+    // has one, and a user who fills it in rather than the front matter field
+    // should not be punished for picking the wrong box.
+    if let Some(body_text) = extract_rollback_section(&plan.body)
+        && !body_text.is_empty() && !is_placeholder(&body_text)
+    {
+        return Check::pass("rollback-stated", crate::gate::truncate(&body_text, 60));
+    }
+    Check::fail(
+        "rollback-stated",
+        "front matter `rollback:` or a ## Rollback section states the rollback",
+        "both are empty — \"git revert\" is a legitimate answer, silence is not",
+    )
+}
+
+/// Extract the text under `## Rollback` until the next heading or end of file.
+fn extract_rollback_section(body: &str) -> Option<String> {
+    let mut capturing = false;
+    let mut lines: Vec<&str> = Vec::new();
+    for line in body.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with("## ") {
+            if capturing {
+                break;
+            }
+            if trimmed.strip_prefix("## ").unwrap_or("").trim().eq_ignore_ascii_case("rollback") {
+                capturing = true;
+                continue;
+            }
+        }
+        if capturing {
+            lines.push(trimmed);
+        }
+    }
+    if !capturing {
+        return None;
+    }
+    let text = lines.join(" ").trim().to_string();
+    // Strip the scaffold instruction that `keel plan` writes.
+    let text = text.replace("_Fill in `rollback:` in the front matter above.", "")
+        .replace("\"git revert\" is a legitimate answer; \"we would not need to\" is not._", "")
+        .trim().to_string();
+    Some(text)
 }
 
 fn blast_radius_declared(plan: &Plan) -> Check {

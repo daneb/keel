@@ -1,0 +1,34 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "cmd",
+      "oracle": "`cargo test --test phase1 rollback -- --include-ignored` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 2 tests\ntest rollback_in_the_body_section_is_accepted_as_a_fallback ... ok\ntest a_missing_rollback_fails_g1 ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 1.19s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.50s\n     Running tests/phase1.rs (target/debug/deps/phase1-e7dc3c650a0c0842)"
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "cmd",
+      "oracle": "`cargo test plan::tests::exit_conditions_are_prefilled` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest plan::tests::exit_conditions_are_prefilled ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 260 filtered out; finished in 0.02s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 25 filtered out; finished in 0.00s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.00s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 25 filtered out; finished in 0.00s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.41s\n     Running unittests src/main.rs (target/debug/deps/keel-fe41ec2bbdcd082a)\n     Running tests/cli.rs (target/debug/deps/cli-e367ef003789e276)\n     Running tests/debts.rs (target/debug/deps/debts-e705d2890d614dff)\n     Running tests/driver.rs (target/debug/deps/driver-e11b618d622758bb)\n     Running tests/export.rs (target/debug/deps/export-081a0a6edc864ec6)\n     Running tests/phase1.rs (target/debug/deps/phase1-e7dc3c650a0c0842)\n     Running tests/phase2.rs (target/debug/deps/phase2-7bc0d0e280872903)\n     Running tests/phase3.rs (target/debug/deps/phase3-e10fec34069ef805)\n     Running tests/phase4.rs (target/debug/deps/phase4-d2c3ff849b45ebf8)\n     Running tests/phase5.rs (target/debug/deps/phase5-f181946d2cefb902)\n     Running tests/support.rs (target/debug/deps/support-d6b10dfd67486a41)\n     Running tests/trajectory.rs (target/debug/deps/trajectory-1ae4e0e66b04368b)"
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "cmd",
+      "oracle": "`cargo test --test phase1 files_scope` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest files_scope_inherits_the_spec_scope ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 1.15s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.44s\n     Running tests/phase1.rs (target/debug/deps/phase1-e7dc3c650a0c0842)"
+    }
+  ],
+  "criteria": 3,
+  "executed": 3,
+  "passed": 3,
+  "failed": 0,
+  "blocked": 0,
+  "human": 0
+}
