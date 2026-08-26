@@ -31,7 +31,7 @@ generated: true
 - `impl Manifest`  <sub>L33</sub>
 - `pub fn new(run: &crate::run::RunMeta, members: Vec<Member>) -> Self`  <sub>L34</sub>
 - `pub fn find(&self, path: &str) -> Option<&Member>`  <sub>L47</sub>
-- `pub const JSON_SCHEMA: &str = r##"` — The JSON Schema for a manifest, written to `schemas/manifest.json` so the  <sub>L54</sub>
+- `pub const JSON_SCHEMA: &str = r##"` — The JSON Schema for a manifest, written to `.keel/schemas/manifest.json` so  <sub>L54</sub>
 - `mod tests`  <sub>L87</sub>
 - `fn the_published_schema_is_itself_valid_json_schema()`  <sub>L91</sub>
 - `fn a_real_manifest_validates_against_the_published_schema()`  <sub>L97</sub>

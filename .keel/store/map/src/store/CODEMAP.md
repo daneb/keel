@@ -28,7 +28,7 @@ generated: true
 - `pub fn lessons(paths: &Paths) -> Result<Vec<StoreDoc>>` — Lesson cards, sorted by id. Phase 3 fills this; Phase 0 renders whatever is  <sub>L164</sub>
 - `pub fn today() -> String`  <sub>L175</sub>
 
-**`src/store/frontmatter.rs`** · 137 lines · imported by 5
+**`src/store/frontmatter.rs`** · 137 lines · imported by 6
 - `pub struct FrontMatter`  <sub>L10</sub>
 - `fn is_false(b: &bool) -> bool`  <sub>L31</sub>
 - `pub fn split_typed<T: serde::de::DeserializeOwned>(raw: &str) -> Result<(T, String)>` — Specs and plans carry structured machine fields that the loose `FrontMatter`  <sub>L36</sub>
