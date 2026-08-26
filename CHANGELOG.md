@@ -7,6 +7,23 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.4.1] - 2026-08-26
+
+### Added
+
+- **`keel next`** — inspects the pipeline state for the active spec and prints
+  a single actionable step with the exact command to run. Eliminates the
+  "what was I supposed to do now?" problem when learning keel's pipeline.
+  Accepts an optional slug; when omitted, picks the most in-progress spec.
+
+### Fixed
+
+- **`keel approve --stage spec` now transitions the spec's `status` field.**
+  Previously the front matter stayed `status: draft` forever because writing
+  back would invalidate the approval hash. The fix updates the file *before*
+  recording the hash, so the approval binds to the spec with its correct
+  status. `keel spec list` now shows `approved` or `rejected` as appropriate.
+
 ## [0.4.0] - 2026-08-25
 
 ### Added

@@ -70,6 +70,11 @@ enum Command {
     Store(StoreCmd),
     /// Show whether the store, map and projections are current
     Status,
+    /// What should I do next? Inspects the pipeline and prints one step.
+    Next {
+        /// Spec slug; optional when there is only one active spec
+        slug: Option<String>,
+    },
     /// The harness measured across runs: pass rates, failures, tokens, theatre
     Metrics {
         /// Runs a check must survive without failing to count as theatre
@@ -447,6 +452,7 @@ fn run() -> Result<i32> {
             Ok(0)
         }
         Command::Status => cmd::status::run(),
+        Command::Next { slug } => cmd::next::run(slug),
         Command::Doctor { json } => cmd::doctor::run(json),
         Command::Metrics { threshold, json } => cmd::metrics::run(threshold, json),
         Command::Hook(HookCmd::Install) => {

@@ -8,6 +8,7 @@ pub mod hook;
 pub mod init;
 pub mod learn;
 pub mod map;
+pub mod next;
 pub mod status;
 pub mod store;
 pub mod metrics;

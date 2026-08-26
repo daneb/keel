@@ -3,7 +3,9 @@
 use crate::approval::{self, Decision, Standing};
 use crate::gate;
 use crate::paths::Paths;
-use anyhow::{Result, bail};
+use crate::spec::SpecFront;
+use crate::store::frontmatter;
+use anyhow::{Context, Result, bail};
 
 pub fn run(slug: Option<String>, stage: String, reject: bool, note: Option<String>) -> Result<i32> {
     let paths = Paths::require_init()?;
@@ -49,6 +51,15 @@ pub fn run(slug: Option<String>, stage: String, reject: bool, note: Option<Strin
     }
 
     let decision = if reject { Decision::Rejected } else { Decision::Approved };
+
+    // Transition the spec's `status` field before recording the approval so the
+    // hash covers the file with its correct status. Without this, `status: draft`
+    // would persist forever — confusing in `keel spec list` and anywhere else
+    // that reads the front matter.
+    if stage == "spec" {
+        transition_spec_status(&paths, &slug, decision)?;
+    }
+
     let recorded = approval::record(
         &paths,
         &slug,
@@ -83,6 +94,35 @@ pub fn run(slug: Option<String>, stage: String, reject: bool, note: Option<Strin
     );
     println!("  recorded in {}", paths.rel(&crate::spec::Spec::dir(&paths, &slug).join("approvals.jsonl")).display());
     Ok(0)
+}
+
+/// Update the spec file's `status` field in place.
+///
+/// The hash recorded by `approval::record` covers the file byte-for-byte, so
+/// this must happen *before* that call — otherwise changing the status would
+/// immediately invalidate the approval it accompanies.
+fn transition_spec_status(paths: &Paths, slug: &str, decision: Decision) -> Result<()> {
+    let path = crate::spec::Spec::path_for(paths, slug);
+    let raw = std::fs::read_to_string(&path)
+        .with_context(|| format!("reading {}", path.display()))?;
+    let (mut front, body): (SpecFront, String) = frontmatter::split_typed(&raw)
+        .with_context(|| format!("parsing {}", path.display()))?;
+
+    let new_status = match decision {
+        Decision::Approved => "approved",
+        Decision::Rejected => "rejected",
+    };
+
+    // Only rewrite if the status actually changes — avoids spurious diffs.
+    if front.status == new_status {
+        return Ok(());
+    }
+
+    front.status = new_status.to_string();
+    let updated = frontmatter::join_typed(&front, &body)?;
+    std::fs::write(&path, updated)
+        .with_context(|| format!("writing {}", path.display()))?;
+    Ok(())
 }
 
 pub fn show(slug: Option<String>) -> Result<i32> {
