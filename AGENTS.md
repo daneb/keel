@@ -1,4 +1,4 @@
-<!-- keel:generated schema=keel.projection/1 adapter=agents store=f00f8d5be7aa body=78a4c9a037b4 -->
+<!-- keel:generated schema=keel.projection/1 adapter=agents store=8c7f9a4de834 body=ce575f242b23 -->
 <!-- Source of truth: .keel/store/ — regenerate with `keel store render`. Edits here are drift and will be reported by `keel store check`. -->
 
 # Project context
@@ -49,14 +49,14 @@ _Versions that cannot move, platforms that must keep working, dependencies that 
 
 ## Repository map
 
-**85 files · 1492 symbols · 22828 lines** — rust 85
+**86 files · 1503 symbols · 23332 lines** — rust 86
 
 Files are ordered by import-graph centrality, not alphabetically. Signatures only; read a body with the file path and line number. Per-directory detail lives in `.keel/store/map/<dir>/CODEMAP.md`.
 
 ### Layout
 
-- `src/` — 8 files, 2687 lines · paths.rs, config.rs, hashing.rs
-- `src/cmd/` — 21 files, 3523 lines · mod.rs, run.rs, learn.rs
+- `src/` — 8 files, 2743 lines · paths.rs, config.rs, hashing.rs
+- `src/cmd/` — 22 files, 3971 lines · mod.rs, run.rs, learn.rs
 - `src/driver/` — 4 files, 1071 lines · mod.rs, contract.rs, conform.rs
 - `src/evidence/` — 2 files, 423 lines · mod.rs, manifest.rs
 - `src/failure/` — 2 files, 767 lines · mod.rs, taxonomy.rs
@@ -74,14 +74,14 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 
 ### Key files
 
-**`src/paths.rs`** · 82 lines · imported by 53
+**`src/paths.rs`** · 82 lines · imported by 54
 - `pub struct Paths`  <sub>L10</sub>
 - `impl Paths`  <sub>L14</sub>
 - `pub fn discover() -> Result<Self>` — Find the repo root: nearest ancestor holding `.keel/`, else `.git/`, else cwd.  <sub>L16</sub>
 - `pub fn require_init() -> Result<Self>` — Like `discover`, but fails if keel has not been initialised here.  <sub>L42</sub>
 - `pub fn rel<'a>(&self, p: &'a Path) -> &'a Path` — Present `p` relative to the repo root when possible, for display.  <sub>L68</sub>
 
-**`src/config.rs`** · 504 lines · imported by 37
+**`src/config.rs`** · 504 lines · imported by 38
 - `pub struct Config`  <sub>L14</sub>
 - `pub struct SharedStore`  <sub>L67</sub>
 - `pub struct Reviewer`  <sub>L83</sub>
@@ -95,14 +95,14 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub fn intern_kind(kind: &str) -> &'static str` — Symbol kinds are a closed set, so a round trip through the database should  <sub>L315</sub>
 - `pub fn unavailable() -> Vec<(&'static str, String)>` — files still get indexed, they just stop yielding symbols. Naming the casualty  <sub>L329</sub>
 
-**`src/gate/mod.rs`** · 355 lines · imported by 13
+**`src/gate/mod.rs`** · 355 lines · imported by 14
 - `pub enum Verdict`  <sub>L33</sub>
 - `pub struct Check`  <sub>L60</sub>
 - `pub struct GateResult`  <sub>L112</sub>
 - `pub fn roll_up(checks: &[Check]) -> Verdict` — misconfiguration, and reporting it as success is precisely how a pipeline  <sub>L164</sub>
 - `pub fn run_id() -> String` — `2026-08-21-7c1` — sortable by date, unique enough within a day.  <sub>L178</sub>
 
-**`src/spec/mod.rs`** · 353 lines · imported by 13
+**`src/spec/mod.rs`** · 353 lines · imported by 15
 - `pub struct SpecFront`  <sub>L20</sub>
 - `pub struct SpecBudget`  <sub>L42</sub>
 - `pub struct Criterion`  <sub>L52</sub>
@@ -151,15 +151,15 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub struct PruneCandidate`  <sub>L215</sub>
 - `pub fn prune_plan(paths: &Paths, keep: usize) -> Result<Vec<PruneCandidate>>` — Decide what could be pruned, keeping the most recent `keep` runs and  <sub>L224</sub>
 
-**`src/failure/mod.rs`** · 573 lines · imported by 5
-- `pub enum Signal`  <sub>L20</sub>
-- `pub struct Episode`  <sub>L84</sub>
-- `pub fn extract(paths: &Paths, run: &Run) -> Result<Vec<Episode>>` — Extract every failure episode from a completed run.  <sub>L118</sub>
-- `pub fn classify(signal: &Signal, events: &[Event]) -> (Attribution, Option<Class>, String)` — Attribution first, then class. Returns the reasoning too, because a  <sub>L220</sub>
-- `pub struct Distribution`  <sub>L384</sub>
+**`src/store/frontmatter.rs`** · 137 lines · imported by 6
+- `pub struct FrontMatter`  <sub>L10</sub>
+- `pub fn split_typed<T: serde::de::DeserializeOwned>(raw: &str) -> Result<(T, String)>` — Specs and plans carry structured machine fields that the loose `FrontMatter`  <sub>L36</sub>
+- `pub fn split(raw: &str) -> Result<(FrontMatter, String)>` — Split a document into front matter and body. A file with no front matter is  <sub>L52</sub>
+- `pub fn join_typed<T: Serialize>(front: &T, body: &str) -> Result<String>` — Re-join typed front matter and body into a writable document.  <sub>L84</sub>
+- `pub fn join(front: &FrontMatter, body: &str) -> Result<String>` — Re-join front matter and body into a writable document.  <sub>L90</sub>
 
 
-_… 254 more lines in `.keel/store/steering/structure.md`._
+_… 261 more lines in `.keel/store/steering/structure.md`._
 
 ## What this is
 

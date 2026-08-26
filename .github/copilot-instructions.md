@@ -1,4 +1,4 @@
-<!-- keel:generated schema=keel.projection/1 adapter=copilot store=f00f8d5be7aa body=a7730f1a36d6 -->
+<!-- keel:generated schema=keel.projection/1 adapter=copilot store=8c7f9a4de834 body=9323a2635b93 -->
 <!-- Source of truth: .keel/store/ — regenerate with `keel store render`. Edits here are drift and will be reported by `keel store check`. -->
 
 # Project context
@@ -49,14 +49,14 @@ _Versions that cannot move, platforms that must keep working, dependencies that 
 
 ## Repository map
 
-**85 files · 1492 symbols · 22828 lines** — rust 85
+**86 files · 1503 symbols · 23332 lines** — rust 86
 
 Files are ordered by import-graph centrality, not alphabetically. Signatures only; read a body with the file path and line number. Per-directory detail lives in `.keel/store/map/<dir>/CODEMAP.md`.
 
 ### Layout
 
-- `src/` — 8 files, 2687 lines · paths.rs, config.rs, hashing.rs
-- `src/cmd/` — 21 files, 3523 lines · mod.rs, run.rs, learn.rs
+- `src/` — 8 files, 2743 lines · paths.rs, config.rs, hashing.rs
+- `src/cmd/` — 22 files, 3971 lines · mod.rs, run.rs, learn.rs
 - `src/driver/` — 4 files, 1071 lines · mod.rs, contract.rs, conform.rs
 - `src/evidence/` — 2 files, 423 lines · mod.rs, manifest.rs
 - `src/failure/` — 2 files, 767 lines · mod.rs, taxonomy.rs
@@ -74,14 +74,14 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 
 ### Key files
 
-**`src/paths.rs`** · 82 lines · imported by 53
+**`src/paths.rs`** · 82 lines · imported by 54
 - `pub struct Paths`  <sub>L10</sub>
 - `impl Paths`  <sub>L14</sub>
 - `pub fn discover() -> Result<Self>` — Find the repo root: nearest ancestor holding `.keel/`, else `.git/`, else cwd.  <sub>L16</sub>
 - `pub fn require_init() -> Result<Self>` — Like `discover`, but fails if keel has not been initialised here.  <sub>L42</sub>
 - `pub fn rel<'a>(&self, p: &'a Path) -> &'a Path` — Present `p` relative to the repo root when possible, for display.  <sub>L68</sub>
 
-**`src/config.rs`** · 504 lines · imported by 37
+**`src/config.rs`** · 504 lines · imported by 38
 - `pub struct Config`  <sub>L14</sub>
 - `pub struct SharedStore`  <sub>L67</sub>
 - `pub struct Reviewer`  <sub>L83</sub>
@@ -95,12 +95,12 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub fn intern_kind(kind: &str) -> &'static str` — Symbol kinds are a closed set, so a round trip through the database should  <sub>L315</sub>
 - `pub fn unavailable() -> Vec<(&'static str, String)>` — files still get indexed, they just stop yielding symbols. Naming the casualty  <sub>L329</sub>
 
-**`src/gate/mod.rs`** · 355 lines · imported by 13
+**`src/gate/mod.rs`** · 355 lines · imported by 14
 - `pub enum Verdict`  <sub>L33</sub>
 - `pub struct Check`  <sub>L60</sub>
 - `pub struct GateResult`  <sub>L112</sub>
 
-_… 313 more lines in `.keel/store/steering/structure.md`._
+_… 320 more lines in `.keel/store/steering/structure.md`._
 
 ## What this is
 
