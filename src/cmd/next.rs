@@ -1,9 +1,8 @@
 //! `keel next` — tell the user what to do next.
 //!
-//! Inspects the pipeline state for the active spec and prints a single
-//! actionable step. The goal is to eliminate the "what command was I
-//! supposed to run?" question — keel has many commands, and a human
-//! learning them should not need to memorise the pipeline by heart.
+//! Inspects the pipeline state and prints actionable steps. When multiple
+//! specs exist and no slug is given, shows the status of each and the next
+//! action for every incomplete one. With a slug, focuses on that spec alone.
 
 use crate::approval::{self, Standing};
 use crate::config::Config;
@@ -12,6 +11,42 @@ use crate::paths::Paths;
 use crate::plan::{Plan, Tasks};
 use crate::spec::{self, Spec};
 use anyhow::Result;
+
+/// Where a spec is in the pipeline.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+enum Stage {
+    /// G0 has never run or is failing.
+    Spec,
+    /// G0 passes but spec is not approved.
+    SpecApproval,
+    /// Spec approved, no plan yet.
+    Plan,
+    /// Plan exists but G1 not passing.
+    PlanGate,
+    /// G1 passes but plan not approved.
+    PlanApproval,
+    /// Plan approved, work not done / G2 not passing.
+    Run,
+    /// Run passed, merge not approved.
+    MergeApproval,
+    /// All done.
+    Complete,
+}
+
+impl Stage {
+    fn label(&self) -> &'static str {
+        match self {
+            Self::Spec => "spec",
+            Self::SpecApproval => "approve spec",
+            Self::Plan => "plan",
+            Self::PlanGate => "G1",
+            Self::PlanApproval => "approve plan",
+            Self::Run => "run",
+            Self::MergeApproval => "approve merge",
+            Self::Complete => "done",
+        }
+    }
+}
 
 pub fn run(slug: Option<String>) -> Result<i32> {
     let paths = match Paths::require_init() {
@@ -38,25 +73,6 @@ pub fn run(slug: Option<String>) -> Result<i32> {
         return Ok(0);
     }
 
-    // --- resolve slug -----------------------------------------------------
-    let slug = match slug {
-        Some(s) => s,
-        None if all_specs.len() == 1 => all_specs[0].clone(),
-        None => {
-            // Pick the most "in-progress" spec: prefer one without a passing G1.
-            let active = all_specs.iter().find(|s| {
-                gate::previous(&paths, s, "G1")
-                    .is_none_or(|r| r.verdict != Verdict::Pass)
-            });
-            match active {
-                Some(s) => s.clone(),
-                None => all_specs.last().unwrap().clone(),
-            }
-        }
-    };
-
-    let _spec = Spec::load(&paths, &slug)?;
-
     // --- store drift? quick pre-flight ------------------------------------
     let store_hash = crate::store::store_hash_with_shared(&paths, &cfg)?;
     let drift_reports = crate::projection::drift::check_all(&paths, &cfg, &store_hash)?;
@@ -70,8 +86,179 @@ pub fn run(slug: Option<String>) -> Result<i32> {
         return Ok(0);
     }
 
+    // --- single slug: focused mode ----------------------------------------
+    if let Some(s) = slug {
+        return next_for_spec(&paths, &s);
+    }
+
+    // --- multiple specs: overview + guidance for each ----------------------
+    if all_specs.len() == 1 {
+        return next_for_spec(&paths, &all_specs[0]);
+    }
+
+    // Show a summary table, then detail for each incomplete spec.
+    println!("specs:\n");
+    let mut stages: Vec<(&str, Stage)> = Vec::new();
+    for slug in &all_specs {
+        let stage = pipeline_stage(&paths, slug);
+        println!("  {:<28} {}", slug, stage.label());
+        stages.push((slug, stage));
+    }
+    println!();
+
+    let incomplete: Vec<&str> = stages.iter()
+        .filter(|(_, s)| *s != Stage::Complete)
+        .map(|(slug, _)| *slug)
+        .collect();
+
+    if incomplete.is_empty() {
+        step(
+            "all specs complete",
+            "Every spec has been gated and approved. Start the next change:\n\n\
+             \x20 keel spec new <slug>",
+        );
+        return Ok(0);
+    }
+
+    for slug in &incomplete {
+        print_guidance(&paths, slug)?;
+    }
+    Ok(0)
+}
+
+/// Determine where a spec sits in the pipeline without printing anything.
+fn pipeline_stage(paths: &Paths, slug: &str) -> Stage {
+    // G0
+    match gate::previous(paths, slug, "G0") {
+        None | Some(gate::GateResult { verdict: Verdict::Fail, .. })
+            | Some(gate::GateResult { verdict: Verdict::Blocked, .. }) => {
+            return Stage::Spec;
+        }
+        _ => {}
+    }
+
+    // Spec approval
+    if !matches!(approval::standing(paths, slug, "spec"), Ok(Standing::Current { .. })) {
+        return Stage::SpecApproval;
+    }
+
+    // Plan exists
+    if Plan::load(paths, slug).is_err() {
+        return Stage::Plan;
+    }
+
+    // G1
+    match gate::previous(paths, slug, "G1") {
+        None | Some(gate::GateResult { verdict: Verdict::Fail, .. })
+            | Some(gate::GateResult { verdict: Verdict::Blocked, .. }) => {
+            return Stage::PlanGate;
+        }
+        _ => {}
+    }
+
+    // Plan approval
+    if !matches!(approval::standing(paths, slug, "plan"), Ok(Standing::Current { .. })) {
+        return Stage::PlanApproval;
+    }
+
+    // Run
+    if !has_passing_run(paths, slug) {
+        return Stage::Run;
+    }
+
+    // Merge approval
+    if !matches!(approval::standing(paths, slug, "merge"), Ok(Standing::Current { .. })) {
+        return Stage::MergeApproval;
+    }
+
+    Stage::Complete
+}
+
+/// Print the next action for a single spec (compact form for multi-spec view).
+fn print_guidance(paths: &Paths, slug: &str) -> Result<()> {
+    let stage = pipeline_stage(paths, slug);
+    match stage {
+        Stage::Spec => {
+            let g0 = gate::previous(paths, slug, "G0");
+            match g0 {
+                None => step(
+                    &format!("[{slug}] run G0"),
+                    &format!("  keel gate g0 {slug}"),
+                ),
+                Some(r) => {
+                    let (_, f, b) = r.counts();
+                    let hints = failure_hints(&r);
+                    step(
+                        &format!("[{slug}] fix spec — G0 has {f} failure(s), {b} blocked"),
+                        &format!("  Edit `.keel/specs/{slug}/spec.md`, then: keel gate g0 {slug}{hints}"),
+                    );
+                }
+            }
+        }
+        Stage::SpecApproval => {
+            step(
+                &format!("[{slug}] approve spec"),
+                &format!("  keel approve {slug} --stage spec"),
+            );
+        }
+        Stage::Plan => {
+            step(
+                &format!("[{slug}] create a plan"),
+                &format!("  keel plan {slug}"),
+            );
+        }
+        Stage::PlanGate => {
+            let g1 = gate::previous(paths, slug, "G1");
+            match g1 {
+                None => step(
+                    &format!("[{slug}] run G1"),
+                    &format!("  keel gate g1 {slug}"),
+                ),
+                Some(r) => {
+                    let (_, f, b) = r.counts();
+                    let hints = failure_hints(&r);
+                    step(
+                        &format!("[{slug}] fix plan — G1 has {f} failure(s), {b} blocked"),
+                        &format!("  Edit plan/tasks, then: keel gate g1 {slug}{hints}"),
+                    );
+                }
+            }
+        }
+        Stage::PlanApproval => {
+            step(
+                &format!("[{slug}] approve plan"),
+                &format!("  keel approve {slug} --stage plan"),
+            );
+        }
+        Stage::Run => {
+            step(
+                &format!("[{slug}] do the work"),
+                &format!(
+                    "  keel run {slug}              # drive an agent\n\
+                     \x20 keel run {slug} --no-driver  # gate the tree as-is"
+                ),
+            );
+        }
+        Stage::MergeApproval => {
+            step(
+                &format!("[{slug}] approve merge"),
+                &format!("  keel approve {slug} --stage merge"),
+            );
+        }
+        Stage::Complete => {
+            // Should not reach here in the incomplete list, but handle gracefully.
+            step(&format!("[{slug}] complete"), "  Nothing to do.");
+        }
+    }
+    Ok(())
+}
+
+/// Focused single-spec mode with full detail.
+fn next_for_spec(paths: &Paths, slug: &str) -> Result<i32> {
+    let _spec = Spec::load(paths, slug)?;
+
     // --- G0 ---------------------------------------------------------------
-    let g0 = gate::previous(&paths, &slug, "G0");
+    let g0 = gate::previous(paths, slug, "G0");
     match g0 {
         None => {
             step(
@@ -98,7 +285,7 @@ pub fn run(slug: Option<String>) -> Result<i32> {
     }
 
     // --- spec approval ----------------------------------------------------
-    match approval::standing(&paths, &slug, "spec")? {
+    match approval::standing(paths, slug, "spec")? {
         Standing::Current { .. } => {} // approved, move on
         Standing::Absent => {
             step(
@@ -134,8 +321,7 @@ pub fn run(slug: Option<String>) -> Result<i32> {
     }
 
     // --- plan exists? -----------------------------------------------------
-    let plan = Plan::load(&paths, &slug);
-    if plan.is_err() {
+    if Plan::load(paths, slug).is_err() {
         step(
             &format!("create a plan for `{slug}`"),
             &format!(
@@ -148,8 +334,8 @@ pub fn run(slug: Option<String>) -> Result<i32> {
     }
 
     // --- G1 ---------------------------------------------------------------
-    let tasks = Tasks::load(&paths, &slug);
-    let g1 = gate::previous(&paths, &slug, "G1");
+    let tasks = Tasks::load(paths, slug);
+    let g1 = gate::previous(paths, slug, "G1");
     match g1 {
         None => {
             step(
@@ -164,7 +350,7 @@ pub fn run(slug: Option<String>) -> Result<i32> {
         }
         Some(ref r) if r.verdict != Verdict::Pass => {
             let (_, f, b) = r.counts();
-            let hints = g1_failure_hints(r);
+            let hints = failure_hints(r);
             step(
                 &format!("fix `{slug}` plan — G1 has {f} failure(s), {b} blocked"),
                 &format!(
@@ -179,7 +365,7 @@ pub fn run(slug: Option<String>) -> Result<i32> {
     }
 
     // --- plan approval ----------------------------------------------------
-    match approval::standing(&paths, &slug, "plan")? {
+    match approval::standing(paths, slug, "plan")? {
         Standing::Current { .. } => {} // approved
         Standing::Absent => {
             step(
@@ -215,10 +401,7 @@ pub fn run(slug: Option<String>) -> Result<i32> {
     }
 
     // --- ready to run -----------------------------------------------------
-    // If we get here, spec approved, plan approved, G1 passes. The user
-    // should do the work (or let an agent do it) and gate the result.
-    let has_run = crate::run::latest(&paths)?.is_some();
-    if !has_run || !has_passing_run(&paths, &slug) {
+    if !has_passing_run(paths, slug) {
         let tasks_info = if let Ok(ref t) = tasks {
             match t.waves() {
                 Ok(w) => format!(" ({} wave(s), {} task(s))", w.len(), t.tasks.len()),
@@ -241,7 +424,7 @@ pub fn run(slug: Option<String>) -> Result<i32> {
     }
 
     // --- post-run: merge approval -----------------------------------------
-    match approval::standing(&paths, &slug, "merge")? {
+    match approval::standing(paths, slug, "merge")? {
         Standing::Current { .. } => {} // approved
         Standing::Absent => {
             step(
@@ -285,18 +468,17 @@ fn has_passing_run(paths: &Paths, slug: &str) -> bool {
         if run.meta.spec != slug {
             continue;
         }
-        if let Ok(results) = run.gate_results() {
-            // A run that passed G2 (or G3) counts as a successful run.
-            if results.iter().any(|r| r.gate == "G2" && r.verdict == Verdict::Pass) {
-                return true;
-            }
+        if let Ok(results) = run.gate_results()
+            && results.iter().any(|r| r.gate == "G2" && r.verdict == Verdict::Pass)
+        {
+            return true;
         }
     }
     false
 }
 
-/// Summarise the failing G1 checks into hints for the user.
-fn g1_failure_hints(result: &gate::GateResult) -> String {
+/// Summarise failing checks into hints.
+fn failure_hints(result: &gate::GateResult) -> String {
     let mut hints = String::new();
     for check in &result.checks {
         if check.verdict == Verdict::Fail {
