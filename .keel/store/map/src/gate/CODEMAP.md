@@ -2,7 +2,7 @@
 id: MAP-src-gate
 scope: dir:src/gate
 owner: agent
-verified_at: 2026-08-25
+verified_at: 2026-08-26
 generated: true
 ---
 

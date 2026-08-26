@@ -1,4 +1,4 @@
-<!-- keel:generated schema=keel.projection/1 adapter=claude store=8f42c2a88dd8 body=3819a20683eb -->
+<!-- keel:generated schema=keel.projection/1 adapter=claude store=f00f8d5be7aa body=297f129c884e -->
 <!-- Source of truth: .keel/store/ — regenerate with `keel store render`. Edits here are drift and will be reported by `keel store check`. -->
 
 # Project context
@@ -49,7 +49,7 @@ _Versions that cannot move, platforms that must keep working, dependencies that 
 
 ## Repository map
 
-**85 files · 1482 symbols · 22740 lines** — rust 85
+**85 files · 1492 symbols · 22828 lines** — rust 85
 
 Files are ordered by import-graph centrality, not alphabetically. Signatures only; read a body with the file path and line number. Per-directory detail lives in `.keel/store/map/<dir>/CODEMAP.md`.
 
@@ -67,7 +67,7 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `src/projection/` — 3 files, 715 lines · drift.rs, mod.rs, sections.rs
 - `src/retrieve/` — 3 files, 763 lines · mod.rs, fallback.rs, budget.rs
 - `src/review/` — 1 file, 545 lines · mod.rs
-- `src/spec/` — 4 files, 1187 lines · mod.rs, ears.rs, oracle.rs
+- `src/spec/` — 4 files, 1275 lines · mod.rs, oracle.rs, ears.rs
 - `src/store/` — 2 files, 314 lines · mod.rs, frontmatter.rs
 - `src/trajectory/` — 2 files, 462 lines · event.rs, mod.rs
 - `tests/` — 11 files, 3483 lines · support.rs, cli.rs, phase1.rs
