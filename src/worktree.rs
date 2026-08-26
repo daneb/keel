@@ -156,7 +156,19 @@ pub fn gate_base(paths: &Paths, explicit: Option<&str>, branch_point: bool) -> R
         .unwrap_or_default()
         .trim()
         .to_string();
-    for trunk in trunk_candidates(paths) {
+    let trunks = trunk_candidates(paths);
+
+    // If we're already on a trunk branch, there is no branch point to find --
+    // searching anyway would merge-base against origin/<trunk>, which (with
+    // unpushed local commits) resolves to a stale ancestor, not HEAD. Compare
+    // on the local name (`origin/<x>` stripped to `<x>`) so this catches
+    // "current is master" even though the candidate list only ever holds
+    // remote-qualified names for it.
+    if trunks.iter().any(|t| t.strip_prefix("origin/").unwrap_or(t) == current) {
+        return Ok(head);
+    }
+
+    for trunk in trunks {
         if trunk == current {
             continue;
         }
@@ -270,6 +282,44 @@ mod tests {
         assert_ne!(head_base, trunk_commit);
 
         let _ = std::fs::remove_dir_all(&p.repo);
+    }
+
+    #[test]
+    fn gate_base_on_trunk_with_unpushed_commits_stays_at_head() {
+        let p = repo();
+        let trunk = git(&p.repo, &["rev-parse", "--abbrev-ref", "HEAD"]).unwrap().trim().to_string();
+        let pushed_commit = base_commit(&p).unwrap();
+
+        // A real origin remote, with the first commit pushed to it -- this is
+        // the shape the bug needs: origin/<trunk> exists, and is behind HEAD.
+        let origin = p.repo.with_file_name(format!(
+            "{}-origin",
+            p.repo.file_name().unwrap().to_string_lossy()
+        ));
+        git(&p.repo, &["init", "-q", "--bare", &origin.to_string_lossy()]).unwrap();
+        git(&p.repo, &["remote", "add", "origin", &origin.to_string_lossy()]).unwrap();
+        git(&p.repo, &["push", "-q", "origin", &trunk]).unwrap();
+
+        // A second commit that is NOT pushed -- still on the trunk branch
+        // directly, no feature branch involved.
+        std::fs::write(p.repo.join("a.txt"), "one\ntwo\n").unwrap();
+        git(&p.repo, &["add", "-A"]).unwrap();
+        git(&p.repo, &["commit", "-q", "-m", "unpushed work"]).unwrap();
+        let head = base_commit(&p).unwrap();
+        assert_ne!(head, pushed_commit);
+
+        // Being on the trunk branch itself, gate_base must return HEAD, not
+        // merge-base(origin/<trunk>, HEAD) -- which would resolve to the
+        // stale, already-pushed commit and hide the unpushed work from the
+        // diff-based gate checks.
+        let base = gate_base(&p, None, true).unwrap();
+        assert_eq!(
+            base, head,
+            "on trunk with unpushed commits, gate_base must not fall back to a stale origin merge-base"
+        );
+
+        let _ = std::fs::remove_dir_all(&p.repo);
+        let _ = std::fs::remove_dir_all(&origin);
     }
 
     #[test]
