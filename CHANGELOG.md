@@ -7,6 +7,16 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.4.8] - 2026-08-27
+
+### Fixed
+
+- **`keel approve --stage merge` picked the wrong G3 result.** Run IDs use
+  a hashed suffix that is not monotonic within a day, so lexicographic sort
+  picked an older failed G3 over a newer passing one — reporting "G3 is FAIL"
+  right after G3 passed. Now uses `generated_at` timestamps to find the
+  truly latest result.
+
 ## [0.4.7] - 2026-08-27
 
 ### Fixed
