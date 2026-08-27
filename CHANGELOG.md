@@ -7,7 +7,7 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
-## [0.4.4] - 2026-08-26
+## [0.4.4] - 2026-08-27
 
 ### Fixed
 
@@ -15,6 +15,15 @@ and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
   `files: scope` were treated as all claiming a literal file called "scope",
   triggering false wave-isolation failures. The keyword is now skipped in
   overlap detection.
+- **`keel next` no longer tells you to re-approve a merge before doing the
+  work.** A superseded merge approval from a prior iteration now drops back
+  to the "do the work" stage instead of asking for a re-approval that makes
+  no sense yet.
+- **Stale diff base on undiverted branches.** `keel gate g2` / `keel run
+  --no-driver` would compute `merge-base` against a stale `origin/master`,
+  producing a diff that included the entire merged history — not just the
+  working tree changes. Now when a branch points at the same commit as
+  trunk, keel diffs against HEAD regardless of how stale the remote ref is.
 
 ## [0.4.3] - 2026-08-26
 
