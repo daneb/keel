@@ -125,12 +125,13 @@ fn transition_spec_status(paths: &Paths, slug: &str, decision: Decision) -> Resu
 
 /// Find the G3 verdict from the most recent run for a given spec.
 ///
-/// `run::latest()` returns the latest run across *all* specs, which is wrong
-/// when several specs are in flight. Walk backwards through the run list and
-/// pick the first one that belongs to this slug and has a G3 result.
+/// Run IDs are `YYYY-MM-DD-xxx` where the suffix is a hash, not a sequence
+/// number — so lexicographic order is only chronological across days, not
+/// within a day. Use the G3 result's `generated_at` timestamp to find the
+/// truly latest one.
 fn find_g3_verdict(paths: &Paths, slug: &str) -> Result<Option<gate::Verdict>> {
-    let mut runs = crate::run::list(paths)?;
-    runs.reverse(); // newest first
+    let runs = crate::run::list(paths)?;
+    let mut best: Option<(String, gate::Verdict)> = None;
     for id in runs {
         let Ok(run) = crate::run::Run::load(paths, &id) else { continue };
         if run.meta.spec != slug {
@@ -139,10 +140,13 @@ fn find_g3_verdict(paths: &Paths, slug: &str) -> Result<Option<gate::Verdict>> {
         if let Ok(results) = run.gate_results()
             && let Some(g3) = results.into_iter().find(|r| r.gate == "G3")
         {
-            return Ok(Some(g3.verdict));
+            let dominated = best.as_ref().is_some_and(|(ts, _)| *ts >= g3.generated_at);
+            if !dominated {
+                best = Some((g3.generated_at.clone(), g3.verdict));
+            }
         }
     }
-    Ok(None)
+    Ok(best.map(|(_, v)| v))
 }
 
 pub fn show(slug: Option<String>) -> Result<i32> {
