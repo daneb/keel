@@ -172,6 +172,18 @@ pub fn gate_base(paths: &Paths, explicit: Option<&str>, branch_point: bool) -> R
         if trunk == current {
             continue;
         }
+        // Resolve the trunk to a commit so we can detect the case where the
+        // branch points at the same commit as trunk — there is no divergence
+        // even though the names differ, and merge-base against a stale
+        // remote ref would return an ancestor that predates work already on
+        // trunk. This is the common case for a branch just created off master
+        // with only uncommitted changes.
+        let trunk_commit = git(&paths.repo, &["rev-parse", &trunk])
+            .map(|s| s.trim().to_string())
+            .unwrap_or_default();
+        if trunk_commit == head {
+            return Ok(head);
+        }
         if let Ok(mb) = git(&paths.repo, &["merge-base", &trunk, "HEAD"]) {
             let mb = mb.trim().to_string();
             // Only useful if the branch actually diverged from that trunk.
