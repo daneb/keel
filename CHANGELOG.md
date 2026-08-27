@@ -7,6 +7,16 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.4.7] - 2026-08-27
+
+### Fixed
+
+- **`keel approve --stage merge` now finds G3 by spec.** The G3 verdict
+  lookup used `run::latest()` which returns the most recent run across all
+  specs. When the latest run belonged to a different spec or the lookup
+  silently failed, approve reported "G3 has never been run" immediately after
+  G3 passed. Now searches backwards through runs filtered by slug.
+
 ## [0.4.6] - 2026-08-27
 
 ### Fixed
