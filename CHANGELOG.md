@@ -7,6 +7,15 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.4.6] - 2026-08-27
+
+### Fixed
+
+- **`keel next` detects stale G1 after spec re-approval.** When the spec
+  changes and is re-approved, a previously passing G1 is now recognised as
+  stale. `keel next` directs the user to re-run G1 instead of skipping
+  ahead to the run stage.
+
 ## [0.4.5] - 2026-08-27
 
 ### Fixed
