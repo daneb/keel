@@ -166,9 +166,12 @@ fn pipeline_stage(paths: &Paths, slug: &str) -> Stage {
         return Stage::Run;
     }
 
-    // Merge approval
-    if !matches!(approval::standing(paths, slug, "merge"), Ok(Standing::Current { .. })) {
-        return Stage::MergeApproval;
+    // Merge approval — a superseded merge means the plan changed since the
+    // last passing run, so the work needs to be redone, not just re-approved.
+    match approval::standing(paths, slug, "merge") {
+        Ok(Standing::Superseded { .. }) => return Stage::Run,
+        Ok(Standing::Current { .. }) => {}
+        _ => return Stage::MergeApproval,
     }
 
     Stage::Complete
@@ -438,8 +441,13 @@ fn next_for_spec(paths: &Paths, slug: &str) -> Result<i32> {
         }
         Standing::Superseded { .. } => {
             step(
-                &format!("re-approve the merge for `{slug}`"),
-                "The plan or tasks changed after the merge was approved. Re-approve.",
+                &format!("re-run `{slug}` — the plan changed since the last run"),
+                &format!(
+                    "The plan or tasks changed after the last passing run.\n\
+                     Do the work again and gate it:\n\n\
+                     \x20 keel run {slug}\n\
+                     \x20 keel run {slug} --no-driver  # gate the tree as-is"
+                ),
             );
             return Ok(0);
         }
