@@ -153,7 +153,16 @@ fn pipeline_stage(paths: &Paths, slug: &str) -> Stage {
             | Some(gate::GateResult { verdict: Verdict::Blocked, .. }) => {
             return Stage::PlanGate;
         }
-        _ => {}
+        Some(ref g1) => {
+            // A G1 pass that predates the current spec approval is stale —
+            // the spec changed (new criteria, wider scope) and G1 needs to
+            // re-verify the plan against the updated spec.
+            if let Ok(Standing::Current { at, .. }) = approval::standing(paths, slug, "spec")
+                && g1.generated_at < at
+            {
+                return Stage::PlanGate;
+            }
+        }
     }
 
     // Plan approval
@@ -364,7 +373,21 @@ fn next_for_spec(paths: &Paths, slug: &str) -> Result<i32> {
             );
             return Ok(0);
         }
-        _ => {} // G1 passes
+        Some(ref r) => {
+            // A G1 pass that predates the current spec approval is stale.
+            if let Ok(Standing::Current { at, .. }) = approval::standing(paths, slug, "spec")
+                && r.generated_at < at
+            {
+                step(
+                    &format!("re-run G1 on `{slug}` — the spec changed since G1 last passed"),
+                    &format!(
+                        "The spec was re-approved after G1 ran. Update the plan and tasks\n\
+                         if needed, then re-run:\n\n  keel gate g1 {slug}"
+                    ),
+                );
+                return Ok(0);
+            }
+        }
     }
 
     // --- plan approval ----------------------------------------------------
