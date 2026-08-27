@@ -27,10 +27,8 @@ pub fn run(slug: Option<String>, stage: String, reject: bool, note: Option<Strin
     let verdict = if gate_name == "G3" {
         // G3 lives in the run directory, not the spec directory: a merge is
         // approved against a particular run's evidence, not against the spec.
-        crate::run::latest(&paths)?
-            .and_then(|id| crate::run::Run::load(&paths, &id).ok())
-            .and_then(|r| r.gate_results().ok())
-            .and_then(|rs| rs.into_iter().find(|r| r.gate == "G3").map(|r| r.verdict))
+        // Find the latest run *for this spec* — not just any run.
+        find_g3_verdict(&paths, &slug)?
     } else {
         gate::previous(&paths, &slug, gate_name).map(|r| r.verdict)
     };
@@ -123,6 +121,28 @@ fn transition_spec_status(paths: &Paths, slug: &str, decision: Decision) -> Resu
     std::fs::write(&path, updated)
         .with_context(|| format!("writing {}", path.display()))?;
     Ok(())
+}
+
+/// Find the G3 verdict from the most recent run for a given spec.
+///
+/// `run::latest()` returns the latest run across *all* specs, which is wrong
+/// when several specs are in flight. Walk backwards through the run list and
+/// pick the first one that belongs to this slug and has a G3 result.
+fn find_g3_verdict(paths: &Paths, slug: &str) -> Result<Option<gate::Verdict>> {
+    let mut runs = crate::run::list(paths)?;
+    runs.reverse(); // newest first
+    for id in runs {
+        let Ok(run) = crate::run::Run::load(paths, &id) else { continue };
+        if run.meta.spec != slug {
+            continue;
+        }
+        if let Ok(results) = run.gate_results()
+            && let Some(g3) = results.into_iter().find(|r| r.gate == "G3")
+        {
+            return Ok(Some(g3.verdict));
+        }
+    }
+    Ok(None)
 }
 
 pub fn show(slug: Option<String>) -> Result<i32> {
