@@ -317,6 +317,11 @@ enum DriverCmd {
         #[arg(long)]
         force: bool,
     },
+    /// Set which configured driver `keel run` uses when `--driver` is omitted
+    Default {
+        /// Driver id, e.g. `kiro`
+        id: String,
+    },
 }
 
 #[derive(Subcommand)]
@@ -502,6 +507,7 @@ fn run() -> Result<i32> {
         Command::Driver(DriverCmd::List) => cmd::driver::list(),
         Command::Driver(DriverCmd::Scaffold { force }) => cmd::driver::scaffold(force),
         Command::Driver(DriverCmd::Check { id, json }) => cmd::driver::check(id, json),
+        Command::Driver(DriverCmd::Default { id }) => cmd::driver::set_default(id),
         Command::Mcp => {
             mcp::serve()?;
             Ok(0)

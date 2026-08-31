@@ -14,7 +14,7 @@ pub mod contract;
 
 use crate::config::{Config, Driver as DriverConfig};
 use crate::paths::Paths;
-use anyhow::{Result, bail};
+use anyhow::{Context, Result, bail};
 pub use contract::{DriverResult, DriverStatus, DriverTask};
 use std::io::Write;
 use std::process::{Command, Stdio};
@@ -348,6 +348,81 @@ pub fn select<'a>(cfg: &'a Config, id: Option<&str>) -> Result<&'a DriverConfig>
     }
 }
 
+/// Make `id` the default driver, and clear the flag on every other one.
+///
+/// Edits `keel.toml` as raw text, one `[[driver]]` block at a time, rather
+/// than loading it into `Config` and calling `save` — a full serde round-trip
+/// has no memory of comments and would silently strip every one in the file,
+/// same reasoning as `append_driver_entries`.
+pub fn set_default(paths: &Paths, cfg: &Config, id: &str) -> Result<()> {
+    if !cfg.drivers.iter().any(|d| d.id == id) {
+        let known: Vec<&str> = cfg.drivers.iter().map(|d| d.id.as_str()).collect();
+        bail!("no driver `{id}` in .keel/keel.toml — configured: {}", known.join(", "));
+    }
+
+    let cfg_path = paths.config();
+    let text = std::fs::read_to_string(&cfg_path)
+        .with_context(|| format!("reading {}", cfg_path.display()))?;
+
+    let lines: Vec<&str> = text.lines().collect();
+    let starts: Vec<usize> =
+        lines.iter().enumerate().filter(|(_, l)| l.trim() == "[[driver]]").map(|(i, _)| i).collect();
+
+    let mut out: Vec<String> = Vec::with_capacity(lines.len() + 1);
+    let mut i = 0;
+    let mut block_idx = 0;
+    while i < lines.len() {
+        if block_idx < starts.len() && i == starts[block_idx] {
+            let end = starts.get(block_idx + 1).copied().unwrap_or_else(|| {
+                lines[i + 1..]
+                    .iter()
+                    .position(|l| l.trim_start().starts_with('['))
+                    .map(|p| i + 1 + p)
+                    .unwrap_or(lines.len())
+            });
+            let block = &lines[i..end];
+            let is_target = block.iter().any(|l| block_line_id(l).as_deref() == Some(id));
+            let mut wrote_default = false;
+            for line in block {
+                let t = line.trim_start();
+                if t.starts_with("default ") || t.starts_with("default=") {
+                    out.push(format!("default = {is_target}"));
+                    wrote_default = true;
+                } else {
+                    out.push((*line).to_string());
+                }
+            }
+            // A hand-edited block with no `default` line at all means "false"
+            // by serde's own default — only a target block that needs to
+            // become `true` requires one to actually be written.
+            if !wrote_default && is_target {
+                out.push("default = true".to_string());
+            }
+            i = end;
+            block_idx += 1;
+        } else {
+            out.push(lines[i].to_string());
+            i += 1;
+        }
+    }
+
+    let mut result = out.join("\n");
+    if text.ends_with('\n') {
+        result.push('\n');
+    }
+    std::fs::write(&cfg_path, result).with_context(|| format!("writing {}", cfg_path.display()))
+}
+
+/// Pull the value out of a `[[driver]]` block's `id = "..."` line, if this is
+/// that line.
+fn block_line_id(line: &str) -> Option<String> {
+    let rest = line.trim().strip_prefix("id")?.trim_start();
+    let rest = rest.strip_prefix('=')?.trim_start();
+    let rest = rest.strip_prefix('"')?;
+    let end = rest.find('"')?;
+    Some(rest[..end].to_string())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -458,6 +533,62 @@ mod tests {
         // A relative path that does not exist is passed through, so the error
         // the caller sees is the shell's, not a rewritten one.
         assert_eq!(resolve_program(&home, "./nope/x"), "./nope/x");
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn set_default_flips_the_flag_and_preserves_hand_edits() {
+        let dir = std::env::temp_dir().join(format!("keel-set-default-{}", std::process::id()));
+        std::fs::create_dir_all(dir.join(".keel")).unwrap();
+        let home = Paths { repo: dir.clone() };
+        let raw = "# keel configuration\n\n\
+                    [[driver]]\n\
+                    id = \"claude-code\"\n\
+                    cmd = \".keel/drivers/claude-code\"\n\
+                    default = true\n\
+                    timeout_secs = 900\n\n\
+                    # kiro adapter, hand-tuned timeout\n\
+                    [[driver]]\n\
+                    id = \"kiro\"\n\
+                    cmd = \".keel/drivers/kiro\"\n\
+                    timeout_secs = 1200\n\n\
+                    [[driver]]\n\
+                    id = \"noop\"\n\
+                    cmd = \".keel/drivers/noop\"\n\
+                    default = false\n\
+                    timeout_secs = 5\n";
+        std::fs::write(home.config(), raw).unwrap();
+        let cfg = Config::load(&home.config()).unwrap();
+        assert!(cfg.drivers.iter().find(|d| d.id == "claude-code").unwrap().default);
+        // kiro's block has no `default` line at all — serde's own default
+        // (false) applies until set_default gives it one.
+        assert!(!cfg.drivers.iter().find(|d| d.id == "kiro").unwrap().default);
+
+        set_default(&home, &cfg, "kiro").unwrap();
+
+        let text = std::fs::read_to_string(home.config()).unwrap();
+        assert!(text.contains("# kiro adapter, hand-tuned timeout"), "{text}");
+
+        let cfg = Config::load(&home.config()).unwrap();
+        assert!(cfg.drivers.iter().find(|d| d.id == "kiro").unwrap().default);
+        assert!(!cfg.drivers.iter().find(|d| d.id == "claude-code").unwrap().default);
+        assert!(!cfg.drivers.iter().find(|d| d.id == "noop").unwrap().default);
+        assert_eq!(cfg.drivers.iter().filter(|d| d.default).count(), 1);
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn set_default_rejects_an_unknown_id() {
+        let dir = std::env::temp_dir().join(format!("keel-set-default-unknown-{}", std::process::id()));
+        std::fs::create_dir_all(dir.join(".keel")).unwrap();
+        let home = Paths { repo: dir.clone() };
+        let cfg = Config::default();
+        cfg.save(&home.config()).unwrap();
+
+        let err = set_default(&home, &cfg, "does-not-exist").unwrap_err();
+        assert!(err.to_string().contains("does-not-exist"), "{err}");
 
         let _ = std::fs::remove_dir_all(&dir);
     }

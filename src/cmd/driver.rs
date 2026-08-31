@@ -38,6 +38,14 @@ pub fn list() -> Result<i32> {
     Ok(0)
 }
 
+pub fn set_default(id: String) -> Result<i32> {
+    let paths = Paths::require_init()?;
+    let cfg = Config::load(&paths.config())?;
+    crate::driver::set_default(&paths, &cfg, &id)?;
+    println!("default driver set to `{id}`");
+    Ok(0)
+}
+
 fn which(cmd: &str) -> bool {
     let program = cmd.split_whitespace().next().unwrap_or(cmd);
     std::process::Command::new("sh")
