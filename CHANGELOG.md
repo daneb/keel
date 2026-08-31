@@ -7,6 +7,16 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.4.9] - 2026-08-31
+
+### Added
+
+- **`keel driver default <id>`** — sets which configured driver `keel run`
+  uses when `--driver` is omitted. Edits `keel.toml` as raw text, flipping
+  `default` on the matching `[[driver]]` block and clearing it elsewhere, so
+  hand-written comments and formatting survive rather than being lost to a
+  full serde round-trip.
+
 ## [0.4.8] - 2026-08-27
 
 ### Fixed
