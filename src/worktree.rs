@@ -196,6 +196,14 @@ pub fn gate_base(paths: &Paths, explicit: Option<&str>, branch_point: bool) -> R
 }
 
 /// Trunk names to try, most authoritative first.
+///
+/// Remote-qualified names come before bare local ones. A remote-tracking ref
+/// only moves on `git fetch`, so it reflects the shared trunk as of the last
+/// sync; a local `main`/`master` branch can sit unchecked-out and un-advanced
+/// for months while its owner works entirely on feature branches. Trying the
+/// stale local name first meant merge-basing against wherever that branch was
+/// left at clone time, silently pulling everything a teammate has pushed
+/// since into "the diff" as if the caller had written it themselves.
 fn trunk_candidates(paths: &Paths) -> Vec<String> {
     let mut out = Vec::new();
     if let Ok(sym) = git(&paths.repo, &["symbolic-ref", "--short", "refs/remotes/origin/HEAD"]) {
@@ -204,7 +212,7 @@ fn trunk_candidates(paths: &Paths) -> Vec<String> {
             out.push(s);
         }
     }
-    for name in ["main", "master", "origin/main", "origin/master"] {
+    for name in ["origin/main", "origin/master", "main", "master"] {
         if git(&paths.repo, &["rev-parse", "--verify", name]).is_ok() {
             out.push(name.to_string());
         }
@@ -332,6 +340,69 @@ mod tests {
 
         let _ = std::fs::remove_dir_all(&p.repo);
         let _ = std::fs::remove_dir_all(&origin);
+    }
+
+    #[test]
+    fn gate_base_prefers_the_fetched_remote_trunk_over_a_stale_local_branch() {
+        let p = repo();
+        let trunk = git(&p.repo, &["rev-parse", "--abbrev-ref", "HEAD"]).unwrap().trim().to_string();
+        let stale_local_trunk = base_commit(&p).unwrap();
+
+        let origin = p.repo.with_file_name(format!(
+            "{}-origin",
+            p.repo.file_name().unwrap().to_string_lossy()
+        ));
+        git(&p.repo, &["init", "-q", "--bare", &origin.to_string_lossy()]).unwrap();
+        git(&p.repo, &["remote", "add", "origin", &origin.to_string_lossy()]).unwrap();
+        git(&p.repo, &["push", "-q", "origin", &trunk]).unwrap();
+
+        // A second clone stands in for a teammate: it advances the trunk on
+        // origin without ever touching this repository's own local branch —
+        // the exact shape of a repo whose local `main`/`master` has sat
+        // unchecked-out since it was cloned.
+        let other = p.repo.with_file_name(format!(
+            "{}-other",
+            p.repo.file_name().unwrap().to_string_lossy()
+        ));
+        git(&p.repo, &["clone", "-q", &origin.to_string_lossy(), &other.to_string_lossy()]).unwrap();
+        git(&other, &["config", "user.email", "t@example.com"]).unwrap();
+        git(&other, &["config", "user.name", "Test"]).unwrap();
+        std::fs::write(other.join("teammate.txt"), "teammate work\n").unwrap();
+        git(&other, &["add", "-A"]).unwrap();
+        git(&other, &["commit", "-q", "-m", "teammate work"]).unwrap();
+        git(&other, &["push", "-q", "origin", &trunk]).unwrap();
+
+        // Fetching moves the remote-tracking ref here without moving the
+        // local trunk branch.
+        git(&p.repo, &["fetch", "-q", "origin"]).unwrap();
+        let fetched_trunk =
+            git(&p.repo, &["rev-parse", &format!("origin/{trunk}")]).unwrap().trim().to_string();
+        assert_ne!(fetched_trunk, stale_local_trunk, "the fetch must actually have moved origin/<trunk>");
+        // A modern `git fetch` auto-populates refs/remotes/origin/HEAD when it
+        // is missing, which would otherwise mask exactly the bug this test
+        // guards: drop it so the fallback candidate order — the actual fix —
+        // is what gets exercised, the way an older git or a repo that has
+        // pruned this ref would leave it.
+        git(&p.repo, &["symbolic-ref", "--delete", "refs/remotes/origin/HEAD"]).unwrap();
+
+        git(&p.repo, &["checkout", "-q", "-b", "feature", &format!("origin/{trunk}")]).unwrap();
+        std::fs::write(p.repo.join("a.txt"), "one\ntwo\n").unwrap();
+        git(&p.repo, &["add", "-A"]).unwrap();
+        git(&p.repo, &["commit", "-q", "-m", "feature work"]).unwrap();
+
+        // The feature branch forked from the fetched, up-to-date trunk. A
+        // stale local `<trunk>` left behind at the first push is still an
+        // ancestor of HEAD, so it "diverges" too -- just at the wrong,
+        // much older point, dragging the teammate's commit into the diff.
+        let base = gate_base(&p, None, true).unwrap();
+        assert_eq!(
+            base, fetched_trunk,
+            "must diff from the fetched origin/<trunk>, not the stale local branch left behind at clone time"
+        );
+
+        let _ = std::fs::remove_dir_all(&p.repo);
+        let _ = std::fs::remove_dir_all(&origin);
+        let _ = std::fs::remove_dir_all(&other);
     }
 
     #[test]
