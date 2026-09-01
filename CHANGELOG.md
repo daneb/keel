@@ -7,6 +7,19 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.4.10] - 2026-09-01
+
+### Fixed
+
+- **`gate_base` no longer diffs against a stale local trunk branch.** The
+  trunk-candidate lookup tried bare local `main`/`master` before the
+  remote-qualified `origin/main`/`origin/master`. A local trunk branch left
+  un-checked-out since clone never advances even as `origin/<trunk>` moves
+  forward on fetch, but it is still an ancestor of `HEAD` — so `merge-base`
+  against it "succeeded" anyway, landing on a much older commit and dragging
+  everything a teammate pushed since into `keel gate g2`'s blast-radius and
+  line-budget diffs. Remote-qualified names are now tried first.
+
 ## [0.4.9] - 2026-08-31
 
 ### Added
