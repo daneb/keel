@@ -202,6 +202,7 @@ footer a{color:var(--body)}
     <a href="#parts">Components</a>
     <a href="#gates">Gates</a>
     <a href="#evidence">Evidence</a>
+    <a href="#see">Seeing it</a>
     <a href="#start">Get started</a>
     <a class="gh" href="https://github.com/daneb/keel">GitHub</a>
   </nav>
@@ -209,7 +210,7 @@ footer a{color:var(--body)}
 
 <div id="top" class="hero"><div class="wrap hero-grid">
   <div>
-    <div class="tag">Rust · macOS · v0.4.0</div>
+    <div class="tag">Rust · macOS · v0.5.0</div>
     <h1>keel</h1>
     <p class="lede">A conductor, not an agent loop.</p>
     <p class="sub">The keel is the one member every rib bolts to — the part that decides
@@ -394,7 +395,7 @@ footer a{color:var(--body)}
     <div class="m"><div class="val">1.25<span style="font-size:20px"> s</span></div>
       <div class="lbl">To index 5,705 files</div>
       <div class="note">Cold, across eight languages.</div></div>
-    <div class="m"><div class="val">359</div><div class="lbl">Tests · 0 warnings</div>
+    <div class="m"><div class="val">461</div><div class="lbl">Tests · 0 warnings</div>
       <div class="note">Clippy clean at <code>-D warnings</code>.</div></div>
     <div class="m"><div class="val">11 → 54%</div><div class="lbl">G2 pass rate</div>
       <div class="note">Inside keel vs. on a real project. The low number was the
@@ -429,6 +430,73 @@ footer a{color:var(--body)}
   </figure>
 </div></section>
 
+<section id="see"><div class="wrap">
+  <div class="tag">Seeing it</div>
+  <h2>The run, while it is running</h2>
+  <p class="intro">keel could gate a change but not show you one. A verdict is only
+    useful if you can see what produced it — which check, wanting what, getting
+    what.</p>
+
+  <figure class="plate" style="margin:0 0 8px">
+    <svg viewBox="0 0 900 96" role="img" aria-label="The pipeline spine: eight stages from spec to done, with the current stage highlighted">
+      <g class="station"><path d="M0,48 H900"/></g>
+      <g class="dim-t" text-anchor="middle" font-size="12">
+        <g fill="none" stroke="var(--rule)">
+          <rect x="14"  y="32" width="92"  height="32" rx="5"/>
+          <rect x="118" y="32" width="122" height="32" rx="5"/>
+          <rect x="252" y="32" width="78"  height="32" rx="5"/>
+          <rect x="342" y="32" width="62"  height="32" rx="5"/>
+          <rect x="416" y="32" width="122" height="32" rx="5"/>
+          <rect x="654" y="32" width="132" height="32" rx="5"/>
+          <rect x="798" y="32" width="78"  height="32" rx="5"/>
+        </g>
+        <rect x="550" y="32" width="92" height="32" rx="5"
+              fill="none" stroke="var(--brass)" stroke-width="2"/>
+        <text x="60"  y="52">spec</text>
+        <text x="179" y="52">approve spec</text>
+        <text x="291" y="52">plan</text>
+        <text x="373" y="52">G1</text>
+        <text x="477" y="52">approve plan</text>
+        <text class="brass-t" x="596" y="52">run</text>
+        <text x="720" y="52">approve merge</text>
+        <text x="837" y="52">done</text>
+      </g>
+      <path class="dim" d="M596,64 L596,84"/>
+      <text class="dim-t brass-t" x="596" y="94" text-anchor="middle">YOU ARE HERE</text>
+    </svg>
+    <figcaption><span>Plate III — The spine</span><span>G0 → G4 · one feature</span></figcaption>
+  </figure>
+
+  <div class="grid g2">
+    <div class="card"><div class="n">TERMINAL</div>
+      <h3><code>keel report</code></h3>
+      <p>A feature's whole life in one place: the spine above, every approval and
+        who it binds to, every run, and every failing check with its
+        <em>expected</em> and <em>actual</em> side by side — plus the lesson that
+        put the check there. <code>--json</code> emits the same model, so anything
+        else can render its own.</p></div>
+    <div class="card"><div class="n">BROWSER</div>
+      <h3><code>keel serve</code></h3>
+      <p>The same model as a page on loopback, updating while a run is still going.
+        Click a failing check through to the evidence it points at. No account, no
+        telemetry, no network — the page's own Content-Security-Policy forbids
+        reaching one, so that is enforced rather than promised.</p></div>
+  </div>
+
+  <div class="honest" style="margin-top:26px">
+    <h3 style="font-size:19px">It cannot do anything</h3>
+    <p style="font-size:15.5px; margin:12px 0 0">There is no button that approves,
+      runs or gates — and not by omission. Anything but <code>GET</code> is refused
+      in the request parser, before routing, so read-only is a property of the code
+      rather than a promise about the routes. A human decision stays a deliberate
+      act on the command line, bound to the hash of what was approved. The server
+      binds loopback only, validates <code>Host</code> against DNS rebinding, and
+      reaches the filesystem by name on exactly one route. The reasoning is written
+      down in <a href="https://github.com/daneb/keel/blob/master/SECURITY.md">SECURITY.md</a>
+      before the code it describes.</p>
+  </div>
+</div></section>
+
 <section id="start"><div class="wrap">
   <div class="tag">Get started</div>
   <h2>Five commands</h2>
@@ -450,7 +518,11 @@ cargo install keel-harness      <span class="c"># binary is called `keel`</span>
 <span class="c"># plan it, run it, and export what happened</span>
 <span class="k">keel</span> plan short-invocation
 <span class="k">keel</span> run  short-invocation
-<span class="k">keel</span> export --verify</pre>
+<span class="k">keel</span> export --verify
+
+<span class="c"># and to see where any of it stands</span>
+<span class="k">keel</span> report short-invocation
+<span class="k">keel</span> serve                    <span class="c"># the same, in a browser, read-only</span></pre>
 
   <div class="honest">
     <h3 style="font-size:19px">Before you trust it on real work</h3>
