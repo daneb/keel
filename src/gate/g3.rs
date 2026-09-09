@@ -24,7 +24,7 @@ pub fn run(paths: &Paths, cfg: &Config, spec: &Spec, run: &Run) -> Result<GateRe
         human_verdict(paths, &spec.front.slug)?,
     ];
     checks.extend(run_plugins(paths, cfg, "G3", Some(&spec.front.slug)));
-    Ok(GateResult::new("G3", Some(spec.front.slug.clone()), checks))
+    Ok(GateResult::new(paths, "G3", Some(spec.front.slug.clone()), checks))
 }
 
 /// G3 cannot be the first gate to notice a problem.

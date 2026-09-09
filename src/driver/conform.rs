@@ -123,7 +123,7 @@ pub struct Conformance {
 pub fn check(home: &Paths, driver: &DriverConfig) -> Result<Conformance> {
     let scratch = Scratch::new(&driver.id)?;
     let before = scratch.changed_files();
-    let run_id = crate::gate::run_id();
+    let run_id = crate::gate::run_id(&scratch.paths);
     let task = probe_task(&run_id, &scratch.paths.repo.to_string_lossy());
 
     // A conformance probe should answer in seconds. A driver that takes its

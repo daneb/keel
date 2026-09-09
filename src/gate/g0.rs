@@ -37,7 +37,7 @@ pub fn run(paths: &Paths, cfg: &Config, spec: &Spec) -> Result<GateResult> {
         shared_stores_check(paths, cfg),
     ];
     checks.extend(run_plugins(paths, cfg, "G0", Some(&spec.front.slug)));
-    Ok(GateResult::new("G0", Some(spec.front.slug.clone()), checks))
+    Ok(GateResult::new(paths, "G0", Some(spec.front.slug.clone()), checks))
 }
 
 fn schema(spec: &Spec) -> Check {
