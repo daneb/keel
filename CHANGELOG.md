@@ -7,6 +7,18 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.6.1] - 2026-09-09
+
+### Added
+
+- **A spec-authoring loop convention.** `conventions.md` now states the
+  protocol for writing `.keel/specs/<slug>/spec.md`: draft one acceptance
+  criterion, run `keel gate g0 <slug>`, fix only what the verdict names, and
+  repeat until it passes. Written once in the store, it projects identically
+  into `CLAUDE.md`, `AGENTS.md`, `.kiro/steering/keel.md` and
+  `.github/copilot-instructions.md`, so the loop is the same regardless of
+  which agent is driving.
+
 ## [0.6.0] - 2026-09-09
 
 ### Added
