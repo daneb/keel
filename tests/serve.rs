@@ -121,6 +121,20 @@ fn the_overview_carries_the_report() {
 }
 
 #[test]
+fn insights_carries_the_executive_summary() {
+    let r = repo_with_a_run("serve-insights");
+    let s = Server::start(&r);
+    let (status, _, body) = s.get("/api/insights");
+    assert_eq!(status, 200, "{body}");
+    let v: serde_json::Value = serde_json::from_str(&body).expect("invalid JSON");
+    assert_eq!(v["schema"], "keel.insights/1");
+    assert!(v["overview"]["runs_total"].as_u64().unwrap() > 0);
+    assert!(!v["specs"].as_array().unwrap().is_empty());
+    assert!(!v["checks"].as_array().unwrap().is_empty());
+    assert!(!v["trend"].as_array().unwrap().is_empty(), "no week bucket for a real run: {v}");
+}
+
+#[test]
 fn a_run_detail_carries_its_events_gates_and_evidence_listing() {
     let r = repo_with_a_run("serve-run");
     let s = Server::start(&r);
@@ -267,6 +281,7 @@ fn every_response_is_hardened() {
         "/".to_string(),
         "/app.js".to_string(),
         "/api/overview".to_string(),
+        "/api/insights".to_string(),
         "/api/version".to_string(),
         format!("/api/run/{id}"),
         format!("/api/run/{id}/evidence/build.txt"),

@@ -1,4 +1,4 @@
-<!-- keel:generated schema=keel.projection/1 adapter=kiro store=17f91d718397 body=e895c843f063 -->
+<!-- keel:generated schema=keel.projection/1 adapter=kiro store=74893c6d51bb body=55e6ec9e3bdf -->
 <!-- Source of truth: .keel/store/ — regenerate with `keel store render`. Edits here are drift and will be reported by `keel store check`. -->
 
 # Project context
@@ -49,15 +49,15 @@ _Versions that cannot move, platforms that must keep working, dependencies that 
 
 ## Repository map
 
-**100 files · 1745 symbols · 27092 lines** — javascript 1, rust 99
+**103 files · 1796 symbols · 28223 lines** — javascript 1, rust 102
 
 Files are ordered by import-graph centrality, not alphabetically. Signatures only; read a body with the file path and line number. Per-directory detail lives in `.keel/store/map/<dir>/CODEMAP.md`.
 
 ### Layout
 
-- `assets/ui/` — 1 file, 329 lines · app.js
-- `src/` — 12 files, 3804 lines · paths.rs, config.rs, run.rs
-- `src/cmd/` — 24 files, 4326 lines · mod.rs, next.rs, run.rs
+- `assets/ui/` — 1 file, 808 lines · app.js
+- `src/` — 13 files, 3969 lines · paths.rs, config.rs, run.rs
+- `src/cmd/` — 24 files, 4308 lines · mod.rs, next.rs, run.rs
 - `src/driver/` — 4 files, 1202 lines · mod.rs, contract.rs, conform.rs
 - `src/evidence/` — 2 files, 423 lines · mod.rs, manifest.rs
 - `src/failure/` — 2 files, 767 lines · mod.rs, taxonomy.rs
@@ -66,18 +66,18 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `src/map/` — 9 files, 2566 lines · lang.rs, extract.rs, blast.rs
 - `src/mcp/` — 1 file, 271 lines · mod.rs
 - `src/projection/` — 3 files, 726 lines · drift.rs, mod.rs, sections.rs
-- `src/report/` — 1 file, 154 lines · mod.rs
+- `src/report/` — 2 files, 422 lines · mod.rs, insights.rs
 - `src/retrieve/` — 3 files, 763 lines · mod.rs, fallback.rs, budget.rs
 - `src/review/` — 1 file, 545 lines · mod.rs
-- `src/serve/` — 1 file, 443 lines · mod.rs
+- `src/serve/` — 1 file, 447 lines · mod.rs
 - `src/spec/` — 4 files, 1275 lines · mod.rs, oracle.rs, ears.rs
 - `src/store/` — 2 files, 314 lines · mod.rs, frontmatter.rs
 - `src/trajectory/` — 2 files, 598 lines · event.rs, mod.rs
-- `tests/` — 16 files, 4547 lines · support.rs, cli.rs, phase1.rs
+- `tests/` — 17 files, 4780 lines · support.rs, cli.rs, phase1.rs
 
 ### Key files
 
-**`src/paths.rs`** · 82 lines · imported by 59
+**`src/paths.rs`** · 82 lines · imported by 61
 - `pub struct Paths`  <sub>L10</sub>
 - `pub fn discover() -> Result<Self>` — Find the repo root: nearest ancestor holding `.keel/`, else `.git/`, else cwd.  <sub>L16</sub>
 - `pub fn require_init() -> Result<Self>` — Like `discover`, but fails if keel has not been initialised here.  <sub>L42</sub>
@@ -143,23 +143,17 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub fn projection_inputs(paths: &Paths) -> Result<Vec<PathBuf>>` — Every file that feeds a projection, in a stable order.  <sub>L100</sub>
 - `pub fn store_hash_with_shared(paths: &Paths, cfg: &crate::config::Config) -> Result<String>` — Shared stores are hashed too: a platform convention changing must mark this  <sub>L128</sub>
 
-**`tests/support.rs`** · 263 lines · imported by 13
+**`tests/support.rs`** · 263 lines · imported by 14
 - `pub fn unique_dir(name: &str) -> PathBuf` — Unique per call, not merely per nanosecond: the clock is coarse enough on  <sub>L11</sub>
 - `pub struct Repo`  <sub>L21</sub>
 - `pub fn install_driver(&self, id: &str, script: &str)` — Install a driver script that prints `result` on stdout.  <sub>L216</sub>
 - `pub fn noop_driver() -> String` — A driver script that reports success without touching anything.  <sub>L259</sub>
 
-**`src/plan.rs`** · 604 lines · imported by 9
-- `pub struct PlanFront`  <sub>L23</sub>
-- `pub struct BlastDeclaration`  <sub>L42</sub>
-- `pub struct Task`  <sub>L96</sub>
-- `pub fn render_tasks(spec: &Spec) -> Result<String>` — Render a `tasks.md` scaffold, one task stub per criterion group.  <sub>L383</sub>
-
-**`src/store/frontmatter.rs`** · 137 lines · imported by 6
-- `pub struct FrontMatter`  <sub>L10</sub>
-- `pub fn split_typed<T: serde::de::DeserializeOwned>(raw: &str) -> Result<(T, String)>` — Specs and plans carry structured machine fields that the loose `FrontMatter`  <sub>L36</sub>
-- `pub fn split(raw: &str) -> Result<(FrontMatter, String)>` — Split a document into front matter and body. A file with no front matter is  <sub>L52</sub>
-- `pub fn join(front: &FrontMatter, body: &str) -> Result<String>` — Re-join front matter and body into a writable document.  <sub>L90</sub>
+**`src/lesson/mod.rs`** · 719 lines · imported by 6
+- `pub struct LessonFront`  <sub>L47</sub>
+- `pub struct Candidate`  <sub>L178</sub>
+- `pub fn propose(episodes: &[Episode], existing: &[Lesson]) -> Vec<Candidate>` — Distil episodes into candidates, counting occurrences across runs.  <sub>L201</sub>
+- `pub fn promote(paths: &Paths, candidate: &Candidate, force: bool) -> Result<Lesson>` — Promote a candidate into a lesson card, enforcing the promotion rules.  <sub>L418</sub>
 
 **`src/failure/mod.rs`** · 573 lines · imported by 5
 - `pub enum Signal`  <sub>L20</sub>
@@ -167,11 +161,17 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub fn extract(paths: &Paths, run: &Run) -> Result<Vec<Episode>>` — Extract every failure episode from a completed run.  <sub>L118</sub>
 - `pub fn classify(signal: &Signal, events: &[Event]) -> (Attribution, Option<Class>, String)` — Attribution first, then class. Returns the reasoning too, because a  <sub>L220</sub>
 
-**`src/lesson/mod.rs`** · 719 lines · imported by 5
-- `pub struct LessonFront`  <sub>L47</sub>
-- `pub struct Candidate`  <sub>L178</sub>
-- `pub fn propose(episodes: &[Episode], existing: &[Lesson]) -> Vec<Candidate>` — Distil episodes into candidates, counting occurrences across runs.  <sub>L201</sub>
-- `pub fn promote(paths: &Paths, candidate: &Candidate, force: bool) -> Result<Lesson>` — Promote a candidate into a lesson card, enforcing the promotion rules.  <sub>L418</sub>
+**`src/store/frontmatter.rs`** · 137 lines · imported by 6
+- `pub struct FrontMatter`  <sub>L10</sub>
+- `pub fn split_typed<T: serde::de::DeserializeOwned>(raw: &str) -> Result<(T, String)>` — Specs and plans carry structured machine fields that the loose `FrontMatter`  <sub>L36</sub>
+- `pub fn split(raw: &str) -> Result<(FrontMatter, String)>` — Split a document into front matter and body. A file with no front matter is  <sub>L52</sub>
+- `pub fn join(front: &FrontMatter, body: &str) -> Result<String>` — Re-join front matter and body into a writable document.  <sub>L90</sub>
+
+**`src/plan.rs`** · 604 lines · imported by 9
+- `pub struct PlanFront`  <sub>L23</sub>
+- `pub struct BlastDeclaration`  <sub>L42</sub>
+- `pub struct Task`  <sub>L96</sub>
+- `pub fn render_tasks(spec: &Spec) -> Result<String>` — Render a `tasks.md` scaffold, one task stub per criterion group.  <sub>L383</sub>
 
 **`src/approval.rs`** · 340 lines · imported by 8
 - `pub enum Decision`  <sub>L19</sub>
@@ -180,7 +180,7 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub enum Standing`  <sub>L158</sub>
 
 
-_… 230 more lines in `.keel/store/steering/structure.md`._
+_… 236 more lines in `.keel/store/steering/structure.md`._
 
 ## What this is
 

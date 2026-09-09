@@ -19,12 +19,22 @@ const STAGES = [
   ["complete", "done"],
 ];
 
-let state = { specs: [], selected: null, tab: "checks", version: null };
+// `selected === null` means the Overview landing view, not "no spec loaded
+// yet" — that state is represented by `specs` being empty.
+let state = { specs: [], insights: null, selected: null, tab: "checks", version: null, sort: null };
 
 function el(tag, cls, text) {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
   if (text !== undefined && text !== null) n.textContent = String(text);
+  return n;
+}
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+function svg(tag, attrs) {
+  const n = document.createElementNS(SVG_NS, tag);
+  for (const k in attrs || {}) n.setAttribute(k, attrs[k]);
   return n;
 }
 
@@ -49,6 +59,18 @@ async function getJSON(url) {
 function renderRail() {
   const rail = document.getElementById("rail");
   clear(rail);
+
+  const overviewRow = el("button", "spec-row rail-overview");
+  overviewRow.type = "button";
+  overviewRow.setAttribute("aria-current", String(state.selected === null));
+  overviewRow.appendChild(el("span", "slug", "Overview"));
+  overviewRow.appendChild(el("span", "stage", "every spec"));
+  overviewRow.addEventListener("click", () => {
+    state.selected = null;
+    render();
+  });
+  rail.appendChild(overviewRow);
+
   if (!state.specs.length) {
     rail.appendChild(el("div", "empty", "  no specs yet"));
     return;
@@ -259,8 +281,462 @@ function humanBytes(n) {
   return (n / 1024 / 1024).toFixed(1) + " MiB";
 }
 
+// --- overview: stat tiles, trend, rankings, tables ---------------------------
+//
+// Color follows the entity, not its position in a sorted list: every code
+// keel's taxonomy can produce has one fixed slot here, so a class or
+// attribution keeps its color across refreshes even as the ranking around it
+// moves. Ten failure classes share eight series slots by design — see
+// src/failure/taxonomy.rs for the full set.
+
+const ATTRIBUTION_COLOR = {
+  AGENTIC: "var(--series-1)",
+  PROCESS: "var(--series-2)",
+  HUMAN: "var(--series-3)",
+  UNATTRIBUTABLE: "var(--series-8)",
+};
+
+const CLASS_COLOR = {
+  "SPEC-AMBIG": "var(--series-1)",
+  "SPEC-MISSING": "var(--series-2)",
+  "LOC-WRONG": "var(--series-3)",
+  "CTX-STALE": "var(--series-4)",
+  "CTX-DRIFT": "var(--series-5)",
+  "EDIT-COMPILE": "var(--series-6)",
+  "EDIT-RUNTIME": "var(--series-7)",
+  "TEST-INVALID": "var(--series-8)",
+  "SCOPE-CREEP": "var(--series-1)",
+  "CONV-VIOLATION": "var(--series-2)",
+};
+
+function showTip(evt, text) {
+  const tip = document.getElementById("tooltip");
+  tip.textContent = text;
+  tip.style.left = evt.clientX + "px";
+  tip.style.top = evt.clientY + "px";
+  tip.hidden = false;
+}
+function hideTip() {
+  document.getElementById("tooltip").hidden = true;
+}
+
+function tile(value, label, ofTotal, warn) {
+  const t = el("div", "tile" + (warn ? " warn" : ""));
+  const v = el("div", "v");
+  v.appendChild(document.createTextNode(value));
+  if (ofTotal) v.appendChild(el("span", "of", " / " + ofTotal));
+  t.appendChild(v);
+  t.appendChild(el("div", "l", label));
+  return t;
+}
+
+function statTiles(i) {
+  const o = i.overview;
+  const wrap = el("div", "tiles");
+  wrap.appendChild(tile(o.specs_complete, "specs complete", o.specs_total));
+  wrap.appendChild(tile(Math.round(o.pass_rate * 100) + "%", "run pass rate"));
+  wrap.appendChild(tile(compactNumber(o.tokens_total), "tokens total"));
+  wrap.appendChild(tile(compactNumber(o.tokens_this_week), "tokens this week"));
+  wrap.appendChild(tile(o.human_decisions, "human decisions", null, o.runs_awaiting_human > 0));
+  wrap.appendChild(tile(o.lessons_in_force, "lessons in force"));
+  wrap.appendChild(tile(o.theatre_count, "gate(s) never fail", null, o.theatre_count > 0));
+  return wrap;
+}
+
+function compactNumber(n) {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
+  if (n >= 1000) return (n / 1000).toFixed(1) + "k";
+  return String(n);
+}
+
+/// A weekly stacked bar (run outcomes, or a single-series token volume).
+/// `series` is `[{key, color, get(bucket)}]`; segments stack in array order.
+function weeklyBarChart(trend, series, height) {
+  const w = 400,
+    h = height || 120,
+    padL = 4,
+    padR = 4,
+    padB = 16,
+    padT = 6;
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+  const n = Math.max(trend.length, 1);
+  const bw = Math.min(28, (plotW / n) * 0.62);
+  const gap = plotW / n;
+
+  const totals = trend.map((b) => series.reduce((s, ser) => s + ser.get(b), 0));
+  const max = Math.max(1, ...totals);
+
+  const s = svg("svg", {
+    viewBox: `0 0 ${w} ${h}`,
+    width: "100%",
+    height: h,
+    role: "img",
+    "aria-label": "weekly trend",
+  });
+  // baseline
+  s.appendChild(
+    svg("line", {
+      class: "chart-grid",
+      x1: padL,
+      x2: w - padR,
+      y1: h - padB,
+      y2: h - padB,
+    })
+  );
+
+  trend.forEach((bucket, idx) => {
+    const cx = padL + gap * idx + gap / 2;
+    let y = h - padB;
+    for (const ser of series) {
+      const val = ser.get(bucket);
+      if (val <= 0) continue;
+      const segH = (val / max) * plotH;
+      y -= segH;
+      const rect = svg("rect", {
+        class: "bar-mark",
+        x: cx - bw / 2,
+        y: y,
+        width: bw,
+        height: Math.max(segH, 0.5),
+        fill: ser.color,
+        rx: 1.5,
+      });
+      rect.addEventListener("mousemove", (e) => showTip(e, `${bucket.week_start} — ${ser.key}: ${val}`));
+      rect.addEventListener("mouseleave", hideTip);
+      s.appendChild(rect);
+    }
+    // sparse labels: first, last, and every third bucket in between
+    if (idx === 0 || idx === trend.length - 1 || idx % 3 === 0) {
+      const t = svg("text", {
+        class: "chart-axis-label",
+        x: cx,
+        y: h - 4,
+        "text-anchor": "middle",
+      });
+      t.textContent = bucket.week_start.slice(5); // MM-DD
+      s.appendChild(t);
+    }
+  });
+
+  return s;
+}
+
+function legendRow(entries) {
+  const wrap = el("div", "legend");
+  for (const [label, color] of entries) {
+    const item = el("span");
+    const sw = document.createElement("span");
+    sw.className = "sw";
+    sw.style.background = color;
+    item.appendChild(sw);
+    item.appendChild(document.createTextNode(label));
+    wrap.appendChild(item);
+  }
+  return wrap;
+}
+
+function trendSection(i) {
+  const sec = el("div", "panel-section");
+  sec.appendChild(el("h2", null, "Trend, by week"));
+  if (!i.trend.length) {
+    sec.appendChild(el("div", "empty", "Not enough run history yet for a trend."));
+    return sec;
+  }
+  const row = el("div", "chart-row");
+
+  const runsBox = el("div", "chart-box");
+  runsBox.appendChild(el("div", "cap", "runs per week, by outcome"));
+  runsBox.appendChild(
+    weeklyBarChart(i.trend, [
+      { key: "passed", color: "var(--pass)", get: (b) => b.passed },
+      { key: "failed", color: "var(--fail)", get: (b) => b.failed },
+      { key: "blocked", color: "var(--blocked)", get: (b) => b.blocked },
+    ])
+  );
+  runsBox.appendChild(
+    legendRow([
+      ["passed", "var(--pass)"],
+      ["failed", "var(--fail)"],
+      ["blocked", "var(--blocked)"],
+    ])
+  );
+  row.appendChild(runsBox);
+
+  const tokensBox = el("div", "chart-box");
+  tokensBox.appendChild(el("div", "cap", "tokens per week"));
+  tokensBox.appendChild(
+    weeklyBarChart(i.trend, [{ key: "tokens", color: "var(--series-1)", get: (b) => b.tokens }])
+  );
+  row.appendChild(tokensBox);
+
+  sec.appendChild(row);
+  return sec;
+}
+
+/// A ranked horizontal bar list. `entries` is `[[label, count], ...]`,
+/// already in the order to display (caller decides ranking and any "Other"
+/// folding — see the dataviz skill's categorical cap).
+function rankedBars(entries, colorFor) {
+  const wrap = el("div", "ranked");
+  const max = Math.max(1, ...entries.map(([, n]) => n));
+  for (const [label, n] of entries) {
+    const row = el("div", "ranked-row");
+    row.appendChild(el("div", "rlabel", label));
+    const track = el("div", "rtrack");
+    const fill = document.createElement("div");
+    fill.className = "rfill";
+    fill.style.width = Math.max(3, (n / max) * 100) + "%";
+    fill.style.background = colorFor(label);
+    track.appendChild(fill);
+    row.appendChild(track);
+    row.appendChild(el("div", "rcount", n));
+    wrap.appendChild(row);
+  }
+  return wrap;
+}
+
+/// Fold everything past the top `cap` entries into "Other" — the dataviz
+/// skill's categorical series cap; past eight or so a ranked list is more
+/// legible collapsed than color-starved.
+function capRanked(pairs, cap) {
+  const sorted = pairs.slice().sort((a, b) => b[1] - a[1]);
+  if (sorted.length <= cap) return sorted;
+  const head = sorted.slice(0, cap);
+  const rest = sorted.slice(cap).reduce((s, [, n]) => s + n, 0);
+  if (rest > 0) head.push(["OTHER", rest]);
+  return head;
+}
+
+function failureSection(i) {
+  const sec = el("div", "panel-section");
+  sec.appendChild(el("h2", null, "Failure attribution"));
+  if (!i.attribution.length) {
+    sec.appendChild(el("div", "empty", "No failures recorded yet."));
+    return sec;
+  }
+  const row = el("div", "chart-row");
+
+  const attrBox = el("div", "chart-box");
+  attrBox.appendChild(
+    rankedBars(i.attribution, (label) => ATTRIBUTION_COLOR[label] || "var(--muted)")
+  );
+  const callout = el("div", "callout");
+  callout.appendChild(el("span", "v", Math.round(i.harness_fixable_rate * 100) + "%"));
+  callout.appendChild(el("span", null, "of agentic failures look harness-fixable"));
+  attrBox.appendChild(callout);
+  row.appendChild(attrBox);
+
+  const classBox = el("div", "chart-box");
+  classBox.appendChild(el("div", "cap", "failure classes"));
+  classBox.appendChild(
+    rankedBars(capRanked(i.failure_classes, 8), (label) => CLASS_COLOR[label] || "var(--muted)")
+  );
+  row.appendChild(classBox);
+
+  sec.appendChild(row);
+  return sec;
+}
+
+/// Column headers that sort `rows` in place and re-render on click. `cols` is
+/// `[{key, label, num, get(row)}]`; `get` returns the sortable value.
+function sortableTable(rows, cols, rowBuilder, sortKey) {
+  const table = el("table", "data");
+  const thead = document.createElement("thead");
+  const htr = document.createElement("tr");
+  for (const c of cols) {
+    const th = el("th", c.num ? "num" : null, c.label);
+    if (state.sort && state.sort.table === sortKey && state.sort.col === c.key) {
+      th.textContent = c.label + (state.sort.dir === 1 ? " ▲" : " ▼");
+    }
+    th.addEventListener("click", () => {
+      const cur = state.sort;
+      const dir = cur && cur.table === sortKey && cur.col === c.key ? -cur.dir : -1;
+      state.sort = { table: sortKey, col: c.key, dir };
+      render();
+    });
+    htr.appendChild(th);
+  }
+  thead.appendChild(htr);
+  table.appendChild(thead);
+
+  let sorted = rows;
+  if (state.sort && state.sort.table === sortKey) {
+    const col = cols.find((c) => c.key === state.sort.col);
+    if (col) {
+      sorted = rows.slice().sort((a, b) => {
+        const av = col.get(a),
+          bv = col.get(b);
+        if (av < bv) return -state.sort.dir;
+        if (av > bv) return state.sort.dir;
+        return 0;
+      });
+    }
+  }
+
+  const tbody = document.createElement("tbody");
+  for (const row of sorted) tbody.appendChild(rowBuilder(row));
+  table.appendChild(tbody);
+  return table;
+}
+
+function checksSection(i) {
+  const sec = el("div", "panel-section");
+  sec.appendChild(el("h2", null, "Checks, worst pass rate first"));
+  if (!i.checks.length) {
+    sec.appendChild(el("div", "empty", "No gates have run yet."));
+    return sec;
+  }
+  const cols = [
+    { key: "check", label: "check", get: (c) => c.gate + "/" + c.check },
+    { key: "rate", label: "pass rate", num: true, get: (c) => (c.runs ? c.passed / c.runs : 0) },
+    { key: "runs", label: "runs", num: true, get: (c) => c.runs },
+    { key: "theatre", label: "", get: () => 0 },
+  ];
+  const rowBuilder = (c) => {
+    const tr = document.createElement("tr");
+    tr.appendChild(el("td", null, c.gate + "/" + c.check));
+    const rate = c.runs ? c.passed / c.runs : 0;
+    const rateTd = el("td", "num");
+    const stack = document.createElement("span");
+    stack.className = "mini-stack";
+    for (const [n, color] of [
+      [c.passed, "var(--pass)"],
+      [c.failed, "var(--fail)"],
+      [c.blocked, "var(--blocked)"],
+    ]) {
+      if (!n) continue;
+      const seg = document.createElement("span");
+      seg.style.width = ((n / c.runs) * 100).toFixed(1) + "%";
+      seg.style.background = color;
+      stack.appendChild(seg);
+    }
+    rateTd.appendChild(stack);
+    rateTd.appendChild(document.createTextNode(" " + Math.round(rate * 100) + "%"));
+    tr.appendChild(rateTd);
+    tr.appendChild(el("td", "num", c.runs));
+    const flagTd = document.createElement("td");
+    if (c.runs >= i.theatre_threshold && c.failed === 0 && c.blocked === 0) {
+      flagTd.appendChild(el("span", "badge theatre", "theatre?"));
+    }
+    tr.appendChild(flagTd);
+    return tr;
+  };
+  sec.appendChild(sortableTable(i.checks, cols, rowBuilder, "checks"));
+  return sec;
+}
+
+function specsSection(i) {
+  const sec = el("div", "panel-section");
+  sec.appendChild(el("h2", null, "Specs"));
+  if (!i.specs.length) {
+    sec.appendChild(el("div", "empty", "No specs yet."));
+    return sec;
+  }
+  const cols = [
+    { key: "slug", label: "spec", get: (s) => s.slug },
+    { key: "stage", label: "stage", get: (s) => s.stage },
+    { key: "rate", label: "pass rate", num: true, get: (s) => s.pass_rate },
+    { key: "runs", label: "runs", num: true, get: (s) => s.runs },
+    { key: "tokens", label: "tokens", num: true, get: (s) => s.tokens_total },
+    { key: "cycle", label: "cycle time", num: true, get: (s) => s.cycle_time_days ?? -1 },
+  ];
+  const rowBuilder = (s) => {
+    const tr = document.createElement("tr");
+    tr.className = "clickable";
+    tr.addEventListener("click", () => {
+      state.selected = s.slug;
+      render();
+    });
+    tr.appendChild(el("td", null, s.slug));
+    tr.appendChild(el("td", null, stageLabel(s.stage)));
+    tr.appendChild(el("td", "num", Math.round(s.pass_rate * 100) + "%"));
+    tr.appendChild(el("td", "num", s.runs));
+    tr.appendChild(el("td", "num", compactNumber(s.tokens_total)));
+    tr.appendChild(
+      el("td", "num", s.cycle_time_days != null ? s.cycle_time_days.toFixed(1) + "d" : "—")
+    );
+    return tr;
+  };
+  sec.appendChild(sortableTable(i.specs, cols, rowBuilder, "specs"));
+  return sec;
+}
+
+function lessonsSection(i) {
+  const sec = el("div", "panel-section");
+  sec.appendChild(el("h2", null, "Lessons"));
+  if (!i.lessons.length) {
+    sec.appendChild(el("div", "empty", "No lessons in force yet."));
+    return sec;
+  }
+  const table = el("table", "data");
+  const thead = document.createElement("thead");
+  const htr = document.createElement("tr");
+  for (const label of ["lesson", "class", "occurrences", "status", "idle"]) {
+    htr.appendChild(el("th", null, label));
+  }
+  thead.appendChild(htr);
+  table.appendChild(thead);
+  const tbody = document.createElement("tbody");
+  for (const l of i.lessons) {
+    const tr = document.createElement("tr");
+    tr.appendChild(el("td", null, l.id));
+    tr.appendChild(el("td", null, l.class));
+    tr.appendChild(el("td", "num", l.occurrences));
+    const statusTd = document.createElement("td");
+    statusTd.appendChild(el("span", "badge " + (l.enforced ? "enforced" : ""), l.enforced ? "enforced" : "advisory"));
+    tr.appendChild(statusTd);
+    const stale = l.idle_days > l.decay_days;
+    const idleTd = document.createElement("td");
+    idleTd.appendChild(document.createTextNode(l.idle_days + "d "));
+    if (stale) idleTd.appendChild(el("span", "badge stale", "past decay"));
+    tr.appendChild(idleTd);
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+  sec.appendChild(table);
+  return sec;
+}
+
+function renderOverview() {
+  const root = document.getElementById("overview");
+  clear(root);
+  const i = state.insights;
+  if (!i) return;
+
+  const head = el("div", "overview-head");
+  head.appendChild(el("h1", null, "Overview"));
+  root.appendChild(head);
+
+  if (i.overview.specs_total === 0) {
+    root.appendChild(el("div", "empty", "No specs yet — `keel spec new <slug>`"));
+    return;
+  }
+
+  root.appendChild(statTiles(i));
+  root.appendChild(trendSection(i));
+  root.appendChild(failureSection(i));
+  root.appendChild(checksSection(i));
+  root.appendChild(specsSection(i));
+  root.appendChild(lessonsSection(i));
+}
+
 function render() {
   renderRail();
+
+  const overviewSection = document.getElementById("overview");
+  const detailSection = document.getElementById("detail");
+
+  if (state.selected === null) {
+    overviewSection.hidden = false;
+    detailSection.hidden = true;
+    document.getElementById("stage-line").textContent = "overview";
+    renderOverview();
+    return;
+  }
+
+  overviewSection.hidden = true;
+  detailSection.hidden = false;
   renderSpine();
   for (const t of document.querySelectorAll(".tab")) {
     t.setAttribute("aria-selected", String(t.dataset.tab === state.tab));
@@ -283,11 +759,14 @@ function banner(message) {
 
 async function refresh() {
   try {
-    const report = await getJSON("/api/overview");
+    const [report, insights] = await Promise.all([getJSON("/api/overview"), getJSON("/api/insights")]);
     banner(null);
     state.specs = report.specs || [];
-    if (!state.specs.some((s) => s.slug === state.selected)) {
-      state.selected = state.specs.length ? state.specs[0].slug : null;
+    state.insights = insights;
+    // A spec that was deleted or renamed out from under an open tab falls
+    // back to Overview rather than pointing at nothing.
+    if (state.selected !== null && !state.specs.some((s) => s.slug === state.selected)) {
+      state.selected = null;
     }
     render();
   } catch (e) {

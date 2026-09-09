@@ -17,6 +17,7 @@ mod hashing;
 mod http;
 mod map;
 mod mcp;
+mod metrics;
 mod paths;
 mod pipeline;
 mod plan;

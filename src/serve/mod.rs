@@ -188,6 +188,10 @@ fn route(server: &Server, req: &Request) -> Response {
             let r = Report::build(&server.paths, None)?;
             Ok(serde_json::to_value(r)?)
         }),
+        "/api/insights" => json_route(|| {
+            let i = crate::report::insights::Insights::build(&server.paths)?;
+            Ok(serde_json::to_value(i)?)
+        }),
         p if p.starts_with("/api/spec/") => {
             let slug = &p["/api/spec/".len()..];
             if !is_safe_segment(slug) {

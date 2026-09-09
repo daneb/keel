@@ -12,7 +12,7 @@ generated: true
 
 2 files · 826 lines · 76 symbols
 
-**`src/lesson/mod.rs`** · 719 lines · imported by 5
+**`src/lesson/mod.rs`** · 719 lines · imported by 6
 - `pub enum RuleKind`  <sub>L29</sub>
 - `pub struct LessonFront`  <sub>L47</sub>
 - `pub struct Lesson`  <sub>L75</sub>

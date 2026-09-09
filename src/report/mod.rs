@@ -18,6 +18,8 @@
 //! Event-level detail is served separately and stays unversioned until the
 //! shape has settled under real use.
 
+pub mod insights;
+
 use crate::approval;
 use crate::gate::{self, GateResult};
 use crate::paths::Paths;

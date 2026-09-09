@@ -130,6 +130,7 @@ review, not a patch.
 `keel.baseline/1` · `keel.adr/1` · `keel.index/2` · `keel.report/1`
 `keel.next/1` · `keel.runs/1` · `keel.approvals/1` · trajectory events
 
-The JSON under `keel serve`'s `/api/run/` is deliberately **not** on this list.
-It is the page's private wire, versioned only when the view has settled under
-real use; nothing else should read it.
+The JSON under `keel serve`'s `/api/run/` and `/api/insights` is deliberately
+**not** on this list. `keel.insights/1`'s version number is a name, not a
+promise — it is the executive-summary view's private wire, still settling
+under real use, the same as per-run detail; nothing else should read either.

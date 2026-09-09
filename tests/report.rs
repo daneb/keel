@@ -79,6 +79,9 @@ fn a_slug_that_does_not_exist_is_refused_rather_than_invented() {
     assert_ne!(code, 0, "a phantom spec was reported as real:\n{out}");
 }
 
+/// `keel report --json` with no slug emits the executive summary
+/// (`keel.insights/1`, see tests/insights.rs) rather than a `Report` — this
+/// only checks that every spec still shows up in it.
 #[test]
 fn with_no_slug_every_spec_is_reported() {
     let r = Repo::bare("report-all");
@@ -86,6 +89,7 @@ fn with_no_slug_every_spec_is_reported() {
     r.run(&["spec", "new", "other", "--scope", "src/api/**"]);
 
     let v = report_json(&r, &["report", "--json"]);
+    assert_eq!(v["schema"], "keel.insights/1");
     let slugs: Vec<&str> = v["specs"]
         .as_array()
         .unwrap()

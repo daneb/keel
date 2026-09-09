@@ -7,6 +7,58 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [Unreleased]
+
+### Added
+
+- **An executive summary, in `keel serve` and `keel report`.** The per-spec
+  spine `keel serve` shipped with in 0.5.0 answered "what's blocking this
+  feature"; it had nothing to say about the repository as a whole. The
+  browser's landing view is now an Overview: stat tiles, a pass/fail/blocked
+  trend by week, failure attribution and failure-class breakdowns as ranked
+  bars, every gate check ranked worst-pass-rate-first with a **theatre flag**
+  on any check that has never failed past its threshold (PLAN.md §6, made
+  visible instead of buried in `keel metrics` text output), a sortable
+  per-spec comparison table, and a lessons panel showing occurrences and idle
+  days against each lesson's decay window. `keel report` with no slug prints
+  the same summary as text instead of dumping every spec's full run history;
+  `keel report <slug>` is unchanged.
+
+  Nothing here is a new computation pretending to be one: attribution,
+  failure classes, check pass rates and the harness-fixable rate all come
+  from the same aggregation `keel metrics` already trusts (now factored out
+  as `crate::metrics::compute`, callable from both). The one genuinely new
+  thing is a time axis — nothing in keel bucketed by date before this, so the
+  weekly trend buckets `RunMeta.started_at` (already written to every
+  `run.json`) into ISO weeks. New `keel.insights/1` — not on the spine
+  freeze, the same as per-run detail JSON: it is `keel serve`'s private wire,
+  not a contract, until the shape has settled.
+
+  Charts are hand-built inline SVG — no library, consistent with the page's
+  CSP and its zero-dependency stance — and the categorical palette used for
+  failure classes and attribution is the one that clears the dataviz
+  validator's CVD and contrast checks against this page's own light and dark
+  surfaces, not hand-picked. keel's existing pass/fail/blocked colors don't
+  clear those same checks when shown adjacent (a stacked bar of run
+  outcomes, say) — every mark using them keeps the word alongside the color,
+  the same discipline the rest of the app already followed.
+
+- **`harness_fixable_rate` reaches a wire for the first time.**
+  `failure::distribution` has computed it since Phase 3; `keel metrics`
+  silently dropped it from both its JSON and its text report. It's now on
+  `Metrics`, printed by `keel metrics`, and shown as the headline figure next
+  to attribution in the new Overview.
+
+### Fixed
+
+- **A spec's cycle time could come out negative.** `SpecReport.runs` inherits
+  `run::list()`'s sort, and a run id's hex suffix is a hash of the clock and
+  process id — not a same-day counter — so it is not reliably chronological
+  within a day. Reading `runs.first()`/`.last()` as "earliest/latest" could
+  therefore pick the wrong ends; it did, on this repository's own history.
+  Cycle time is now computed from parsed timestamps across every run for the
+  spec, never array position.
+
 ## [0.5.0] - 2026-09-09
 
 ### Added

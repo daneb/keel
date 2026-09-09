@@ -1,4 +1,4 @@
-<!-- keel:generated schema=keel.projection/1 adapter=copilot store=17f91d718397 body=19687c092e0a -->
+<!-- keel:generated schema=keel.projection/1 adapter=copilot store=74893c6d51bb body=30c38edda691 -->
 <!-- Source of truth: .keel/store/ — regenerate with `keel store render`. Edits here are drift and will be reported by `keel store check`. -->
 
 # Project context
@@ -49,15 +49,15 @@ _Versions that cannot move, platforms that must keep working, dependencies that 
 
 ## Repository map
 
-**100 files · 1745 symbols · 27092 lines** — javascript 1, rust 99
+**103 files · 1796 symbols · 28223 lines** — javascript 1, rust 102
 
 Files are ordered by import-graph centrality, not alphabetically. Signatures only; read a body with the file path and line number. Per-directory detail lives in `.keel/store/map/<dir>/CODEMAP.md`.
 
 ### Layout
 
-- `assets/ui/` — 1 file, 329 lines · app.js
-- `src/` — 12 files, 3804 lines · paths.rs, config.rs, run.rs
-- `src/cmd/` — 24 files, 4326 lines · mod.rs, next.rs, run.rs
+- `assets/ui/` — 1 file, 808 lines · app.js
+- `src/` — 13 files, 3969 lines · paths.rs, config.rs, run.rs
+- `src/cmd/` — 24 files, 4308 lines · mod.rs, next.rs, run.rs
 - `src/driver/` — 4 files, 1202 lines · mod.rs, contract.rs, conform.rs
 - `src/evidence/` — 2 files, 423 lines · mod.rs, manifest.rs
 - `src/failure/` — 2 files, 767 lines · mod.rs, taxonomy.rs
@@ -66,18 +66,18 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `src/map/` — 9 files, 2566 lines · lang.rs, extract.rs, blast.rs
 - `src/mcp/` — 1 file, 271 lines · mod.rs
 - `src/projection/` — 3 files, 726 lines · drift.rs, mod.rs, sections.rs
-- `src/report/` — 1 file, 154 lines · mod.rs
+- `src/report/` — 2 files, 422 lines · mod.rs, insights.rs
 - `src/retrieve/` — 3 files, 763 lines · mod.rs, fallback.rs, budget.rs
 - `src/review/` — 1 file, 545 lines · mod.rs
-- `src/serve/` — 1 file, 443 lines · mod.rs
+- `src/serve/` — 1 file, 447 lines · mod.rs
 - `src/spec/` — 4 files, 1275 lines · mod.rs, oracle.rs, ears.rs
 - `src/store/` — 2 files, 314 lines · mod.rs, frontmatter.rs
 - `src/trajectory/` — 2 files, 598 lines · event.rs, mod.rs
-- `tests/` — 16 files, 4547 lines · support.rs, cli.rs, phase1.rs
+- `tests/` — 17 files, 4780 lines · support.rs, cli.rs, phase1.rs
 
 ### Key files
 
-**`src/paths.rs`** · 82 lines · imported by 59
+**`src/paths.rs`** · 82 lines · imported by 61
 - `pub struct Paths`  <sub>L10</sub>
 - `pub fn discover() -> Result<Self>` — Find the repo root: nearest ancestor holding `.keel/`, else `.git/`, else cwd.  <sub>L16</sub>
 - `pub fn require_init() -> Result<Self>` — Like `discover`, but fails if keel has not been initialised here.  <sub>L42</sub>
@@ -100,7 +100,7 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub struct Check`  <sub>L74</sub>
 - `pub struct GateResult`  <sub>L133</sub>
 
-_… 310 more lines in `.keel/store/steering/structure.md`._
+_… 316 more lines in `.keel/store/steering/structure.md`._
 
 ## What this is
 
