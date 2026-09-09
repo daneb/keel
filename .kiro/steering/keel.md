@@ -1,4 +1,4 @@
-<!-- keel:generated schema=keel.projection/1 adapter=kiro store=74893c6d51bb body=55e6ec9e3bdf -->
+<!-- keel:generated schema=keel.projection/1 adapter=kiro store=0da95b9f1779 body=341257cb76ec -->
 <!-- Source of truth: .keel/store/ — regenerate with `keel store render`. Edits here are drift and will be reported by `keel store check`. -->
 
 # Project context
@@ -19,6 +19,25 @@ become gate checks and stop costing context.
 - Change the smallest surface that solves the problem. If a fix needs a wider
   blast radius, say so before making it, not after.
 - A test that mocks away the behaviour under test is worse than no test.
+
+### Authoring a spec
+
+Write `.keel/specs/<slug>/spec.md` by looping against G0, not by guessing what
+it wants up front:
+
+1. Draft or edit one acceptance criterion: an EARS sentence (`THE SYSTEM
+   SHALL …`, or `WHEN/WHILE/IF…THEN/WHERE … THE SYSTEM SHALL …`, upper case,
+   never "should") plus an `oracle:` line (`cmd`, `test`, `schema`, `doctest`,
+   or `human` — `human` is legal but shows up as cost on the report).
+2. Run `keel gate g0 <slug>`.
+3. Fix only what the verdict names — a bad EARS shape, a missing oracle, an
+   unresolved placeholder, or a flagged weasel word ("handle", "appropriate",
+   "robust", and similar — the full list is in `src/spec/ears.rs`) — then
+   rerun. Don't pre-empt failures the gate hasn't reported yet.
+4. Repeat until G0 passes, then `keel approve <slug> --stage spec`.
+
+This applies the same way regardless of which agent is driving the
+conversation — Claude Code, Kiro, Copilot, or a human alone.
 
 ### Rules
 
@@ -161,26 +180,7 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub fn extract(paths: &Paths, run: &Run) -> Result<Vec<Episode>>` — Extract every failure episode from a completed run.  <sub>L118</sub>
 - `pub fn classify(signal: &Signal, events: &[Event]) -> (Attribution, Option<Class>, String)` — Attribution first, then class. Returns the reasoning too, because a  <sub>L220</sub>
 
-**`src/store/frontmatter.rs`** · 137 lines · imported by 6
-- `pub struct FrontMatter`  <sub>L10</sub>
-- `pub fn split_typed<T: serde::de::DeserializeOwned>(raw: &str) -> Result<(T, String)>` — Specs and plans carry structured machine fields that the loose `FrontMatter`  <sub>L36</sub>
-- `pub fn split(raw: &str) -> Result<(FrontMatter, String)>` — Split a document into front matter and body. A file with no front matter is  <sub>L52</sub>
-- `pub fn join(front: &FrontMatter, body: &str) -> Result<String>` — Re-join front matter and body into a writable document.  <sub>L90</sub>
-
-**`src/plan.rs`** · 604 lines · imported by 9
-- `pub struct PlanFront`  <sub>L23</sub>
-- `pub struct BlastDeclaration`  <sub>L42</sub>
-- `pub struct Task`  <sub>L96</sub>
-- `pub fn render_tasks(spec: &Spec) -> Result<String>` — Render a `tasks.md` scaffold, one task stub per criterion group.  <sub>L383</sub>
-
-**`src/approval.rs`** · 340 lines · imported by 8
-- `pub enum Decision`  <sub>L19</sub>
-- `pub struct Approval`  <sub>L25</sub>
-- `pub fn artefact_hash(paths: &Paths, slug: &str, stage: &str) -> Result<String>` — `tasks.md` too — approving a plan whose task list can then change freely  <sub>L90</sub>
-- `pub enum Standing`  <sub>L158</sub>
-
-
-_… 236 more lines in `.keel/store/steering/structure.md`._
+_… 255 more lines in `.keel/store/steering/structure.md`._
 
 ## What this is
 

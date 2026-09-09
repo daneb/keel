@@ -1,4 +1,4 @@
-<!-- keel:generated schema=keel.projection/1 adapter=copilot store=74893c6d51bb body=30c38edda691 -->
+<!-- keel:generated schema=keel.projection/1 adapter=copilot store=0da95b9f1779 body=231e3df539b5 -->
 <!-- Source of truth: .keel/store/ — regenerate with `keel store render`. Edits here are drift and will be reported by `keel store check`. -->
 
 # Project context
@@ -19,6 +19,25 @@ become gate checks and stop costing context.
 - Change the smallest surface that solves the problem. If a fix needs a wider
   blast radius, say so before making it, not after.
 - A test that mocks away the behaviour under test is worse than no test.
+
+### Authoring a spec
+
+Write `.keel/specs/<slug>/spec.md` by looping against G0, not by guessing what
+it wants up front:
+
+1. Draft or edit one acceptance criterion: an EARS sentence (`THE SYSTEM
+   SHALL …`, or `WHEN/WHILE/IF…THEN/WHERE … THE SYSTEM SHALL …`, upper case,
+   never "should") plus an `oracle:` line (`cmd`, `test`, `schema`, `doctest`,
+   or `human` — `human` is legal but shows up as cost on the report).
+2. Run `keel gate g0 <slug>`.
+3. Fix only what the verdict names — a bad EARS shape, a missing oracle, an
+   unresolved placeholder, or a flagged weasel word ("handle", "appropriate",
+   "robust", and similar — the full list is in `src/spec/ears.rs`) — then
+   rerun. Don't pre-empt failures the gate hasn't reported yet.
+4. Repeat until G0 passes, then `keel approve <slug> --stage spec`.
+
+This applies the same way regardless of which agent is driving the
+conversation — Claude Code, Kiro, Copilot, or a human alone.
 
 ### Rules
 
@@ -80,27 +99,8 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 **`src/paths.rs`** · 82 lines · imported by 61
 - `pub struct Paths`  <sub>L10</sub>
 - `pub fn discover() -> Result<Self>` — Find the repo root: nearest ancestor holding `.keel/`, else `.git/`, else cwd.  <sub>L16</sub>
-- `pub fn require_init() -> Result<Self>` — Like `discover`, but fails if keel has not been initialised here.  <sub>L42</sub>
-- `pub fn rel<'a>(&self, p: &'a Path) -> &'a Path` — Present `p` relative to the repo root when possible, for display.  <sub>L68</sub>
 
-**`src/config.rs`** · 504 lines · imported by 38
-- `pub struct Config`  <sub>L14</sub>
-- `pub struct SharedStore`  <sub>L67</sub>
-- `pub struct Reviewer`  <sub>L83</sub>
-- `pub struct SpecConfig`  <sub>L212</sub>
-
-**`src/map/lang.rs`** · 355 lines · imported by 6
-- `pub struct Compiled` — The three queries keel runs over every file.  <sub>L11</sub>
-- `pub enum Lang`  <sub>L18</sub>
-- `pub fn intern_kind(kind: &str) -> &'static str` — Symbol kinds are a closed set, so a round trip through the database should  <sub>L315</sub>
-- `pub fn unavailable() -> Vec<(&'static str, String)>` — files still get indexed, they just stop yielding symbols. Naming the casualty  <sub>L329</sub>
-
-**`src/gate/mod.rs`** · 375 lines · imported by 17
-- `pub enum Verdict`  <sub>L33</sub>
-- `pub struct Check`  <sub>L74</sub>
-- `pub struct GateResult`  <sub>L133</sub>
-
-_… 316 more lines in `.keel/store/steering/structure.md`._
+_… 335 more lines in `.keel/store/steering/structure.md`._
 
 ## What this is
 

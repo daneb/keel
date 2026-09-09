@@ -1,4 +1,4 @@
-<!-- keel:generated schema=keel.projection/1 adapter=claude store=74893c6d51bb body=0adbaf86c9ca -->
+<!-- keel:generated schema=keel.projection/1 adapter=claude store=0da95b9f1779 body=4924030d0ae0 -->
 <!-- Source of truth: .keel/store/ — regenerate with `keel store render`. Edits here are drift and will be reported by `keel store check`. -->
 
 # Project context
@@ -19,6 +19,25 @@ become gate checks and stop costing context.
 - Change the smallest surface that solves the problem. If a fix needs a wider
   blast radius, say so before making it, not after.
 - A test that mocks away the behaviour under test is worse than no test.
+
+### Authoring a spec
+
+Write `.keel/specs/<slug>/spec.md` by looping against G0, not by guessing what
+it wants up front:
+
+1. Draft or edit one acceptance criterion: an EARS sentence (`THE SYSTEM
+   SHALL …`, or `WHEN/WHILE/IF…THEN/WHERE … THE SYSTEM SHALL …`, upper case,
+   never "should") plus an `oracle:` line (`cmd`, `test`, `schema`, `doctest`,
+   or `human` — `human` is legal but shows up as cost on the report).
+2. Run `keel gate g0 <slug>`.
+3. Fix only what the verdict names — a bad EARS shape, a missing oracle, an
+   unresolved placeholder, or a flagged weasel word ("handle", "appropriate",
+   "robust", and similar — the full list is in `src/spec/ears.rs`) — then
+   rerun. Don't pre-empt failures the gate hasn't reported yet.
+4. Repeat until G0 passes, then `keel approve <slug> --stage spec`.
+
+This applies the same way regardless of which agent is driving the
+conversation — Claude Code, Kiro, Copilot, or a human alone.
 
 ### Rules
 
@@ -140,26 +159,8 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 **`src/store/mod.rs`** · 177 lines · imported by 12
 - `pub struct StoreDoc`  <sub>L16</sub>
 - `pub struct Shared`  <sub>L65</sub>
-- `pub fn projection_inputs(paths: &Paths) -> Result<Vec<PathBuf>>` — Every file that feeds a projection, in a stable order.  <sub>L100</sub>
-- `pub fn store_hash_with_shared(paths: &Paths, cfg: &crate::config::Config) -> Result<String>` — Shared stores are hashed too: a platform convention changing must mark this  <sub>L128</sub>
 
-**`tests/support.rs`** · 263 lines · imported by 14
-- `pub fn unique_dir(name: &str) -> PathBuf` — Unique per call, not merely per nanosecond: the clock is coarse enough on  <sub>L11</sub>
-- `pub struct Repo`  <sub>L21</sub>
-- `pub fn install_driver(&self, id: &str, script: &str)` — Install a driver script that prints `result` on stdout.  <sub>L216</sub>
-- `pub fn noop_driver() -> String` — A driver script that reports success without touching anything.  <sub>L259</sub>
-
-**`src/lesson/mod.rs`** · 719 lines · imported by 6
-- `pub struct LessonFront`  <sub>L47</sub>
-- `pub struct Candidate`  <sub>L178</sub>
-- `pub fn propose(episodes: &[Episode], existing: &[Lesson]) -> Vec<Candidate>` — Distil episodes into candidates, counting occurrences across runs.  <sub>L201</sub>
-- `pub fn promote(paths: &Paths, candidate: &Candidate, force: bool) -> Result<Lesson>` — Promote a candidate into a lesson card, enforcing the promotion rules.  <sub>L418</sub>
-
-**`src/failure/mod.rs`** · 573 lines · imported by 5
-- `pub enum Signal`  <sub>L20</sub>
-- `pub struct Episode`  <sub>L84</sub>
-
-_… 257 more lines in `.keel/store/steering/structure.md`._
+_… 275 more lines in `.keel/store/steering/structure.md`._
 
 ## What this is
 
