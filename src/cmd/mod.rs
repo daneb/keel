@@ -14,6 +14,8 @@ pub mod store;
 pub mod metrics;
 pub mod plan;
 pub mod prune;
+pub mod report;
+pub mod serve;
 pub mod ratchet;
 pub mod retrieve;
 pub mod run;

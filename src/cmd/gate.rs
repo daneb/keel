@@ -44,9 +44,12 @@ fn report(paths: &Paths, slug: &str, result: &GateResult, json: bool) -> Result<
     println!(
         "\n{} {} — {p} passed, {f} failed, {b} blocked",
         result.gate,
-        result.verdict.glyph()
+        result.verdict.glyph_styled()
     );
-    println!("evidence: {}", paths.rel(&written).display());
+    println!(
+        "{}",
+        crate::ui::dim(&format!("evidence: {}", paths.rel(&written).display()))
+    );
 
     if result.verdict == gate::Verdict::Blocked {
         println!("\nblocked is not failed: a check could not run. Fix the environment, not the spec.");

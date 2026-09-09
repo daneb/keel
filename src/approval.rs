@@ -181,6 +181,28 @@ pub fn standing(paths: &Paths, slug: &str, stage: &str) -> Result<Standing> {
     }
 }
 
+/// A `Standing` as JSON.
+///
+/// `Standing` is a display type carrying differently-shaped variants, so it is
+/// rendered explicitly rather than derived: the wire names here are a schema
+/// several outputs share, and a variant rename must not silently change them.
+pub fn standing_json(s: &Standing) -> serde_json::Value {
+    match s {
+        Standing::Current { by, at } => {
+            serde_json::json!({ "state": "current", "by": by, "at": at })
+        }
+        Standing::Absent => serde_json::json!({ "state": "absent" }),
+        Standing::Rejected { by, note } => {
+            serde_json::json!({ "state": "rejected", "by": by, "note": note })
+        }
+        Standing::Superseded { approved_hash, current_hash } => serde_json::json!({
+            "state": "superseded",
+            "approved_hash": approved_hash,
+            "current_hash": current_hash,
+        }),
+    }
+}
+
 /// Whoever git thinks is working here; the record needs a name against it.
 fn current_user(paths: &Paths) -> String {
     let out = std::process::Command::new("git")

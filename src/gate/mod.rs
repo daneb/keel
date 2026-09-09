@@ -45,6 +45,20 @@ impl Verdict {
         }
     }
 
+    /// The same word, coloured when stdout is a terminal.
+    ///
+    /// Separate from [`Verdict::glyph`] because that one also produces the wire
+    /// value written into `run.json` and the trajectory, where an escape
+    /// sequence would be corruption rather than decoration.
+    pub fn glyph_styled(&self) -> String {
+        let g = self.glyph();
+        match self {
+            Verdict::Pass => crate::ui::green(g),
+            Verdict::Fail => crate::ui::red(g),
+            Verdict::Blocked => crate::ui::yellow(g),
+        }
+    }
+
     /// Exit code for a gate verdict. `blocked` is distinct from `fail` on the
     /// wire too, so a caller can tell "you broke it" from "I could not look".
     pub fn exit_code(&self) -> i32 {
@@ -95,14 +109,21 @@ impl Check {
 
     /// A single line for the terminal.
     pub fn line(&self) -> String {
-        let mut s = format!("  {:<8} {}", self.verdict.glyph(), self.id);
+        // Pad on the plain word: escape sequences have width on the wire but
+        // not on the screen, so colouring before padding skews every column.
+        let pad = " ".repeat(8usize.saturating_sub(self.verdict.glyph().len()));
+        let mut s = format!("  {}{pad} {}", self.verdict.glyph_styled(), self.id);
         if let Some(d) = &self.detail {
             s.push_str(&format!(" — {d}"));
         } else if let (Some(e), Some(a)) = (&self.expected, &self.actual) {
-            s.push_str(&format!("\n           expected: {e}\n           actual:   {a}"));
+            s.push_str(&format!(
+                "\n           {} {e}\n           {}   {a}",
+                crate::ui::dim("expected:"),
+                crate::ui::dim("actual:")
+            ));
         }
         if let Some(from) = &self.from {
-            s.push_str(&format!("  [{from}]"));
+            s.push_str(&crate::ui::dim(&format!("  [{from}]")));
         }
         s
     }
@@ -137,8 +158,7 @@ impl GateResult {
         std::fs::create_dir_all(dir)?;
         let path = dir.join(format!("{}.json", self.gate));
         let json = serde_json::to_string_pretty(self)?;
-        std::fs::write(&path, format!("{json}\n"))
-            .with_context(|| format!("writing {}", path.display()))?;
+        crate::atomic::write(&path, &format!("{json}\n"))?;
         Ok(path)
     }
 

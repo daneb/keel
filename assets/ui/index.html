@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>keel</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<header>
+  <span class="brand">keel</span>
+  <span id="stage-line" class="muted"></span>
+  <span class="spacer"></span>
+  <span id="live" class="muted" title="polling for changes">·</span>
+</header>
+
+<div id="banner" class="banner" hidden></div>
+
+<main>
+  <nav id="rail" aria-label="specs"></nav>
+
+  <section id="detail">
+    <div id="spine" class="spine" aria-label="pipeline"></div>
+
+    <div class="tabs" role="tablist">
+      <button class="tab" data-tab="checks" role="tab" aria-selected="true">Checks</button>
+      <button class="tab" data-tab="evidence" role="tab" aria-selected="false">Evidence</button>
+    </div>
+
+    <div id="panel-checks" class="panel" role="tabpanel"></div>
+    <div id="panel-evidence" class="panel" role="tabpanel" hidden></div>
+  </section>
+</main>
+
+<script src="/app.js"></script>
+</body>
+</html>

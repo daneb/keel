@@ -1,4 +1,4 @@
-<!-- keel:generated schema=keel.projection/1 adapter=copilot store=8c7f9a4de834 body=9323a2635b93 -->
+<!-- keel:generated schema=keel.projection/1 adapter=copilot store=17f91d718397 body=19687c092e0a -->
 <!-- Source of truth: .keel/store/ — regenerate with `keel store render`. Edits here are drift and will be reported by `keel store check`. -->
 
 # Project context
@@ -49,34 +49,36 @@ _Versions that cannot move, platforms that must keep working, dependencies that 
 
 ## Repository map
 
-**86 files · 1503 symbols · 23332 lines** — rust 86
+**100 files · 1745 symbols · 27092 lines** — javascript 1, rust 99
 
 Files are ordered by import-graph centrality, not alphabetically. Signatures only; read a body with the file path and line number. Per-directory detail lives in `.keel/store/map/<dir>/CODEMAP.md`.
 
 ### Layout
 
-- `src/` — 8 files, 2743 lines · paths.rs, config.rs, hashing.rs
-- `src/cmd/` — 22 files, 3971 lines · mod.rs, run.rs, learn.rs
-- `src/driver/` — 4 files, 1071 lines · mod.rs, contract.rs, conform.rs
+- `assets/ui/` — 1 file, 329 lines · app.js
+- `src/` — 12 files, 3804 lines · paths.rs, config.rs, run.rs
+- `src/cmd/` — 24 files, 4326 lines · mod.rs, next.rs, run.rs
+- `src/driver/` — 4 files, 1202 lines · mod.rs, contract.rs, conform.rs
 - `src/evidence/` — 2 files, 423 lines · mod.rs, manifest.rs
 - `src/failure/` — 2 files, 767 lines · mod.rs, taxonomy.rs
-- `src/gate/` — 10 files, 3137 lines · mod.rs, ratchet.rs, g1.rs
+- `src/gate/` — 10 files, 3213 lines · mod.rs, ratchet.rs, g1.rs
 - `src/lesson/` — 2 files, 826 lines · mod.rs, usage.rs
-- `src/map/` — 9 files, 2566 lines · lang.rs, extract.rs, db.rs
+- `src/map/` — 9 files, 2566 lines · lang.rs, extract.rs, blast.rs
 - `src/mcp/` — 1 file, 271 lines · mod.rs
-- `src/projection/` — 3 files, 715 lines · drift.rs, mod.rs, sections.rs
+- `src/projection/` — 3 files, 726 lines · drift.rs, mod.rs, sections.rs
+- `src/report/` — 1 file, 154 lines · mod.rs
 - `src/retrieve/` — 3 files, 763 lines · mod.rs, fallback.rs, budget.rs
 - `src/review/` — 1 file, 545 lines · mod.rs
+- `src/serve/` — 1 file, 443 lines · mod.rs
 - `src/spec/` — 4 files, 1275 lines · mod.rs, oracle.rs, ears.rs
 - `src/store/` — 2 files, 314 lines · mod.rs, frontmatter.rs
-- `src/trajectory/` — 2 files, 462 lines · event.rs, mod.rs
-- `tests/` — 11 files, 3483 lines · support.rs, cli.rs, phase1.rs
+- `src/trajectory/` — 2 files, 598 lines · event.rs, mod.rs
+- `tests/` — 16 files, 4547 lines · support.rs, cli.rs, phase1.rs
 
 ### Key files
 
-**`src/paths.rs`** · 82 lines · imported by 54
+**`src/paths.rs`** · 82 lines · imported by 59
 - `pub struct Paths`  <sub>L10</sub>
-- `impl Paths`  <sub>L14</sub>
 - `pub fn discover() -> Result<Self>` — Find the repo root: nearest ancestor holding `.keel/`, else `.git/`, else cwd.  <sub>L16</sub>
 - `pub fn require_init() -> Result<Self>` — Like `discover`, but fails if keel has not been initialised here.  <sub>L42</sub>
 - `pub fn rel<'a>(&self, p: &'a Path) -> &'a Path` — Present `p` relative to the repo root when possible, for display.  <sub>L68</sub>
@@ -86,21 +88,19 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub struct SharedStore`  <sub>L67</sub>
 - `pub struct Reviewer`  <sub>L83</sub>
 - `pub struct SpecConfig`  <sub>L212</sub>
-- `pub struct PlanConfig`  <sub>L235</sub>
 
 **`src/map/lang.rs`** · 355 lines · imported by 6
 - `pub struct Compiled` — The three queries keel runs over every file.  <sub>L11</sub>
 - `pub enum Lang`  <sub>L18</sub>
-- `pub fn symbol_kind(&self, node_kind: &str) -> Option<&'static str>` — Node kind → the short symbol kind shown in maps. `None` means "indexed  <sub>L120</sub>
 - `pub fn intern_kind(kind: &str) -> &'static str` — Symbol kinds are a closed set, so a round trip through the database should  <sub>L315</sub>
 - `pub fn unavailable() -> Vec<(&'static str, String)>` — files still get indexed, they just stop yielding symbols. Naming the casualty  <sub>L329</sub>
 
-**`src/gate/mod.rs`** · 355 lines · imported by 14
+**`src/gate/mod.rs`** · 375 lines · imported by 17
 - `pub enum Verdict`  <sub>L33</sub>
-- `pub struct Check`  <sub>L60</sub>
-- `pub struct GateResult`  <sub>L112</sub>
+- `pub struct Check`  <sub>L74</sub>
+- `pub struct GateResult`  <sub>L133</sub>
 
-_… 320 more lines in `.keel/store/steering/structure.md`._
+_… 310 more lines in `.keel/store/steering/structure.md`._
 
 ## What this is
 

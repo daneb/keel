@@ -4,7 +4,7 @@ What is built, what is deferred and why, and what is deliberately not planned.
 The design is [PLAN.md](PLAN.md); the decisions are in
 [`.keel/store/decisions/`](.keel/store/decisions/ADR-0000-index.md).
 
-Updated 2026-08-23.
+Updated 2026-09-09.
 
 ## Built
 
@@ -20,7 +20,7 @@ its own, and each is.
 | **4** Retrieval service | Agents work from symbols, and the drop is measured | 14.6× at 100% recall |
 | **5** Breadth | New tools, checks and repos plug in without touching the spine | 4 drivers, 0 schema changes |
 
-**359 tests · 0 clippy warnings · macOS.**
+**461 tests · 0 clippy warnings · macOS.**
 
 ## Deferred
 
@@ -98,7 +98,9 @@ promoted from real data and one was demoted.
   compiled and unexercised — a decision, not an omission.
 - **Reimplementing what the agent already does.** Model adapters, tool
   registries, inference loops. PLAN.md §1: drivers stay thin, and keel is a
-  conductor.
+  conductor. `keel serve` is not an exception to this: it is a read-only view of
+  evidence keel already recorded, it cannot run a gate or record an approval,
+  and nothing in it is a place an agent could act.
 - **Automatic lesson promotion without human sign-off.** G4 forces the decision;
   it does not make it.
 
@@ -125,4 +127,9 @@ review, not a patch.
 `keel.gate/1` · `keel.spec/1` · `keel.plan/1` · `keel.tasks/1` · `keel.lesson/1`
 `keel.run/1` · `keel.manifest/1` · `keel.drivertask/1` · `keel.driverresult/1`
 `keel.reviewrequest/1` · `keel.reviewresult/1` · `keel.approval/1`
-`keel.baseline/1` · `keel.adr/1` · `keel.index/2` · trajectory events
+`keel.baseline/1` · `keel.adr/1` · `keel.index/2` · `keel.report/1`
+`keel.next/1` · `keel.runs/1` · `keel.approvals/1` · trajectory events
+
+The JSON under `keel serve`'s `/api/run/` is deliberately **not** on this list.
+It is the page's private wire, versioned only when the view has settled under
+real use; nothing else should read it.

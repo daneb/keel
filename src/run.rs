@@ -89,8 +89,8 @@ impl Run {
 
     pub fn save(&self) -> Result<()> {
         let json = serde_json::to_string_pretty(&self.meta)?;
-        std::fs::write(self.dir.join("run.json"), format!("{json}\n"))?;
-        Ok(())
+        // Atomic: `finish()` rewrites this while other processes are reading it.
+        crate::atomic::write(&self.dir.join("run.json"), &format!("{json}\n"))
     }
 
     pub fn trajectory_path(&self) -> PathBuf {

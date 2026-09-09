@@ -157,7 +157,7 @@ pub fn run(opts: Options) -> Result<i32> {
                 println!("{}", c.line());
             }
             let (p, f, b) = result.counts();
-            println!("{} {} — {p} passed, {f} failed, {b} blocked", result.gate, result.verdict.glyph());
+            println!("{} {} — {p} passed, {f} failed, {b} blocked", result.gate, result.verdict.glyph_styled());
         }
         let _ = path;
         verdicts.push(result.verdict);
@@ -193,7 +193,7 @@ pub fn run(opts: Options) -> Result<i32> {
             }).collect::<Vec<_>>(),
         }));
     } else {
-        println!("\nrun {} — {}", run.meta.id, overall.glyph());
+        println!("\nrun {} — {}", run.meta.id, overall.glyph_styled());
         println!(
             "recorded: {} events in {}",
             traj.next_seq().saturating_sub(1),
@@ -332,16 +332,35 @@ pub fn replay(id: Option<String>, json: bool) -> Result<i32> {
 }
 
 /// `keel runs` — what has been run.
-pub fn list(latest_only: bool) -> Result<i32> {
+pub fn list(latest_only: bool, json: bool) -> Result<i32> {
     let paths = Paths::require_init()?;
-    if latest_only {
+    if latest_only && !json {
         match crate::run::latest(&paths)? {
             Some(id) => println!("{id}"),
             None => bail!("no runs yet"),
         }
         return Ok(0);
     }
-    let ids = crate::run::list(&paths)?;
+    let mut ids = crate::run::list(&paths)?;
+    if latest_only {
+        ids = ids.into_iter().next_back().into_iter().collect();
+    }
+
+    if json {
+        let runs: Vec<_> = ids
+            .iter()
+            .filter_map(|id| Run::load(&paths, id).ok().map(|r| r.meta))
+            .collect();
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&serde_json::json!({
+                "schema": "keel.runs/1",
+                "runs": runs,
+            }))?
+        );
+        return Ok(0);
+    }
+
     if ids.is_empty() {
         println!("  no runs yet — `keel run <spec>`");
         return Ok(0);
@@ -555,7 +574,7 @@ pub fn run_waves(opts: Options) -> Result<i32> {
             println!("{}", c.line());
         }
         let (p, f, b) = result.counts();
-        println!("{} {} — {p} passed, {f} failed, {b} blocked", result.gate, result.verdict.glyph());
+        println!("{} {} — {p} passed, {f} failed, {b} blocked", result.gate, result.verdict.glyph_styled());
         verdicts.push(result.verdict);
         if result.verdict == Verdict::Fail && name != "G3" {
             println!("\nstopping: {name} failed");
@@ -576,7 +595,7 @@ pub fn run_waves(opts: Options) -> Result<i32> {
     })?;
     run.finish(&overall.glyph().to_lowercase())?;
 
-    println!("\nrun {} — {}", run.meta.id, overall.glyph());
+    println!("\nrun {} — {}", run.meta.id, overall.glyph_styled());
     println!("evidence: {}", paths.rel(&run.dir).display());
     Ok(overall.exit_code())
 }

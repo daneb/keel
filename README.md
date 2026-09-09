@@ -257,6 +257,11 @@ keel slice T-1                # everything one task needs, budget-fitted
 keel mcp                      # the same queries over MCP, on stdio
 keel bench                    # measured token drop vs reading whole files
 
+# Seeing where things stand
+keel next                     # the one command that moves this spec forward
+keel report [slug]            # a feature's whole life: gates, approvals, runs
+keel serve                    # the same, in a browser, read-only, on loopback
+
 # Evidence and learning
 keel replay <run> / keel runs / keel runs --prune
 keel export <run> / keel export --verify <bundle>
@@ -295,7 +300,7 @@ compiling is named in `keel map` output rather than silently yielding nothing.
 
 ## Status
 
-**359 tests · 0 clippy warnings · macOS.** All five phases of PLAN.md.
+**461 tests · 0 clippy warnings · macOS.** All five phases of PLAN.md.
 
 Honest limits before you trust it: G2's *green* path is under-exercised (11%
 pass across 18 runs, because keel was developed inside keel), and every number

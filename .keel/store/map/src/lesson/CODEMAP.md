@@ -2,7 +2,7 @@
 id: MAP-src-lesson
 scope: dir:src/lesson
 owner: agent
-verified_at: 2026-08-26
+verified_at: 2026-09-09
 generated: true
 ---
 

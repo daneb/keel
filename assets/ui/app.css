@@ -1,0 +1,221 @@
+/* keel serve — operator view.
+ *
+ * The identity here is the palette and the density, not the typeface. The
+ * marketing page loads Space Grotesk and IBM Plex from Google Fonts; this page
+ * must not, both because its CSP forbids the network and because an offline
+ * artefact that phones home is a contradiction. System stacks it is. */
+
+:root {
+  --paper: #e7efe1;
+  --card: #f6faf2;
+  --ink: #16241e;
+  --body: #3d5148;
+  --muted: #6d8478;
+  --rule: #c9dbc5;
+  --brass: #a8762f;
+  --pass: #2f6b46;
+  --fail: #a33224;
+  --blocked: #9a6b12;
+  --sel: #dbe9d6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #101a16;
+    --card: #16241e;
+    --ink: #e8f2e8;
+    --body: #b3c9bb;
+    --muted: #7f9a8b;
+    --rule: #25392f;
+    --brass: #d9a75c;
+    --pass: #79c095;
+    --fail: #e08376;
+    --blocked: #d9a75c;
+    --sel: #1e3128;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--body);
+  font: 13px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+code, .mono, pre, .id, .glyph {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 44px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--card);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.brand {
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  font-size: 15px;
+}
+
+.spacer { flex: 1; }
+.muted { color: var(--muted); }
+
+.banner {
+  padding: 8px 14px;
+  background: color-mix(in srgb, var(--blocked) 18%, var(--paper));
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink);
+}
+
+main {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  min-height: calc(100vh - 44px);
+}
+
+@media (max-width: 700px) {
+  main { grid-template-columns: 1fr; }
+  #rail { border-right: none; border-bottom: 1px solid var(--rule); }
+}
+
+#rail {
+  border-right: 1px solid var(--rule);
+  padding: 8px 0;
+  background: var(--card);
+}
+
+.spec-row {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: none;
+  color: var(--body);
+  padding: 7px 14px;
+  cursor: pointer;
+  font: inherit;
+  border-left: 2px solid transparent;
+}
+
+.spec-row:hover { background: var(--sel); }
+.spec-row[aria-current="true"] {
+  background: var(--sel);
+  border-left-color: var(--brass);
+  color: var(--ink);
+}
+
+.spec-row .slug { display: block; font-weight: 600; }
+.spec-row .stage { display: block; font-size: 11px; color: var(--muted); }
+
+#detail { padding: 16px 18px; min-width: 0; }
+
+/* the lifecycle spine */
+.spine {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.node {
+  padding: 4px 9px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  color: var(--muted);
+  background: var(--card);
+}
+
+.node.done { color: var(--pass); border-color: color-mix(in srgb, var(--pass) 45%, var(--rule)); }
+.node.bad { color: var(--fail); border-color: color-mix(in srgb, var(--fail) 55%, var(--rule)); }
+.node.here {
+  color: var(--ink);
+  border-color: var(--brass);
+  box-shadow: inset 0 0 0 1px var(--brass);
+  font-weight: 600;
+}
+
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--rule); margin-bottom: 12px; }
+
+.tab {
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--muted);
+  padding: 7px 12px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--brass); font-weight: 600; }
+
+.run { margin-bottom: 18px; }
+
+.run-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 8px;
+}
+
+.id { color: var(--ink); font-weight: 600; }
+
+.glyph { font-weight: 700; }
+.glyph.pass { color: var(--pass); }
+.glyph.fail { color: var(--fail); }
+.glyph.blocked { color: var(--blocked); }
+
+.check { padding: 6px 0 6px 10px; border-left: 2px solid var(--rule); margin: 6px 0; }
+.check.fail { border-left-color: var(--fail); }
+.check.blocked { border-left-color: var(--blocked); }
+.check-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.check .from { color: var(--brass); font-size: 11px; }
+
+.kv { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 2px 8px; margin-top: 4px; }
+.kv dt { color: var(--muted); font-size: 11px; }
+.kv dd { margin: 0; overflow-wrap: anywhere; }
+
+.empty { color: var(--muted); padding: 18px 0; }
+
+.file {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--body);
+  padding: 5px 0;
+  cursor: pointer;
+}
+
+.file:hover .name { color: var(--ink); text-decoration: underline; }
+.file .name { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+pre {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 10px;
+  overflow-x: auto;
+  max-height: 60vh;
+  font-size: 12px;
+  margin: 6px 0 14px;
+}

@@ -4,51 +4,92 @@
 //! specs exist and no slug is given, shows the status of each and the next
 //! action for every incomplete one. With a slug, focuses on that spec alone.
 
-use crate::approval::{self, Standing};
+use crate::approval::Standing;
 use crate::config::Config;
 use crate::gate::{self, Verdict};
 use crate::paths::Paths;
-use crate::plan::{Plan, Tasks};
+use crate::pipeline::{self, Position, Stage};
+use crate::plan::Tasks;
 use crate::spec::{self, Spec};
 use anyhow::Result;
 
-/// Where a spec is in the pipeline.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-enum Stage {
-    /// G0 has never run or is failing.
-    Spec,
-    /// G0 passes but spec is not approved.
-    SpecApproval,
-    /// Spec approved, no plan yet.
-    Plan,
-    /// Plan exists but G1 not passing.
-    PlanGate,
-    /// G1 passes but plan not approved.
-    PlanApproval,
-    /// Plan approved, work not done / G2 not passing.
-    Run,
-    /// Run passed, merge not approved.
-    MergeApproval,
-    /// All done.
-    Complete,
-}
-
-impl Stage {
-    fn label(&self) -> &'static str {
-        match self {
-            Self::Spec => "spec",
-            Self::SpecApproval => "approve spec",
-            Self::Plan => "plan",
-            Self::PlanGate => "G1",
-            Self::PlanApproval => "approve plan",
-            Self::Run => "run",
-            Self::MergeApproval => "approve merge",
-            Self::Complete => "done",
-        }
+/// The one command that moves this spec forward from where it stands.
+fn command_for(slug: &str, stage: Stage) -> String {
+    match stage {
+        Stage::Spec => format!("keel gate g0 {slug}"),
+        Stage::SpecApproval => format!("keel approve {slug} --stage spec"),
+        Stage::Plan => format!("keel plan {slug}"),
+        Stage::PlanGate => format!("keel gate g1 {slug}"),
+        Stage::PlanApproval => format!("keel approve {slug} --stage plan"),
+        Stage::Run => format!("keel run {slug}"),
+        Stage::MergeApproval => format!("keel approve {slug} --stage merge"),
+        Stage::Complete => "keel spec new <slug>".to_string(),
     }
 }
 
-pub fn run(slug: Option<String>) -> Result<i32> {
+/// `keel next --json`.
+///
+/// Repo-level obstacles land in `blockers` rather than replacing the answer, so
+/// a caller always gets the same shape and can decide for itself whether a
+/// drifted store is worth stopping for.
+fn run_json(slug: Option<String>) -> Result<i32> {
+    let mut blockers: Vec<serde_json::Value> = Vec::new();
+    let mut specs: Vec<serde_json::Value> = Vec::new();
+
+    if let Ok(paths) = Paths::require_init() {
+        let cfg = Config::load(&paths.config())?;
+        let store_hash = crate::store::store_hash_with_shared(&paths, &cfg)?;
+        if crate::projection::drift::check_all(&paths, &cfg, &store_hash)?
+            .iter()
+            .any(|r| r.state.is_blocking())
+        {
+            blockers.push(serde_json::json!({
+                "reason": "store drift",
+                "command": "keel store render",
+            }));
+        }
+
+        let slugs = match slug {
+            Some(s) => vec![s],
+            None => spec::list(&paths)?,
+        };
+        if slugs.is_empty() {
+            blockers.push(serde_json::json!({
+                "reason": "no specs",
+                "command": "keel spec new <slug>",
+            }));
+        }
+        for s in slugs {
+            let stage = pipeline::stage(&paths, &s);
+            specs.push(serde_json::json!({
+                "slug": s,
+                "stage": stage.key(),
+                "command": command_for(&s, stage),
+                "complete": stage == Stage::Complete,
+            }));
+        }
+    } else {
+        blockers.push(serde_json::json!({
+            "reason": "not initialised",
+            "command": "keel init",
+        }));
+    }
+
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&serde_json::json!({
+            "schema": "keel.next/1",
+            "blockers": blockers,
+            "specs": specs,
+        }))?
+    );
+    Ok(0)
+}
+
+pub fn run(slug: Option<String>, json: bool) -> Result<i32> {
+    if json {
+        return run_json(slug);
+    }
     let paths = match Paths::require_init() {
         Ok(p) => p,
         Err(_) => {
@@ -100,7 +141,7 @@ pub fn run(slug: Option<String>) -> Result<i32> {
     println!("specs:\n");
     let mut stages: Vec<(&str, Stage)> = Vec::new();
     for slug in &all_specs {
-        let stage = pipeline_stage(&paths, slug);
+        let stage = pipeline::stage(&paths, slug);
         println!("  {:<28} {}", slug, stage.label());
         stages.push((slug, stage));
     }
@@ -126,73 +167,12 @@ pub fn run(slug: Option<String>) -> Result<i32> {
     Ok(0)
 }
 
-/// Determine where a spec sits in the pipeline without printing anything.
-fn pipeline_stage(paths: &Paths, slug: &str) -> Stage {
-    // G0
-    match gate::previous(paths, slug, "G0") {
-        None | Some(gate::GateResult { verdict: Verdict::Fail, .. })
-            | Some(gate::GateResult { verdict: Verdict::Blocked, .. }) => {
-            return Stage::Spec;
-        }
-        _ => {}
-    }
-
-    // Spec approval
-    if !matches!(approval::standing(paths, slug, "spec"), Ok(Standing::Current { .. })) {
-        return Stage::SpecApproval;
-    }
-
-    // Plan exists
-    if Plan::load(paths, slug).is_err() {
-        return Stage::Plan;
-    }
-
-    // G1
-    match gate::previous(paths, slug, "G1") {
-        None | Some(gate::GateResult { verdict: Verdict::Fail, .. })
-            | Some(gate::GateResult { verdict: Verdict::Blocked, .. }) => {
-            return Stage::PlanGate;
-        }
-        Some(ref g1) => {
-            // A G1 pass that predates the current spec approval is stale —
-            // the spec changed (new criteria, wider scope) and G1 needs to
-            // re-verify the plan against the updated spec.
-            if let Ok(Standing::Current { at, .. }) = approval::standing(paths, slug, "spec")
-                && g1.generated_at < at
-            {
-                return Stage::PlanGate;
-            }
-        }
-    }
-
-    // Plan approval
-    if !matches!(approval::standing(paths, slug, "plan"), Ok(Standing::Current { .. })) {
-        return Stage::PlanApproval;
-    }
-
-    // Run
-    if !has_passing_run(paths, slug) {
-        return Stage::Run;
-    }
-
-    // Merge approval — a superseded merge means the plan changed since the
-    // last passing run, so the work needs to be redone, not just re-approved.
-    match approval::standing(paths, slug, "merge") {
-        Ok(Standing::Superseded { .. }) => return Stage::Run,
-        Ok(Standing::Current { .. }) => {}
-        _ => return Stage::MergeApproval,
-    }
-
-    Stage::Complete
-}
-
 /// Print the next action for a single spec (compact form for multi-spec view).
 fn print_guidance(paths: &Paths, slug: &str) -> Result<()> {
-    let stage = pipeline_stage(paths, slug);
-    match stage {
+    let pos = pipeline::position(paths, slug);
+    match pos.stage {
         Stage::Spec => {
-            let g0 = gate::previous(paths, slug, "G0");
-            match g0 {
+            match pos.g0 {
                 None => step(
                     &format!("[{slug}] run G0"),
                     &format!("  keel gate g0 {slug}"),
@@ -220,8 +200,7 @@ fn print_guidance(paths: &Paths, slug: &str) -> Result<()> {
             );
         }
         Stage::PlanGate => {
-            let g1 = gate::previous(paths, slug, "G1");
-            match g1 {
+            match pos.g1 {
                 None => step(
                     &format!("[{slug}] run G1"),
                     &format!("  keel gate g1 {slug}"),
@@ -266,12 +245,28 @@ fn print_guidance(paths: &Paths, slug: &str) -> Result<()> {
 }
 
 /// Focused single-spec mode with full detail.
+///
+/// Every arm renders from the single [`Position`] evaluated up front, so the
+/// stage named in the multi-spec listing and the guidance printed here cannot
+/// disagree about what is blocking.
 fn next_for_spec(paths: &Paths, slug: &str) -> Result<i32> {
     let _spec = Spec::load(paths, slug)?;
+    let pos = pipeline::position(paths, slug);
+    match pos.stage {
+        Stage::Spec => spec_guidance(slug, &pos),
+        Stage::SpecApproval => spec_approval_guidance(slug, &pos),
+        Stage::Plan => plan_guidance(slug),
+        Stage::PlanGate => plan_gate_guidance(slug, &pos),
+        Stage::PlanApproval => plan_approval_guidance(slug, &pos),
+        Stage::Run => run_guidance(paths, slug, &pos),
+        Stage::MergeApproval => merge_approval_guidance(slug, &pos),
+        Stage::Complete => complete_guidance(slug),
+    }
+    Ok(0)
+}
 
-    // --- G0 ---------------------------------------------------------------
-    let g0 = gate::previous(paths, slug, "G0");
-    match g0 {
+fn spec_guidance(slug: &str, pos: &Position) {
+    match &pos.g0 {
         None => {
             step(
                 &format!("run G0 on `{slug}`"),
@@ -280,9 +275,8 @@ fn next_for_spec(paths: &Paths, slug: &str) -> Result<i32> {
                      G0 checks EARS form, oracles, no placeholders, and the store."
                 ),
             );
-            return Ok(0);
         }
-        Some(ref r) if r.verdict != Verdict::Pass => {
+        Some(r) => {
             let (_, f, b) = r.counts();
             step(
                 &format!("fix `{slug}` spec — G0 has {f} failure(s), {b} blocked"),
@@ -291,76 +285,68 @@ fn next_for_spec(paths: &Paths, slug: &str) -> Result<i32> {
                      then re-run:\n\n  keel gate g0 {slug}"
                 ),
             );
-            return Ok(0);
-        }
-        _ => {} // G0 passes, continue
-    }
-
-    // --- spec approval ----------------------------------------------------
-    match approval::standing(paths, slug, "spec")? {
-        Standing::Current { .. } => {} // approved, move on
-        Standing::Absent => {
-            step(
-                &format!("approve the `{slug}` spec"),
-                &format!(
-                    "G0 passes. A human must sign off before planning begins:\n\n\
-                     \x20 keel approve {slug} --stage spec"
-                ),
-            );
-            return Ok(0);
-        }
-        Standing::Rejected { by, note } => {
-            step(
-                &format!("spec was rejected by {by}"),
-                &format!(
-                    "Revise the spec and re-run G0, then re-approve.{}",
-                    note.map(|n| format!("\n\nReason: {n}")).unwrap_or_default()
-                ),
-            );
-            return Ok(0);
-        }
-        Standing::Superseded { .. } => {
-            step(
-                &format!("re-approve the `{slug}` spec"),
-                &format!(
-                    "The spec changed after it was approved. Re-run G0 and re-approve:\n\n\
-                     \x20 keel gate g0 {slug}\n\
-                     \x20 keel approve {slug} --stage spec"
-                ),
-            );
-            return Ok(0);
         }
     }
+}
 
-    // --- plan exists? -----------------------------------------------------
-    if Plan::load(paths, slug).is_err() {
-        step(
-            &format!("create a plan for `{slug}`"),
+fn spec_approval_guidance(slug: &str, pos: &Position) {
+    match &pos.spec_approval {
+        Standing::Rejected { by, note } => step(
+            &format!("spec was rejected by {by}"),
             &format!(
-                "The spec is approved. Compute the blast radius and scaffold tasks:\n\n\
-                 \x20 keel plan {slug}\n\n\
-                 Then fill in the approach, rollback, and each task's files/budget/exit."
+                "Revise the spec and re-run G0, then re-approve.{}",
+                note.as_ref().map(|n| format!("\n\nReason: {n}")).unwrap_or_default()
             ),
-        );
-        return Ok(0);
+        ),
+        Standing::Superseded { .. } => step(
+            &format!("re-approve the `{slug}` spec"),
+            &format!(
+                "The spec changed after it was approved. Re-run G0 and re-approve:\n\n\
+                 \x20 keel gate g0 {slug}\n\
+                 \x20 keel approve {slug} --stage spec"
+            ),
+        ),
+        _ => step(
+            &format!("approve the `{slug}` spec"),
+            &format!(
+                "G0 passes. A human must sign off before planning begins:\n\n\
+                 \x20 keel approve {slug} --stage spec"
+            ),
+        ),
     }
+}
 
-    // --- G1 ---------------------------------------------------------------
-    let tasks = Tasks::load(paths, slug);
-    let g1 = gate::previous(paths, slug, "G1");
-    match g1 {
-        None => {
-            step(
-                &format!("run G1 on `{slug}`"),
-                &format!(
-                    "A plan and tasks exist. Gate them:\n\n  keel gate g1 {slug}\n\n\
-                     G1 checks traceability, budgets, exit conditions, blast radius,\n\
-                     and spec approval."
-                ),
-            );
-            return Ok(0);
-        }
-        Some(ref r) if r.verdict != Verdict::Pass => {
+fn plan_guidance(slug: &str) {
+    step(
+        &format!("create a plan for `{slug}`"),
+        &format!(
+            "The spec is approved. Compute the blast radius and scaffold tasks:\n\n\
+             \x20 keel plan {slug}\n\n\
+             Then fill in the approach, rollback, and each task's files/budget/exit."
+        ),
+    );
+}
+
+fn plan_gate_guidance(slug: &str, pos: &Position) {
+    match &pos.g1 {
+        None => step(
+            &format!("run G1 on `{slug}`"),
+            &format!(
+                "A plan and tasks exist. Gate them:\n\n  keel gate g1 {slug}\n\n\
+                 G1 checks traceability, budgets, exit conditions, blast radius,\n\
+                 and spec approval."
+            ),
+        ),
+        // A G1 that passed but predates the spec's current approval judged a
+        // spec that has since changed.
+        Some(_) if pos.g1_stale => step(
+            &format!("re-run G1 on `{slug}` — the spec changed since G1 last passed"),
+            &format!(
+                "The spec was re-approved after G1 ran. Update the plan and tasks\n\
+                 if needed, then re-run:\n\n  keel gate g1 {slug}"
+            ),
+        ),
+        Some(r) => {
             let (_, f, b) = r.counts();
             let hints = failure_hints(r);
             step(
@@ -371,113 +357,92 @@ fn next_for_spec(paths: &Paths, slug: &str) -> Result<i32> {
                      Failing checks:{hints}"
                 ),
             );
-            return Ok(0);
-        }
-        Some(ref r) => {
-            // A G1 pass that predates the current spec approval is stale.
-            if let Ok(Standing::Current { at, .. }) = approval::standing(paths, slug, "spec")
-                && r.generated_at < at
-            {
-                step(
-                    &format!("re-run G1 on `{slug}` — the spec changed since G1 last passed"),
-                    &format!(
-                        "The spec was re-approved after G1 ran. Update the plan and tasks\n\
-                         if needed, then re-run:\n\n  keel gate g1 {slug}"
-                    ),
-                );
-                return Ok(0);
-            }
         }
     }
+}
 
-    // --- plan approval ----------------------------------------------------
-    match approval::standing(paths, slug, "plan")? {
-        Standing::Current { .. } => {} // approved
-        Standing::Absent => {
-            step(
-                &format!("approve the `{slug}` plan"),
-                &format!(
-                    "G1 passes. Sign off the plan before running:\n\n\
-                     \x20 keel approve {slug} --stage plan"
-                ),
-            );
-            return Ok(0);
-        }
-        Standing::Rejected { by, note } => {
-            step(
-                &format!("plan was rejected by {by}"),
-                &format!(
-                    "Revise the plan and tasks, re-run G1, then re-approve.{}",
-                    note.map(|n| format!("\n\nReason: {n}")).unwrap_or_default()
-                ),
-            );
-            return Ok(0);
-        }
-        Standing::Superseded { .. } => {
-            step(
-                &format!("re-approve the `{slug}` plan"),
-                &format!(
-                    "The plan or tasks changed after approval. Re-run G1 and re-approve:\n\n\
-                     \x20 keel gate g1 {slug}\n\
-                     \x20 keel approve {slug} --stage plan"
-                ),
-            );
-            return Ok(0);
-        }
-    }
-
-    // --- ready to run -----------------------------------------------------
-    if !has_passing_run(paths, slug) {
-        let tasks_info = if let Ok(ref t) = tasks {
-            match t.waves() {
-                Ok(w) => format!(" ({} wave(s), {} task(s))", w.len(), t.tasks.len()),
-                Err(_) => String::new(),
-            }
-        } else {
-            String::new()
-        };
-        step(
-            &format!("do the work for `{slug}`"),
+fn plan_approval_guidance(slug: &str, pos: &Position) {
+    match &pos.plan_approval {
+        Standing::Rejected { by, note } => step(
+            &format!("plan was rejected by {by}"),
             &format!(
-                "Everything is approved. Make the change, then gate it:\n\n\
-                 \x20 keel run {slug}              # drive an agent and gate the result\n\
-                 \x20 keel run {slug} --no-driver  # gate the working tree as-is\n\
-                 \x20 keel run {slug} --waves      # one worktree per task{tasks_info}\n\n\
-                 G2 will run build/test/lint and every oracle."
+                "Revise the plan and tasks, re-run G1, then re-approve.{}",
+                note.as_ref().map(|n| format!("\n\nReason: {n}")).unwrap_or_default()
+            ),
+        ),
+        Standing::Superseded { .. } => step(
+            &format!("re-approve the `{slug}` plan"),
+            &format!(
+                "The plan or tasks changed after approval. Re-run G1 and re-approve:\n\n\
+                 \x20 keel gate g1 {slug}\n\
+                 \x20 keel approve {slug} --stage plan"
+            ),
+        ),
+        _ => step(
+            &format!("approve the `{slug}` plan"),
+            &format!(
+                "G1 passes. Sign off the plan before running:\n\n\
+                 \x20 keel approve {slug} --stage plan"
+            ),
+        ),
+    }
+}
+
+fn run_guidance(paths: &Paths, slug: &str, pos: &Position) {
+    // A passing run already exists, so the only way to be back here is a merge
+    // approval that went stale — the agreed shape of the work changed.
+    if pos.passing_run.is_some() {
+        step(
+            &format!("re-run `{slug}` — the plan changed since the last run"),
+            &format!(
+                "The plan or tasks changed after the last passing run.\n\
+                 Do the work again and gate it:\n\n\
+                 \x20 keel run {slug}\n\
+                 \x20 keel run {slug} --no-driver  # gate the tree as-is"
             ),
         );
-        return Ok(0);
+        return;
     }
 
-    // --- post-run: merge approval -----------------------------------------
-    match approval::standing(paths, slug, "merge")? {
-        Standing::Current { .. } => {} // approved
-        Standing::Absent => {
-            step(
-                &format!("approve the merge for `{slug}`"),
-                &format!(
-                    "The run passed. Review it and approve the merge:\n\n\
-                     \x20 keel approve {slug} --stage merge"
-                ),
-            );
-            return Ok(0);
-        }
-        Standing::Superseded { .. } => {
-            step(
-                &format!("re-run `{slug}` — the plan changed since the last run"),
-                &format!(
-                    "The plan or tasks changed after the last passing run.\n\
-                     Do the work again and gate it:\n\n\
-                     \x20 keel run {slug}\n\
-                     \x20 keel run {slug} --no-driver  # gate the tree as-is"
-                ),
-            );
-            return Ok(0);
-        }
-        _ => {}
-    }
+    let tasks_info = match Tasks::load(paths, slug) {
+        Ok(t) => match t.waves() {
+            Ok(w) => format!(" ({} wave(s), {} task(s))", w.len(), t.tasks.len()),
+            Err(_) => String::new(),
+        },
+        Err(_) => String::new(),
+    };
+    step(
+        &format!("do the work for `{slug}`"),
+        &format!(
+            "Everything is approved. Make the change, then gate it:\n\n\
+             \x20 keel run {slug}              # drive an agent and gate the result\n\
+             \x20 keel run {slug} --no-driver  # gate the working tree as-is\n\
+             \x20 keel run {slug} --waves      # one worktree per task{tasks_info}\n\n\
+             G2 will run build/test/lint and every oracle."
+        ),
+    );
+}
 
-    // --- export and learn -------------------------------------------------
+fn merge_approval_guidance(slug: &str, pos: &Position) {
+    match &pos.merge_approval {
+        Standing::Rejected { by, note } => step(
+            &format!("the merge was rejected by {by}"),
+            &format!(
+                "Address the reason, re-run `keel run {slug}`, then re-approve.{}",
+                note.as_ref().map(|n| format!("\n\nReason: {n}")).unwrap_or_default()
+            ),
+        ),
+        _ => step(
+            &format!("approve the merge for `{slug}`"),
+            &format!(
+                "The run passed. Review it and approve the merge:\n\n\
+                 \x20 keel approve {slug} --stage merge"
+            ),
+        ),
+    }
+}
+
+fn complete_guidance(slug: &str) {
     step(
         &format!("`{slug}` is complete"),
         "The pipeline has been gated and approved. Optional next steps:\n\n\
@@ -485,27 +450,6 @@ fn next_for_spec(paths: &Paths, slug: &str) -> Result<i32> {
          \x20 keel learn            # extract failure episodes and propose lessons\n\
          \x20 keel spec new <slug>  # start the next change",
     );
-    Ok(0)
-}
-
-/// Check whether there is a run for this slug that passed G2.
-fn has_passing_run(paths: &Paths, slug: &str) -> bool {
-    let runs_dir = paths.runs();
-    let Ok(entries) = std::fs::read_dir(&runs_dir) else { return false };
-    for entry in entries.filter_map(|e| e.ok()) {
-        let Ok(run) = crate::run::Run::load(paths, &entry.file_name().to_string_lossy()) else {
-            continue;
-        };
-        if run.meta.spec != slug {
-            continue;
-        }
-        if let Ok(results) = run.gate_results()
-            && results.iter().any(|r| r.gate == "G2" && r.verdict == Verdict::Pass)
-        {
-            return true;
-        }
-    }
-    false
 }
 
 /// Summarise failing checks into hints.
@@ -523,7 +467,7 @@ fn failure_hints(result: &gate::GateResult) -> String {
 }
 
 fn step(title: &str, detail: &str) {
-    println!("▸ {title}\n");
+    println!("{}\n", crate::ui::bold(&format!("▸ {title}")));
     for line in detail.lines() {
         println!("  {line}");
     }

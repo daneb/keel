@@ -264,8 +264,9 @@ fn record_security_findings(
     if let Some(dir) = path.parent() {
         std::fs::create_dir_all(dir)?;
     }
-    std::fs::write(&path, format!("{}\n", serde_json::to_string_pretty(&rows)?))?;
-    Ok(())
+    // Atomic: an approval binds to this file's hash, so a reader must never see
+    // it half-written.
+    crate::atomic::write(&path, &format!("{}\n", serde_json::to_string_pretty(&rows)?))
 }
 
 /// Look for mocks and weakened assertions *added* by this change.

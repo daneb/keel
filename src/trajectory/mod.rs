@@ -9,8 +9,9 @@ pub mod event;
 
 use anyhow::{Context, Result, bail};
 pub use event::{Event, Payload};
+use serde::Serialize;
 use std::fs::{File, OpenOptions};
-use std::io::{BufRead, BufReader, Write};
+use std::io::Write;
 use std::path::{Path, PathBuf};
 
 pub struct Trajectory {
@@ -67,42 +68,102 @@ impl Trajectory {
     }
 }
 
+/// Something in the stream that a strict read refuses.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(tag = "anomaly", rename_all = "snake_case")]
+pub enum Anomaly {
+    /// A line that is not a trajectory event and is not the in-progress tail.
+    Unparseable { line: usize, why: String },
+    /// A sequence number that does not follow the one before it.
+    Gap { line: usize, expected: u64, found: u64 },
+    /// The final line is incomplete and the file has no closing newline — an
+    /// append caught mid-write, which is expected while a run is in flight.
+    TrailingPartial { line: usize },
+}
+
+impl Anomaly {
+    fn message(&self, path: &Path) -> String {
+        let p = path.display();
+        match self {
+            Self::Unparseable { line, why } => {
+                format!("{p}:{line} is not a valid trajectory event: {why}")
+            }
+            Self::Gap { line, expected, found } => format!(
+                "{p}:{line} sequence is {found} where {expected} was expected \
+                 — the stream has a gap or a duplicate"
+            ),
+            Self::TrailingPartial { line } => {
+                format!("{p}:{line} is a partial record — the stream was cut mid-append")
+            }
+        }
+    }
+}
+
+/// Every event a trajectory yields, plus whatever could not be read.
+pub struct Scan {
+    pub events: Vec<Event>,
+    pub anomalies: Vec<Anomaly>,
+}
+
+/// Read a trajectory, tolerating damage and reporting exactly what it was.
+///
+/// This is for readers that must render a stream they do not control — one
+/// being appended to right now, or one that was truncated by a crash. It never
+/// invents an event to fill a gap and never drops a line without recording
+/// that it did, so a caller can always say what it could not see. Callers that
+/// need the strict guarantee want [`read`] instead.
+pub fn scan(path: &Path) -> Result<Scan> {
+    let raw = std::fs::read_to_string(path)
+        .with_context(|| format!("reading {}", path.display()))?;
+    // A file not ending in a newline has an append in flight, so its last line
+    // is expected to be incomplete rather than corrupt.
+    let closed = raw.is_empty() || raw.ends_with('\n');
+    let lines: Vec<&str> = raw.lines().collect();
+    let last = lines.len().saturating_sub(1);
+
+    let mut events: Vec<Event> = Vec::new();
+    let mut anomalies = Vec::new();
+    let mut prev_seq: Option<u64> = None;
+
+    for (i, line) in lines.iter().enumerate() {
+        if line.trim().is_empty() {
+            continue;
+        }
+        match serde_json::from_str::<Event>(line) {
+            Ok(event) => {
+                let expected = prev_seq.map(|p| p + 1).unwrap_or(1);
+                if event.seq != expected {
+                    anomalies.push(Anomaly::Gap { line: i + 1, expected, found: event.seq });
+                }
+                prev_seq = Some(event.seq);
+                events.push(event);
+            }
+            Err(_) if i == last && !closed => {
+                anomalies.push(Anomaly::TrailingPartial { line: i + 1 });
+            }
+            Err(why) => {
+                anomalies.push(Anomaly::Unparseable { line: i + 1, why: why.to_string() });
+            }
+        }
+    }
+
+    Ok(Scan { events, anomalies })
+}
+
 /// Read every event in a trajectory, in sequence order.
 ///
 /// A malformed line is an error naming the file and line number, never a
 /// silently skipped record: a stream you cannot fully parse cannot support the
 /// claim that a verdict is reproducible from it.
+///
+/// Implemented as [`scan`] plus "refuse if anything was wrong", so the strict
+/// guarantee and the lenient one are the same parser and cannot drift apart.
 pub fn read(path: &Path) -> Result<Vec<Event>> {
-    let file = File::open(path).with_context(|| format!("reading {}", path.display()))?;
-    let mut out = Vec::new();
-    for (n, line) in BufReader::new(file).lines().enumerate() {
-        let line = line.with_context(|| format!("{}:{}", path.display(), n + 1))?;
-        if line.trim().is_empty() {
-            continue;
-        }
-        let event: Event = serde_json::from_str(&line)
-            .with_context(|| format!("{}:{} is not a valid trajectory event", path.display(), n + 1))?;
-        out.push(event);
+    let scanned = scan(path)?;
+    match scanned.anomalies.first() {
+        Some(a) => bail!("{}", a.message(path)),
+        None => Ok(scanned.events),
     }
-    verify_sequence(path, &out)?;
-    Ok(out)
-}
-
-/// Sequence numbers must start at 1 and increase by exactly 1.
-fn verify_sequence(path: &Path, events: &[Event]) -> Result<()> {
-    for (i, e) in events.iter().enumerate() {
-        let expected = i as u64 + 1;
-        if e.seq != expected {
-            bail!(
-                "{}:{} sequence is {} where {} was expected — the stream has a gap or a duplicate",
-                path.display(),
-                i + 1,
-                e.seq,
-                expected
-            );
-        }
-    }
-    Ok(())
 }
 
 /// Total tokens this run put in front of a model.
@@ -216,6 +277,81 @@ mod tests {
         let raw = std::fs::read_to_string(&p).unwrap();
         std::fs::write(&p, format!("{raw}\n\n")).unwrap();
         assert_eq!(read(&p).unwrap().len(), 1);
+    }
+
+    // --- scan: the lenient reader ----------------------------------------
+
+    #[test]
+    fn scan_keeps_the_events_around_a_gap_and_names_it() {
+        let p = tmp();
+        let a = Event { t: "t".into(), seq: 1, payload: inject(1) };
+        let b = Event { t: "t".into(), seq: 5, payload: inject(2) };
+        let c = Event { t: "t".into(), seq: 6, payload: inject(3) };
+        std::fs::write(
+            &p,
+            format!(
+                "{}\n{}\n{}\n",
+                a.one_line().unwrap(),
+                b.one_line().unwrap(),
+                c.one_line().unwrap()
+            ),
+        )
+        .unwrap();
+
+        let s = scan(&p).unwrap();
+        assert_eq!(s.events.len(), 3, "a gap discarded events after it");
+        assert!(!s.anomalies.is_empty());
+        assert_eq!(
+            s.anomalies,
+            vec![Anomaly::Gap { line: 2, expected: 2, found: 5 }],
+            "one anomaly per discontinuity, not one per following event"
+        );
+    }
+
+    #[test]
+    fn an_unterminated_last_line_is_a_partial_append_not_corruption() {
+        let p = tmp();
+        let mut t = Trajectory::open(&p).unwrap();
+        t.append(inject(1)).unwrap();
+        drop(t);
+        let raw = std::fs::read_to_string(&p).unwrap();
+        // No trailing newline: an append caught mid-write.
+        std::fs::write(&p, format!("{raw}{{\"t\":\"2026")).unwrap();
+
+        let s = scan(&p).unwrap();
+        assert_eq!(s.events.len(), 1);
+        assert_eq!(s.anomalies, vec![Anomaly::TrailingPartial { line: 2 }]);
+    }
+
+    #[test]
+    fn a_broken_line_with_a_newline_after_it_is_corruption_not_a_partial() {
+        let p = tmp();
+        let mut t = Trajectory::open(&p).unwrap();
+        t.append(inject(1)).unwrap();
+        drop(t);
+        let raw = std::fs::read_to_string(&p).unwrap();
+        std::fs::write(&p, format!("{raw}{{not json}}\n")).unwrap();
+
+        let s = scan(&p).unwrap();
+        assert_eq!(s.events.len(), 1);
+        assert!(
+            matches!(s.anomalies.as_slice(), [Anomaly::Unparseable { line: 2, .. }]),
+            "{:?}",
+            s.anomalies
+        );
+    }
+
+    #[test]
+    fn scan_and_read_agree_on_a_healthy_stream() {
+        let p = tmp();
+        let mut t = Trajectory::open(&p).unwrap();
+        for n in 1..=4 {
+            t.append(inject(n)).unwrap();
+        }
+        drop(t);
+        let s = scan(&p).unwrap();
+        assert!(s.anomalies.is_empty());
+        assert_eq!(s.events.len(), read(&p).unwrap().len());
     }
 
     #[test]

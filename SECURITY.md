@@ -86,6 +86,73 @@ lesson caps bound how much a single bad input can shift, approvals bind to a
 SHA-256 so a change cannot be inherited silently, and G2 checks the diff against
 the declared scope regardless of what the agent believed it was doing.
 
+### `keel serve` opens a listening socket
+
+Every other keel command reads and writes files and exits. `keel serve` binds a
+TCP port and serves the contents of `.keel/` to a browser, which is a different
+class of exposure from anything else in this tool. What follows is the whole of
+it.
+
+**It is read-only, mechanically.** The request parser rejects any method other
+than `GET` and `HEAD` before routing, and rejects any request carrying a body.
+There is no route that writes. A gate cannot be run, a spec cannot be approved
+and a lesson cannot be promoted from the browser — those stay deliberate CLI
+acts bound to an artefact hash, which is the property
+[ADR-0003](.keel/store/decisions/ADR-0003-approvals-bind-to-a-hash.md) exists to
+protect.
+
+**It binds loopback only.** `127.0.0.1`, never `0.0.0.0`, and there is no
+`--host` flag to widen it. A flag that widens the bind is a flag that eventually
+gets set in an alias.
+
+**`Host` is validated, because of DNS rebinding.** Loopback binding alone does
+not make a local server private. Any page the operator visits can re-resolve its
+own hostname to `127.0.0.1` after its DNS TTL expires and then issue same-origin
+requests to the port — reading specs, plans, diff stats and evidence logs.
+The defence is to reject any request whose `Host` is not exactly
+`127.0.0.1:<port>` or `[::1]:<port>`, which is why the URL keel prints uses the
+literal address and not `localhost`. `Origin`, when present and foreign, is
+rejected too, and no CORS header is ever emitted.
+
+**Evidence content is untrusted, and the browser is the thing at risk.** The
+threat model already grants above that a hostile driver can put arbitrary bytes
+into evidence files. Those bytes are served to a browser by an origin that can
+read the whole `.keel/` tree, which makes stored XSS the live concern rather
+than a theoretical one. Evidence is served as `text/plain` only and never
+sniffed, every response carries `nosniff` and a `Content-Security-Policy` of
+`default-src 'none'` with `'self'` for script and style, and the page never
+assigns disk content to `innerHTML`.
+
+That CSP is also what makes the "no telemetry, no CDN, no web fonts" promise
+mechanical rather than a matter of good intentions: the page cannot reach the
+network even if a future edit tries to.
+
+**The only route that touches disk by name is evidence.** The page, its CSS and
+its JavaScript are compiled into the binary with `include_str!`, so there is no
+general static-file route to traverse. Evidence file names are matched by exact
+string equality against what `read_dir` returned for that run, and the resolved
+path is canonicalised and asserted to remain inside the run's evidence
+directory. The allowlist is what makes traversal impossible by construction —
+important on a case-insensitive, Unicode-normalising filesystem where a
+blocklist of `..` is defeatable — and the canonicalise step is what catches a
+symlink planted in `evidence/` by a hostile driver.
+
+**It is not a daemon.** It runs in the foreground, holds no state, writes
+nothing, and dies with Ctrl-C. There is no launchd plist, no auto-start and no
+graceful-shutdown path, because that is where daemons begin.
+
+**On a shared machine, the port is the exposure.** There is deliberately no
+token in the URL. A token would not fix rebinding — `Host` validation does that
+— and it would leak through `Referer`, shell history, terminal scrollback and
+screenshots while making the tool annoying to use. What it would buy is
+protection from another local user on the same box, and that user can already
+read `.keel/runs/**` directly, so the server grants them no capability they
+lacked. The honest statement is therefore: **on a multi-user host such as a
+shared build box or a CI runner, any local user can read what `keel serve`
+serves.** A Unix domain socket would be the right primitive there, and browsers
+cannot speak one. Do not run `keel serve` on a host whose other users should not
+read your repository.
+
 ---
 
 ## Reviewing the code keel helps produce
@@ -214,6 +281,9 @@ Named so the absence is a known state rather than an assumption:
 - No SBOM, and no signing or build provenance on released artefacts.
 - No license or dependency-source policy (`cargo-deny` is not wired in).
 - No fuzzing of the parsers that take untrusted input, most importantly the
-  driver result parser.
+  driver result parser — and now also the HTTP request parser in `keel serve`.
+- No token-based access control on `keel serve`. Access is governed by the
+  loopback bind and `Host` validation alone, so every local user on the machine
+  can read what it serves. Reasoning is in the threat model above.
 - The `cfg(windows)` branches compile but are unexercised; keel is developed and
   tested on macOS, and CI runs Linux.

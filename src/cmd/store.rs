@@ -71,7 +71,16 @@ pub fn check(json: bool) -> Result<i32> {
                 None => String::new(),
             };
             let over = if r.over_budget { " OVER BUDGET" } else { "" };
-            println!("  {:<8} {:<10} {}{}{}", r.state.glyph(), r.adapter, r.path, budget, over);
+            // Pad on the plain word — see `gate::Check::line`.
+            let pad = " ".repeat(8usize.saturating_sub(r.state.glyph().len()));
+            println!(
+                "  {}{pad} {:<10} {}{}{}",
+                r.state.glyph_styled(),
+                r.adapter,
+                r.path,
+                budget,
+                over
+            );
             if r.state != drift::State::Ok {
                 println!("           {}", r.detail);
             }

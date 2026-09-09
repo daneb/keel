@@ -5,6 +5,7 @@
 //! of the repository — and to make drift in that picture loud.
 
 mod approval;
+mod atomic;
 mod cmd;
 mod config;
 mod driver;
@@ -13,16 +14,21 @@ mod failure;
 mod gate;
 mod lesson;
 mod hashing;
+mod http;
 mod map;
 mod mcp;
 mod paths;
+mod pipeline;
 mod plan;
 mod projection;
+mod report;
 mod retrieve;
 mod review;
+mod serve;
 mod run;
 mod spec;
 mod store;
+mod ui;
 mod worktree;
 mod trajectory;
 
@@ -74,6 +80,8 @@ enum Command {
     Next {
         /// Spec slug; optional when there is only one active spec
         slug: Option<String>,
+        #[arg(long)]
+        json: bool,
     },
     /// The harness measured across runs: pass rates, failures, tokens, theatre
     Metrics {
@@ -125,7 +133,11 @@ enum Command {
         note: Option<String>,
     },
     /// Show the approval history and current standing
-    Approvals { slug: Option<String> },
+    Approvals {
+        slug: Option<String>,
+        #[arg(long)]
+        json: bool,
+    },
     /// Execute a task through an agent, capture evidence, run G2/G2.5/G3
     Run {
         /// Spec slug; optional when there is only one spec
@@ -145,6 +157,18 @@ enum Command {
         /// Run every task, wave by wave, each in its own git worktree
         #[arg(long)]
         waves: bool,
+        #[arg(long)]
+        json: bool,
+    },
+    /// Serve a read-only web view of .keel/ on loopback
+    Serve {
+        #[arg(long, default_value = "7717")]
+        port: u16,
+    },
+    /// A feature's whole life: gates, approvals, runs and failing checks
+    Report {
+        /// Spec slug; without one, every spec
+        slug: Option<String>,
         #[arg(long)]
         json: bool,
     },
@@ -168,6 +192,8 @@ enum Command {
         /// Actually delete; without this, prune only reports
         #[arg(long)]
         apply: bool,
+        #[arg(long)]
+        json: bool,
     },
     /// Write an evidence bundle, or verify one
     Export {
@@ -457,7 +483,7 @@ fn run() -> Result<i32> {
             Ok(0)
         }
         Command::Status => cmd::status::run(),
-        Command::Next { slug } => cmd::next::run(slug),
+        Command::Next { slug, json } => cmd::next::run(slug, json),
         Command::Doctor { json } => cmd::doctor::run(json),
         Command::Metrics { threshold, json } => cmd::metrics::run(threshold, json),
         Command::Hook(HookCmd::Install) => {
@@ -495,7 +521,7 @@ fn run() -> Result<i32> {
         Command::Approve { slug, stage, reject, note } => {
             cmd::approve::run(slug, stage, reject, note)
         }
-        Command::Approvals { slug } => cmd::approve::show(slug),
+        Command::Approvals { slug, json } => cmd::approve::show(slug, json),
         Command::Outline { path, json } => cmd::retrieve::outline(path, json),
         Command::Symbol { name, json } => cmd::retrieve::symbol(name, json),
         Command::Source { name, nth, justify, json } => {
@@ -521,13 +547,15 @@ fn run() -> Result<i32> {
             if waves { cmd::run::run_waves(opts) } else { cmd::run::run(opts) }
         }
         Command::Replay { run, json } => cmd::run::replay(run, json),
-        Command::Runs { latest, prune, keep, apply } => {
+        Command::Runs { latest, prune, keep, apply, json } => {
             if prune {
                 cmd::prune::prune(keep, apply)
             } else {
-                cmd::run::list(latest)
+                cmd::run::list(latest, json)
             }
         }
+        Command::Serve { port } => cmd::serve::run(port),
+        Command::Report { slug, json } => cmd::report::run(slug, json),
         Command::Export { run, verify, out } => cmd::run::export(run, verify, out),
         Command::Ratchet { accept } => cmd::ratchet::run(accept),
     }

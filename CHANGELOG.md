@@ -7,6 +7,75 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.5.0] - 2026-09-09
+
+### Added
+
+- **`keel serve`** — a read-only web view of `.keel/` on loopback, aimed at the
+  operator mid-flight: a lifecycle spine from G0 to G4, every failing check with
+  its expected/actual pair and the lesson that produced it, and the evidence
+  those checks point at. It updates while a run is in progress by polling a
+  cheap `stat`-based change token. No new dependency: the HTTP/1.1 server is
+  hand-rolled over `std::net`, on the same reasoning as `src/mcp`, and the page,
+  its CSS and its JavaScript are compiled into the binary.
+
+  The server is read-only *mechanically* — anything but `GET`/`HEAD` is refused
+  in the parser, before routing, so no route can quietly acquire the power to
+  approve or gate. It binds `127.0.0.1` with no flag to widen it, validates the
+  `Host` header against DNS rebinding, refuses cross-origin requests, serves
+  evidence only as `text/plain` under a `Content-Security-Policy` that forbids
+  the network outright, and reaches the filesystem by name on exactly one route
+  — which serves only names `read_dir` returned and then canonicalises to prove
+  containment, so a symlink planted in `evidence/` by a hostile driver cannot
+  escape. New threat-model section in [SECURITY.md](SECURITY.md).
+
+- **`keel report [slug]`** — the same assembled view in the terminal, and
+  `--json` for anything that wants to render its own. New `keel.report/1`
+  schema, kept deliberately thin: it earns its content by embedding records that
+  are already frozen (`keel.gate/1`, `keel.run/1`) rather than inventing
+  summaries of them.
+
+- **`--json` on `keel next`, `keel runs` and `keel approvals`** — the three
+  human-facing commands that had no machine-readable form. `keel.next/1` carries
+  a stable stage key and the one command that advances it; repo-level obstacles
+  arrive as `blockers` rather than replacing the answer, so an uninitialised
+  repository still returns valid JSON. (`keel status` is deliberately left out:
+  its schema has real design content and gets its own decision.)
+
+- **Colour and glyphs in terminal output**, matching `release.sh` so the script
+  and the binary read as one product. Decided per write against the real stdout
+  handle, honouring `NO_COLOR`, `TERM=dumb` and `CLICOLOR_FORCE`. When stdout is
+  not a terminal the bytes are exactly what they were before, which is asserted
+  rather than assumed.
+
+### Fixed
+
+- **`run.json` and gate results are now written atomically.** Both used
+  `std::fs::write`, which truncates before writing, so any concurrent reader —
+  the pre-commit hook, `keel export`, a second terminal — could observe an empty
+  or partial file, and `Run::finish` rewrites `run.json` at exactly the moment
+  someone would look. Now written to a sibling temporary and renamed. This was a
+  latent race before `keel serve` existed; the server only made it frequent.
+
+### Changed
+
+- **The pipeline state machine lives in one place** (`src/pipeline.rs`).
+  `keel next` derived it twice — once compactly for the multi-spec listing and
+  once inline for the detailed guidance — and the two had already drifted: a
+  *rejected* merge approval was listed as needing approval but described as
+  complete. Both now render from one evaluation, and a rejected merge reads as
+  rejected in both.
+
+- **`keel next` explains a rejected merge** instead of falling through to
+  "complete", and names the reason if one was recorded.
+
+- **Trajectories can be read leniently** via `trajectory::scan`, which reports
+  gaps, unparseable lines and a partial trailing record rather than refusing the
+  file — and distinguishes an append caught mid-write from actual corruption, so
+  a live run does not look damaged. The strict `trajectory::read` is unchanged
+  in behaviour and is now implemented on top of `scan`, so the two cannot drift.
+  Nothing is ever dropped silently: what could not be read is reported.
+
 ## [0.4.10] - 2026-09-01
 
 ### Fixed

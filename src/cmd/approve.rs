@@ -149,10 +149,31 @@ fn find_g3_verdict(paths: &Paths, slug: &str) -> Result<Option<gate::Verdict>> {
     Ok(best.map(|(_, v)| v))
 }
 
-pub fn show(slug: Option<String>) -> Result<i32> {
+pub fn show(slug: Option<String>, json: bool) -> Result<i32> {
     let paths = Paths::require_init()?;
     let slug = crate::cmd::gate::resolve_slug(&paths, slug)?;
     let history = approval::history(&paths, &slug)?;
+
+    if json {
+        let mut standing = serde_json::Map::new();
+        for stage in approval::STAGES {
+            standing.insert(
+                stage.to_string(),
+                approval::standing_json(&approval::standing(&paths, &slug, stage)?),
+            );
+        }
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&serde_json::json!({
+                "schema": "keel.approvals/1",
+                "spec": slug,
+                "history": history,
+                "standing": standing,
+            }))?
+        );
+        return Ok(0);
+    }
+
     if history.is_empty() {
         println!("  no approvals recorded for `{slug}`");
     }

@@ -1,4 +1,4 @@
-<!-- keel:generated schema=keel.projection/1 adapter=agents store=8c7f9a4de834 body=ce575f242b23 -->
+<!-- keel:generated schema=keel.projection/1 adapter=agents store=17f91d718397 body=e11abbbd79ac -->
 <!-- Source of truth: .keel/store/ — regenerate with `keel store render`. Edits here are drift and will be reported by `keel store check`. -->
 
 # Project context
@@ -49,34 +49,36 @@ _Versions that cannot move, platforms that must keep working, dependencies that 
 
 ## Repository map
 
-**86 files · 1503 symbols · 23332 lines** — rust 86
+**100 files · 1745 symbols · 27092 lines** — javascript 1, rust 99
 
 Files are ordered by import-graph centrality, not alphabetically. Signatures only; read a body with the file path and line number. Per-directory detail lives in `.keel/store/map/<dir>/CODEMAP.md`.
 
 ### Layout
 
-- `src/` — 8 files, 2743 lines · paths.rs, config.rs, hashing.rs
-- `src/cmd/` — 22 files, 3971 lines · mod.rs, run.rs, learn.rs
-- `src/driver/` — 4 files, 1071 lines · mod.rs, contract.rs, conform.rs
+- `assets/ui/` — 1 file, 329 lines · app.js
+- `src/` — 12 files, 3804 lines · paths.rs, config.rs, run.rs
+- `src/cmd/` — 24 files, 4326 lines · mod.rs, next.rs, run.rs
+- `src/driver/` — 4 files, 1202 lines · mod.rs, contract.rs, conform.rs
 - `src/evidence/` — 2 files, 423 lines · mod.rs, manifest.rs
 - `src/failure/` — 2 files, 767 lines · mod.rs, taxonomy.rs
-- `src/gate/` — 10 files, 3137 lines · mod.rs, ratchet.rs, g1.rs
+- `src/gate/` — 10 files, 3213 lines · mod.rs, ratchet.rs, g1.rs
 - `src/lesson/` — 2 files, 826 lines · mod.rs, usage.rs
-- `src/map/` — 9 files, 2566 lines · lang.rs, extract.rs, db.rs
+- `src/map/` — 9 files, 2566 lines · lang.rs, extract.rs, blast.rs
 - `src/mcp/` — 1 file, 271 lines · mod.rs
-- `src/projection/` — 3 files, 715 lines · drift.rs, mod.rs, sections.rs
+- `src/projection/` — 3 files, 726 lines · drift.rs, mod.rs, sections.rs
+- `src/report/` — 1 file, 154 lines · mod.rs
 - `src/retrieve/` — 3 files, 763 lines · mod.rs, fallback.rs, budget.rs
 - `src/review/` — 1 file, 545 lines · mod.rs
+- `src/serve/` — 1 file, 443 lines · mod.rs
 - `src/spec/` — 4 files, 1275 lines · mod.rs, oracle.rs, ears.rs
 - `src/store/` — 2 files, 314 lines · mod.rs, frontmatter.rs
-- `src/trajectory/` — 2 files, 462 lines · event.rs, mod.rs
-- `tests/` — 11 files, 3483 lines · support.rs, cli.rs, phase1.rs
+- `src/trajectory/` — 2 files, 598 lines · event.rs, mod.rs
+- `tests/` — 16 files, 4547 lines · support.rs, cli.rs, phase1.rs
 
 ### Key files
 
-**`src/paths.rs`** · 82 lines · imported by 54
+**`src/paths.rs`** · 82 lines · imported by 59
 - `pub struct Paths`  <sub>L10</sub>
-- `impl Paths`  <sub>L14</sub>
 - `pub fn discover() -> Result<Self>` — Find the repo root: nearest ancestor holding `.keel/`, else `.git/`, else cwd.  <sub>L16</sub>
 - `pub fn require_init() -> Result<Self>` — Like `discover`, but fails if keel has not been initialised here.  <sub>L42</sub>
 - `pub fn rel<'a>(&self, p: &'a Path) -> &'a Path` — Present `p` relative to the repo root when possible, for display.  <sub>L68</sub>
@@ -86,80 +88,78 @@ Files are ordered by import-graph centrality, not alphabetically. Signatures onl
 - `pub struct SharedStore`  <sub>L67</sub>
 - `pub struct Reviewer`  <sub>L83</sub>
 - `pub struct SpecConfig`  <sub>L212</sub>
-- `pub struct PlanConfig`  <sub>L235</sub>
 
 **`src/map/lang.rs`** · 355 lines · imported by 6
 - `pub struct Compiled` — The three queries keel runs over every file.  <sub>L11</sub>
 - `pub enum Lang`  <sub>L18</sub>
-- `pub fn symbol_kind(&self, node_kind: &str) -> Option<&'static str>` — Node kind → the short symbol kind shown in maps. `None` means "indexed  <sub>L120</sub>
 - `pub fn intern_kind(kind: &str) -> &'static str` — Symbol kinds are a closed set, so a round trip through the database should  <sub>L315</sub>
 - `pub fn unavailable() -> Vec<(&'static str, String)>` — files still get indexed, they just stop yielding symbols. Naming the casualty  <sub>L329</sub>
 
-**`src/gate/mod.rs`** · 355 lines · imported by 14
+**`src/gate/mod.rs`** · 375 lines · imported by 17
 - `pub enum Verdict`  <sub>L33</sub>
-- `pub struct Check`  <sub>L60</sub>
-- `pub struct GateResult`  <sub>L112</sub>
-- `pub fn roll_up(checks: &[Check]) -> Verdict` — misconfiguration, and reporting it as success is precisely how a pipeline  <sub>L164</sub>
-- `pub fn run_id() -> String` — `2026-08-21-7c1` — sortable by date, unique enough within a day.  <sub>L178</sub>
+- `pub struct Check`  <sub>L74</sub>
+- `pub struct GateResult`  <sub>L133</sub>
+- `pub fn roll_up(checks: &[Check]) -> Verdict` — misconfiguration, and reporting it as success is precisely how a pipeline  <sub>L184</sub>
 
 **`src/spec/mod.rs`** · 353 lines · imported by 15
 - `pub struct SpecFront`  <sub>L20</sub>
 - `pub struct SpecBudget`  <sub>L42</sub>
 - `pub struct Criterion`  <sub>L52</sub>
 - `pub struct Spec`  <sub>L65</sub>
-- `pub fn list(paths: &Paths) -> Result<Vec<String>>` — Every spec slug present on disk, sorted.  <sub>L113</sub>
+
+**`src/trajectory/event.rs`** · 228 lines · imported by 2
+- `pub enum Payload`  <sub>L12</sub>
+- `pub struct Event`  <sub>L109</sub>
+- `pub fn summary(&self) -> String` — A compact human rendering for `keel replay`.  <sub>L126</sub>
+- `pub fn estimate_tokens(text: &str) -> usize` — enough for the only two questions the trajectory needs to answer: is the  <sub>L157</sub>
 
 **`src/map/extract.rs`** · 468 lines · imported by 4
 - `pub struct Symbol`  <sub>L12</sub>
 - `pub struct Reference`  <sub>L24</sub>
 - `pub struct FileFacts`  <sub>L31</sub>
 - `pub struct Extractor` — Reusable per-thread parse state. Compiling a query is expensive relative to  <sub>L46</sub>
-- `pub fn unparsed(rel: &str, lang: Lang, source_len: u64, sha: String, lines: usize) -> FileFacts` — Metadata-only entry for a file that was never parsed (too large, or an  <sub>L197</sub>
 
-**`src/trajectory/event.rs`** · 228 lines · imported by 2
-- `pub enum Payload`  <sub>L12</sub>
-- `pub fn tokens(&self) -> usize` — Tokens this event put in front of a model, if any.  <sub>L99</sub>
-- `pub struct Event`  <sub>L109</sub>
-- `pub fn summary(&self) -> String` — A compact human rendering for `keel replay`.  <sub>L126</sub>
-- `pub fn estimate_tokens(text: &str) -> usize` — enough for the only two questions the trajectory needs to answer: is the  <sub>L157</sub>
+**`src/trajectory/mod.rs`** · 370 lines · imported by 8
+- `pub struct Trajectory`  <sub>L17</sub>
+- `pub enum Anomaly`  <sub>L74</sub>
+- `pub struct Scan` — Every event a trajectory yields, plus whatever could not be read.  <sub>L103</sub>
+- `pub fn scan(path: &Path) -> Result<Scan>` — that it did, so a caller can always say what it could not see. Callers that  <sub>L115</sub>
 
-**`src/trajectory/mod.rs`** · 234 lines · imported by 7
-- `pub mod event;` — the sequence invariant.  <sub>L8</sub>
-- `pub struct Trajectory`  <sub>L16</sub>
-- `pub fn read(path: &Path) -> Result<Vec<Event>>` — silently skipped record: a stream you cannot fully parse cannot support the  <sub>L75</sub>
-- `pub fn token_total(events: &[Event]) -> usize` — Total tokens this run put in front of a model.  <sub>L109</sub>
-- `pub fn gate_verdicts(events: &[Event]) -> Vec<(String, String)>` — Every gate verdict in the stream, in order.  <sub>L114</sub>
+**`src/run.rs`** · 272 lines · imported by 12
+- `pub struct RunMeta`  <sub>L17</sub>
+- `pub struct Run`  <sub>L37</sub>
+- `pub fn protected(paths: &Paths) -> Result<std::collections::BTreeSet<String>>` — answers "why does this rule exist?". Pruning a cited run turns the answer  <sub>L184</sub>
+- `pub struct PruneCandidate`  <sub>L215</sub>
 
 **`src/hashing.rs`** · 49 lines · imported by 6
 - `pub fn sha256_hex(bytes: &[u8]) -> String`  <sub>L13</sub>
 - `pub fn short(hex: &str) -> &str` — The 12-char prefix used in projection headers. Full hashes are unreadable in  <sub>L21</sub>
 - `pub struct SetHasher` — Hash an ordered set of (path, content) pairs. Path is included so that a  <sub>L27</sub>
-- `pub fn new() -> Self`  <sub>L32</sub>
 - `pub fn add(&mut self, path: &str, content: &[u8])`  <sub>L34</sub>
 
 **`src/store/mod.rs`** · 177 lines · imported by 12
 - `pub struct StoreDoc`  <sub>L16</sub>
 - `pub struct Shared`  <sub>L65</sub>
-- `pub fn shared(paths: &Paths, cfg: &crate::config::Config) -> Vec<Shared>` — dropped: silently skipping it is exactly how a platform rule stops applying  <sub>L83</sub>
 - `pub fn projection_inputs(paths: &Paths) -> Result<Vec<PathBuf>>` — Every file that feeds a projection, in a stable order.  <sub>L100</sub>
 - `pub fn store_hash_with_shared(paths: &Paths, cfg: &crate::config::Config) -> Result<String>` — Shared stores are hashed too: a platform convention changing must mark this  <sub>L128</sub>
 
-**`src/run.rs`** · 272 lines · imported by 11
-- `pub struct RunMeta`  <sub>L17</sub>
-- `pub struct Run`  <sub>L37</sub>
-- `pub fn protected(paths: &Paths) -> Result<std::collections::BTreeSet<String>>` — answers "why does this rule exist?". Pruning a cited run turns the answer  <sub>L184</sub>
-- `pub struct PruneCandidate`  <sub>L215</sub>
-- `pub fn prune_plan(paths: &Paths, keep: usize) -> Result<Vec<PruneCandidate>>` — Decide what could be pruned, keeping the most recent `keep` runs and  <sub>L224</sub>
+**`tests/support.rs`** · 263 lines · imported by 13
+- `pub fn unique_dir(name: &str) -> PathBuf` — Unique per call, not merely per nanosecond: the clock is coarse enough on  <sub>L11</sub>
+- `pub struct Repo`  <sub>L21</sub>
+- `pub fn install_driver(&self, id: &str, script: &str)` — Install a driver script that prints `result` on stdout.  <sub>L216</sub>
+- `pub fn noop_driver() -> String` — A driver script that reports success without touching anything.  <sub>L259</sub>
+
+**`src/plan.rs`** · 604 lines · imported by 9
+- `pub struct PlanFront`  <sub>L23</sub>
+- `pub struct BlastDeclaration`  <sub>L42</sub>
+- `pub struct Task`  <sub>L96</sub>
+- `pub fn render_tasks(spec: &Spec) -> Result<String>` — Render a `tasks.md` scaffold, one task stub per criterion group.  <sub>L383</sub>
 
 **`src/store/frontmatter.rs`** · 137 lines · imported by 6
 - `pub struct FrontMatter`  <sub>L10</sub>
 - `pub fn split_typed<T: serde::de::DeserializeOwned>(raw: &str) -> Result<(T, String)>` — Specs and plans carry structured machine fields that the loose `FrontMatter`  <sub>L36</sub>
-- `pub fn split(raw: &str) -> Result<(FrontMatter, String)>` — Split a document into front matter and body. A file with no front matter is  <sub>L52</sub>
-- `pub fn join_typed<T: Serialize>(front: &T, body: &str) -> Result<String>` — Re-join typed front matter and body into a writable document.  <sub>L84</sub>
-- `pub fn join(front: &FrontMatter, body: &str) -> Result<String>` — Re-join front matter and body into a writable document.  <sub>L90</sub>
 
-
-_… 261 more lines in `.keel/store/steering/structure.md`._
+_… 251 more lines in `.keel/store/steering/structure.md`._
 
 ## What this is
 

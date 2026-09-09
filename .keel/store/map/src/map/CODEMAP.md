@@ -2,7 +2,7 @@
 id: MAP-src-map
 scope: dir:src/map
 owner: agent
-verified_at: 2026-08-26
+verified_at: 2026-09-09
 generated: true
 ---
 
@@ -44,20 +44,6 @@ generated: true
 - `fn python_docstring(node: &Node, source: &[u8]) -> Option<String>`  <sub>L277</sub>
 - `fn strip_comment_markers(line: &str) -> String`  <sub>L287</sub>
 
-**`src/map/db.rs`** · 265 lines · imported by 7
-- `pub const SCHEMA_VERSION: &str = "keel.index/2";`  <sub>L12</sub>
-- `const SCHEMA: &str = r#"`  <sub>L14</sub>
-- `pub struct Index`  <sub>L70</sub>
-- `impl Index`  <sub>L74</sub>
-- `pub fn create(path: &Path) -> Result<(Self, std::path::PathBuf)>` — renames, so a crashed `keel map` never leaves a half-written index that  <sub>L78</sub>
-- `pub fn open(path: &Path) -> Result<Self>`  <sub>L92</sub>
-- `pub fn write_all(`  <sub>L97</sub>
-- `pub fn meta(&self, key: &str) -> Result<Option<String>>`  <sub>L157</sub>
-- `pub fn shas(&self) -> Result<std::collections::HashMap<String, String>>` — Every indexed file's path and content hash, for skipping unchanged  <sub>L168</sub>
-- `pub fn facts_for(&self, path: &str) -> Result<Option<crate::map::extract::FileFacts>>` — Reconstruct one file's facts from the index, so an unchanged file need  <sub>L181</sub>
-- `pub fn counts(&self) -> Result<(usize, usize)>`  <sub>L247</sub>
-- `pub fn promote(tmp: &Path, final_path: &Path) -> Result<()>` — Atomically replace the live index with a freshly built one.  <sub>L255</sub>
-
 **`src/map/blast.rs`** · 268 lines · imported by 6
 - `pub struct Impact`  <sub>L19</sub>
 - `pub struct BlastRadius`  <sub>L28</sub>
@@ -73,6 +59,20 @@ generated: true
 - `fn two_hops_reach_the_transitive_importer()`  <sub>L219</sub>
 - `fn globs_expand_across_the_tree()`  <sub>L231</sub>
 - `fn impact_is_ordered_nearest_first_and_deterministic()`  <sub>L246</sub>
+
+**`src/map/db.rs`** · 265 lines · imported by 7
+- `pub const SCHEMA_VERSION: &str = "keel.index/2";`  <sub>L12</sub>
+- `const SCHEMA: &str = r#"`  <sub>L14</sub>
+- `pub struct Index`  <sub>L70</sub>
+- `impl Index`  <sub>L74</sub>
+- `pub fn create(path: &Path) -> Result<(Self, std::path::PathBuf)>` — renames, so a crashed `keel map` never leaves a half-written index that  <sub>L78</sub>
+- `pub fn open(path: &Path) -> Result<Self>`  <sub>L92</sub>
+- `pub fn write_all(`  <sub>L97</sub>
+- `pub fn meta(&self, key: &str) -> Result<Option<String>>`  <sub>L157</sub>
+- `pub fn shas(&self) -> Result<std::collections::HashMap<String, String>>` — Every indexed file's path and content hash, for skipping unchanged  <sub>L168</sub>
+- `pub fn facts_for(&self, path: &str) -> Result<Option<crate::map::extract::FileFacts>>` — Reconstruct one file's facts from the index, so an unchanged file need  <sub>L181</sub>
+- `pub fn counts(&self) -> Result<(usize, usize)>`  <sub>L247</sub>
+- `pub fn promote(tmp: &Path, final_path: &Path) -> Result<()>` — Atomically replace the live index with a freshly built one.  <sub>L255</sub>
 
 **`src/map/mod.rs`** · 203 lines · imported by 2
 - `pub mod blast;` — files (local detail, pulled only when work touches that directory).  <sub>L7</sub>

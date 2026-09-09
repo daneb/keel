@@ -88,6 +88,17 @@ impl State {
             State::Stale => "stale",
         }
     }
+
+    /// The same word, coloured when stdout is a terminal. `DRIFT` is red
+    /// because it refuses rather than re-renders; `stale` is only a reminder.
+    pub fn glyph_styled(&self) -> String {
+        let g = self.glyph();
+        match self {
+            State::Ok => crate::ui::green(g),
+            State::Drift => crate::ui::red(g),
+            State::Missing | State::Foreign | State::Stale => crate::ui::yellow(g),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize)]
