@@ -295,3 +295,30 @@ fn runs_are_listed_newest_last_and_latest_resolves() {
     let latest = r.ok(&["runs", "--latest"]).trim().to_string();
     assert!(listing.lines().last().unwrap().contains(&latest), "{listing} / {latest}");
 }
+
+/// Two runs created back-to-back with no delay, in separate processes, must
+/// still be listed oldest-first: `run_id`'s suffix used to be a hash of the
+/// clock and the pid, unrelated to creation order, so two runs landing in the
+/// same wall-clock instant could sort in either order.
+#[test]
+fn same_second_runs_are_still_listed_in_creation_order() {
+    let r = Repo::ready("runs-list-same-second");
+    r.install_driver("noop", &noop_driver());
+
+    let mut created = Vec::new();
+    for _ in 0..5 {
+        r.run(&["run", "demo"]);
+        let latest = r.ok(&["runs", "--latest"]).trim().to_string();
+        created.push(latest);
+    }
+
+    let listing = r.ok(&["runs"]);
+    let listed_ids: Vec<&str> = listing
+        .lines()
+        .map(|l| l.split_whitespace().next().unwrap())
+        .collect();
+    assert_eq!(
+        listed_ids, created,
+        "runs must be listed in the order they were created:\n{listing}"
+    );
+}

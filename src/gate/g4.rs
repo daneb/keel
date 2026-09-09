@@ -36,7 +36,7 @@ pub fn run(
         decay_review(paths, &existing)?,
     ];
     checks.extend(run_plugins(paths, cfg, "G4", Some(&run.meta.spec)));
-    Ok(GateResult::new("G4", Some(run.meta.spec.clone()), checks))
+    Ok(GateResult::new(paths, "G4", Some(run.meta.spec.clone()), checks))
 }
 
 /// Every episode has an attribution. `UNATTRIBUTABLE` counts as classified —

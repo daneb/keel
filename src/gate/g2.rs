@@ -107,7 +107,7 @@ pub fn run(
     checks.extend(lesson_checks(paths, cfg, run)?);
 
     checks.extend(run_plugins(paths, cfg, "G2", Some(&spec.front.slug)));
-    Ok(GateResult::new("G2", Some(spec.front.slug.clone()), checks))
+    Ok(GateResult::new(paths, "G2", Some(spec.front.slug.clone()), checks))
 }
 
 /// build / test / lint. An unconfigured step blocks rather than passes: keel

@@ -142,11 +142,11 @@ pub struct GateResult {
 }
 
 impl GateResult {
-    pub fn new(gate: &str, spec: Option<String>, checks: Vec<Check>) -> Self {
+    pub fn new(paths: &Paths, gate: &str, spec: Option<String>, checks: Vec<Check>) -> Self {
         Self {
             schema: GATE_SCHEMA.to_string(),
             gate: gate.to_string(),
-            run: run_id(),
+            run: run_id(paths),
             spec,
             verdict: roll_up(&checks),
             generated_at: chrono::Local::now().to_rfc3339(),
@@ -194,14 +194,28 @@ pub fn roll_up(checks: &[Check]) -> Verdict {
     Verdict::Pass
 }
 
-/// `2026-08-21-7c1` — sortable by date, unique enough within a day.
-pub fn run_id() -> String {
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|d| d.subsec_nanos() as u64 ^ d.as_secs())
-        .unwrap_or(0);
-    let salt = now ^ (std::process::id() as u64) << 17;
-    format!("{}-{:03x}", crate::store::today(), salt & 0xfff)
+/// `2026-08-21-7c1` — sortable by date, and the suffix is a per-day counter
+/// derived from the highest existing suffix for today, so lexicographic order
+/// matches creation order within a day (not just a hash that happens to look
+/// sortable).
+pub fn run_id(paths: &Paths) -> String {
+    let today = crate::store::today();
+    let next = next_run_seq(paths, &today);
+    format!("{today}-{next:03x}")
+}
+
+/// One past the highest run-id suffix already on disk for `today`.
+fn next_run_seq(paths: &Paths, today: &str) -> u64 {
+    let prefix = format!("{today}-");
+    std::fs::read_dir(paths.runs())
+        .into_iter()
+        .flatten()
+        .filter_map(|e| e.ok())
+        .filter_map(|e| e.file_name().into_string().ok())
+        .filter_map(|name| name.strip_prefix(prefix.as_str()).map(str::to_string))
+        .filter_map(|suffix| u64::from_str_radix(&suffix, 16).ok())
+        .max()
+        .map_or(0, |m| m + 1)
 }
 
 /// Directory holding gate results for a spec.
@@ -344,9 +358,15 @@ mod tests {
         assert_eq!(Verdict::Blocked.exit_code(), 3);
     }
 
+    fn scratch_paths(name: &str) -> Paths {
+        let repo = std::env::temp_dir().join(format!("keel-gate-test-{name}-{}", std::process::id()));
+        Paths { repo }
+    }
+
     #[test]
     fn gate_result_round_trips_through_json() {
-        let r = GateResult::new("G0", Some("rate-limit".into()), vec![
+        let paths = scratch_paths("round-trip");
+        let r = GateResult::new(&paths, "G0", Some("rate-limit".into()), vec![
             Check::fail("oracle-presence", "every criterion has an oracle", "AC-2 has none"),
         ]);
         let json = serde_json::to_string(&r).unwrap();
@@ -368,8 +388,29 @@ mod tests {
 
     #[test]
     fn run_ids_are_dated_and_distinct() {
-        let a = run_id();
+        let paths = scratch_paths("dated");
+        let a = run_id(&paths);
         assert!(a.starts_with(&crate::store::today()), "{a}");
         assert_eq!(a.len(), crate::store::today().len() + 4);
+    }
+
+    /// Two runs created moments apart within the same day must sort in
+    /// creation order — the bug this replaces was a hash that had no relation
+    /// to when a run was actually created.
+    #[test]
+    fn same_day_run_ids_sort_in_creation_order() {
+        let paths = scratch_paths("same-day-order");
+        std::fs::create_dir_all(paths.runs()).unwrap();
+
+        let mut ids = Vec::new();
+        for _ in 0..20 {
+            let id = run_id(&paths);
+            std::fs::create_dir_all(paths.runs().join(&id)).unwrap();
+            ids.push(id);
+        }
+
+        let mut sorted = ids.clone();
+        sorted.sort();
+        assert_eq!(ids, sorted, "run ids must sort lexicographically in creation order");
     }
 }

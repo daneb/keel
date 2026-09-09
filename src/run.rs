@@ -49,7 +49,7 @@ impl Run {
         store_hash: &str,
         base: Option<String>,
     ) -> Result<Self> {
-        let id = crate::gate::run_id();
+        let id = crate::gate::run_id(paths);
         let dir = paths.runs().join(&id);
         if dir.exists() {
             bail!("run {id} already exists");
@@ -153,8 +153,9 @@ pub fn list(paths: &Paths) -> Result<Vec<String>> {
         .filter(|e| e.path().join("run.json").is_file())
         .filter_map(|e| e.file_name().to_str().map(|s| s.to_string()))
         .collect();
-    // Run ids are `YYYY-MM-DD-xxx`, so lexicographic order is chronological
-    // within a day and correct across days.
+    // Run ids are `YYYY-MM-DD-xxx`, where `xxx` is a per-day counter assigned
+    // in creation order (see `gate::run_id`), so lexicographic order is
+    // chronological within a day and correct across days.
     out.sort();
     Ok(out)
 }

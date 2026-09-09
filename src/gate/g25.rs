@@ -64,7 +64,7 @@ pub fn run(
     checks.extend(reviewer_findings(paths, cfg, spec, run, &base)?);
     checks.extend(run_plugins(paths, cfg, "G2.5", Some(&spec.front.slug)));
 
-    Ok(GateResult::new("G2.5", Some(spec.front.slug.clone()), checks))
+    Ok(GateResult::new(paths, "G2.5", Some(spec.front.slug.clone()), checks))
 }
 
 /// The configured adversarial reviewer, if there is one.

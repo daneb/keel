@@ -51,7 +51,7 @@ pub fn run(
         blast_radius_current(paths, cfg, spec, plan)?,
     ];
     checks.extend(run_plugins(paths, cfg, "G1", Some(&spec.front.slug)));
-    Ok(GateResult::new("G1", Some(spec.front.slug.clone()), checks))
+    Ok(GateResult::new(paths, "G1", Some(spec.front.slug.clone()), checks))
 }
 
 fn schema(plan: &Plan, tasks: &Tasks) -> Check {
