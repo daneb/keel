@@ -7,7 +7,7 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
-## [Unreleased]
+## [0.6.0] - 2026-09-09
 
 ### Added
 
