@@ -7,6 +7,31 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.6.4] - 2026-09-10
+
+### Fixed
+
+- **The pipeline timeline is legible under a real, pre-`lock-completed-specs`
+  stale approval.** Running 0.6.3's timeline against a real project
+  surfaced a spec whose merge approval was recorded (mistakenly, against the
+  wrong spec, before SPEC-0005 existed) as `current`, while a later G1 run
+  had genuinely regressed the spec back before `Complete`. The timeline
+  reported the stale approval as if nothing were wrong. A new `stale()`
+  check flags the `approve merge` and `done` nodes and explains the
+  discrepancy in the detail panel when either is opened.
+- **`plan_gate` was the only stage named after its gate.** Every other stage
+  used plain English (`spec`, `plan`, `approve plan`); `plan_gate` was
+  labelled bare `G1`, with no equivalent for `spec`'s own gate. Both
+  gate-backed stages now name their gate: `spec (G0)` and `plan (G1)`.
+- **The current-stage node and an open detail node were indistinguishable.**
+  `.here` and `[aria-expanded="true"]` shared one brass outline, so nothing
+  told them apart when they landed on two different nodes at once — routine,
+  since opening a node to inspect it doesn't move the pipeline. `.here` now
+  fills brass; an open node now outlines in ink instead.
+- **The spine read as an afterthought next to a long Checks panel.** Node
+  padding and font-size are larger, and pending-node text/borders move off
+  flat `--muted` onto an ink-mixed token for contrast.
+
 ## [0.6.3] - 2026-09-10
 
 ### Added
