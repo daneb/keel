@@ -7,6 +7,39 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.6.2] - 2026-09-10
+
+### Fixed
+
+- **`keel serve` no longer dies from SIGPIPE on its own startup banner.**
+  `cmd::serve::run` printed two startup lines before `serve()` re-armed
+  SIGPIPE-ignore, which `main` had set back to the default (fatal)
+  disposition. A caller that read only the first line and closed its end
+  early — a test harness that only wants the bound URL, a `| head`-style
+  consumer — could win a race against the second `println!` and kill the
+  whole server before it served a single request. This was the cause behind
+  `tests/serve.rs` failing intermittently on every CI run since `keel serve`
+  shipped in 0.5.0 (never reproduced locally on macOS; confirmed by
+  reproducing keel's own CI, Linux, in a container). SIGPIPE is now ignored
+  before any output, and the startup banner is written directly rather than
+  through `println!`, so a closed stdout can no longer panic the process
+  either.
+- **Run ids now sort in creation order within a day.** `gate::run_id`'s
+  suffix was a hash of the clock and the pid, not a monotonic counter, so
+  `run::list()`'s "lexicographic order is chronological" claim was false for
+  two runs created the same day — `pipeline::stage()` could report a stale
+  G2 verdict as current. The suffix is now a per-day counter derived from
+  the highest existing run id for today.
+
+### Added
+
+- **A completed spec is locked against further approvals.** `keel approve
+  <slug> --stage <stage>` took the slug on faith, so approving or rejecting
+  an earlier stage against an old, already-merged spec by mistake silently
+  appended a fresh decision to its approval log. `keel approve` now refuses
+  once a spec has reached `Stage::Complete`, naming the slug and why;
+  `--force` remains as a deliberate, noted override.
+
 ## [0.6.1] - 2026-09-09
 
 ### Added
