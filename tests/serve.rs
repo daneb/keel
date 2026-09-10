@@ -593,3 +593,83 @@ fn the_spine_nodes_are_larger_than_before() {
     assert!(node.contains("padding: 7px 14px;"), "node padding was not increased");
     assert!(node.contains("font-size: 12px;"), "node font-size was not increased");
 }
+
+// ---------------------------------------------------------------------------
+// the per-spec summary (`#spec-summary`)
+// ---------------------------------------------------------------------------
+
+#[test]
+fn a_summary_section_sits_between_the_timeline_and_the_tabs() {
+    let r = Repo::bare("summary-position");
+    let s = Server::start(&r);
+    let (_, _, html) = s.get("/");
+    let timeline_at = html.find("id=\"timeline-detail\"").expect("no timeline-detail");
+    let summary_at = html.find("id=\"spec-summary\"").expect("no spec-summary");
+    let tabs_at = html.find("class=\"tabs\"").expect("no tabs");
+    assert!(
+        timeline_at < summary_at && summary_at < tabs_at,
+        "spec-summary is not between timeline-detail and the tabs"
+    );
+}
+
+#[test]
+fn the_summary_totals_tokens_and_events_across_every_run() {
+    let r = Repo::bare("summary-totals");
+    let s = Server::start(&r);
+    let (_, _, js) = s.get("/app.js");
+    assert!(js.contains("function specSummary(spec)"), "no summary aggregator");
+    assert!(
+        js.contains("tokens += r.tokens || 0;") && js.contains("events += r.events || 0;"),
+        "the summary does not sum tokens/events across every run"
+    );
+}
+
+#[test]
+fn the_summary_counts_currently_open_fails_not_every_historical_one() {
+    let r = Repo::bare("summary-fails");
+    let s = Server::start(&r);
+    let (_, _, js) = s.get("/app.js");
+    let summary_fn = js
+        .split("function specSummary(spec)")
+        .nth(1)
+        .expect("specSummary is not defined");
+    assert!(
+        summary_fn.contains("latestRun ? countFails(latestRun.gates) : 0"),
+        "fails are not scoped to the latest run's gates"
+    );
+    assert!(
+        !summary_fn.contains("countFails(r.gates)"),
+        "fails appear to be summed across every run rather than just the latest one"
+    );
+}
+
+#[test]
+fn every_exercised_gate_gets_a_badge_at_its_latest_verdict() {
+    let r = Repo::bare("summary-gate-badges");
+    let s = Server::start(&r);
+    let (_, _, js) = s.get("/app.js");
+    assert!(
+        js.contains("for (const g of spec.gates || []) gates.set(g.gate, g.verdict);"),
+        "the gate map does not start from the spec's own G0/G1"
+    );
+    assert!(
+        js.contains("for (const g of r.gates || []) gates.set(g.gate, g.verdict);"),
+        "the gate map is not overwritten by each run's own gates in order"
+    );
+    assert!(js.contains("gate-badge"), "no gate-badge class is applied");
+    let (_, _, css) = s.get("/app.css");
+    assert!(css.contains(".gate-badge.pass"), "no pass styling for a gate badge");
+    assert!(css.contains(".gate-badge.fail"), "no fail styling for a gate badge");
+}
+
+#[test]
+fn the_summary_does_not_replace_the_checks_and_evidence_tabs() {
+    let r = Repo::bare("summary-tabs-remain");
+    let s = Server::start(&r);
+    let (_, _, html) = s.get("/");
+    assert!(html.contains("id=\"panel-checks\""), "the Checks panel is gone");
+    assert!(html.contains("id=\"panel-evidence\""), "the Evidence panel is gone");
+    let (_, _, js) = s.get("/app.js");
+    assert!(js.contains("renderSpecSummary();"), "render() no longer calls renderSpecSummary");
+    assert!(js.contains("renderChecks()"), "render() no longer renders the Checks tab");
+}

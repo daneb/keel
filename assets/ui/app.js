@@ -284,6 +284,69 @@ function renderSpine() {
   document.getElementById("stage-line").textContent = spec.slug + " · " + stageLabel(spec.stage);
 }
 
+// Aggregates across a spec's whole history: tokens and events sum every run,
+// but fails counts only the *current* picture — `spec.gates` (G0/G1, which
+// the spec directory holds one of, not one per run) plus the latest run's
+// own gates — so a spec that is passing now doesn't read as failing because
+// an earlier attempt once did. `gates` maps each distinct gate id this spec
+// has ever produced a result for to its latest verdict: `spec.gates` first,
+// then every run's `gates` in their existing oldest-first order, so the last
+// write for a given id is the latest one.
+function specSummary(spec) {
+  const runs = spec.runs || [];
+  let tokens = 0;
+  let events = 0;
+  for (const r of runs) {
+    tokens += r.tokens || 0;
+    events += r.events || 0;
+  }
+
+  const gates = new Map();
+  for (const g of spec.gates || []) gates.set(g.gate, g.verdict);
+  for (const r of runs) {
+    for (const g of r.gates || []) gates.set(g.gate, g.verdict);
+  }
+
+  const countFails = (gs) =>
+    (gs || []).reduce(
+      (n, g) => n + (g.checks || []).filter((c) => (c.verdict || "").toLowerCase() !== "pass").length,
+      0
+    );
+  const latestRun = runs.length ? runs[runs.length - 1] : null;
+  const fails = countFails(spec.gates) + (latestRun ? countFails(latestRun.gates) : 0);
+
+  return { runsTotal: runs.length, tokens, events, fails, gates };
+}
+
+function renderSpecSummary() {
+  const root = document.getElementById("spec-summary");
+  clear(root);
+  const spec = current();
+  if (!spec) return;
+
+  const s = specSummary(spec);
+  const sec = el("div", "panel-section");
+  sec.appendChild(el("h2", null, "Summary"));
+
+  const tiles = el("div", "tiles");
+  tiles.appendChild(tile(s.runsTotal, "runs"));
+  tiles.appendChild(tile(compactNumber(s.tokens), "tokens"));
+  tiles.appendChild(tile(compactNumber(s.events), "events"));
+  tiles.appendChild(tile(s.fails, "open fails", null, s.fails > 0));
+  sec.appendChild(tiles);
+
+  if (s.gates.size) {
+    const row = el("div", "gate-badges");
+    for (const [gate, verdict] of s.gates) {
+      const b = el("span", "gate-badge " + (verdict || "").toLowerCase(), gate);
+      row.appendChild(b);
+    }
+    sec.appendChild(row);
+  }
+
+  root.appendChild(sec);
+}
+
 function renderCheck(check, gate) {
   const v = (check.verdict || "").toLowerCase();
   const row = el("div", "check " + v);
@@ -897,6 +960,7 @@ function render() {
   overviewSection.hidden = true;
   detailSection.hidden = false;
   renderSpine();
+  renderSpecSummary();
   for (const t of document.querySelectorAll(".tab")) {
     t.setAttribute("aria-selected", String(t.dataset.tab === state.tab));
   }

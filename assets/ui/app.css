@@ -260,6 +260,25 @@ main {
   }
 }
 
+.gate-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.gate-badge {
+  padding: 3px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--card);
+}
+
+.gate-badge.pass { color: var(--pass); border-color: color-mix(in srgb, var(--pass) 45%, var(--rule)); }
+.gate-badge.fail { color: var(--fail); border-color: color-mix(in srgb, var(--fail) 55%, var(--rule)); }
+.gate-badge.blocked {
+  color: var(--blocked);
+  border-color: color-mix(in srgb, var(--blocked) 55%, var(--rule));
+}
+
 .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--rule); margin-bottom: 12px; }
 
 .tab {

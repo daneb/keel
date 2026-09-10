@@ -1,0 +1,18 @@
+     2      0  .keel/runs/2026-09-10-005/evidence/build.txt
+     2      0  .keel/runs/2026-09-10-005/evidence/lint.txt
+    58      0  .keel/runs/2026-09-10-005/evidence/oracles.json
+    95      0  .keel/runs/2026-09-10-005/evidence/test.txt
+     9      0  .keel/runs/2026-09-10-005/run.json
+    15      0  .keel/runs/2026-09-10-005/trajectory.jsonl
+     2      0  .keel/specs/spec-summary/approvals.jsonl
+    90      0  .keel/specs/spec-summary/gates/G0.json
+    95      0  .keel/specs/spec-summary/gates/G1.json
+    61      0  .keel/specs/spec-summary/plan.md
+    86      0  .keel/specs/spec-summary/spec.md
+    56      0  .keel/specs/spec-summary/tasks.md
+    19      0  assets/ui/app.css
+    64      0  assets/ui/app.js
+     1      0  assets/ui/index.html
+    80      0  tests/serve.rs
+
+16 file(s), +735 -0 (735 lines of churn) against f0622e53ecfec6107d42b33dfe0d90c60010bb13
