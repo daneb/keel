@@ -461,6 +461,40 @@ table.data tr.clickable:hover td { background: var(--sel); }
 .badge.stale { color: var(--blocked); border-color: var(--blocked); }
 .badge.enforced { color: var(--pass); border-color: var(--pass); }
 
+/* info overlays: a small `?` button next to a heading/label/badge, or (where
+   there's no room for one, e.g. the ranked-bar label column) a dotted
+   underline marking the element itself as the hover/focus target. Both feed
+   the one #tooltip below. */
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  margin-left: 5px;
+  border: 1px solid var(--muted);
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+  font: 600 9px/1 ui-sans-serif, system-ui, sans-serif;
+  text-transform: none;
+  letter-spacing: normal;
+  padding: 0;
+  cursor: help;
+  vertical-align: middle;
+}
+.info-icon:hover, .info-icon:focus-visible {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.has-tip {
+  text-decoration: underline dotted color-mix(in srgb, var(--muted) 70%, transparent);
+  text-underline-offset: 2px;
+  cursor: help;
+}
+.has-tip:hover, .has-tip:focus-visible { color: var(--ink); }
+
 /* hover tooltip */
 #tooltip {
   position: fixed;
@@ -471,7 +505,10 @@ table.data tr.clickable:hover td { background: var(--sel); }
   padding: 5px 8px;
   border-radius: 4px;
   z-index: 20;
-  white-space: nowrap;
+  /* short chart tooltips stay on one line; glossary text wraps instead of
+     running off-screen — `max-width` makes both work off one rule. */
+  max-width: min(280px, 80vw);
+  white-space: pre-line;
   transform: translate(-50%, -100%);
   margin-top: -8px;
 }

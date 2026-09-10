@@ -542,13 +542,120 @@ function hideTip() {
   document.getElementById("tooltip").hidden = true;
 }
 
+// --- glossary: info overlays ------------------------------------------------
+//
+// Definitions for terms an operator meets on this page but that are only
+// documented in Rust doc comments (src/failure/taxonomy.rs, src/report/
+// insights.rs) or PLAN.md. One source of truth here, reused by every `?`
+// button below rather than re-explained inline at each call site.
+
+const GLOSSARY = {
+  "specs complete": "Specs whose merge approval is current and the pipeline has reached `complete`.",
+  "run pass rate": "Share of runs whose G2 gate passed, across every spec.",
+  "tokens total": "Tokens spent across every run this store has recorded.",
+  "tokens this week": "Tokens spent by runs started in the last 7 days.",
+  "human decisions": "Approvals and rejections a person has recorded (spec, plan, merge). Highlighted when a run is currently waiting on one.",
+  "lessons in force": "Promoted lessons still inside their decay window — see the Lessons table below.",
+  "gate(s) never fail":
+    "Checks that have run at least 20 times and never once failed or blocked — \"theatre\": either the check is trivially satisfied or it is not wired to anything that can actually break. Flagged per-check in the table below as \"theatre?\".",
+  "Trend, by week": "Run outcomes and token spend, bucketed by the week a run started.",
+  "Failure attribution":
+    "Every non-pass check, classified by whose failure it was — see the definitions on AGENTIC, PROCESS, HUMAN and UNATTRIBUTABLE below. Attribution comes first: only AGENTIC failures ever become lessons, so this chart is what keeps the taxonomy honest.",
+  "harness-fixable":
+    "Of AGENTIC failures, the share whose class (SCOPE-CREEP, CONV-VIOLATION, SPEC-AMBIG, SPEC-MISSING, LOC-WRONG, CTX-STALE, TEST-INVALID) is something a gate could plausibly catch — as opposed to EDIT-COMPILE/EDIT-RUNTIME/CTX-DRIFT, which mostly measure the model itself.",
+  "failure classes": "The locus of each AGENTIC failure — which part of the pipeline it traces back to. Hover a bar for its definition.",
+  "Checks, worst pass rate first": "Every check any gate has run, ranked by how often it fails or blocks. A check with a 100% pass rate over many runs is worth a look — see \"theatre?\" below.",
+  "theatre?": "This check has run at least 20 times and never failed or blocked. It may be redundant, or not actually wired to catch the thing it claims to.",
+  Specs: "Every spec this store knows about, with its current stage and running totals.",
+  "cycle time": "Days from the spec's first run to its merge approval.",
+  Lessons: "Lessons promoted from AGENTIC failures — the only attribution that can produce one. Each fires again if the same failure class recurs.",
+  enforced: "This lesson has an oracle attached (a check that can catch a repeat) rather than being advisory-only text a reviewer has to remember.",
+  advisory: "This lesson has no oracle — it relies on a reviewer remembering it, rather than a check catching a repeat.",
+  "past decay": "This lesson has gone idle longer than its decay window — it has not fired recently enough to justify still gating on it. Consider retiring or re-verifying it.",
+
+  AGENTIC: "An observable technical failure caused by the agent's own output.",
+  PROCESS: "Workflow or environment: flaky infra, a missing tool, a run superseded by a later one.",
+  HUMAN: "A person changed their mind, redirected, or renegotiated scope — not a defect.",
+  UNATTRIBUTABLE: "No observable rationale for the failure. Counted for honesty, but never promoted into a lesson.",
+
+  "SPEC-AMBIG": "The spec was ambiguous — caught by G0's ambiguity check, or a late \"what did you mean\".",
+  "SPEC-MISSING": "An acceptance criterion was missing and had to be added mid-implementation.",
+  "LOC-WRONG": "The agent edited the wrong file, or a symbol outside the declared blast radius.",
+  "CTX-STALE": "The agent acted on a store or map entry that was older than the code it described.",
+  "CTX-DRIFT": "The agent contradicted a fact it had already established earlier in the same run.",
+  "EDIT-COMPILE": "The change didn't build.",
+  "EDIT-RUNTIME": "A test failed, an assertion failed, or the change threw at runtime.",
+  "TEST-INVALID": "Tests passed, but only because they mock away the behaviour under test.",
+  "SCOPE-CREEP": "The diff exceeded the blast radius or budget the spec declared.",
+  "CONV-VIOLATION": "A lint or house-rule breach: naming, layering, or another local convention.",
+  OTHER: "Every class or category past the top ranked ones, folded together so the chart stays legible.",
+};
+
+/// A small `?` button that shows a glossary definition on hover/focus and
+/// toggles a pinned tooltip on click/tap, for operators without a mouse.
+/// `key` looks up `GLOSSARY`; falls back to `label` when the two differ (e.g.
+/// a ranked-bar row keyed by its own code).
+function infoIcon(key) {
+  const text = GLOSSARY[key];
+  if (!text) return null;
+  const btn = el("button", "info-icon", "?");
+  btn.type = "button";
+  btn.setAttribute("aria-label", key + ": " + text);
+  let pinned = false;
+  btn.addEventListener("mouseenter", (e) => showTip(e, text));
+  btn.addEventListener("mousemove", (e) => {
+    if (!pinned) showTip(e, text);
+  });
+  btn.addEventListener("mouseleave", () => {
+    if (!pinned) hideTip();
+  });
+  btn.addEventListener("focus", (e) => showTip(e, text));
+  btn.addEventListener("blur", () => {
+    pinned = false;
+    hideTip();
+  });
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    pinned = !pinned;
+    if (pinned) showTip(e, text);
+    else hideTip();
+  });
+  return btn;
+}
+
+/// A heading or label plus its `?` info icon, when the glossary has an
+/// entry for it — otherwise just the plain text node, unchanged.
+function withInfo(tag, cls, text, glossaryKey) {
+  const node = el(tag, cls, text);
+  const icon = infoIcon(glossaryKey || text);
+  if (icon) node.appendChild(icon);
+  return node;
+}
+
+/// Like `infoIcon`, but for elements too narrow to fit a separate `?` button
+/// (the ranked-bar label column) — the element itself becomes the hover/
+/// focus target, marked with a dotted underline for discoverability, rather
+/// than growing to fit an appended icon.
+function tipify(node, glossaryKey) {
+  const text = GLOSSARY[glossaryKey];
+  if (!text) return node;
+  node.classList.add("has-tip");
+  node.tabIndex = 0;
+  node.addEventListener("mouseenter", (e) => showTip(e, text));
+  node.addEventListener("mousemove", (e) => showTip(e, text));
+  node.addEventListener("mouseleave", hideTip);
+  node.addEventListener("focus", (e) => showTip(e, text));
+  node.addEventListener("blur", hideTip);
+  return node;
+}
+
 function tile(value, label, ofTotal, warn) {
   const t = el("div", "tile" + (warn ? " warn" : ""));
   const v = el("div", "v");
   v.appendChild(document.createTextNode(value));
   if (ofTotal) v.appendChild(el("span", "of", " / " + ofTotal));
   t.appendChild(v);
-  t.appendChild(el("div", "l", label));
+  t.appendChild(withInfo("div", "l", label));
   return t;
 }
 
@@ -660,7 +767,7 @@ function legendRow(entries) {
 
 function trendSection(i) {
   const sec = el("div", "panel-section");
-  sec.appendChild(el("h2", null, "Trend, by week"));
+  sec.appendChild(withInfo("h2", null, "Trend, by week"));
   if (!i.trend.length) {
     sec.appendChild(el("div", "empty", "Not enough run history yet for a trend."));
     return sec;
@@ -704,7 +811,7 @@ function rankedBars(entries, colorFor) {
   const max = Math.max(1, ...entries.map(([, n]) => n));
   for (const [label, n] of entries) {
     const row = el("div", "ranked-row");
-    row.appendChild(el("div", "rlabel", label));
+    row.appendChild(tipify(el("div", "rlabel", label), label));
     const track = el("div", "rtrack");
     const fill = document.createElement("div");
     fill.className = "rfill";
@@ -732,7 +839,7 @@ function capRanked(pairs, cap) {
 
 function failureSection(i) {
   const sec = el("div", "panel-section");
-  sec.appendChild(el("h2", null, "Failure attribution"));
+  sec.appendChild(withInfo("h2", null, "Failure attribution"));
   if (!i.attribution.length) {
     sec.appendChild(el("div", "empty", "No failures recorded yet."));
     return sec;
@@ -745,12 +852,12 @@ function failureSection(i) {
   );
   const callout = el("div", "callout");
   callout.appendChild(el("span", "v", Math.round(i.harness_fixable_rate * 100) + "%"));
-  callout.appendChild(el("span", null, "of agentic failures look harness-fixable"));
+  callout.appendChild(withInfo("span", null, "of agentic failures look harness-fixable", "harness-fixable"));
   attrBox.appendChild(callout);
   row.appendChild(attrBox);
 
   const classBox = el("div", "chart-box");
-  classBox.appendChild(el("div", "cap", "failure classes"));
+  classBox.appendChild(withInfo("div", "cap", "failure classes"));
   classBox.appendChild(
     rankedBars(capRanked(i.failure_classes, 8), (label) => CLASS_COLOR[label] || "var(--muted)")
   );
@@ -771,6 +878,8 @@ function sortableTable(rows, cols, rowBuilder, sortKey) {
     if (state.sort && state.sort.table === sortKey && state.sort.col === c.key) {
       th.textContent = c.label + (state.sort.dir === 1 ? " ▲" : " ▼");
     }
+    const icon = infoIcon(c.glossary || c.label);
+    if (icon) th.appendChild(icon);
     th.addEventListener("click", () => {
       const cur = state.sort;
       const dir = cur && cur.table === sortKey && cur.col === c.key ? -cur.dir : -1;
@@ -804,7 +913,7 @@ function sortableTable(rows, cols, rowBuilder, sortKey) {
 
 function checksSection(i) {
   const sec = el("div", "panel-section");
-  sec.appendChild(el("h2", null, "Checks, worst pass rate first"));
+  sec.appendChild(withInfo("h2", null, "Checks, worst pass rate first"));
   if (!i.checks.length) {
     sec.appendChild(el("div", "empty", "No gates have run yet."));
     return sec;
@@ -839,7 +948,7 @@ function checksSection(i) {
     tr.appendChild(el("td", "num", c.runs));
     const flagTd = document.createElement("td");
     if (c.runs >= i.theatre_threshold && c.failed === 0 && c.blocked === 0) {
-      flagTd.appendChild(el("span", "badge theatre", "theatre?"));
+      flagTd.appendChild(withInfo("span", "badge theatre", "theatre?"));
     }
     tr.appendChild(flagTd);
     return tr;
@@ -850,7 +959,7 @@ function checksSection(i) {
 
 function specsSection(i) {
   const sec = el("div", "panel-section");
-  sec.appendChild(el("h2", null, "Specs"));
+  sec.appendChild(withInfo("h2", null, "Specs"));
   if (!i.specs.length) {
     sec.appendChild(el("div", "empty", "No specs yet."));
     return sec;
@@ -886,7 +995,7 @@ function specsSection(i) {
 
 function lessonsSection(i) {
   const sec = el("div", "panel-section");
-  sec.appendChild(el("h2", null, "Lessons"));
+  sec.appendChild(withInfo("h2", null, "Lessons"));
   if (!i.lessons.length) {
     sec.appendChild(el("div", "empty", "No lessons in force yet."));
     return sec;
@@ -906,12 +1015,14 @@ function lessonsSection(i) {
     tr.appendChild(el("td", null, l.class));
     tr.appendChild(el("td", "num", l.occurrences));
     const statusTd = document.createElement("td");
-    statusTd.appendChild(el("span", "badge " + (l.enforced ? "enforced" : ""), l.enforced ? "enforced" : "advisory"));
+    statusTd.appendChild(
+      withInfo("span", "badge " + (l.enforced ? "enforced" : ""), l.enforced ? "enforced" : "advisory")
+    );
     tr.appendChild(statusTd);
     const stale = l.idle_days > l.decay_days;
     const idleTd = document.createElement("td");
     idleTd.appendChild(document.createTextNode(l.idle_days + "d "));
-    if (stale) idleTd.appendChild(el("span", "badge stale", "past decay"));
+    if (stale) idleTd.appendChild(withInfo("span", "badge stale", "past decay"));
     tr.appendChild(idleTd);
     tbody.appendChild(tr);
   }
