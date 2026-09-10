@@ -7,6 +7,19 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.6.6] - 2026-09-10
+
+### Added
+
+- **Info overlays on the Overview page.** The stat tiles, section headers,
+  ranked-bar labels (attribution classes, failure classes) and table badges
+  use terms — AGENTIC/PROCESS/HUMAN/UNATTRIBUTABLE, SCOPE-CREEP, "theatre",
+  "harness-fixable" — that were previously only documented in Rust doc
+  comments. A small `?` icon (or, where there's no room for one, a
+  dotted-underline hover target) now surfaces each term's definition on
+  hover or click/tab-focus, from a single glossary in `app.js`. No change to
+  data flow or wire format.
+
 ## [0.6.5] - 2026-09-10
 
 ### Added
