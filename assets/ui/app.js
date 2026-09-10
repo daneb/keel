@@ -21,7 +21,24 @@ const STAGES = [
 
 // `selected === null` means the Overview landing view, not "no spec loaded
 // yet" — that state is represented by `specs` being empty.
-let state = { specs: [], insights: null, selected: null, tab: "checks", version: null, sort: null };
+// `timelineOpen` is the stage key whose detail is expanded below the spine,
+// or `null` when none is — one panel, not one per node, so opening a second
+// closes the first automatically.
+let state = {
+  specs: [],
+  insights: null,
+  selected: null,
+  tab: "checks",
+  version: null,
+  sort: null,
+  timelineOpen: null,
+};
+
+// Which gate (G0/G1) and which `approval::STAGES` entry back each stage's
+// detail, when either applies. A stage absent from a map has no gate or
+// approval of its own — `stageDetail` falls back to its node's own status.
+const STAGE_GATE = { spec: "G0", plan_gate: "G1" };
+const STAGE_APPROVAL = { spec_approval: "spec", plan_approval: "plan", merge_approval: "merge" };
 
 function el(tag, cls, text) {
   const n = document.createElement(tag);
@@ -82,6 +99,7 @@ function renderRail() {
     b.appendChild(el("span", "slug", spec.slug));
     b.appendChild(el("span", "stage", stageLabel(spec.stage)));
     b.addEventListener("click", () => {
+      if (state.selected !== spec.slug) state.timelineOpen = null;
       state.selected = spec.slug;
       render();
     });
@@ -103,6 +121,102 @@ function gateVerdict(spec, gate) {
   return g ? g.verdict : null;
 }
 
+function gateFor(spec, gate) {
+  return (spec.gates || []).find((g) => g.gate === gate) || null;
+}
+
+function checkCounts(gateResult) {
+  const counts = { pass: 0, fail: 0, blocked: 0 };
+  for (const c of (gateResult && gateResult.checks) || []) {
+    const v = (c.verdict || "").toLowerCase();
+    if (Object.prototype.hasOwnProperty.call(counts, v)) counts[v] += 1;
+  }
+  return counts;
+}
+
+function approvalStanding(spec, stage) {
+  return (spec.approvals || {})[stage] || { state: "absent" };
+}
+
+// The detail for one stage's node, as DOM nodes for `#timeline-detail`. A
+// gate stage reads its verdict and check counts from `spec.gates`; an
+// approval stage reads its standing from `spec.approvals`; the remaining
+// stages (`plan`, `run`, `complete`) have no gate or approval of their own,
+// so they fall back to what the run history or the node's own place in the
+// sequence already says.
+function stageDetail(spec, key) {
+  const out = [];
+  const gateName = STAGE_GATE[key];
+  const approvalStage = STAGE_APPROVAL[key];
+
+  if (gateName) {
+    const g = gateFor(spec, gateName);
+    if (!g) {
+      out.push(el("div", "muted", gateName + " has not run yet"));
+    } else {
+      const line = el("div", "timeline-line");
+      line.appendChild(verdictGlyph(g.verdict));
+      line.appendChild(el("span", null, gateName));
+      out.push(line);
+      const counts = checkCounts(g);
+      out.push(
+        el(
+          "div",
+          "muted",
+          counts.pass + " passed · " + counts.fail + " failed · " + counts.blocked + " blocked"
+        )
+      );
+    }
+  } else if (approvalStage) {
+    const a = approvalStanding(spec, approvalStage);
+    if (a.state === "current") {
+      out.push(el("div", null, "approved by " + a.by));
+      out.push(el("div", "muted", a.at));
+    } else if (a.state === "rejected") {
+      out.push(el("div", null, "rejected by " + a.by));
+      if (a.note) out.push(el("div", "muted", a.note));
+    } else if (a.state === "superseded") {
+      out.push(
+        el("div", null, "superseded — approved " + a.approved_hash + ", now " + a.current_hash)
+      );
+    } else {
+      out.push(el("div", "muted", "not approved yet"));
+    }
+  } else if (key === "run") {
+    const runs = spec.runs || [];
+    if (!runs.length) {
+      out.push(el("div", "muted", "no runs yet"));
+    } else {
+      const latest = runs[runs.length - 1];
+      const g2 = (latest.gates || []).find((g) => g.gate === "G2");
+      const line = el("div", "timeline-line");
+      line.appendChild(verdictGlyph(g2 ? g2.verdict : null));
+      line.appendChild(el("span", null, latest.id));
+      out.push(line);
+    }
+  } else if (key === "complete") {
+    const a = approvalStanding(spec, "merge");
+    out.push(el("div", "muted", a.state === "current" ? "completed " + a.at : "not complete yet"));
+  } else {
+    out.push(el("div", "muted", "created once `keel plan` has run"));
+  }
+  return out;
+}
+
+// The single detail panel below the spine — at most one stage's detail is
+// shown at a time, so opening a second node replaces rather than stacks.
+function renderTimelineDetail(spec) {
+  const panel = document.getElementById("timeline-detail");
+  clear(panel);
+  if (!state.timelineOpen) {
+    panel.hidden = true;
+    return;
+  }
+  panel.hidden = false;
+  panel.appendChild(el("div", "timeline-detail-head", stageLabel(state.timelineOpen)));
+  for (const node of stageDetail(spec, state.timelineOpen)) panel.appendChild(node);
+}
+
 function renderSpine() {
   const spine = document.getElementById("spine");
   clear(spine);
@@ -111,7 +225,9 @@ function renderSpine() {
 
   const at = STAGES.findIndex(([k]) => k === spec.stage);
   STAGES.forEach(([key, label], i) => {
-    const node = el("div", "node", label);
+    const node = el("button", "node", label);
+    node.type = "button";
+    node.dataset.stage = key;
     // A gate that actually failed is worth more than "you are here".
     const failed =
       (key === "spec" && gateVerdict(spec, "G0") === "fail") ||
@@ -119,9 +235,18 @@ function renderSpine() {
     if (failed) node.classList.add("bad");
     else if (i < at) node.classList.add("done");
     if (i === at) node.classList.add("here");
+    node.setAttribute("aria-expanded", String(state.timelineOpen === key));
+    node.addEventListener("click", () => {
+      state.timelineOpen = state.timelineOpen === key ? null : key;
+      for (const n of spine.querySelectorAll(".node")) {
+        n.setAttribute("aria-expanded", String(state.timelineOpen === n.dataset.stage));
+      }
+      renderTimelineDetail(spec);
+    });
     spine.appendChild(node);
   });
 
+  renderTimelineDetail(spec);
   document.getElementById("stage-line").textContent = spec.slug + " · " + stageLabel(spec.stage);
 }
 

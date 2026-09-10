@@ -414,3 +414,89 @@ fn the_page_loads_nothing_from_the_network() {
         assert!(!src.contains("https://"), "{name} references an external URL");
     }
 }
+
+// ---------------------------------------------------------------------------
+// the pipeline timeline (`#spine`)
+// ---------------------------------------------------------------------------
+
+/// There is no headless-browser harness in this repo, so these pin the
+/// served bytes rather than DOM behaviour directly — the same style the two
+/// tests above already use for this file.
+#[test]
+fn timeline_nodes_are_connected_by_a_track() {
+    let r = Repo::bare("timeline-track");
+    let s = Server::start(&r);
+    let (_, _, css) = s.get("/app.css");
+    assert!(
+        css.contains(".node::before"),
+        "no connector rule between adjacent stage nodes in app.css"
+    );
+    assert!(
+        css.contains(".node:first-child::before { content: none; }"),
+        "the first node still draws a connector to a predecessor it doesn't have"
+    );
+}
+
+#[test]
+fn clicking_a_stage_node_renders_its_detail() {
+    let r = Repo::bare("timeline-click");
+    let s = Server::start(&r);
+    let (_, _, js) = s.get("/app.js");
+    assert!(js.contains("function stageDetail("), "no per-stage detail builder");
+    assert!(
+        js.contains("node.addEventListener(\"click\""),
+        "a stage node has no click handler"
+    );
+    assert!(
+        js.contains("renderTimelineDetail(spec)"),
+        "the click handler does not render the clicked stage's detail"
+    );
+}
+
+#[test]
+fn clicking_the_open_node_again_collapses_it() {
+    let r = Repo::bare("timeline-collapse");
+    let s = Server::start(&r);
+    let (_, _, js) = s.get("/app.js");
+    assert!(
+        js.contains("state.timelineOpen === key ? null : key"),
+        "clicking the already-open stage node does not toggle it closed"
+    );
+    assert!(
+        js.contains("if (!state.timelineOpen)") && js.contains("panel.hidden = true;"),
+        "the detail panel is not hidden when nothing is open"
+    );
+}
+
+#[test]
+fn opening_another_node_replaces_the_open_detail() {
+    let r = Repo::bare("timeline-replace");
+    let s = Server::start(&r);
+    let (_, _, js) = s.get("/app.js");
+    // `renderTimelineDetail` clears the panel before appending the newly
+    // selected stage's nodes, so a second click never stacks a second
+    // stage's detail alongside the first.
+    let detail_fn = js
+        .split("function renderTimelineDetail")
+        .nth(1)
+        .expect("renderTimelineDetail is not defined");
+    assert!(
+        detail_fn.contains("clear(panel);"),
+        "renderTimelineDetail does not clear the panel before rendering"
+    );
+}
+
+#[test]
+fn the_timeline_stacks_vertically_under_700px() {
+    let r = Repo::bare("timeline-responsive");
+    let s = Server::start(&r);
+    let (_, _, css) = s.get("/app.css");
+    assert!(
+        css.contains("@media (max-width: 700px)"),
+        "app.css dropped the breakpoint #rail already stacks at"
+    );
+    assert!(
+        css.contains(".spine { flex-direction: column; overflow-x: visible; }"),
+        "the spine does not switch to a vertical column under 700px"
+    );
+}

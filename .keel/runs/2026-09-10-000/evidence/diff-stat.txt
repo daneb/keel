@@ -1,0 +1,19 @@
+     1      1  .keel/lesson-usage.json
+     2      0  .keel/runs/2026-09-10-000/evidence/build.txt
+     2      0  .keel/runs/2026-09-10-000/evidence/lint.txt
+    59      0  .keel/runs/2026-09-10-000/evidence/oracles.json
+    95      0  .keel/runs/2026-09-10-000/evidence/test.txt
+     9      0  .keel/runs/2026-09-10-000/run.json
+    15      0  .keel/runs/2026-09-10-000/trajectory.jsonl
+     2      0  .keel/specs/pipeline-timeline/approvals.jsonl
+    90      0  .keel/specs/pipeline-timeline/gates/G0.json
+    95      0  .keel/specs/pipeline-timeline/gates/G1.json
+    68      0  .keel/specs/pipeline-timeline/plan.md
+    93      0  .keel/specs/pipeline-timeline/spec.md
+    56      0  .keel/specs/pipeline-timeline/tasks.md
+    70      4  assets/ui/app.css
+   127      2  assets/ui/app.js
+     1      0  assets/ui/index.html
+    86      0  tests/serve.rs
+
+17 file(s), +871 -7 (878 lines of churn) against d4ac1318086ad68892566e15e3d227c85c6b0334

@@ -1,0 +1,59 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "cmd",
+      "oracle": "`cargo test --test serve timeline_nodes_are_connected_by_a_track` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest timeline_nodes_are_connected_by_a_track ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.84s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.20s\n     Running tests/serve.rs (target/debug/deps/serve-29bd77d3976a45e3)"
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "cmd",
+      "oracle": "`cargo test --test serve clicking_a_stage_node_renders_its_detail` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest clicking_a_stage_node_renders_its_detail ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.84s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s\n     Running tests/serve.rs (target/debug/deps/serve-29bd77d3976a45e3)"
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "cmd",
+      "oracle": "`cargo test --test serve clicking_the_open_node_again_collapses_it` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest clicking_the_open_node_again_collapses_it ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.85s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s\n     Running tests/serve.rs (target/debug/deps/serve-29bd77d3976a45e3)"
+    },
+    {
+      "criterion": "AC-4",
+      "kind": "cmd",
+      "oracle": "`cargo test --test serve opening_another_node_replaces_the_open_detail` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest opening_another_node_replaces_the_open_detail ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.84s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s\n     Running tests/serve.rs (target/debug/deps/serve-29bd77d3976a45e3)"
+    },
+    {
+      "criterion": "AC-5",
+      "kind": "cmd",
+      "oracle": "`cargo test --test serve the_timeline_stacks_vertically_under_700px` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest the_timeline_stacks_vertically_under_700px ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.85s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s\n     Running tests/serve.rs (target/debug/deps/serve-29bd77d3976a45e3)"
+    },
+    {
+      "criterion": "AC-6",
+      "kind": "cmd",
+      "oracle": "`cargo test --test serve the_page_never_assigns_disk_content_to_inner_html the_page_loads_nothing_from_the_network` exits 0",
+      "outcome": "fail",
+      "exit_code": 1,
+      "detail": "expected exit 0, got 1",
+      "output": "error: unexpected argument 'the_page_loads_nothing_from_the_network' found\n\nUsage: cargo test [OPTIONS] [TESTNAME] [-- [ARGS]...]\n\nFor more information, try '--help'."
+    }
+  ],
+  "criteria": 6,
+  "executed": 6,
+  "passed": 5,
+  "failed": 1,
+  "blocked": 0,
+  "human": 0
+}
