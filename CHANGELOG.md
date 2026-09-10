@@ -7,6 +7,21 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.6.3] - 2026-09-10
+
+### Added
+
+- **The pipeline spine is a connected, clickable timeline.** `keel serve`'s
+  detail view rendered `#spine` as disconnected badges — which stage a spec
+  was at, and nothing else. Stages now read as one journey (left-to-right,
+  or top-to-bottom under the 700px breakpoint `#rail` already stacks at),
+  connected by a visible track, and clicking a stage discloses its own
+  detail in place: a gate stage shows its verdict and check counts, an
+  approval stage shows who approved it and when — or why it's rejected,
+  superseded, or still absent — and the run stage shows the latest attempt.
+  Built entirely from data `/api/overview` already serves; no wire-format
+  change.
+
 ## [0.6.2] - 2026-09-10
 
 ### Fixed
