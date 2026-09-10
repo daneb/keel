@@ -500,3 +500,96 @@ fn the_timeline_stacks_vertically_under_700px() {
         "the spine does not switch to a vertical column under 700px"
     );
 }
+
+#[test]
+fn gate_backed_stage_labels_name_their_gate_consistently() {
+    let r = Repo::bare("timeline-labels");
+    let s = Server::start(&r);
+    let (_, _, js) = s.get("/app.js");
+    assert!(js.contains("\"spec (G0)\""), "the spec stage does not name G0");
+    assert!(js.contains("\"plan (G1)\""), "the plan_gate stage does not name G1");
+    assert!(
+        !js.contains("[\"plan_gate\", \"G1\"]"),
+        "plan_gate is still labelled bare G1 in STAGES"
+    );
+}
+
+#[test]
+fn here_and_expanded_are_styled_differently() {
+    let r = Repo::bare("timeline-here-vs-open");
+    let s = Server::start(&r);
+    let (_, _, css) = s.get("/app.css");
+    let here = css
+        .split(".node.here {")
+        .nth(1)
+        .and_then(|s| s.split('}').next())
+        .expect(".node.here rule not found");
+    let expanded = css
+        .split(".node[aria-expanded=\"true\"] {")
+        .nth(1)
+        .and_then(|s| s.split('}').next())
+        .expect(".node[aria-expanded] rule not found");
+    assert!(
+        here.contains("background: color-mix(in srgb, var(--brass)"),
+        "the current-stage node no longer fills with the brass accent"
+    );
+    assert!(
+        expanded.contains("border-color: var(--ink)") && !expanded.contains("var(--brass)"),
+        "the open-detail node still shares the current-stage node's brass accent"
+    );
+}
+
+#[test]
+fn a_current_merge_approval_past_the_pipelines_stage_is_flagged() {
+    let r = Repo::bare("timeline-stale");
+    let s = Server::start(&r);
+    let (_, _, js) = s.get("/app.js");
+    assert!(
+        js.contains("function stale(spec)"),
+        "no helper detects a current merge approval past Complete"
+    );
+    assert!(
+        js.contains("node.classList.add(\"stale\")"),
+        "the spine does not mark the stale nodes"
+    );
+    assert!(
+        js.contains("function staleWarning("),
+        "the detail panel has no explanation for a stale approval"
+    );
+    let (_, _, css) = s.get("/app.css");
+    assert!(css.contains(".node.stale"), "app.css has no styling for a stale node");
+}
+
+#[test]
+fn pending_nodes_use_higher_contrast_tokens() {
+    let r = Repo::bare("timeline-contrast");
+    let s = Server::start(&r);
+    let (_, _, css) = s.get("/app.css");
+    let node = css
+        .split(".node {")
+        .nth(1)
+        .and_then(|s| s.split("}\n").next())
+        .expect(".node rule not found");
+    assert!(
+        node.contains("color-mix(in srgb, var(--muted) 60%, var(--ink))"),
+        "a pending node's text still falls back to plain --muted"
+    );
+    assert!(
+        !node.contains("color: var(--muted);"),
+        "a pending node's text is still the flat --muted token"
+    );
+}
+
+#[test]
+fn the_spine_nodes_are_larger_than_before() {
+    let r = Repo::bare("timeline-size");
+    let s = Server::start(&r);
+    let (_, _, css) = s.get("/app.css");
+    let node = css
+        .split(".node {")
+        .nth(1)
+        .and_then(|s| s.split("}\n").next())
+        .expect(".node rule not found");
+    assert!(node.contains("padding: 7px 14px;"), "node padding was not increased");
+    assert!(node.contains("font-size: 12px;"), "node font-size was not increased");
+}

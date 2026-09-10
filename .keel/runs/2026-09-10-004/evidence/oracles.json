@@ -1,0 +1,58 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "cmd",
+      "oracle": "`cargo test --test serve gate_backed_stage_labels_name_their_gate_consistently` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest gate_backed_stage_labels_name_their_gate_consistently ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 28 filtered out; finished in 0.85s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.20s\n     Running tests/serve.rs (target/debug/deps/serve-87338db6edd391ad)"
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "cmd",
+      "oracle": "`cargo test --test serve here_and_expanded_are_styled_differently` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest here_and_expanded_are_styled_differently ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 28 filtered out; finished in 0.85s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s\n     Running tests/serve.rs (target/debug/deps/serve-87338db6edd391ad)"
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "cmd",
+      "oracle": "`cargo test --test serve a_current_merge_approval_past_the_pipelines_stage_is_flagged` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest a_current_merge_approval_past_the_pipelines_stage_is_flagged ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 28 filtered out; finished in 0.85s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s\n     Running tests/serve.rs (target/debug/deps/serve-87338db6edd391ad)"
+    },
+    {
+      "criterion": "AC-4",
+      "kind": "cmd",
+      "oracle": "`cargo test --test serve pending_nodes_use_higher_contrast_tokens` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest pending_nodes_use_higher_contrast_tokens ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 28 filtered out; finished in 0.85s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s\n     Running tests/serve.rs (target/debug/deps/serve-87338db6edd391ad)"
+    },
+    {
+      "criterion": "AC-5",
+      "kind": "cmd",
+      "oracle": "`cargo test --test serve the_spine_nodes_are_larger_than_before` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest the_spine_nodes_are_larger_than_before ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 28 filtered out; finished in 0.85s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s\n     Running tests/serve.rs (target/debug/deps/serve-87338db6edd391ad)"
+    },
+    {
+      "criterion": "AC-6",
+      "kind": "cmd",
+      "oracle": "`cargo test --test serve the_page_never_assigns_disk_content_to_inner_html && cargo test --test serve the_page_loads_nothing_from_the_network` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest the_page_never_assigns_disk_content_to_inner_html ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 28 filtered out; finished in 0.00s\n\n\nrunning 1 test\ntest the_page_loads_nothing_from_the_network ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 28 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s\n     Running tests/serve.rs (target/debug/deps/serve-87338db6edd391ad)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s\n     Running tests/serve.rs (target/debug/deps/serve-87338db6edd391ad)"
+    }
+  ],
+  "criteria": 6,
+  "executed": 6,
+  "passed": 6,
+  "failed": 0,
+  "blocked": 0,
+  "human": 0
+}

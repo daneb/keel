@@ -159,13 +159,15 @@ main {
   position: relative;
   flex: 0 0 auto;
   margin-left: 22px;
-  padding: 4px 9px;
-  border: 1px solid var(--rule);
+  padding: 7px 14px;
+  border: 1px solid color-mix(in srgb, var(--muted) 55%, var(--rule));
   border-radius: 4px;
   font: inherit;
-  font-size: 11px;
+  font-size: 12px;
   white-space: nowrap;
-  color: var(--muted);
+  /* pending nodes still need to read clearly on their own, not just relative
+     to --rule, so this mixes toward --ink rather than using plain --muted. */
+  color: color-mix(in srgb, var(--muted) 60%, var(--ink));
   background: var(--card);
   cursor: pointer;
 }
@@ -191,15 +193,30 @@ main {
 .node.done::before { background: color-mix(in srgb, var(--pass) 45%, var(--rule)); }
 .node.bad { color: var(--fail); border-color: color-mix(in srgb, var(--fail) 55%, var(--rule)); }
 .node.bad::before { background: color-mix(in srgb, var(--fail) 55%, var(--rule)); }
+
+/* "this is where the pipeline is" (`.here`) and "this node's detail is open"
+   (`[aria-expanded]`) used to share one brass outline, so the two were
+   indistinguishable whenever they landed on different nodes at once —
+   routine, since opening a node to inspect it never moves the pipeline.
+   `.here` now fills; `[aria-expanded]` now outlines in ink instead of brass,
+   so neither can be mistaken for the other, together or apart. */
 .node.here {
   color: var(--ink);
   border-color: var(--brass);
-  box-shadow: inset 0 0 0 1px var(--brass);
+  background: color-mix(in srgb, var(--brass) 18%, var(--card));
   font-weight: 600;
 }
 .node[aria-expanded="true"] {
-  border-color: var(--brass);
-  box-shadow: inset 0 0 0 1px var(--brass);
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+/* an approval that still reads current, but the pipeline has since moved
+   back before Complete — see `stale()` in app.js. Blocked-toned rather than
+   fail-toned: nothing here is wrong on its own, it needs a human to look. */
+.node.stale {
+  border-color: var(--blocked);
+  box-shadow: inset 0 0 0 1px var(--blocked);
 }
 
 .timeline-detail {
@@ -218,6 +235,11 @@ main {
 }
 
 .timeline-line { display: flex; align-items: center; gap: 6px; }
+
+.timeline-warning {
+  color: var(--blocked);
+  margin-bottom: 6px;
+}
 
 /* the journey reads top-to-bottom once there is no room for left-to-right.
    Placed after the rules it overrides: a `@media` block does not out-cascade

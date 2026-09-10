@@ -1,0 +1,17 @@
+     2      0  .keel/runs/2026-09-10-003/evidence/build.txt
+     2      0  .keel/runs/2026-09-10-003/evidence/lint.txt
+    58      0  .keel/runs/2026-09-10-003/evidence/oracles.json
+    95      0  .keel/runs/2026-09-10-003/evidence/test.txt
+     9      0  .keel/runs/2026-09-10-003/run.json
+    15      0  .keel/runs/2026-09-10-003/trajectory.jsonl
+     2      0  .keel/specs/timeline-clarity/approvals.jsonl
+    90      0  .keel/specs/timeline-clarity/gates/G0.json
+    95      0  .keel/specs/timeline-clarity/gates/G1.json
+    63      0  .keel/specs/timeline-clarity/plan.md
+   106      0  .keel/specs/timeline-clarity/spec.md
+    56      0  .keel/specs/timeline-clarity/tasks.md
+    29      7  assets/ui/app.css
+    37      3  assets/ui/app.js
+    93      0  tests/serve.rs
+
+15 file(s), +752 -10 (762 lines of churn) against ca47daa97d169a5465b5bd2830704f2fc416d193

@@ -8,11 +8,14 @@
 
 "use strict";
 
+// Only `spec` and `plan_gate` are backed by exactly one named gate (G0, G1
+// respectively) — `run` spans G2/G2.5/G3, and the rest are approvals or plain
+// stages, so there is no single gate id to append to those.
 const STAGES = [
-  ["spec", "spec"],
+  ["spec", "spec (G0)"],
   ["spec_approval", "approve spec"],
   ["plan", "plan"],
-  ["plan_gate", "G1"],
+  ["plan_gate", "plan (G1)"],
   ["plan_approval", "approve plan"],
   ["run", "run"],
   ["merge_approval", "approve merge"],
@@ -138,6 +141,27 @@ function approvalStanding(spec, stage) {
   return (spec.approvals || {})[stage] || { state: "absent" };
 }
 
+// True when the merge approval still reads `current` (its artefact hash is
+// unchanged) but the pipeline has since moved back before `Complete` — the
+// class of situation `lock-completed-specs` (SPEC-0005) now prevents going
+// forward, but a spec approved before that fix can still be sitting in front
+// of a later regression, with its approval history none the wiser.
+function stale(spec) {
+  return spec.stage !== "complete" && approvalStanding(spec, "merge").state === "current";
+}
+
+function staleWarning(spec, mergeApproval) {
+  return el(
+    "div",
+    "timeline-warning",
+    "approved as complete on " +
+      mergeApproval.at +
+      ", but the pipeline has since moved back to " +
+      stageLabel(spec.stage) +
+      " — a later run regressed, or this was approved against the wrong spec"
+  );
+}
+
 // The detail for one stage's node, as DOM nodes for `#timeline-detail`. A
 // gate stage reads its verdict and check counts from `spec.gates`; an
 // approval stage reads its standing from `spec.approvals`; the remaining
@@ -169,6 +193,7 @@ function stageDetail(spec, key) {
     }
   } else if (approvalStage) {
     const a = approvalStanding(spec, approvalStage);
+    if (approvalStage === "merge" && stale(spec)) out.push(staleWarning(spec, a));
     if (a.state === "current") {
       out.push(el("div", null, "approved by " + a.by));
       out.push(el("div", "muted", a.at));
@@ -196,7 +221,11 @@ function stageDetail(spec, key) {
     }
   } else if (key === "complete") {
     const a = approvalStanding(spec, "merge");
-    out.push(el("div", "muted", a.state === "current" ? "completed " + a.at : "not complete yet"));
+    if (stale(spec)) {
+      out.push(staleWarning(spec, a));
+    } else {
+      out.push(el("div", "muted", a.state === "current" ? "completed " + a.at : "not complete yet"));
+    }
   } else {
     out.push(el("div", "muted", "created once `keel plan` has run"));
   }
@@ -235,6 +264,11 @@ function renderSpine() {
     if (failed) node.classList.add("bad");
     else if (i < at) node.classList.add("done");
     if (i === at) node.classList.add("here");
+    // A merge approval that still reads current but the pipeline has since
+    // left `Complete` — flagged on both nodes it could mislead about.
+    if ((key === "merge_approval" || key === "complete") && stale(spec)) {
+      node.classList.add("stale");
+    }
     node.setAttribute("aria-expanded", String(state.timelineOpen === key));
     node.addEventListener("click", () => {
       state.timelineOpen = state.timelineOpen === key ? null : key;
