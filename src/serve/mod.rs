@@ -67,18 +67,26 @@ struct Server {
     version: Mutex<Option<(Instant, String)>>,
 }
 
-/// Serve until interrupted. Takes an already-bound listener so a test can own
-/// the port.
-pub fn serve(paths: Paths, listener: TcpListener) -> Result<()> {
-    // `main` restores SIGPIPE to its default so `keel status | head` works. For
-    // a server that default is fatal: a browser abandoning a request mid-body —
-    // a refresh during a slow evidence read, which is routine — would kill the
-    // process. Writes to a dead socket must come back as errors instead.
+/// `main` restores SIGPIPE to its default so `keel status | head` works. For
+/// a server that default is fatal: a browser abandoning a request mid-body —
+/// a refresh during a slow evidence read, which is routine — would kill the
+/// process. Writes to a dead socket must come back as errors instead.
+///
+/// Callers must arm this before writing anything, including the startup
+/// banner: a parent that only reads the first line (a test harness, a
+/// `| head`-style consumer) can have already closed its end of stdout by the
+/// time a second line is written, and that race is exactly what this guards
+/// against. See `cmd::serve::run`.
+pub fn ignore_sigpipe() {
     #[cfg(unix)]
     unsafe {
         libc::signal(libc::SIGPIPE, libc::SIG_IGN);
     }
+}
 
+/// Serve until interrupted. Takes an already-bound listener so a test can own
+/// the port.
+pub fn serve(paths: Paths, listener: TcpListener) -> Result<()> {
     let port = listener.local_addr()?.port();
     let server = Arc::new(Server { paths, port, version: Mutex::new(None) });
     let live = Arc::new(AtomicUsize::new(0));
