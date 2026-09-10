@@ -132,6 +132,9 @@ enum Command {
         /// Why
         #[arg(long)]
         note: Option<String>,
+        /// Override the lock on a spec that has already reached Complete
+        #[arg(long)]
+        force: bool,
     },
     /// Show the approval history and current standing
     Approvals {
@@ -519,8 +522,8 @@ fn run() -> Result<i32> {
         Command::Lesson(LessonCmd::Promote { index, force }) => cmd::learn::promote(index, force),
         Command::Lesson(LessonCmd::Reject { index, note }) => cmd::learn::reject(index, note),
         Command::Lesson(LessonCmd::Demote { id, reason }) => cmd::learn::demote(id, reason),
-        Command::Approve { slug, stage, reject, note } => {
-            cmd::approve::run(slug, stage, reject, note)
+        Command::Approve { slug, stage, reject, note, force } => {
+            cmd::approve::run(slug, stage, reject, note, force)
         }
         Command::Approvals { slug, json } => cmd::approve::show(slug, json),
         Command::Outline { path, json } => cmd::retrieve::outline(path, json),

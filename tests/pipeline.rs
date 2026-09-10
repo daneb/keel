@@ -227,3 +227,64 @@ fn a_spec_that_never_passed_g0_is_listed_at_the_spec_stage() {
         .unwrap_or_else(|| panic!("demo missing from listing:\n{listing}"));
     assert!(line.contains("spec"), "{line}");
 }
+
+// ---------------------------------------------------------------------------
+// a completed spec is locked against further approvals
+// ---------------------------------------------------------------------------
+
+/// Walk a spec all the way to `Stage::Complete`.
+fn completed_repo(name: &str) -> Repo {
+    let r = Repo::ready(name);
+    r.ok(&["approve", "demo", "--stage", "plan"]);
+    r.install_driver("worker", &working_driver());
+    assert_eq!(r.run(&["run", "demo"]).0, 1, "G3 should want a human");
+    r.ok(&["approve", "demo", "--stage", "merge"]);
+    assert!(headline(&r, "demo").contains("complete"), "the cycle should be done");
+    r
+}
+
+#[test]
+fn approving_a_completed_spec_is_refused() {
+    let r = completed_repo("lock-refused");
+    let before = r.read(".keel/specs/demo/approvals.jsonl");
+
+    let (code, _) = r.run(&["approve", "demo", "--stage", "spec"]);
+    assert_ne!(code, 0, "approving a completed spec should fail");
+
+    let after = r.read(".keel/specs/demo/approvals.jsonl");
+    assert_eq!(before, after, "a refused approval must not be appended to the log");
+}
+
+#[test]
+fn the_refusal_names_the_completed_slug() {
+    let r = completed_repo("lock-message");
+    let (_, out) = r.run(&["approve", "demo", "--stage", "spec"]);
+    assert!(out.contains("demo"), "the refusal should name the slug: {out}");
+    assert!(out.contains("complete"), "the refusal should say why: {out}");
+}
+
+#[test]
+fn force_overrides_the_completed_lock() {
+    let r = completed_repo("lock-force");
+    let before = r.read(".keel/specs/demo/approvals.jsonl").lines().count();
+
+    r.ok(&["approve", "demo", "--stage", "spec", "--force"]);
+
+    let after = r.read(".keel/specs/demo/approvals.jsonl");
+    assert_eq!(after.lines().count(), before + 1, "the forced approval should be recorded");
+    assert!(
+        after.contains("overrode the completed-spec lock"),
+        "the override should be noted in the log: {after}"
+    );
+}
+
+#[test]
+fn an_incomplete_spec_still_approves_normally() {
+    let r = Repo::bare("lock-unaffected");
+    r.write_spec();
+    r.ok(&["gate", "g0", "demo"]);
+
+    let (code, _) = r.run(&["approve", "demo", "--stage", "spec"]);
+    assert_eq!(code, 0, "a spec that is not complete must approve as before");
+    assert!(r.read(".keel/specs/demo/approvals.jsonl").contains("\"stage\":\"spec\""));
+}

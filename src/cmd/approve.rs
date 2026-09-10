@@ -3,11 +3,18 @@
 use crate::approval::{self, Decision, Standing};
 use crate::gate;
 use crate::paths::Paths;
+use crate::pipeline::Stage;
 use crate::spec::SpecFront;
 use crate::store::frontmatter;
 use anyhow::{Context, Result, bail};
 
-pub fn run(slug: Option<String>, stage: String, reject: bool, note: Option<String>) -> Result<i32> {
+pub fn run(
+    slug: Option<String>,
+    stage: String,
+    reject: bool,
+    note: Option<String>,
+    force: bool,
+) -> Result<i32> {
     let paths = Paths::require_init()?;
     let slug = crate::cmd::gate::resolve_slug(&paths, slug)?;
     if !approval::STAGES.contains(&stage.as_str()) {
@@ -17,6 +24,25 @@ pub fn run(slug: Option<String>, stage: String, reject: bool, note: Option<Strin
     let artefact = approval::artefact_path(&paths, &slug, &stage);
     if !artefact.exists() {
         bail!("nothing to approve: {} does not exist", paths.rel(&artefact).display());
+    }
+
+    // A spec that has already reached Complete is done: its stages are
+    // settled, and a slip naming the wrong (old, finished) slug should not be
+    // able to silently rewrite its approval history. `--force` is the
+    // deliberate escape hatch; anything else is refused outright.
+    let mut note = note;
+    if crate::pipeline::stage(&paths, &slug) == Stage::Complete {
+        if !force {
+            bail!(
+                "`{slug}` is already complete (merge approved) — its stages are locked. \
+                 Pass --force if you really mean to record a new {stage} decision on it."
+            );
+        }
+        let override_note = format!("--force: overrode the completed-spec lock on `{slug}`");
+        note = Some(match note {
+            Some(n) => format!("{override_note}; {n}"),
+            None => override_note,
+        });
     }
 
     let gate_name = match stage.as_str() {
