@@ -7,6 +7,25 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.6.5] - 2026-09-10
+
+### Added
+
+- **A per-spec summary above the Checks/Evidence drill-down.** The detail
+  view went straight from the timeline to the Checks and Evidence tabs,
+  which render every run's events/tokens/failing-checks line by line —
+  nothing answered "how much has this feature cost, which gates has it
+  exercised, is anything currently failing" without reading down through
+  however many runs a spec has accumulated. A new summary section between
+  the timeline and the tabs shows runs/tokens/events totalled across the
+  spec's whole history, an "open fails" count scoped to the spec's own
+  G0/G1 plus the latest run only (so a spec passing now doesn't read as
+  failing because an earlier attempt once did), and one badge per gate id
+  the spec has ever produced a result for, coloured by that gate's latest
+  verdict. The Checks/Evidence tabs are unchanged — the summary is what to
+  read first, the tabs are still where to drill in. Built entirely from data
+  `/api/overview` already serves; no wire-format change.
+
 ## [0.6.4] - 2026-09-10
 
 ### Fixed
