@@ -7,6 +7,21 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.6.7] - 2026-09-14
+
+### Fixed
+
+- **`keel plan` scaffolds no longer fail G1 on the first run.** A freshly
+  generated `plan.md` left `rollback:` empty and a freshly generated
+  `tasks.md` left each task's `files:` as an unfilled placeholder, so
+  `rollback-stated` and `task-files-in-scope` failed on almost every new
+  spec before a human had touched either file. New plans now default
+  `rollback:` to `git revert` (and state it in the `## Rollback` body
+  section too), and new tasks default `files:` to `scope` — already a
+  recognised value meaning "within the spec's declared scope." Re-running
+  `keel plan` still preserves anything a human has already written in
+  either field.
+
 ## [0.6.6] - 2026-09-10
 
 ### Added
