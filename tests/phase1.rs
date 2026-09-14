@@ -120,15 +120,25 @@ impl Repo {
          - exit: `cargo test --test limit` exits 0\n"
     }
 
-    /// Fill in the rollback that `keel plan` deliberately leaves empty.
+    /// Replace whatever rollback `keel plan` scaffolded (it defaults to
+    /// `git revert`) with a specific value.
     fn set_rollback(&self, slug: &str, text: &str) {
         let p = format!(".keel/specs/{slug}/plan.md");
         let content = self.read(&p);
-        let replaced = content
-            .replace("rollback: ''", &format!("rollback: '{text}'"))
-            .replace("rollback: \"\"", &format!("rollback: '{text}'"));
-        assert_ne!(replaced, content, "no empty rollback field found in:\n{content}");
-        self.write(&p, &replaced);
+        let mut found = false;
+        let replaced: Vec<String> = content
+            .lines()
+            .map(|line| {
+                if line.starts_with("rollback:") {
+                    found = true;
+                    format!("rollback: {text}")
+                } else {
+                    line.to_string()
+                }
+            })
+            .collect();
+        assert!(found, "no rollback field found in:\n{content}");
+        self.write(&p, &format!("{}\n", replaced.join("\n")));
     }
 }
 
@@ -359,7 +369,12 @@ fn tasks_exceeding_the_spec_budget_fail_g1() {
 fn a_missing_rollback_fails_g1() {
     let r = ready_for_g1("g1-rollback");
     let p = ".keel/specs/demo/plan.md";
-    r.write(p, &r.read(p).replace("rollback: 'git revert the merge'", "rollback: ''"));
+    // Clear both the front matter field and the body's scaffolded default —
+    // otherwise the body fallback still states a real rollback.
+    let plan = r.read(p)
+        .replace("rollback: git revert the merge", "rollback: ''")
+        .replace("`git revert` — replace this if the change needs a different rollback.", "");
+    r.write(p, &plan);
     let (code, out) = r.run(&["gate", "g1", "demo"]);
     assert_eq!(code, 1, "{out}");
     assert!(out.contains("rollback-stated"), "{out}");
@@ -520,13 +535,15 @@ fn rollback_in_the_body_section_is_accepted_as_a_fallback() {
     r.ok(&["gate", "g0", "demo"]);
     r.ok(&["approve", "demo", "--stage", "spec"]);
     r.ok(&["plan", "demo"]);
-    // Leave the front matter field empty but fill in the body section.
+    // Clear the front matter field's default but fill in the body section.
     let plan = r.read(".keel/specs/demo/plan.md");
-    assert!(plan.contains("rollback: ''"), "expected empty rollback field:\n{plan}");
-    let plan = plan.replace(
-        "## Rollback\n\n_Fill in",
-        "## Rollback\n\ngit revert the merge commit\n\n_Fill in",
-    );
+    assert!(plan.contains("rollback: git revert"), "expected the default rollback field:\n{plan}");
+    let plan = plan
+        .replace("rollback: git revert", "rollback: ''")
+        .replace(
+            "`git revert` — replace this if the change needs a different rollback.",
+            "git revert the merge commit",
+        );
     r.write(".keel/specs/demo/plan.md", &plan);
     r.write_tasks("demo", r.good_tasks());
     let (code, out) = r.run(&["gate", "g1", "demo"]);
