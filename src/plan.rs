@@ -293,7 +293,10 @@ pub fn render_plan(spec: &Spec, radius: &BlastRadius, existing: Option<&Plan>) -
         },
         // Keep whatever the human already wrote; only the computed parts are
         // regenerated. A `keel plan` re-run must never silently erase design.
-        rollback: existing.map(|p| p.front.rollback.clone()).unwrap_or_default(),
+        rollback: existing
+            .map(|p| p.front.rollback.clone())
+            .filter(|r| !r.trim().is_empty())
+            .unwrap_or_else(|| "git revert".to_string()),
         verified_at: Some(crate::store::today()),
         extra: existing.map(|p| p.front.extra.clone()).unwrap_or_default(),
     };
@@ -306,8 +309,7 @@ pub fn render_plan(spec: &Spec, radius: &BlastRadius, existing: Option<&Plan>) -
              _How the change is made. Name the seam you are cutting at._\n\n\
              ## Blast radius\n\n{}\n\
              ## Rollback\n\n\
-             _Fill in `rollback:` in the front matter above. \"git revert\" is a\n\
-             legitimate answer; \"we would not need to\" is not._\n",
+             `git revert` — replace this if the change needs a different rollback.\n",
             spec.front.slug,
             blast_section(radius)
         ),
@@ -409,7 +411,7 @@ pub fn render_tasks(spec: &Spec) -> Result<String> {
         body.push_str(&format!(
             "### T-{} {}\n\
              - criteria: {}\n\
-             - files: _name the files this task touches_\n\
+             - files: scope\n\
              - budget: {}\n\
              - exit: {}\n\n",
             n + 1,
@@ -571,6 +573,60 @@ Prose after the tasks.
         let out = replace_section("# Design\n\n## Approach\n\nText.\n", "## Blast radius", "table\n");
         assert!(out.contains("## Blast radius"));
         assert!(out.contains("Text."));
+    }
+
+    fn lint_spec() -> crate::spec::Spec {
+        use crate::spec::Spec;
+        let raw = "---\n\
+            id: SPEC-0001\nslug: lint\nschema: keel.spec/1\nstatus: draft\n\
+            scope:\n  - \"src/**\"\n\
+            budget:\n  criteria: 1\n  lines: 120\n---\n\n\
+            # Lint\n\n## Acceptance criteria\n\n\
+            ### AC-1 ESLint passes\n\n\
+            WHEN lint runs THE SYSTEM SHALL exit zero.\n\n\
+            oracle: cmd `npm run lint` exit 0\n";
+        Spec::parse(std::path::Path::new("spec.md"), raw).unwrap()
+    }
+
+    fn empty_radius() -> BlastRadius {
+        BlastRadius {
+            scope: vec!["src/**".to_string()],
+            depth: 2,
+            seed: Vec::new(),
+            impact: Vec::new(),
+            impact_lines: 0,
+            unmatched_globs: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn a_new_plan_defaults_rollback_to_git_revert() {
+        let spec = lint_spec();
+        let rendered = render_plan(&spec, &empty_radius(), None).unwrap();
+        let plan = crate::store::frontmatter::split_typed::<PlanFront>(&rendered).unwrap().0;
+        assert_eq!(plan.rollback, "git revert");
+        assert!(rendered.contains("`git revert`"), "body should also state git revert:\n{rendered}");
+    }
+
+    #[test]
+    fn re_planning_keeps_a_rollback_the_human_already_wrote() {
+        let spec = lint_spec();
+        let first = render_plan(&spec, &empty_radius(), None).unwrap();
+        let (front, body) = crate::store::frontmatter::split_typed::<PlanFront>(&first).unwrap();
+        let mut existing = Plan { front, body };
+        existing.front.rollback = "restore the config from backup".to_string();
+
+        let rendered = render_plan(&spec, &empty_radius(), Some(&existing)).unwrap();
+        let plan = crate::store::frontmatter::split_typed::<PlanFront>(&rendered).unwrap().0;
+        assert_eq!(plan.rollback, "restore the config from backup");
+    }
+
+    #[test]
+    fn a_new_tasks_scaffold_defaults_files_to_scope() {
+        let rendered = render_tasks(&lint_spec()).unwrap();
+        assert!(rendered.contains("- files: scope"), "got:\n{rendered}");
+        let tasks = Tasks::parse(Path::new("tasks.md"), &rendered).unwrap();
+        assert_eq!(tasks.tasks[0].files, vec!["scope".to_string()]);
     }
 
     #[test]
