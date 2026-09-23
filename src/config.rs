@@ -56,6 +56,17 @@ pub struct Config {
     /// Metrics that may improve and must not regress.
     #[serde(default = "default_ratchets", rename = "ratchet")]
     pub ratchets: Vec<Ratchet>,
+    #[serde(default)]
+    pub chain: ChainConfig,
+}
+
+/// The evidence chain (ADR-0001).
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(default)]
+pub struct ChainConfig {
+    /// Environment variable *names* whose values are masked out of every chain
+    /// entry. Names, not values: the config is committed.
+    pub secrets: Vec<String>,
 }
 
 /// A store belonging to another repository, layered underneath this one.
@@ -360,6 +371,7 @@ impl Default for Config {
             reviewers: vec![],
             shared: vec![],
             ratchets: default_ratchets(),
+            chain: ChainConfig::default(),
         }
     }
 }

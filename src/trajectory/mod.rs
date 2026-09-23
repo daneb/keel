@@ -60,7 +60,32 @@ impl Trajectory {
             .with_context(|| format!("appending to {}", self.path.display()))?;
         self.file.flush()?;
         self.next_seq += 1;
+        self.chain(&event.payload)?;
         Ok(event)
+    }
+
+    /// Only a run's start and end reach the evidence chain. The rest of the
+    /// stream is what reached the model, which the chain must not carry
+    /// (ADR-0001); `run_end` commits to it by hash instead.
+    fn chain(&self, payload: &Payload) -> Result<()> {
+        let run = self.path.parent().and_then(|p| p.file_name()).map(|n| n.to_string_lossy().into_owned());
+        match payload {
+            Payload::RunStart { spec, task, .. } => crate::chain::record(
+                &self.path,
+                "run_start",
+                serde_json::json!({ "run": run, "spec": spec, "task": task }),
+            ),
+            Payload::RunEnd { verdict, .. } => crate::chain::record(
+                &self.path,
+                "run_end",
+                serde_json::json!({
+                    "run": run,
+                    "verdict": verdict,
+                    "trajectory_sha256": crate::chain::file_sha256(&self.path)?,
+                }),
+            ),
+            _ => Ok(()),
+        }
     }
 
     pub fn next_seq(&self) -> u64 {

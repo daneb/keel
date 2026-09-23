@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "keel.chain/1 entry",
+  "description": "One line of .keel/chain.jsonl. hash is SHA-256 over prev_hash, seq, ts, kind, writer and data; prev_hash is the preceding entry's hash, or 64 zeros for the first.",
+  "type": "object",
+  "required": ["schema", "seq", "ts", "kind", "writer", "data", "prev_hash", "hash"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "keel.chain/1" },
+    "seq": { "type": "integer", "minimum": 1 },
+    "ts": { "type": "string", "format": "date-time" },
+    "kind": { "type": "string", "minLength": 1 },
+    "writer": { "type": "string", "minLength": 1 },
+    "data": { "type": "object" },
+    "prev_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

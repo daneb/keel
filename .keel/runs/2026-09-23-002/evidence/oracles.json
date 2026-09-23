@@ -1,0 +1,82 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "test",
+      "oracle": "test tests/chain.rs::approval_gate_and_run_entries_link",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 1.43s"
+    },
+    {
+      "criterion": "AC-1",
+      "kind": "test",
+      "oracle": "test tests/chain.rs::every_entry_validates_against_the_published_schema",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 1.43s"
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "test",
+      "oracle": "test tests/chain.rs::verify_accepts_an_intact_chain",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 1.19s"
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "test",
+      "oracle": "test tests/chain.rs::verify_names_each_tamper",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 1.95s"
+    },
+    {
+      "criterion": "AC-4",
+      "kind": "test",
+      "oracle": "test tests/chain.rs::verify_rejects_a_recomputed_tail",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 1.16s"
+    },
+    {
+      "criterion": "AC-5",
+      "kind": "test",
+      "oracle": "test tests/chain.rs::sink_mode_never_writes_the_chain_file",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 1.15s"
+    },
+    {
+      "criterion": "AC-6",
+      "kind": "test",
+      "oracle": "test tests/chain.rs::in_process_chain_reports_self_attested",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 1.16s"
+    },
+    {
+      "criterion": "AC-7",
+      "kind": "test",
+      "oracle": "test tests/chain.rs::canary_secret_absent_and_chain_verifies",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 1.16s"
+    },
+    {
+      "criterion": "AC-8",
+      "kind": "test",
+      "oracle": "test tests/chain.rs::run_end_carries_trajectory_hash_only",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 1.44s"
+    }
+  ],
+  "criteria": 8,
+  "executed": 9,
+  "passed": 9,
+  "failed": 0,
+  "blocked": 0,
+  "human": 0
+}

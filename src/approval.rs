@@ -133,6 +133,13 @@ pub fn record(
     let mut f = std::fs::OpenOptions::new().create(true).append(true).open(&path)
         .with_context(|| format!("appending to {}", path.display()))?;
     writeln!(f, "{line}")?;
+    crate::chain::record(&path, "approval", serde_json::json!({
+        "spec": slug,
+        "stage": approval.stage,
+        "decision": approval.decision,
+        "artefact_hash": approval.artefact_hash,
+        "by": approval.by,
+    }))?;
     Ok(approval)
 }
 

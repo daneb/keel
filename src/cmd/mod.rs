@@ -1,5 +1,6 @@
 pub mod approve;
 pub mod bench;
+pub mod chain;
 pub mod blast;
 pub mod doctor;
 pub mod driver;
