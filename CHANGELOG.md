@@ -7,6 +7,42 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.7.0] - 2026-09-24
+
+### Added
+
+- **One hash-chained evidence log.** Approvals, gate verdicts, and run
+  start and end now append `keel.chain/1` entries to `.keel/chain.jsonl`,
+  each committing to the hash of the one before. `run_end` carries the
+  trajectory's SHA-256, never its content. `keel chain verify` names the
+  first entry that was edited, deleted, reordered or inserted, and with
+  `--head <hash>` also fails when the chain doesn't end at an anchor held
+  outside it. `keel chain head` prints that anchor. Schema:
+  `schemas/chain.json`. Design: `docs/decisions/0001-one-chain-runtime-writes.md`.
+- **A runtime can hold the pen.** With `KEEL_CHAIN_SINK` set, keel sends each
+  entry's payload to that path and never writes the chain file itself; the
+  runtime's host process stamps and appends it. Without it, entries are
+  marked `writer: "in-process"` and `keel chain verify` reports the chain as
+  self-attested.
+- **Secrets are redacted from the chain.** Values of the environment
+  variables named in `[chain] secrets` are replaced with `[REDACTED]` before
+  hashing, so a redacted chain still verifies.
+- **Runtime posture attestation.** A runtime names a `keel.posture/1`
+  attestation (`schemas/posture.json`) in `KEEL_RUNTIME_ATTESTATION`. keel
+  records it in the chain as `attest` before any agent runs. When
+  `[runtime] require` lists properties, a new `posture` gate judges it first:
+  every property `proven` passes, `unproven` or absent blocks (exit 3),
+  `violated` fails (exit 1), and a missing or malformed attestation blocks,
+  naming the offending field. A run that doesn't pass stops before the
+  driver is invoked; `--waves` judges posture once, before the first wave.
+  With `[runtime] require` empty, the default, runs behave exactly as before.
+
+### Security
+
+- **rustls 0.23.45** for RUSTSEC-2026-0285 (TLS 1.3 handshake messages
+  accepted across encryption level boundaries), pulled in through
+  `jsonschema`'s HTTP client. Lockfile only.
+
 ## [0.6.7] - 2026-09-14
 
 ### Fixed
