@@ -1,0 +1,4 @@
+{"schema":"keel.approval/1","stage":"spec","decision":"approved","artefact_hash":"f7aec522223981f02de8c118bfbeae477083f3058d635ac213dde41ae9224ec1","gate_verdict":"pass","by":"Dane Balia","at":"2026-09-23T05:49:45.223338+02:00"}
+{"schema":"keel.approval/1","stage":"spec","decision":"approved","artefact_hash":"a6710ed4e8ca4dc87db4e66be960e731a7a469321ba8d8db7d130444d029a45e","gate_verdict":"pass","by":"Dane Balia","at":"2026-09-23T06:29:01.651494+02:00"}
+{"schema":"keel.approval/1","stage":"plan","decision":"approved","artefact_hash":"10af20eaf1b128a26e5dad968505e0a99abe7cd83b81fcb2f0b0a07e5a8cb751","gate_verdict":"pass","by":"Dane Balia","at":"2026-09-23T06:29:13.700847+02:00"}
+{"schema":"keel.approval/1","stage":"merge","decision":"approved","artefact_hash":"548aaa0852a99271b0dfdcd02944fd9367f346803973d1c7e5e7fddfd508338f","gate_verdict":"fail","by":"Dane Balia","at":"2026-09-23T07:34:11.311142+02:00"}

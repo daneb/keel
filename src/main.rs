@@ -6,6 +6,7 @@
 
 mod approval;
 mod atomic;
+mod chain;
 mod cmd;
 mod config;
 mod driver;
@@ -120,6 +121,9 @@ enum Command {
     /// Run a gate and record its verdict
     #[command(subcommand)]
     Gate(GateCmd),
+    /// Verify the evidence chain, or print its head
+    #[command(subcommand)]
+    Chain(ChainCmd),
     /// Record a human decision on a stage
     Approve {
         slug: Option<String>,
@@ -414,6 +418,20 @@ enum GateCmd {
 }
 
 #[derive(Subcommand)]
+enum ChainCmd {
+    /// Walk the chain and name the first entry that does not link
+    Verify {
+        /// Also fail unless the chain ends at this hash
+        #[arg(long)]
+        head: Option<String>,
+        #[arg(long)]
+        json: bool,
+    },
+    /// Print the hash of the last entry, for anchoring outside the chain
+    Head,
+}
+
+#[derive(Subcommand)]
 enum StoreCmd {
     /// Render the store into CLAUDE.md, AGENTS.md and the rest
     Render {
@@ -516,6 +534,8 @@ fn run() -> Result<i32> {
             json,
         }),
         Command::Gate(GateCmd::G4 { run, json }) => cmd::learn::g4(run, json),
+        Command::Chain(ChainCmd::Verify { head, json }) => cmd::chain::verify(head, json),
+        Command::Chain(ChainCmd::Head) => cmd::chain::head(),
         Command::Learn { run, json } => cmd::learn::learn(run, json),
         Command::Failures { json } => cmd::learn::failures(json),
         Command::Lessons { json } => cmd::learn::list(json),

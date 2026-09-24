@@ -157,8 +157,15 @@ impl GateResult {
     pub fn write(&self, dir: &Path) -> Result<PathBuf> {
         std::fs::create_dir_all(dir)?;
         let path = dir.join(format!("{}.json", self.gate));
-        let json = serde_json::to_string_pretty(self)?;
-        crate::atomic::write(&path, &format!("{json}\n"))?;
+        let json = format!("{}\n", serde_json::to_string_pretty(self)?);
+        crate::atomic::write(&path, &json)?;
+        crate::chain::record(&path, "gate", serde_json::json!({
+            "gate": self.gate,
+            "spec": self.spec,
+            "run": self.run,
+            "verdict": self.verdict,
+            "sha256": crate::hashing::sha256_hex(json.as_bytes()),
+        }))?;
         Ok(path)
     }
 

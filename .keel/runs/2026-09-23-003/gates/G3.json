@@ -1,0 +1,31 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G3",
+  "run": "2026-09-23-004",
+  "spec": "evidence-chain",
+  "verdict": "fail",
+  "generated_at": "2026-09-23T07:31:59.288142+02:00",
+  "checks": [
+    {
+      "id": "earlier-gates",
+      "verdict": "pass",
+      "detail": "G2.5 and G2 passed"
+    },
+    {
+      "id": "reviewable-size",
+      "verdict": "pass",
+      "detail": "573/600 reviewable lines"
+    },
+    {
+      "id": "evidence-complete",
+      "verdict": "pass",
+      "detail": "trajectory, metadata and gate results present"
+    },
+    {
+      "id": "human-verdict",
+      "verdict": "fail",
+      "expected": "a recorded human decision on the change",
+      "actual": "none — run `keel approve evidence-chain --stage merge`"
+    }
+  ]
+}
