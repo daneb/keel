@@ -58,6 +58,17 @@ pub struct Config {
     pub ratchets: Vec<Ratchet>,
     #[serde(default)]
     pub chain: ChainConfig,
+    #[serde(default)]
+    pub runtime: RuntimeConfig,
+}
+
+/// What the sandbox a run happens in must vouch for (SPEC-0010).
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(default)]
+pub struct RuntimeConfig {
+    /// Posture properties the runtime's attestation must mark `proven` before
+    /// an agent runs. Empty means no runtime is required.
+    pub require: Vec<String>,
 }
 
 /// The evidence chain (ADR-0001).
@@ -372,6 +383,7 @@ impl Default for Config {
             shared: vec![],
             ratchets: default_ratchets(),
             chain: ChainConfig::default(),
+            runtime: RuntimeConfig::default(),
         }
     }
 }

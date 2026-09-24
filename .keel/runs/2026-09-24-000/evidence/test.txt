@@ -1,0 +1,105 @@
+$ cargo test --quiet
+
+
+running 291 tests
+....................................................................................... 87/291
+....................................................................................... 174/291
+....................................................................................... 261/291
+..............................
+test result: ok. 291 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.71s
+
+
+running 9 tests
+.........
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.49s
+
+
+running 9 tests
+.........
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.77s
+
+
+running 13 tests
+.............
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.64s
+
+
+running 6 tests
+......
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.48s
+
+
+running 6 tests
+......
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.20s
+
+
+running 9 tests
+.........
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.52s
+
+
+running 5 tests
+.....
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
+
+
+running 25 tests
+.........................
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.35s
+
+
+running 14 tests
+..............
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.60s
+
+
+running 13 tests
+.............
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.06s
+
+
+running 15 tests
+...............
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.12s
+
+
+running 25 tests
+.........................
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.56s
+
+
+running 12 tests
+............
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.84s
+
+
+running 6 tests
+......
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.65s
+
+
+running 8 tests
+........
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.27s
+
+
+running 34 tests
+..................................
+test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.68s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 7 tests
+.......
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.36s
+
+
+running 5 tests
+.....
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.38s
+
