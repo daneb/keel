@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "keel.posture/1 runtime attestation",
+  "description": "Written by the runtime before it starts keel, and named in KEEL_RUNTIME_ATTESTATION. Each property is a claim the runtime makes from outside the sandbox: proven, unproven (cannot vouch either way) or violated.",
+  "type": "object",
+  "required": ["schema", "runtime", "properties"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "keel.posture/1" },
+    "runtime": { "type": "string", "minLength": 1 },
+    "image_digest": { "type": "string" },
+    "attested_at": { "type": "string", "format": "date-time" },
+    "properties": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["status"],
+        "additionalProperties": false,
+        "properties": {
+          "status": { "enum": ["proven", "unproven", "violated"] },
+          "evidence": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "test",
+      "oracle": "test tests/runtime.rs::attest_entry_precedes_the_driver",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.69s"
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "test",
+      "oracle": "test tests/runtime.rs::proven_posture_passes_and_runs_the_driver",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.68s"
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "test",
+      "oracle": "test tests/runtime.rs::unproven_property_blocks_before_the_driver",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.50s"
+    },
+    {
+      "criterion": "AC-4",
+      "kind": "test",
+      "oracle": "test tests/runtime.rs::violated_property_fails_before_the_driver",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.19s"
+    },
+    {
+      "criterion": "AC-5",
+      "kind": "test",
+      "oracle": "test tests/runtime.rs::missing_attestation_blocks",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.49s"
+    },
+    {
+      "criterion": "AC-6",
+      "kind": "test",
+      "oracle": "test tests/runtime.rs::malformed_attestation_names_the_field",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.19s"
+    },
+    {
+      "criterion": "AC-7",
+      "kind": "test",
+      "oracle": "test tests/runtime.rs::no_requirement_leaves_runs_unchanged",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.71s"
+    },
+    {
+      "criterion": "AC-8",
+      "kind": "test",
+      "oracle": "test tests/runtime.rs::waves_check_posture_before_the_first_wave",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 2.05s"
+    }
+  ],
+  "criteria": 8,
+  "executed": 8,
+  "passed": 8,
+  "failed": 0,
+  "blocked": 0,
+  "human": 0
+}

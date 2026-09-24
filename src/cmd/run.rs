@@ -78,6 +78,9 @@ pub fn run(opts: Options) -> Result<i32> {
         keel_version: env!("CARGO_PKG_VERSION").to_string(),
         store_hash: store_hash.clone(),
     })?;
+    if let Some(code) = posture_stop(&paths, &cfg, &slug, &mut run, &mut traj, started, opts.json)? {
+        return Ok(code);
+    }
 
     // --- context, recorded as it is assembled --------------------------------
     let prompt = build_prompt(&paths, &cfg, &spec, tasks.as_ref(), opts.task.as_deref(), &mut traj)?;
@@ -210,6 +213,48 @@ pub fn run(opts: Options) -> Result<i32> {
 /// P5's invariant is that anything reaching the model is reconstructable from
 /// the stream — which means the injections have to be recorded *here*, as the
 /// prompt is built, not summarised afterwards.
+/// Judge the runtime's posture before any agent runs. `Some(exit code)` means
+/// the run stops here; the driver is never invoked.
+fn posture_stop(
+    paths: &Paths,
+    cfg: &Config,
+    slug: &str,
+    run: &mut Run,
+    traj: &mut Trajectory,
+    started: Instant,
+    json: bool,
+) -> Result<Option<i32>> {
+    let Some(result) = crate::runtime::preflight(paths, cfg, slug, run)? else {
+        return Ok(None);
+    };
+    traj.append(Payload::Gate {
+        gate: result.gate.clone(),
+        verdict: result.verdict.glyph().to_lowercase(),
+        result: format!("gates/{}.json", result.gate),
+    })?;
+    if !json {
+        println!("{} — {}", result.gate, slug);
+        for c in &result.checks {
+            println!("{}", c.line());
+        }
+        let (p, f, b) = result.counts();
+        println!("{} {} — {p} passed, {f} failed, {b} blocked\n", result.gate, result.verdict.glyph_styled());
+    }
+    if result.verdict == Verdict::Pass {
+        return Ok(None);
+    }
+
+    let verdict = result.verdict.glyph().to_lowercase();
+    traj.append(Payload::RunEnd { verdict: verdict.clone(), duration_ms: started.elapsed().as_millis() as u64 })?;
+    run.finish(&verdict)?;
+    if json {
+        println!("{}", serde_json::json!({ "run": run.meta.id, "spec": slug, "verdict": verdict }));
+    } else {
+        println!("run {} — {} — the runtime's posture did not pass; no agent ran", run.meta.id, result.verdict.glyph_styled());
+    }
+    Ok(Some(result.verdict.exit_code()))
+}
+
 fn build_prompt(
     paths: &Paths,
     cfg: &Config,
@@ -466,6 +511,11 @@ pub fn run_waves(opts: Options) -> Result<i32> {
         keel_version: env!("CARGO_PKG_VERSION").to_string(),
         store_hash: store_hash.clone(),
     })?;
+    // Once, before the first wave: no agent in any worktree runs on an
+    // unvouched-for sandbox.
+    if let Some(code) = posture_stop(&paths, &cfg, &slug, &mut run, &mut traj, started, opts.json)? {
+        return Ok(code);
+    }
 
     let prompt_base = build_prompt(&paths, &cfg, &spec, None, None, &mut traj)?;
 
