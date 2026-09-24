@@ -71,6 +71,11 @@ cmd = ".keel/reviewers/heuristic"
 timeout_secs = 60
 advisory = false
 
+# G3's reviewable-size ceiling, raised from the default 600 for SPEC-0011
+# (bundle-v1): a 668-line change, a third of it tests, reviewed as one.
+[plan]
+max_reviewable_lines = 700
+
 [verify]
 build = "cargo build --quiet"
 test = "cargo test --quiet"
