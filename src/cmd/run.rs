@@ -424,7 +424,7 @@ pub fn list(latest_only: bool, json: bool) -> Result<i32> {
 }
 
 /// `keel export <run>` and `keel export --verify <bundle>`.
-pub fn export(target: Option<String>, verify: Option<String>, out: Option<String>) -> Result<i32> {
+pub fn export(target: Option<String>, verify: Option<String>, out: Option<String>, chain: Option<String>) -> Result<i32> {
     let paths = Paths::require_init()?;
 
     if let Some(archive) = verify {
@@ -454,7 +454,12 @@ pub fn export(target: Option<String>, verify: Option<String>, out: Option<String
     let id = crate::run::resolve(&paths, target)?;
     let run = Run::load(&paths, &id)?;
     crate::evidence::write_schema(&paths)?;
-    let archive = crate::evidence::export(&paths, &run, out.as_deref().map(std::path::Path::new))?;
+    let archive = crate::evidence::export(
+        &paths,
+        &run,
+        out.as_deref().map(std::path::Path::new),
+        chain.as_deref().map(std::path::Path::new),
+    )?;
     // stdout is the path and nothing else, so it composes with other tools.
     println!("{}", archive.display());
     Ok(0)

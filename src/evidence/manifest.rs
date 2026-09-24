@@ -27,6 +27,10 @@ pub struct Manifest {
     pub created_at: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub verdict: Option<String>,
+    /// Hash of the last `chain.jsonl` entry shipped: the anchor the bundled
+    /// chain must end at. Absent when the bundle carries no chain.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub chain_head: Option<String>,
     pub members: Vec<Member>,
 }
 
@@ -40,6 +44,7 @@ impl Manifest {
             keel_version: run.keel_version.clone(),
             created_at: chrono::Local::now().to_rfc3339(),
             verdict: run.verdict.clone(),
+            chain_head: None,
             members,
         }
     }
@@ -65,6 +70,7 @@ pub const JSON_SCHEMA: &str = r##"{
     "keel_version": { "type": "string", "minLength": 1 },
     "created_at": { "type": "string", "minLength": 1 },
     "verdict": { "type": "string" },
+    "chain_head": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
     "members": {
       "type": "array",
       "minItems": 1,
@@ -105,6 +111,7 @@ mod tests {
             keel_version: "0.1.0".into(),
             created_at: "2026-08-21T10:00:00Z".into(),
             verdict: Some("pass".into()),
+            chain_head: Some("c".repeat(64)),
             members: vec![Member { path: "run.json".into(), bytes: 12, sha256: "b".repeat(64) }],
         };
         let json = serde_json::to_value(&m).unwrap();

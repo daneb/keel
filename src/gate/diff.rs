@@ -89,6 +89,26 @@ pub fn against(paths: &Paths, base: &str) -> Result<Diff> {
     Ok(Diff { base: base.to_string(), files, added, removed })
 }
 
+/// The full patch `against` measures: tracked changes against `base`, then
+/// each untracked file as an addition. Kept as evidence so a reviewer reads
+/// the change that was judged, not a later state of the tree.
+pub fn patch(paths: &Paths, base: &str) -> Result<String> {
+    let mut out = git(paths, &["diff", "--binary", base, "--"])?;
+    for path in untracked(paths)? {
+        // `--no-index` exits 1 whenever the two sides differ, which for a new
+        // file is always; only a missing patch is a failure.
+        let o = std::process::Command::new("git")
+            .args(["diff", "--no-index", "--binary", "/dev/null", &path])
+            .current_dir(&paths.repo)
+            .output()?;
+        if o.stdout.is_empty() && !o.status.success() {
+            bail!("git diff --no-index {path} failed: {}", String::from_utf8_lossy(&o.stderr).trim());
+        }
+        out.push_str(&String::from_utf8_lossy(&o.stdout));
+    }
+    Ok(out)
+}
+
 fn parse_numstat(line: &str) -> Option<FileChange> {
     let mut parts = line.split('\t');
     let a = parts.next()?;

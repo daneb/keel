@@ -125,6 +125,9 @@ enum Command {
     /// Verify the evidence chain, or print its head
     #[command(subcommand)]
     Chain(ChainCmd),
+    /// Check an evidence bundle using nothing but the bundle
+    #[command(subcommand)]
+    Bundle(BundleCmd),
     /// Record a human decision on a stage
     Approve {
         slug: Option<String>,
@@ -214,6 +217,10 @@ enum Command {
         /// Directory to write the bundle into
         #[arg(long)]
         out: Option<String>,
+        /// Ship this evidence chain instead of .keel/chain.jsonl — the one a
+        /// runtime wrote when keel never held the pen
+        #[arg(long)]
+        chain: Option<String>,
     },
     /// Extract failure episodes, classify them, propose lesson cards
     Learn {
@@ -419,6 +426,16 @@ enum GateCmd {
 }
 
 #[derive(Subcommand)]
+enum BundleCmd {
+    /// Members, chain, approvals, verdicts and trajectory: every link, offline
+    Verify {
+        archive: String,
+        #[arg(long)]
+        json: bool,
+    },
+}
+
+#[derive(Subcommand)]
 enum ChainCmd {
     /// Walk the chain and name the first entry that does not link
     Verify {
@@ -537,6 +554,7 @@ fn run() -> Result<i32> {
         Command::Gate(GateCmd::G4 { run, json }) => cmd::learn::g4(run, json),
         Command::Chain(ChainCmd::Verify { head, json }) => cmd::chain::verify(head, json),
         Command::Chain(ChainCmd::Head) => cmd::chain::head(),
+        Command::Bundle(BundleCmd::Verify { archive, json }) => cmd::bundle::verify(archive, json),
         Command::Learn { run, json } => cmd::learn::learn(run, json),
         Command::Failures { json } => cmd::learn::failures(json),
         Command::Lessons { json } => cmd::learn::list(json),
@@ -581,7 +599,7 @@ fn run() -> Result<i32> {
         }
         Command::Serve { port } => cmd::serve::run(port),
         Command::Report { slug, json } => cmd::report::run(slug, json),
-        Command::Export { run, verify, out } => cmd::run::export(run, verify, out),
+        Command::Export { run, verify, out, chain } => cmd::run::export(run, verify, out, chain),
         Command::Ratchet { accept } => cmd::ratchet::run(accept),
     }
 }

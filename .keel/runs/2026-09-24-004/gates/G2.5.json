@@ -1,0 +1,37 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G2.5",
+  "run": "2026-09-24-005",
+  "spec": "bundle-v1",
+  "verdict": "pass",
+  "generated_at": "2026-09-24T20:27:35.259082+02:00",
+  "checks": [
+    {
+      "id": "test-invalidation",
+      "verdict": "pass",
+      "detail": "2 flagged line(s) reviewed and accepted by Dane Balia",
+      "evidence": "evidence/review-test-invalidation.txt"
+    },
+    {
+      "id": "test-movement",
+      "verdict": "pass",
+      "detail": "13 code file(s), 1 test file(s)"
+    },
+    {
+      "id": "conventions",
+      "verdict": "pass",
+      "detail": "4 house rule(s) in force"
+    },
+    {
+      "id": "lessons",
+      "verdict": "pass",
+      "detail": "3 lesson(s) in force"
+    },
+    {
+      "id": "review",
+      "verdict": "pass",
+      "detail": "0 finding(s) (0.0s)",
+      "evidence": "evidence/review.json"
+    }
+  ]
+}

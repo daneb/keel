@@ -1,0 +1,37 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G2.5",
+  "run": "2026-09-24-003",
+  "spec": "bundle-v1",
+  "verdict": "blocked",
+  "generated_at": "2026-09-24T20:15:28.524629+02:00",
+  "checks": [
+    {
+      "id": "test-invalidation",
+      "verdict": "blocked",
+      "detail": "2 added line(s) mock or weaken behaviour — confirm the test still tests, then `keel approve --stage review bundle-v1`: src/gate/diff.rs: pub fn patch(paths: &Paths, base: &str) -> Result<String> {, src/gate/g2.rs: run.write_evidence(\"diff.patch\", &diff::patch(paths, &base)?)?;",
+      "evidence": "evidence/review-test-invalidation.txt"
+    },
+    {
+      "id": "test-movement",
+      "verdict": "pass",
+      "detail": "13 code file(s), 1 test file(s)"
+    },
+    {
+      "id": "conventions",
+      "verdict": "pass",
+      "detail": "4 house rule(s) in force"
+    },
+    {
+      "id": "lessons",
+      "verdict": "pass",
+      "detail": "3 lesson(s) in force"
+    },
+    {
+      "id": "review",
+      "verdict": "pass",
+      "detail": "0 finding(s) (0.0s)",
+      "evidence": "evidence/review.json"
+    }
+  ]
+}

@@ -87,6 +87,7 @@ pub fn run(
     match diff::against(paths, &base) {
         Ok(d) => {
             let stat = run.write_evidence("diff-stat.txt", &d.stat())?;
+            run.write_evidence("diff.patch", &diff::patch(paths, &base)?)?;
             checks.push(blast_radius(cfg, spec, plan, &d, &stat));
             checks.push(line_budget(cfg, spec, &d, &stat));
         }

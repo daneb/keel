@@ -1,0 +1,2 @@
+src/gate/diff.rs: pub fn patch(paths: &Paths, base: &str) -> Result<String> {
+src/gate/g2.rs: run.write_evidence("diff.patch", &diff::patch(paths, &base)?)?;
