@@ -188,6 +188,11 @@ pub fn verify(path: &Path, anchor: Option<&str>) -> Result<Outcome> {
     } else {
         String::new()
     };
+    Ok(verify_str(&raw, anchor))
+}
+
+/// The same walk over chain text already in hand — a bundle's member, say.
+pub fn verify_str(raw: &str, anchor: Option<&str>) -> Outcome {
     let mut prev_hash = GENESIS_HASH.to_string();
     let mut self_attested = false;
     let mut entries = 0;
@@ -196,9 +201,9 @@ pub fn verify(path: &Path, anchor: Option<&str>) -> Result<Outcome> {
         let expected_seq = line as u64;
         let entry: Entry = match serde_json::from_str(l) {
             Ok(e) => e,
-            Err(e) => return Ok(Outcome::Broken { line, seq: None, reason: format!("does not parse: {e}") }),
+            Err(e) => return Outcome::Broken { line, seq: None, reason: format!("does not parse: {e}") },
         };
-        let broken = |reason: String| Ok(Outcome::Broken { line, seq: Some(entry.seq), reason });
+        let broken = |reason: String| Outcome::Broken { line, seq: Some(entry.seq), reason };
         if entry.seq != expected_seq {
             return broken(format!("sequence {} where {expected_seq} belongs", entry.seq));
         }
@@ -215,9 +220,9 @@ pub fn verify(path: &Path, anchor: Option<&str>) -> Result<Outcome> {
     if let Some(expected) = anchor
         && expected != prev_hash
     {
-        return Ok(Outcome::HeadMismatch { expected: expected.to_string(), actual: prev_hash });
+        return Outcome::HeadMismatch { expected: expected.to_string(), actual: prev_hash };
     }
-    Ok(Outcome::Intact { entries, head: prev_hash, self_attested })
+    Outcome::Intact { entries, head: prev_hash, self_attested }
 }
 
 /// SHA-256 of a file's bytes, for entries that commit to a file without

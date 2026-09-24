@@ -2,6 +2,7 @@ pub mod approve;
 pub mod bench;
 pub mod chain;
 pub mod blast;
+pub mod bundle;
 pub mod doctor;
 pub mod driver;
 pub mod gate;

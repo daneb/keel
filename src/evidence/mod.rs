@@ -6,6 +6,7 @@
 //! happened. Plus a manifest, so they can tell it has not been edited since.
 
 pub mod manifest;
+pub mod verify;
 
 use crate::hashing::sha256_hex;
 use crate::paths::Paths;
@@ -19,7 +20,10 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 
 /// Build a bundle for a run. Returns the archive path.
-pub fn export(paths: &Paths, run: &Run, out_dir: Option<&Path>) -> Result<PathBuf> {
+///
+/// `chain` is where the evidence chain comes from: a runtime's, when keel
+/// never held the pen (ADR-0001), else the repository's own.
+pub fn export(paths: &Paths, run: &Run, out_dir: Option<&Path>, chain: Option<&Path>) -> Result<PathBuf> {
     let mut members: Vec<(String, Vec<u8>)> = Vec::new();
 
     // The run directory, in full.
@@ -37,6 +41,16 @@ pub fn export(paths: &Paths, run: &Run, out_dir: Option<&Path>) -> Result<PathBu
         collect_dir(&steering, &paths.store(), &mut members)?;
     }
 
+    let local_chain = crate::chain::path_in(&paths.repo);
+    let chain_source = chain.unwrap_or(&local_chain);
+    let chain_head = match chain_through_run(chain_source, &run.meta.id)? {
+        Some((text, head)) => {
+            members.push(("chain.jsonl".to_string(), text.into_bytes()));
+            Some(head)
+        }
+        None => None,
+    };
+
     members.sort_by(|a, b| a.0.cmp(&b.0));
     members.dedup_by(|a, b| a.0 == b.0);
 
@@ -53,7 +67,8 @@ pub fn export(paths: &Paths, run: &Run, out_dir: Option<&Path>) -> Result<PathBu
             sha256: sha256_hex(bytes),
         })
         .collect();
-    let manifest = Manifest::new(&run.meta, entries);
+    let mut manifest = Manifest::new(&run.meta, entries);
+    manifest.chain_head = chain_head;
     let manifest_bytes = format!("{}\n", serde_json::to_string_pretty(&manifest)?).into_bytes();
     members.insert(1, ("manifest.json".to_string(), manifest_bytes));
 
@@ -77,6 +92,27 @@ pub fn export(paths: &Paths, run: &Run, out_dir: Option<&Path>) -> Result<PathBu
     tar.into_inner()?.finish()?;
 
     Ok(archive_path)
+}
+
+/// The chain from its first entry through this run's `run_end`, with the hash
+/// it ends at. Entries after the run belong to later work and would only make
+/// the bundle's anchor drift. With no `run_end` for the run, every entry is
+/// kept and the verifier says what is missing. `None` when there is no chain.
+fn chain_through_run(path: &Path, run_id: &str) -> Result<Option<(String, String)>> {
+    let Ok(raw) = std::fs::read_to_string(path) else { return Ok(None) };
+    let mut kept = String::new();
+    let mut head = None;
+    for line in raw.lines().filter(|l| !l.trim().is_empty()) {
+        kept.push_str(line);
+        kept.push('\n');
+        let v: serde_json::Value = serde_json::from_str(line)
+            .with_context(|| format!("parsing {}", path.display()))?;
+        head = v["hash"].as_str().map(String::from);
+        if v["kind"] == "run_end" && v["data"]["run"] == run_id {
+            break;
+        }
+    }
+    Ok(head.map(|h| (kept, h)))
 }
 
 /// Read every member of a bundle back into memory.

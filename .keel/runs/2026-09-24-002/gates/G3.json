@@ -1,0 +1,32 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G3",
+  "run": "2026-09-24-003",
+  "spec": "bundle-v1",
+  "verdict": "fail",
+  "generated_at": "2026-09-24T20:15:28.550987+02:00",
+  "checks": [
+    {
+      "id": "earlier-gates",
+      "verdict": "blocked",
+      "detail": "G2.5 could not complete — G3 has nothing to ratify"
+    },
+    {
+      "id": "reviewable-size",
+      "verdict": "fail",
+      "expected": "at most 600 lines for one human review",
+      "actual": "668 lines across 14 files — split it, or raise the limit knowing what you are buying"
+    },
+    {
+      "id": "evidence-complete",
+      "verdict": "pass",
+      "detail": "trajectory, metadata and gate results present"
+    },
+    {
+      "id": "human-verdict",
+      "verdict": "fail",
+      "expected": "a recorded human decision on the change",
+      "actual": "none — run `keel approve bundle-v1 --stage merge`"
+    }
+  ]
+}

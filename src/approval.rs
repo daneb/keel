@@ -88,23 +88,38 @@ pub const STAGES: &[&str] = &["spec", "plan", "review", "security", "merge"];
 /// `tasks.md` too — approving a plan whose task list can then change freely
 /// would approve nothing.
 pub fn artefact_hash(paths: &Paths, slug: &str, stage: &str) -> Result<String> {
-    let mut hasher = crate::hashing::SetHasher::new();
-    let mut inputs = vec![artefact_path(paths, slug, stage)];
-    if stage == "plan" {
-        inputs.push(crate::plan::Tasks::path_for(paths, slug));
-    }
-    if stage == "merge" {
-        // Approving a merge approves the whole agreed shape of the work, so a
-        // later edit to the plan or tasks supersedes it too.
-        inputs.push(crate::plan::Plan::path_for(paths, slug));
-        inputs.push(crate::plan::Tasks::path_for(paths, slug));
-    }
-    for p in inputs {
+    let dir = Spec::dir(paths, slug);
+    let mut files = Vec::new();
+    for name in artefact_names(stage) {
+        let p = dir.join(name);
         let content = std::fs::read(&p)
             .with_context(|| format!("reading {} to hash it", p.display()))?;
-        hasher.add(&p.file_name().unwrap_or_default().to_string_lossy(), &content);
+        files.push((*name, content));
     }
-    Ok(hasher.finish())
+    Ok(hash_named(files.iter().map(|(n, c)| (*n, c.as_slice()))))
+}
+
+/// The files a stage signs off on, by name in the spec directory, in the
+/// order they are hashed. Approving a merge approves the whole agreed shape
+/// of the work, so a later edit to the plan or tasks supersedes it too.
+pub fn artefact_names(stage: &str) -> &'static [&'static str] {
+    match stage {
+        "plan" => &["plan.md", "tasks.md"],
+        "review" => &["review-flags.txt"],
+        "security" => &["security-findings.json"],
+        "merge" => &["spec.md", "plan.md", "tasks.md"],
+        _ => &["spec.md"],
+    }
+}
+
+/// The approval hash over named contents. Shared by `artefact_hash` and the
+/// bundle verifier, so what was signed and what is checked cannot drift.
+pub fn hash_named<'a>(files: impl IntoIterator<Item = (&'a str, &'a [u8])>) -> String {
+    let mut hasher = crate::hashing::SetHasher::new();
+    for (name, content) in files {
+        hasher.add(name, content);
+    }
+    hasher.finish()
 }
 
 pub fn record(

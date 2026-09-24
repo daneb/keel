@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "keel.bundleverify/1 report",
+  "description": "What `keel bundle verify --json` prints: every check run against a bundle, using nothing but the bundle. verdict rolls the checks up the way every gate does: any fail is fail, else any blocked is blocked.",
+  "type": "object",
+  "required": ["schema", "archive", "run", "spec", "verdict", "checks"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "keel.bundleverify/1" },
+    "archive": { "type": "string", "minLength": 1 },
+    "run": { "type": ["string", "null"] },
+    "spec": { "type": ["string", "null"] },
+    "verdict": { "enum": ["pass", "fail", "blocked"] },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "verdict"],
+        "properties": {
+          "id": { "enum": ["members", "chain", "approvals", "gate-verdicts", "trajectory"] },
+          "verdict": { "enum": ["pass", "fail", "blocked"] },
+          "expected": { "type": "string" },
+          "actual": { "type": "string" },
+          "detail": { "type": "string" }
+        }
+      }
+    }
+  }
+}
