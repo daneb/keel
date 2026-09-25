@@ -7,6 +7,29 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.9.1] - 2026-09-25
+
+### Fixed
+
+- **`test-movement` can be reviewed.** It blocked any change with code but no
+  test, and said "confirm", but nothing could record a confirmation, so a
+  config or docs change stayed blocked for good. It now writes a flag naming
+  the changed files into `review-flags.txt`. `keel approve --stage review`
+  clears it, and a different change makes that sign-off lapse.
+- **`keel cover` says "verification blocked"** for a bundle whose checks
+  couldn't complete, such as one with no chain, and "failed verification"
+  only when a check failed.
+- **The driver scripts pass Shellcheck** without `-x`, so CI in repositories
+  that commit `.keel/` no longer trips on keel's own scripts. Existing copies
+  in `.keel/drivers/` aren't changed.
+
+### Changed
+
+- **`keel.chain/1` and `keel.posture/1` are frozen**, along with
+  `KEEL_CHAIN_SINK` and `KEEL_RUNTIME_ATTESTATION`: additive changes only,
+  any other change is a design review (ROADMAP, *Spine freeze*). A runtime
+  such as Moor depends on them byte for byte.
+
 ## [0.9.0] - 2026-09-25
 
 ### Added
