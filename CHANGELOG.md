@@ -7,6 +7,39 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.8.0] - 2026-09-25
+
+### Added
+
+- **`keel bundle verify [--json] <archive>`** checks an evidence bundle
+  using nothing but the bundle: no repository, no `.keel/`, no config, no
+  network. Five checks, with gate verdicts and exit codes (0 pass, 1 fail,
+  3 blocked):
+  - `members`: every file matches the manifest.
+  - `chain`: every entry links, ending at the manifest's `chain_head`.
+  - `approvals`: each stage's latest approval equals the hash of the spec,
+    plan or tasks shipped.
+  - `gate-verdicts`: every shipped verdict has a chain entry with its SHA-256.
+  - `trajectory`: the trajectory matches its `run_end` entry, with only human
+    decisions after it.
+
+  A bundle with no chain is blocked, not passed. `--json` prints a
+  `keel.bundleverify/1` report (`schemas/bundleverify.json`).
+- **Bundles carry the evidence chain.** `keel export` ships the chain up to
+  the run's `run_end` and records its last hash as `chain_head` in the
+  manifest. That's a new optional field, so `keel.manifest/1` stays
+  compatible. `--chain <file>` ships a runtime's chain instead, for when keel
+  never held one.
+- **G2 keeps the patch it judged** as `evidence/diff.patch`, untracked files
+  included.
+
+### Changed
+
+- **Re-running a spec's gates after a run makes that run's bundle fail
+  `gate-verdicts`.** The re-run rewrites `<spec>/gates/*.json`, and the new
+  file isn't the one the chain recorded for the run. Export a run's bundle
+  before re-gating its spec.
+
 ## [0.7.0] - 2026-09-24
 
 ### Added
