@@ -1,0 +1,11 @@
+{
+  "schema": "keel.run/1",
+  "id": "2026-09-25-003",
+  "spec": "papercuts",
+  "keel_version": "0.9.0",
+  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
+  "started_at": "2026-09-25T19:09:34.482227+02:00",
+  "finished_at": "2026-09-25T19:11:18.553830+02:00",
+  "verdict": "pass",
+  "base_commit": "0b578c60eb9b9756635e5c86b7d8843866adc4a7"
+}

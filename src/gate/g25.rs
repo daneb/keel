@@ -50,8 +50,11 @@ pub fn run(
     match diff::against(paths, &base) {
         Ok(d) => {
             let patch = read_patch(paths, cfg, &base);
-            checks.push(test_invalidation(paths, spec, run, &d, patch.as_deref())?);
-            checks.push(test_movement(cfg, &d));
+            // Written into the same flags file as test-invalidation's hits, so
+            // one review sign-off acknowledges both and lapses when either moves.
+            let movement: Vec<String> = movement_flag(cfg, &d).into_iter().collect();
+            checks.push(test_invalidation(paths, spec, run, &d, patch.as_deref(), &movement)?);
+            checks.push(test_movement(paths, cfg, spec, &d));
         }
         Err(e) => {
             checks.push(Check::blocked("test-invalidation", format!("could not read the diff: {e}")));
@@ -276,8 +279,14 @@ fn test_invalidation(
     run: &Run,
     d: &diff::Diff,
     patch: Option<&str>,
+    extra_flags: &[String],
 ) -> Result<Check> {
+    let flags_path = crate::approval::review_flags_path(paths, &spec.front.slug);
+    if let Some(dir) = flags_path.parent() {
+        let _ = std::fs::create_dir_all(dir);
+    }
     let Some(patch) = patch else {
+        let _ = std::fs::write(&flags_path, flags_text(&[], extra_flags));
         return Ok(Check::blocked("test-invalidation", "could not read the patch text"));
     };
 
@@ -317,14 +326,7 @@ fn test_invalidation(
     // Record the flagged lines where an approval can bind to them, so a human
     // can say "I looked, these are fine" and have that survive exactly as long
     // as the flags do.
-    let flags_path = crate::approval::review_flags_path(paths, &spec.front.slug);
-    if let Some(dir) = flags_path.parent() {
-        let _ = std::fs::create_dir_all(dir);
-    }
-    let _ = std::fs::write(
-        &flags_path,
-        if hits.is_empty() { String::new() } else { format!("{}\n", hits.join("\n")) },
-    );
+    let _ = std::fs::write(&flags_path, flags_text(&hits, extra_flags));
 
     let reviewed = !hits.is_empty()
         && matches!(
@@ -363,8 +365,38 @@ fn test_invalidation(
     Ok(check)
 }
 
+/// Every flag a review sign-off acknowledges, one per line.
+fn flags_text(hits: &[String], extra: &[String]) -> String {
+    let all: Vec<&String> = hits.iter().chain(extra).collect();
+    if all.is_empty() {
+        String::new()
+    } else {
+        format!("{}\n", all.iter().map(|s| s.as_str()).collect::<Vec<_>>().join("\n"))
+    }
+}
+
+/// The review flag for code that changed with no test beside it, naming the
+/// files so a sign-off binds to exactly this change.
+fn movement_flag(cfg: &Config, d: &diff::Diff) -> Option<String> {
+    let is_test = |p: &str| crate::map::rank::is_test(p);
+    let counted = |f: &&diff::FileChange| !crate::gate::g2::is_incidental_for(cfg, &f.path);
+    if d.files.iter().filter(counted).any(|f| is_test(&f.path)) {
+        return None;
+    }
+    let code: Vec<&str> = d.files.iter().filter(counted).map(|f| f.path.as_str()).collect();
+    (!code.is_empty()).then(|| format!("test-movement: no test changed with {}", code.join(", ")))
+}
+
 /// Code changed with no test changed at all is worth a look; so is the reverse.
-fn test_movement(cfg: &Config, d: &diff::Diff) -> Check {
+/// A human can say "the oracles cover this" with `keel approve --stage review`,
+/// which binds to the flag naming these files.
+fn test_movement(paths: &Paths, cfg: &Config, spec: &Spec, d: &diff::Diff) -> Check {
+    if movement_flag(cfg, d).is_some()
+        && let Ok(crate::approval::Standing::Current { by, .. }) =
+            crate::approval::standing(paths, &spec.front.slug, "review")
+    {
+        return Check::pass("test-movement", format!("no test changed; reviewed and accepted by {by}"));
+    }
     let is_test = |p: &str| crate::map::rank::is_test(p);
     let changed_tests = d
         .files
@@ -380,7 +412,11 @@ fn test_movement(cfg: &Config, d: &diff::Diff) -> Check {
     if changed_code > 0 && changed_tests == 0 {
         return Check::blocked(
             "test-movement",
-            format!("{changed_code} code file(s) changed and no test file did — confirm the criteria's oracles actually exercise this"),
+            format!(
+                "{changed_code} code file(s) changed and no test file did — confirm the criteria's oracles \
+                 exercise this, then `keel approve --stage review {}`",
+                spec.front.slug
+            ),
         );
     }
     Check::pass(
@@ -527,7 +563,8 @@ mod tests {
             added: 40,
             removed: 0,
         };
-        assert_eq!(test_movement(&Config::default(), &d).verdict, super::super::Verdict::Blocked);
+        let flag = movement_flag(&Config::default(), &d).expect("code without tests is flagged");
+        assert!(flag.contains("src/api.rs"), "{flag}");
     }
 
     #[test]
@@ -541,6 +578,6 @@ mod tests {
             added: 60,
             removed: 0,
         };
-        assert_eq!(test_movement(&Config::default(), &d).verdict, super::super::Verdict::Pass);
+        assert_eq!(movement_flag(&Config::default(), &d), None);
     }
 }
