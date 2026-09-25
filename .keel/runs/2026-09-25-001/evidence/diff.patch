@@ -1,0 +1,3240 @@
+diff --git a/.keel/chain.jsonl b/.keel/chain.jsonl
+index 9ad2223..914d704 100644
+--- a/.keel/chain.jsonl
++++ b/.keel/chain.jsonl
+@@ -44,3 +44,15 @@
+ {"schema":"keel.chain/1","seq":44,"ts":"2026-09-24T20:27:35.259927+02:00","kind":"gate","writer":"in-process","data":{"gate":"G2.5","run":"2026-09-24-005","sha256":"e4166d57a3b62b200a5795348aabf659f11e2155aa844ed934701226cbaa0586","spec":"bundle-v1","verdict":"pass"},"prev_hash":"cf8180843ca47f11e9305dd9075ce088ab0d2131d4d7173adc04a7b3166f3f9d","hash":"1f0e3f5fdbe4767be5788cb3ed6164ed9bbb372ffd051b388b0c1746b9519973"}
+ {"schema":"keel.chain/1","seq":45,"ts":"2026-09-24T20:27:35.292757+02:00","kind":"gate","writer":"in-process","data":{"gate":"G3","run":"2026-09-24-005","sha256":"e5e2cae7b4b87c1316b54fcf0d90be59e2137de256b40aa1da7de7ae9d6340cf","spec":"bundle-v1","verdict":"pass"},"prev_hash":"1f0e3f5fdbe4767be5788cb3ed6164ed9bbb372ffd051b388b0c1746b9519973","hash":"0ea3d668182071977ac7fdab62c9b237b7c6225cf6635e328e57470e4c0afa57"}
+ {"schema":"keel.chain/1","seq":46,"ts":"2026-09-24T20:27:35.293848+02:00","kind":"run_end","writer":"in-process","data":{"run":"2026-09-24-004","trajectory_sha256":"4e391660ea17b97c3ef655e49cbc159b927898273bb41049d77c3332dffa811a","verdict":"pass"},"prev_hash":"0ea3d668182071977ac7fdab62c9b237b7c6225cf6635e328e57470e4c0afa57","hash":"ba042bf24670524462b32ba0b05e0fe3940e8e4b6680d417f6a543564d90c495"}
++{"schema":"keel.chain/1","seq":47,"ts":"2026-09-25T14:53:49.672498+02:00","kind":"gate","writer":"in-process","data":{"gate":"G0","run":"2026-09-25-000","sha256":"ecb479cf1d6768b613d9999f3635cf6cd2caa9044e5946cfda8469364ab1430b","spec":"keel-cover","verdict":"fail"},"prev_hash":"ba042bf24670524462b32ba0b05e0fe3940e8e4b6680d417f6a543564d90c495","hash":"a14c29021b8ffeba35aa7c0087f79e2181f19a5fe46f839123ce05226a1e854b"}
++{"schema":"keel.chain/1","seq":48,"ts":"2026-09-25T14:54:09.539554+02:00","kind":"gate","writer":"in-process","data":{"gate":"G0","run":"2026-09-25-000","sha256":"9bffbf8ab3b67e2a56545c84a990dacf39df36142ac6b602bb7d6ded03f82963","spec":"keel-cover","verdict":"pass"},"prev_hash":"a14c29021b8ffeba35aa7c0087f79e2181f19a5fe46f839123ce05226a1e854b","hash":"6081edb98fc8b48e113b1f3125e2e16890d3fb906914355f349d9b3f89221e91"}
++{"schema":"keel.chain/1","seq":49,"ts":"2026-09-25T14:55:12.803896+02:00","kind":"approval","writer":"in-process","data":{"artefact_hash":"3d0c21044f4a888e408e4590e3df75ab302a1fc568be07a077139fd5031b6ba6","by":"Dane Balia","decision":"approved","spec":"keel-cover","stage":"spec"},"prev_hash":"6081edb98fc8b48e113b1f3125e2e16890d3fb906914355f349d9b3f89221e91","hash":"e7987a4c357067e5c8f7cc32c0cf78684d7ae86c6c1f40df30f366d6b15d9f92"}
++{"schema":"keel.chain/1","seq":50,"ts":"2026-09-25T14:55:54.893345+02:00","kind":"gate","writer":"in-process","data":{"gate":"G1","run":"2026-09-25-000","sha256":"cfe22f8795de3bbabe823bc691ad61332a6f076c48afa62cfdb0b8264ba4b49f","spec":"keel-cover","verdict":"pass"},"prev_hash":"e7987a4c357067e5c8f7cc32c0cf78684d7ae86c6c1f40df30f366d6b15d9f92","hash":"d26faf4de5d86ad92b5a9b54b6dcafa53ed499c1b45df270822fa15b03ad2121"}
++{"schema":"keel.chain/1","seq":51,"ts":"2026-09-25T14:56:27.415209+02:00","kind":"approval","writer":"in-process","data":{"artefact_hash":"ac4e88801e228ec015f6873981ce39be4f49b2fd7ac42c6ef0c3ae1de6b78c58","by":"Dane Balia","decision":"approved","spec":"keel-cover","stage":"plan"},"prev_hash":"d26faf4de5d86ad92b5a9b54b6dcafa53ed499c1b45df270822fa15b03ad2121","hash":"9e04e65376560cbda94c586d2b4e347c948ede2c41f54dab0bfdabc0ff6b383f"}
++{"schema":"keel.chain/1","seq":52,"ts":"2026-09-25T14:59:44.377940+02:00","kind":"run_start","writer":"in-process","data":{"run":"2026-09-25-000","spec":"keel-cover","task":null},"prev_hash":"9e04e65376560cbda94c586d2b4e347c948ede2c41f54dab0bfdabc0ff6b383f","hash":"d9c30230f6cf9a47710c2a9d2e625c5beb1bead01523a1d4af18c7839583e6bb"}
++{"schema":"keel.chain/1","seq":53,"ts":"2026-09-25T15:01:28.676012+02:00","kind":"gate","writer":"in-process","data":{"gate":"G2","run":"2026-09-25-001","sha256":"8e0ddecd4c4f2f177de17e70f27df2dc808b64660c2f0934fcef58b359c04a75","spec":"keel-cover","verdict":"pass"},"prev_hash":"d9c30230f6cf9a47710c2a9d2e625c5beb1bead01523a1d4af18c7839583e6bb","hash":"4aa5a063fc0bc9459f9f7d9f57470a94c11ef98de2587020bf9c978c31c93c17"}
++{"schema":"keel.chain/1","seq":54,"ts":"2026-09-25T15:01:28.774724+02:00","kind":"gate","writer":"in-process","data":{"gate":"G2.5","run":"2026-09-25-001","sha256":"027109a24d6fd3262b92318afbad9cd4eb0152214c4732a9162deb617c45eba7","spec":"keel-cover","verdict":"pass"},"prev_hash":"4aa5a063fc0bc9459f9f7d9f57470a94c11ef98de2587020bf9c978c31c93c17","hash":"7a53fe851b3974ee3f5bd56b995b5fe5ee6acb07fb933db6ba3ab2111da6a024"}
++{"schema":"keel.chain/1","seq":55,"ts":"2026-09-25T15:01:28.799321+02:00","kind":"gate","writer":"in-process","data":{"gate":"G3","run":"2026-09-25-001","sha256":"a61eb82f38324f5091d74255781bf3aec24a5706dfd3a17ca187a2164beb1d21","spec":"keel-cover","verdict":"fail"},"prev_hash":"7a53fe851b3974ee3f5bd56b995b5fe5ee6acb07fb933db6ba3ab2111da6a024","hash":"710905407cf82cf9a9f8b997113a651c3f9977e115b3ac64ed7b5cb52af283ef"}
++{"schema":"keel.chain/1","seq":56,"ts":"2026-09-25T15:01:28.800144+02:00","kind":"run_end","writer":"in-process","data":{"run":"2026-09-25-000","trajectory_sha256":"1027179553c4ad31b066b552dcdf2511c0f7735708fd75e1529cce640d02cdba","verdict":"fail"},"prev_hash":"710905407cf82cf9a9f8b997113a651c3f9977e115b3ac64ed7b5cb52af283ef","hash":"5c54c7307ec80c96fb4d47cc52a080a20019431a9704e9f3c428b4bb754f6aba"}
++{"schema":"keel.chain/1","seq":57,"ts":"2026-09-25T15:44:40.530509+02:00","kind":"approval","writer":"in-process","data":{"artefact_hash":"d761025fa94fad026218c5a6ee74821f62ec208904b4a4f56fdf70d7c35f9214","by":"Dane Balia","decision":"approved","spec":"keel-cover","stage":"merge"},"prev_hash":"5c54c7307ec80c96fb4d47cc52a080a20019431a9704e9f3c428b4bb754f6aba","hash":"0111791afb3eac94e9949fbb4bdeed3968c8319827ea3764118e5ec2a2566483"}
++{"schema":"keel.chain/1","seq":58,"ts":"2026-09-25T15:45:02.696542+02:00","kind":"run_start","writer":"in-process","data":{"run":"2026-09-25-001","spec":"keel-cover","task":null},"prev_hash":"0111791afb3eac94e9949fbb4bdeed3968c8319827ea3764118e5ec2a2566483","hash":"02bb6026bb2e18185870d49b7f91a8210c885438eb6c3758f70635876d057a6a"}
+diff --git a/.keel/lesson-usage.json b/.keel/lesson-usage.json
+index 8547999..1c091f8 100644
+--- a/.keel/lesson-usage.json
++++ b/.keel/lesson-usage.json
+@@ -1,12 +1,12 @@
+ {
+   "injected": {
+-    "L-0001": "2026-09-24",
++    "L-0001": "2026-09-25",
+     "L-0002": "2026-08-22",
+     "L-0003": "2026-08-22"
+   },
+   "fired": {
+-    "L-0002": "2026-09-24",
+-    "L-0003": "2026-09-24",
++    "L-0002": "2026-09-25",
++    "L-0003": "2026-09-25",
+     "L-0004": "2026-01-15"
+   }
+ }
+diff --git a/src/cmd/mod.rs b/src/cmd/mod.rs
+index 92e0774..611a4b2 100644
+--- a/src/cmd/mod.rs
++++ b/src/cmd/mod.rs
+@@ -1,6 +1,7 @@
+ pub mod approve;
+ pub mod bench;
+ pub mod chain;
++pub mod cover;
+ pub mod blast;
+ pub mod bundle;
+ pub mod doctor;
+diff --git a/src/gate/g2.rs b/src/gate/g2.rs
+index 895e610..38539da 100644
+--- a/src/gate/g2.rs
++++ b/src/gate/g2.rs
+@@ -88,6 +88,7 @@ pub fn run(
+         Ok(d) => {
+             let stat = run.write_evidence("diff-stat.txt", &d.stat())?;
+             run.write_evidence("diff.patch", &diff::patch(paths, &base)?)?;
++            run.write_evidence("tree.txt", &format!("{}\n", crate::cover::tree_hash(paths, cfg)?))?;
+             checks.push(blast_radius(cfg, spec, plan, &d, &stat));
+             checks.push(line_budget(cfg, spec, &d, &stat));
+         }
+diff --git a/src/main.rs b/src/main.rs
+index bc5f271..7837ec0 100644
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -9,6 +9,7 @@ mod atomic;
+ mod chain;
+ mod cmd;
+ mod config;
++mod cover;
+ mod driver;
+ mod evidence;
+ mod failure;
+@@ -128,6 +129,14 @@ enum Command {
+     /// Check an evidence bundle using nothing but the bundle
+     #[command(subcommand)]
+     Bundle(BundleCmd),
++    /// Is this tree covered by a committed, verified bundle of a passing run?
++    Cover {
++        /// Pass as exempted rather than covered, recording why
++        #[arg(long, value_name = "REASON")]
++        exempt: Option<String>,
++        #[arg(long)]
++        json: bool,
++    },
+     /// Record a human decision on a stage
+     Approve {
+         slug: Option<String>,
+@@ -555,6 +564,7 @@ fn run() -> Result<i32> {
+         Command::Chain(ChainCmd::Verify { head, json }) => cmd::chain::verify(head, json),
+         Command::Chain(ChainCmd::Head) => cmd::chain::head(),
+         Command::Bundle(BundleCmd::Verify { archive, json }) => cmd::bundle::verify(archive, json),
++        Command::Cover { exempt, json } => cmd::cover::run(exempt, json),
+         Command::Learn { run, json } => cmd::learn::learn(run, json),
+         Command::Failures { json } => cmd::learn::failures(json),
+         Command::Lessons { json } => cmd::learn::list(json),
+diff --git a/.keel/runs/2026-09-25-000/evidence/build.txt b/.keel/runs/2026-09-25-000/evidence/build.txt
+new file mode 100644
+index 0000000..01700b6
+--- /dev/null
++++ b/.keel/runs/2026-09-25-000/evidence/build.txt
+@@ -0,0 +1,2 @@
++$ cargo build --quiet
++
+diff --git a/.keel/runs/2026-09-25-000/evidence/diff-stat.txt b/.keel/runs/2026-09-25-000/evidence/diff-stat.txt
+new file mode 100644
+index 0000000..a770386
+--- /dev/null
++++ b/.keel/runs/2026-09-25-000/evidence/diff-stat.txt
+@@ -0,0 +1,24 @@
++     6      0  .keel/chain.jsonl
++     1      1  .keel/lesson-usage.json
++     2      0  .keel/runs/2026-09-25-000/evidence/build.txt
++     2      0  .keel/runs/2026-09-25-000/evidence/lint.txt
++    74      0  .keel/runs/2026-09-25-000/evidence/oracles.json
++   115      0  .keel/runs/2026-09-25-000/evidence/test.txt
++     9      0  .keel/runs/2026-09-25-000/run.json
++    17      0  .keel/runs/2026-09-25-000/trajectory.jsonl
++     2      0  .keel/specs/keel-cover/approvals.jsonl
++    90      0  .keel/specs/keel-cover/gates/G0.json
++    95      0  .keel/specs/keel-cover/gates/G1.json
++   131      0  .keel/specs/keel-cover/plan.md
++   117      0  .keel/specs/keel-cover/spec.md
++    34      0  .keel/specs/keel-cover/tasks.md
++    34      0  action.yml
++    27      0  schemas/cover.json
++    34      0  src/cmd/cover.rs
++     1      0  src/cmd/mod.rs
++   160      0  src/cover/mod.rs
++     1      0  src/gate/g2.rs
++    10      0  src/main.rs
++   180      0  tests/cover.rs
++
++22 file(s), +1142 -1 (1143 lines of churn) against 356d8eba19e27fd4e9db028419ca77ea214cca0e
+diff --git a/.keel/runs/2026-09-25-000/evidence/diff.patch b/.keel/runs/2026-09-25-000/evidence/diff.patch
+new file mode 100644
+index 0000000..3e9a709
+--- /dev/null
++++ b/.keel/runs/2026-09-25-000/evidence/diff.patch
+@@ -0,0 +1,1341 @@
++diff --git a/.keel/chain.jsonl b/.keel/chain.jsonl
++index 9ad2223..4003384 100644
++--- a/.keel/chain.jsonl
+++++ b/.keel/chain.jsonl
++@@ -44,3 +44,9 @@
++ {"schema":"keel.chain/1","seq":44,"ts":"2026-09-24T20:27:35.259927+02:00","kind":"gate","writer":"in-process","data":{"gate":"G2.5","run":"2026-09-24-005","sha256":"e4166d57a3b62b200a5795348aabf659f11e2155aa844ed934701226cbaa0586","spec":"bundle-v1","verdict":"pass"},"prev_hash":"cf8180843ca47f11e9305dd9075ce088ab0d2131d4d7173adc04a7b3166f3f9d","hash":"1f0e3f5fdbe4767be5788cb3ed6164ed9bbb372ffd051b388b0c1746b9519973"}
++ {"schema":"keel.chain/1","seq":45,"ts":"2026-09-24T20:27:35.292757+02:00","kind":"gate","writer":"in-process","data":{"gate":"G3","run":"2026-09-24-005","sha256":"e5e2cae7b4b87c1316b54fcf0d90be59e2137de256b40aa1da7de7ae9d6340cf","spec":"bundle-v1","verdict":"pass"},"prev_hash":"1f0e3f5fdbe4767be5788cb3ed6164ed9bbb372ffd051b388b0c1746b9519973","hash":"0ea3d668182071977ac7fdab62c9b237b7c6225cf6635e328e57470e4c0afa57"}
++ {"schema":"keel.chain/1","seq":46,"ts":"2026-09-24T20:27:35.293848+02:00","kind":"run_end","writer":"in-process","data":{"run":"2026-09-24-004","trajectory_sha256":"4e391660ea17b97c3ef655e49cbc159b927898273bb41049d77c3332dffa811a","verdict":"pass"},"prev_hash":"0ea3d668182071977ac7fdab62c9b237b7c6225cf6635e328e57470e4c0afa57","hash":"ba042bf24670524462b32ba0b05e0fe3940e8e4b6680d417f6a543564d90c495"}
+++{"schema":"keel.chain/1","seq":47,"ts":"2026-09-25T14:53:49.672498+02:00","kind":"gate","writer":"in-process","data":{"gate":"G0","run":"2026-09-25-000","sha256":"ecb479cf1d6768b613d9999f3635cf6cd2caa9044e5946cfda8469364ab1430b","spec":"keel-cover","verdict":"fail"},"prev_hash":"ba042bf24670524462b32ba0b05e0fe3940e8e4b6680d417f6a543564d90c495","hash":"a14c29021b8ffeba35aa7c0087f79e2181f19a5fe46f839123ce05226a1e854b"}
+++{"schema":"keel.chain/1","seq":48,"ts":"2026-09-25T14:54:09.539554+02:00","kind":"gate","writer":"in-process","data":{"gate":"G0","run":"2026-09-25-000","sha256":"9bffbf8ab3b67e2a56545c84a990dacf39df36142ac6b602bb7d6ded03f82963","spec":"keel-cover","verdict":"pass"},"prev_hash":"a14c29021b8ffeba35aa7c0087f79e2181f19a5fe46f839123ce05226a1e854b","hash":"6081edb98fc8b48e113b1f3125e2e16890d3fb906914355f349d9b3f89221e91"}
+++{"schema":"keel.chain/1","seq":49,"ts":"2026-09-25T14:55:12.803896+02:00","kind":"approval","writer":"in-process","data":{"artefact_hash":"3d0c21044f4a888e408e4590e3df75ab302a1fc568be07a077139fd5031b6ba6","by":"Dane Balia","decision":"approved","spec":"keel-cover","stage":"spec"},"prev_hash":"6081edb98fc8b48e113b1f3125e2e16890d3fb906914355f349d9b3f89221e91","hash":"e7987a4c357067e5c8f7cc32c0cf78684d7ae86c6c1f40df30f366d6b15d9f92"}
+++{"schema":"keel.chain/1","seq":50,"ts":"2026-09-25T14:55:54.893345+02:00","kind":"gate","writer":"in-process","data":{"gate":"G1","run":"2026-09-25-000","sha256":"cfe22f8795de3bbabe823bc691ad61332a6f076c48afa62cfdb0b8264ba4b49f","spec":"keel-cover","verdict":"pass"},"prev_hash":"e7987a4c357067e5c8f7cc32c0cf78684d7ae86c6c1f40df30f366d6b15d9f92","hash":"d26faf4de5d86ad92b5a9b54b6dcafa53ed499c1b45df270822fa15b03ad2121"}
+++{"schema":"keel.chain/1","seq":51,"ts":"2026-09-25T14:56:27.415209+02:00","kind":"approval","writer":"in-process","data":{"artefact_hash":"ac4e88801e228ec015f6873981ce39be4f49b2fd7ac42c6ef0c3ae1de6b78c58","by":"Dane Balia","decision":"approved","spec":"keel-cover","stage":"plan"},"prev_hash":"d26faf4de5d86ad92b5a9b54b6dcafa53ed499c1b45df270822fa15b03ad2121","hash":"9e04e65376560cbda94c586d2b4e347c948ede2c41f54dab0bfdabc0ff6b383f"}
+++{"schema":"keel.chain/1","seq":52,"ts":"2026-09-25T14:59:44.377940+02:00","kind":"run_start","writer":"in-process","data":{"run":"2026-09-25-000","spec":"keel-cover","task":null},"prev_hash":"9e04e65376560cbda94c586d2b4e347c948ede2c41f54dab0bfdabc0ff6b383f","hash":"d9c30230f6cf9a47710c2a9d2e625c5beb1bead01523a1d4af18c7839583e6bb"}
++diff --git a/.keel/lesson-usage.json b/.keel/lesson-usage.json
++index 8547999..1848e46 100644
++--- a/.keel/lesson-usage.json
+++++ b/.keel/lesson-usage.json
++@@ -1,6 +1,6 @@
++ {
++   "injected": {
++-    "L-0001": "2026-09-24",
+++    "L-0001": "2026-09-25",
++     "L-0002": "2026-08-22",
++     "L-0003": "2026-08-22"
++   },
++diff --git a/src/cmd/mod.rs b/src/cmd/mod.rs
++index 92e0774..611a4b2 100644
++--- a/src/cmd/mod.rs
+++++ b/src/cmd/mod.rs
++@@ -1,6 +1,7 @@
++ pub mod approve;
++ pub mod bench;
++ pub mod chain;
+++pub mod cover;
++ pub mod blast;
++ pub mod bundle;
++ pub mod doctor;
++diff --git a/src/gate/g2.rs b/src/gate/g2.rs
++index 895e610..38539da 100644
++--- a/src/gate/g2.rs
+++++ b/src/gate/g2.rs
++@@ -88,6 +88,7 @@ pub fn run(
++         Ok(d) => {
++             let stat = run.write_evidence("diff-stat.txt", &d.stat())?;
++             run.write_evidence("diff.patch", &diff::patch(paths, &base)?)?;
+++            run.write_evidence("tree.txt", &format!("{}\n", crate::cover::tree_hash(paths, cfg)?))?;
++             checks.push(blast_radius(cfg, spec, plan, &d, &stat));
++             checks.push(line_budget(cfg, spec, &d, &stat));
++         }
++diff --git a/src/main.rs b/src/main.rs
++index bc5f271..7837ec0 100644
++--- a/src/main.rs
+++++ b/src/main.rs
++@@ -9,6 +9,7 @@ mod atomic;
++ mod chain;
++ mod cmd;
++ mod config;
+++mod cover;
++ mod driver;
++ mod evidence;
++ mod failure;
++@@ -128,6 +129,14 @@ enum Command {
++     /// Check an evidence bundle using nothing but the bundle
++     #[command(subcommand)]
++     Bundle(BundleCmd),
+++    /// Is this tree covered by a committed, verified bundle of a passing run?
+++    Cover {
+++        /// Pass as exempted rather than covered, recording why
+++        #[arg(long, value_name = "REASON")]
+++        exempt: Option<String>,
+++        #[arg(long)]
+++        json: bool,
+++    },
++     /// Record a human decision on a stage
++     Approve {
++         slug: Option<String>,
++@@ -555,6 +564,7 @@ fn run() -> Result<i32> {
++         Command::Chain(ChainCmd::Verify { head, json }) => cmd::chain::verify(head, json),
++         Command::Chain(ChainCmd::Head) => cmd::chain::head(),
++         Command::Bundle(BundleCmd::Verify { archive, json }) => cmd::bundle::verify(archive, json),
+++        Command::Cover { exempt, json } => cmd::cover::run(exempt, json),
++         Command::Learn { run, json } => cmd::learn::learn(run, json),
++         Command::Failures { json } => cmd::learn::failures(json),
++         Command::Lessons { json } => cmd::learn::list(json),
++diff --git a/.keel/runs/2026-09-25-000/evidence/build.txt b/.keel/runs/2026-09-25-000/evidence/build.txt
++new file mode 100644
++index 0000000..01700b6
++--- /dev/null
+++++ b/.keel/runs/2026-09-25-000/evidence/build.txt
++@@ -0,0 +1,2 @@
+++$ cargo build --quiet
+++
++diff --git a/.keel/runs/2026-09-25-000/evidence/diff-stat.txt b/.keel/runs/2026-09-25-000/evidence/diff-stat.txt
++new file mode 100644
++index 0000000..a770386
++--- /dev/null
+++++ b/.keel/runs/2026-09-25-000/evidence/diff-stat.txt
++@@ -0,0 +1,24 @@
+++     6      0  .keel/chain.jsonl
+++     1      1  .keel/lesson-usage.json
+++     2      0  .keel/runs/2026-09-25-000/evidence/build.txt
+++     2      0  .keel/runs/2026-09-25-000/evidence/lint.txt
+++    74      0  .keel/runs/2026-09-25-000/evidence/oracles.json
+++   115      0  .keel/runs/2026-09-25-000/evidence/test.txt
+++     9      0  .keel/runs/2026-09-25-000/run.json
+++    17      0  .keel/runs/2026-09-25-000/trajectory.jsonl
+++     2      0  .keel/specs/keel-cover/approvals.jsonl
+++    90      0  .keel/specs/keel-cover/gates/G0.json
+++    95      0  .keel/specs/keel-cover/gates/G1.json
+++   131      0  .keel/specs/keel-cover/plan.md
+++   117      0  .keel/specs/keel-cover/spec.md
+++    34      0  .keel/specs/keel-cover/tasks.md
+++    34      0  action.yml
+++    27      0  schemas/cover.json
+++    34      0  src/cmd/cover.rs
+++     1      0  src/cmd/mod.rs
+++   160      0  src/cover/mod.rs
+++     1      0  src/gate/g2.rs
+++    10      0  src/main.rs
+++   180      0  tests/cover.rs
+++
+++22 file(s), +1142 -1 (1143 lines of churn) against 356d8eba19e27fd4e9db028419ca77ea214cca0e
++diff --git a/.keel/runs/2026-09-25-000/evidence/lint.txt b/.keel/runs/2026-09-25-000/evidence/lint.txt
++new file mode 100644
++index 0000000..f68c665
++--- /dev/null
+++++ b/.keel/runs/2026-09-25-000/evidence/lint.txt
++@@ -0,0 +1,2 @@
+++$ cargo clippy --all-targets --quiet
+++
++diff --git a/.keel/runs/2026-09-25-000/evidence/oracles.json b/.keel/runs/2026-09-25-000/evidence/oracles.json
++new file mode 100644
++index 0000000..6b1ef41
++--- /dev/null
+++++ b/.keel/runs/2026-09-25-000/evidence/oracles.json
++@@ -0,0 +1,74 @@
+++{
+++  "runs": [
+++    {
+++      "criterion": "AC-1",
+++      "kind": "test",
+++      "oracle": "test tests/cover.rs::g2_records_the_tree_it_judged",
+++      "outcome": "pass",
+++      "exit_code": 0,
+++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.66s"
+++    },
+++    {
+++      "criterion": "AC-2",
+++      "kind": "test",
+++      "oracle": "test tests/cover.rs::content_hash_is_the_same_committed_or_not",
+++      "outcome": "pass",
+++      "exit_code": 0,
+++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.35s"
+++    },
+++    {
+++      "criterion": "AC-3",
+++      "kind": "test",
+++      "oracle": "test tests/cover.rs::a_verified_bundle_of_this_tree_covers_it",
+++      "outcome": "pass",
+++      "exit_code": 0,
+++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.59s"
+++    },
+++    {
+++      "criterion": "AC-4",
+++      "kind": "test",
+++      "oracle": "test tests/cover.rs::an_uncovered_change_names_each_reason",
+++      "outcome": "pass",
+++      "exit_code": 0,
+++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 2.10s"
+++    },
+++    {
+++      "criterion": "AC-5",
+++      "kind": "test",
+++      "oracle": "test tests/cover.rs::an_edit_after_the_run_is_not_covered",
+++      "outcome": "pass",
+++      "exit_code": 0,
+++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.78s"
+++    },
+++    {
+++      "criterion": "AC-6",
+++      "kind": "test",
+++      "oracle": "test tests/cover.rs::an_exemption_passes_as_exempted_not_covered",
+++      "outcome": "pass",
+++      "exit_code": 0,
+++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.27s"
+++    },
+++    {
+++      "criterion": "AC-7",
+++      "kind": "test",
+++      "oracle": "test tests/cover.rs::json_report_validates_against_the_published_schema",
+++      "outcome": "pass",
+++      "exit_code": 0,
+++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.88s"
+++    },
+++    {
+++      "criterion": "AC-8",
+++      "kind": "test",
+++      "oracle": "test tests/cover.rs::the_action_runs_keel_cover_on_the_pr_head",
+++      "outcome": "pass",
+++      "exit_code": 0,
+++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s"
+++    }
+++  ],
+++  "criteria": 8,
+++  "executed": 8,
+++  "passed": 8,
+++  "failed": 0,
+++  "blocked": 0,
+++  "human": 0
+++}
++\ No newline at end of file
++diff --git a/.keel/runs/2026-09-25-000/evidence/test.txt b/.keel/runs/2026-09-25-000/evidence/test.txt
++new file mode 100644
++index 0000000..965a75b
++--- /dev/null
+++++ b/.keel/runs/2026-09-25-000/evidence/test.txt
++@@ -0,0 +1,115 @@
+++$ cargo test --quiet
+++
+++
+++running 291 tests
+++....................................................................................... 87/291
+++....................................................................................... 174/291
+++....................................................................................... 261/291
+++..............................
+++test result: ok. 291 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.73s
+++
+++
+++running 8 tests
+++........
+++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.57s
+++
+++
+++running 9 tests
+++.........
+++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.49s
+++
+++
+++running 9 tests
+++.........
+++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.81s
+++
+++
+++running 8 tests
+++........
+++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.57s
+++
+++
+++running 13 tests
+++.............
+++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.49s
+++
+++
+++running 6 tests
+++......
+++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.45s
+++
+++
+++running 6 tests
+++......
+++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.45s
+++
+++
+++running 9 tests
+++.........
+++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.04s
+++
+++
+++running 5 tests
+++.....
+++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.35s
+++
+++
+++running 25 tests
+++.........................
+++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.53s
+++
+++
+++running 14 tests
+++..............
+++test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.33s
+++
+++
+++running 13 tests
+++.............
+++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.64s
+++
+++
+++running 15 tests
+++...............
+++test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.16s
+++
+++
+++running 25 tests
+++.........................
+++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.23s
+++
+++
+++running 12 tests
+++............
+++test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.86s
+++
+++
+++running 6 tests
+++......
+++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.73s
+++
+++
+++running 8 tests
+++........
+++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.51s
+++
+++
+++running 34 tests
+++..................................
+++test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.09s
+++
+++
+++running 0 tests
+++
+++test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+++
+++
+++running 7 tests
+++.......
+++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.92s
+++
+++
+++running 5 tests
+++.....
+++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.47s
+++
++diff --git a/.keel/runs/2026-09-25-000/run.json b/.keel/runs/2026-09-25-000/run.json
++new file mode 100644
++index 0000000..8429c90
++--- /dev/null
+++++ b/.keel/runs/2026-09-25-000/run.json
++@@ -0,0 +1,9 @@
+++{
+++  "schema": "keel.run/1",
+++  "id": "2026-09-25-000",
+++  "spec": "keel-cover",
+++  "keel_version": "0.8.0",
+++  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
+++  "started_at": "2026-09-25T14:59:44.376381+02:00",
+++  "base_commit": "356d8eba19e27fd4e9db028419ca77ea214cca0e"
+++}
++diff --git a/.keel/runs/2026-09-25-000/trajectory.jsonl b/.keel/runs/2026-09-25-000/trajectory.jsonl
++new file mode 100644
++index 0000000..ad909e4
++--- /dev/null
+++++ b/.keel/runs/2026-09-25-000/trajectory.jsonl
++@@ -0,0 +1,17 @@
+++{"t":"2026-09-25T14:59:44.376769+02:00","seq":1,"kind":"run_start","spec":"keel-cover","keel_version":"0.8.0","store_hash":"0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2"}
+++{"t":"2026-09-25T14:59:44.378357+02:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":424,"bytes":1693}
+++{"t":"2026-09-25T14:59:44.378435+02:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
+++{"t":"2026-09-25T14:59:44.378599+02:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6268,"bytes":25071}
+++{"t":"2026-09-25T14:59:44.379161+02:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
+++{"t":"2026-09-25T14:59:44.379278+02:00","seq":6,"kind":"inject","source":".keel/specs/keel-cover/spec.md","tokens":1067,"bytes":4266}
+++{"t":"2026-09-25T14:59:44.627617+02:00","seq":7,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
+++{"t":"2026-09-25T15:00:25.359169+02:00","seq":8,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
+++{"t":"2026-09-25T15:00:28.760903+02:00","seq":9,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
+++{"t":"2026-09-25T15:00:41.521011+02:00","seq":10,"kind":"oracle","criterion":"AC-1","oracle":"test tests/cover.rs::g2_records_the_tree_it_judged","verdict":"pass","exit_code":0}
+++{"t":"2026-09-25T15:00:41.521232+02:00","seq":11,"kind":"oracle","criterion":"AC-2","oracle":"test tests/cover.rs::content_hash_is_the_same_committed_or_not","verdict":"pass","exit_code":0}
+++{"t":"2026-09-25T15:00:41.521256+02:00","seq":12,"kind":"oracle","criterion":"AC-3","oracle":"test tests/cover.rs::a_verified_bundle_of_this_tree_covers_it","verdict":"pass","exit_code":0}
+++{"t":"2026-09-25T15:00:41.521267+02:00","seq":13,"kind":"oracle","criterion":"AC-4","oracle":"test tests/cover.rs::an_uncovered_change_names_each_reason","verdict":"pass","exit_code":0}
+++{"t":"2026-09-25T15:00:41.521277+02:00","seq":14,"kind":"oracle","criterion":"AC-5","oracle":"test tests/cover.rs::an_edit_after_the_run_is_not_covered","verdict":"pass","exit_code":0}
+++{"t":"2026-09-25T15:00:41.521331+02:00","seq":15,"kind":"oracle","criterion":"AC-6","oracle":"test tests/cover.rs::an_exemption_passes_as_exempted_not_covered","verdict":"pass","exit_code":0}
+++{"t":"2026-09-25T15:00:41.521395+02:00","seq":16,"kind":"oracle","criterion":"AC-7","oracle":"test tests/cover.rs::json_report_validates_against_the_published_schema","verdict":"pass","exit_code":0}
+++{"t":"2026-09-25T15:00:41.521483+02:00","seq":17,"kind":"oracle","criterion":"AC-8","oracle":"test tests/cover.rs::the_action_runs_keel_cover_on_the_pr_head","verdict":"pass","exit_code":0}
++diff --git a/.keel/specs/keel-cover/approvals.jsonl b/.keel/specs/keel-cover/approvals.jsonl
++new file mode 100644
++index 0000000..2d54bba
++--- /dev/null
+++++ b/.keel/specs/keel-cover/approvals.jsonl
++@@ -0,0 +1,2 @@
+++{"schema":"keel.approval/1","stage":"spec","decision":"approved","artefact_hash":"3d0c21044f4a888e408e4590e3df75ab302a1fc568be07a077139fd5031b6ba6","gate_verdict":"pass","by":"Dane Balia","at":"2026-09-25T14:55:12.803141+02:00"}
+++{"schema":"keel.approval/1","stage":"plan","decision":"approved","artefact_hash":"ac4e88801e228ec015f6873981ce39be4f49b2fd7ac42c6ef0c3ae1de6b78c58","gate_verdict":"pass","by":"Dane Balia","at":"2026-09-25T14:56:27.414507+02:00"}
++diff --git a/.keel/specs/keel-cover/gates/G0.json b/.keel/specs/keel-cover/gates/G0.json
++new file mode 100644
++index 0000000..8ca3919
++--- /dev/null
+++++ b/.keel/specs/keel-cover/gates/G0.json
++@@ -0,0 +1,90 @@
+++{
+++  "schema": "keel.gate/1",
+++  "gate": "G0",
+++  "run": "2026-09-25-000",
+++  "spec": "keel-cover",
+++  "verdict": "pass",
+++  "generated_at": "2026-09-25T14:54:09.538926+02:00",
+++  "checks": [
+++    {
+++      "id": "schema",
+++      "verdict": "pass",
+++      "detail": "SPEC-0012 (keel.spec/1)"
+++    },
+++    {
+++      "id": "criteria-present",
+++      "verdict": "pass",
+++      "detail": "8 criteria"
+++    },
+++    {
+++      "id": "criterion-ids-unique",
+++      "verdict": "pass",
+++      "detail": "no duplicate ids"
+++    },
+++    {
+++      "id": "no-placeholders",
+++      "verdict": "pass",
+++      "detail": "no unfilled scaffold text"
+++    },
+++    {
+++      "id": "ears-conformance",
+++      "verdict": "pass",
+++      "detail": "8/8 conform (event-driven, optional-feature, ubiquitous, unwanted-behaviour)"
+++    },
+++    {
+++      "id": "oracle-presence",
+++      "verdict": "pass",
+++      "detail": "8 oracles across 8 criteria"
+++    },
+++    {
+++      "id": "oracle-wellformed",
+++      "verdict": "pass",
+++      "detail": "all oracles parse"
+++    },
+++    {
+++      "id": "ambiguity",
+++      "verdict": "pass",
+++      "detail": "no ambiguous phrasing in criteria"
+++    },
+++    {
+++      "id": "criterion-budget",
+++      "verdict": "pass",
+++      "detail": "8/8 criteria"
+++    },
+++    {
+++      "id": "spec-length",
+++      "verdict": "pass",
+++      "detail": "117/250 lines"
+++    },
+++    {
+++      "id": "scope-declared",
+++      "verdict": "pass",
+++      "detail": "9 glob(s): src/cover/**, src/cmd/cover.rs, src/cmd/mod.rs, src/main.rs, src/gate/g2.rs, src/gate/diff.rs, action.yml, schemas/**, tests/cover.rs"
+++    },
+++    {
+++      "id": "change-budget",
+++      "verdict": "pass",
+++      "detail": "650 lines of diff budgeted"
+++    },
+++    {
+++      "id": "oracle-mix",
+++      "verdict": "pass",
+++      "detail": "8/8 runnable (8 test)"
+++    },
+++    {
+++      "id": "human-cost",
+++      "verdict": "pass",
+++      "detail": "0 human oracle(s), none load-bearing"
+++    },
+++    {
+++      "id": "store-drift",
+++      "verdict": "pass",
+++      "detail": "4 projections current"
+++    },
+++    {
+++      "id": "shared-stores",
+++      "verdict": "pass",
+++      "detail": "none configured"
+++    }
+++  ]
+++}
++diff --git a/.keel/specs/keel-cover/gates/G1.json b/.keel/specs/keel-cover/gates/G1.json
++new file mode 100644
++index 0000000..51f3fb8
++--- /dev/null
+++++ b/.keel/specs/keel-cover/gates/G1.json
++@@ -0,0 +1,95 @@
+++{
+++  "schema": "keel.gate/1",
+++  "gate": "G1",
+++  "run": "2026-09-25-000",
+++  "spec": "keel-cover",
+++  "verdict": "pass",
+++  "generated_at": "2026-09-25T14:55:54.893046+02:00",
+++  "checks": [
+++    {
+++      "id": "schema",
+++      "verdict": "pass",
+++      "detail": "PLAN-0012 + TASKS-0012"
+++    },
+++    {
+++      "id": "g0-passed",
+++      "verdict": "pass",
+++      "detail": "G0 passed in run 2026-09-25-000"
+++    },
+++    {
+++      "id": "spec-approved",
+++      "verdict": "pass",
+++      "detail": "approved by Dane Balia"
+++    },
+++    {
+++      "id": "tasks-present",
+++      "verdict": "pass",
+++      "detail": "4/15 tasks"
+++    },
+++    {
+++      "id": "task-ids-unique",
+++      "verdict": "pass",
+++      "detail": "no duplicate task ids"
+++    },
+++    {
+++      "id": "task-fields",
+++      "verdict": "pass",
+++      "detail": "all task fields recognised"
+++    },
+++    {
+++      "id": "task-criterion-traceability",
+++      "verdict": "pass",
+++      "detail": "4 tasks all traced"
+++    },
+++    {
+++      "id": "criteria-covered",
+++      "verdict": "pass",
+++      "detail": "8/8 criteria have a task"
+++    },
+++    {
+++      "id": "task-budgets",
+++      "verdict": "pass",
+++      "detail": "all 4 tasks budgeted, total 470 lines"
+++    },
+++    {
+++      "id": "total-budget",
+++      "verdict": "pass",
+++      "detail": "470/650 lines"
+++    },
+++    {
+++      "id": "task-exit-conditions",
+++      "verdict": "pass",
+++      "detail": "every task states when it is done"
+++    },
+++    {
+++      "id": "task-dependencies",
+++      "verdict": "pass",
+++      "detail": "4 wave(s), widths 1/1/1/1"
+++    },
+++    {
+++      "id": "wave-isolation",
+++      "verdict": "pass",
+++      "detail": "4 wave(s), no file claimed twice within one"
+++    },
+++    {
+++      "id": "task-files-in-scope",
+++      "verdict": "pass",
+++      "detail": "all task files inside the declared scope"
+++    },
+++    {
+++      "id": "rollback-stated",
+++      "verdict": "pass",
+++      "detail": "git revert the merge; keel cover and action.yml are new, an…"
+++    },
+++    {
+++      "id": "blast-radius-declared",
+++      "verdict": "pass",
+++      "detail": "21 file(s) at depth 2, 6563 lines"
+++    },
+++    {
+++      "id": "blast-radius-current",
+++      "verdict": "pass",
+++      "detail": "21 files, 6563 lines — matches a fresh computation — no indexed file matches src/cover/**, src/cmd/cover.rs, action.yml, schemas/**, tests/cover.rs (new files, or a typo)"
+++    }
+++  ]
+++}
++diff --git a/.keel/specs/keel-cover/plan.md b/.keel/specs/keel-cover/plan.md
++new file mode 100644
++index 0000000..68485b6
++--- /dev/null
+++++ b/.keel/specs/keel-cover/plan.md
++@@ -0,0 +1,131 @@
+++---
+++id: PLAN-0012
+++slug: keel-cover
+++schema: keel.plan/1
+++blast:
+++  depth: 2
+++  declared:
+++  - src/cover/**
+++  - src/cmd/cover.rs
+++  - src/cmd/mod.rs
+++  - src/main.rs
+++  - src/gate/g2.rs
+++  - src/gate/diff.rs
+++  - action.yml
+++  - schemas/**
+++  - tests/cover.rs
+++  computed:
+++  - src/main.rs
+++  - src/cmd/mod.rs
+++  - src/gate/diff.rs
+++  - src/gate/g2.rs
+++  - src/gate/mod.rs
+++  - src/run.rs
+++  - src/lesson/mod.rs
+++  - src/failure/mod.rs
+++  - src/report/mod.rs
+++  - src/pipeline.rs
+++  - src/driver/conform.rs
+++  - src/metrics.rs
+++  - src/cmd/next.rs
+++  - src/cmd/run.rs
+++  - src/cmd/learn.rs
+++  - src/cmd/doctor.rs
+++  - src/cmd/spec.rs
+++  - src/cmd/approve.rs
+++  - src/cmd/report.rs
+++  - src/cmd/gate.rs
+++  - src/cmd/plan.rs
+++  computed_lines: 6563
+++rollback: git revert the merge; keel cover and action.yml are new, and tree.txt is one more evidence file nothing else reads
+++verified_at: 2026-09-25
+++---
+++
+++# Design — keel-cover
+++
+++## Approach
+++
+++A new module, `src/cover/`, owns the content hash and the coverage decision.
+++G2 and the command are thin callers.
+++
+++**Content hash (AC-2).** `cover::tree_hash(paths, cfg)`:
+++- Lists `git ls-files --cached --others --exclude-standard -z`, which is
+++  tracked plus untracked-but-not-ignored, the same set G2's diff sees.
+++- Drops paths under `.keel/` and the enabled adapters' rendered outputs (the
+++  same globs `g2::is_incidental_for` uses, minus lockfiles), and drops tracked
+++  files deleted from the working tree.
+++- Feeds each remaining path and its working-tree bytes, sorted by path, to
+++  `SetHasher`.
+++
+++Because only working-tree bytes are read, it's the same hash committed, staged
+++or untracked. A symlink hashes its target path. The file mode isn't part of
+++the hash, which is a stated limit.
+++
+++**G2 (AC-1).** It writes `tree.txt` to evidence next to `diff.patch`, from the
+++same call.
+++
+++**Coverage (AC-3 to AC-6).** `cover::check(paths, cfg, exempt) -> Report`
+++hashes the head and considers each `.keel/bundles/*.tar.gz`, taking the first
+++reason that applies:
+++1. `keel bundle verify` doesn't pass: "failed verification", naming the
+++   failing checks.
+++2. The manifest's run verdict isn't `pass`: "run verdict <v>".
+++3. No `evidence/tree.txt` in the bundle: "predates tree hashes".
+++4. The hash differs: "a different tree (<12 chars>)".
+++5. Otherwise it covers the head.
+++
+++The verdict is `covered` if any bundle covers the head, else `exempted` when
+++`--exempt` was given, else `uncovered`. Exit codes: 0, 0 and 1. A covered head
+++stays `covered` even with `--exempt`, because the stronger statement wins.
+++
+++**Command and report (AC-7).** `keel cover [--exempt <reason>] [--json]`
+++prints the head hash and one line per bundle, or a `keel.cover/1` object
+++(`schemas/cover.json`).
+++
+++**Action (AC-8).** A composite `action.yml` at the repository root. Its only
+++input is `keel-version`, defaulting to the first release that ships `keel
+++cover`. Its steps:
+++1. `actions/checkout` at `github.event.pull_request.head.sha`.
+++2. `cargo install keel-harness --version <v> --locked`.
+++3. `keel cover`, adding `--exempt "label keel:exempt"` when
+++   `contains(github.event.pull_request.labels.*.name, 'keel:exempt')`, passed
+++   through an env var, not interpolated into the script.
+++
+++The test parses the YAML and asserts each of these.
+++
+++## Blast radius
+++
+++<!-- generated by `keel plan`; edits here are overwritten -->
+++
+++Computed from the import graph at depth 2: **21 files, 6563 lines**.
+++
+++| depth | file | lines |
+++| --- | --- | --- |
+++| scope | `src/main.rs` | 563 |
+++| scope | `src/cmd/mod.rs` | 23 |
+++| scope | `src/gate/diff.rs` | 186 |
+++| scope | `src/gate/g2.rs` | 382 |
+++| +1 | `src/gate/mod.rs` | 375 |
+++| +2 | `src/run.rs` | 272 |
+++| +2 | `src/lesson/mod.rs` | 719 |
+++| +2 | `src/failure/mod.rs` | 573 |
+++| +2 | `src/report/mod.rs` | 156 |
+++| +2 | `src/pipeline.rs` | 284 |
+++| +2 | `src/driver/conform.rs` | 260 |
+++| +2 | `src/metrics.rs` | 164 |
+++| +2 | `src/cmd/next.rs` | 475 |
+++| +2 | `src/cmd/run.rs` | 688 |
+++| +2 | `src/cmd/learn.rs` | 371 |
+++| +2 | `src/cmd/doctor.rs` | 296 |
+++| +2 | `src/cmd/spec.rs` | 208 |
+++| +2 | `src/cmd/approve.rs` | 203 |
+++| +2 | `src/cmd/report.rs` | 202 |
+++| +2 | `src/cmd/gate.rs` | 74 |
+++| +2 | `src/cmd/plan.rs` | 89 |
+++
+++_Scope globs matching no indexed file (new files, or a typo): src/cover/**, src/cmd/cover.rs, action.yml, schemas/**, tests/cover.rs_
+++
+++
+++## Rollback
+++
+++`git revert` — replace this if the change needs a different rollback.
++diff --git a/.keel/specs/keel-cover/spec.md b/.keel/specs/keel-cover/spec.md
++new file mode 100644
++index 0000000..0904d10
++--- /dev/null
+++++ b/.keel/specs/keel-cover/spec.md
++@@ -0,0 +1,117 @@
+++---
+++id: SPEC-0012
+++slug: keel-cover
+++schema: keel.spec/1
+++status: approved
+++scope:
+++- src/cover/**
+++- src/cmd/cover.rs
+++- src/cmd/mod.rs
+++- src/main.rs
+++- src/gate/g2.rs
+++- src/gate/diff.rs
+++- action.yml
+++- schemas/**
+++- tests/cover.rs
+++budget:
+++  criteria: 8
+++  lines: 650
+++verified_at: 2026-09-25
+++---
+++
+++# A PR check: every change covered by a verified bundle
+++
+++## Context
+++
+++A bundle proves what one run did (SPEC-0011), but nothing yet stops a change
+++reaching `master` without one. Roadmap R10 asks for a PR check: fail when a
+++PR's change has no valid bundle. That's the piece an outside team adopts first,
+++and it needs nothing but keel: no runtime, no Moor.
+++
+++The design decisions:
+++- **Every commit needs cover, not only agent-marked ones.** A trailer can be
+++  deleted, and a check that can be dodged that way checks nothing.
+++- **Bundles are committed in the PR** under `.keel/bundles/`, so the check
+++  runs offline, with no artifact storage.
+++
+++Commit SHAs can't link a run to a PR: a driver's work isn't committed when it's
+++gated. The link is the **content of the gated tree**. G2 records a hash of the
+++tree it judged. The PR's head is covered when a committed bundle verifies, its
+++run passed, and its hash equals the head's. The hash leaves out `.keel/**`,
+++which committing the bundle itself changes, and keel's rendered projections,
+++which `store-drift` already checks. It keeps lockfiles in, because a dependency
+++change is exactly what has to be covered.
+++
+++## Acceptance criteria
+++
+++### AC-1 G2 records the tree it judged
+++
+++WHEN G2 runs THE SYSTEM SHALL write the content hash of the working tree it
+++judged to the run's evidence as `tree.txt`.
+++
+++oracle: test tests/cover.rs::g2_records_the_tree_it_judged
+++
+++### AC-2 The content hash ignores where the bytes live
+++
+++THE SYSTEM SHALL compute the same content hash for the same files whether they
+++are committed, staged or untracked. The hash leaves out `.keel/**`, gitignored
+++files and keel's rendered projections, and covers every other path, lockfiles
+++included.
+++
+++oracle: test tests/cover.rs::content_hash_is_the_same_committed_or_not
+++
+++### AC-3 A covered head passes
+++
+++WHEN `keel cover` runs and a bundle under `.keel/bundles/` passes `keel bundle
+++verify`, records a `pass` run verdict and a tree hash equal to the head's THE
+++SYSTEM SHALL exit 0 and name that bundle.
+++
+++oracle: test tests/cover.rs::a_verified_bundle_of_this_tree_covers_it
+++
+++### AC-4 An uncovered head fails, saying why
+++
+++IF no bundle under `.keel/bundles/` covers the head THEN THE SYSTEM SHALL exit
+++1, print the head's content hash, and give each bundle's reason: failed
+++verification, a verdict other than pass, or a different tree.
+++
+++oracle: test tests/cover.rs::an_uncovered_change_names_each_reason
+++
+++### AC-5 A change after the run is not covered
+++
+++IF the tree changes after a bundle's run, including a lockfile THEN THE
+++SYSTEM SHALL report that bundle as covering a different tree.
+++
+++oracle: test tests/cover.rs::an_edit_after_the_run_is_not_covered
+++
+++### AC-6 An exemption is a stated human decision
+++
+++WHERE `keel cover --exempt <reason>` is given THE SYSTEM SHALL exit 0 and print
+++that the head is exempted, not covered, with the reason.
+++
+++oracle: test tests/cover.rs::an_exemption_passes_as_exempted_not_covered
+++
+++### AC-7 The report is machine-readable
+++
+++WHEN `keel cover --json` runs THE SYSTEM SHALL print one `keel.cover/1` object
+++with the head hash, the verdict (`covered`, `uncovered` or `exempted`), and
+++each bundle considered with its reason.
+++
+++oracle: test tests/cover.rs::json_report_validates_against_the_published_schema
+++
+++### AC-8 A GitHub Action runs it on pull requests
+++
+++THE SYSTEM SHALL ship `action.yml`, a composite action that checks out the
+++PR's head, installs a pinned keel version, runs `keel cover`, and passes
+++`--exempt` with the PR's `keel:exempt` label as the reason when that label is
+++set.
+++
+++oracle: test tests/cover.rs::the_action_runs_keel_cover_on_the_pr_head
+++
+++## Out of scope
+++
+++- Changing `keel init`'s `.gitignore`, which still ignores `.keel/bundles/`.
+++  Committing a bundle takes `git add -f` for now.
+++- Covering each commit separately. The head's tree is what merges, and every
+++  commit in the PR contributes to it.
+++- A bundle built by CI itself (the GitHub Actions runtime).
+++- Branch protection settings, which are the repository owner's to set.
++diff --git a/.keel/specs/keel-cover/tasks.md b/.keel/specs/keel-cover/tasks.md
++new file mode 100644
++index 0000000..6325464
++--- /dev/null
+++++ b/.keel/specs/keel-cover/tasks.md
++@@ -0,0 +1,34 @@
+++---
+++id: TASKS-0012
+++slug: keel-cover
+++schema: keel.tasks/1
+++---
+++
+++# Tasks
+++
+++### T-1 Content hash, and G2 records it
+++- criteria: AC-1, AC-2
+++- files: src/cover/mod.rs, src/gate/g2.rs, src/main.rs, tests/cover.rs
+++- budget: 150
+++- exit: test tests/cover.rs::content_hash_is_the_same_committed_or_not
+++
+++### T-2 Coverage decision and the keel cover command
+++- criteria: AC-3, AC-4, AC-5, AC-6
+++- files: src/cover/mod.rs, src/cmd/cover.rs, src/cmd/mod.rs, src/main.rs, tests/cover.rs
+++- budget: 150
+++- depends_on: T-1
+++- exit: test tests/cover.rs::an_uncovered_change_names_each_reason
+++
+++### T-3 JSON report and schema
+++- criteria: AC-7
+++- files: src/cmd/cover.rs, schemas/cover.json, tests/cover.rs
+++- budget: 80
+++- depends_on: T-2
+++- exit: test tests/cover.rs::json_report_validates_against_the_published_schema
+++
+++### T-4 The GitHub Action
+++- criteria: AC-8
+++- files: action.yml, tests/cover.rs
+++- budget: 90
+++- depends_on: T-3
+++- exit: test tests/cover.rs::the_action_runs_keel_cover_on_the_pr_head
++diff --git a/action.yml b/action.yml
++new file mode 100644
++index 0000000..d930946
++--- /dev/null
+++++ b/action.yml
++@@ -0,0 +1,34 @@
+++name: keel cover
+++description: >-
+++  Fail a pull request unless its change is covered by a committed, verified
+++  keel evidence bundle of a passing run of exactly that tree. A maintainer can
+++  pass it instead by adding the `keel:exempt` label, which is recorded as an
+++  exemption, not as cover. Bundles live under .keel/bundles/ in the PR
+++  (`keel export`, then `git add -f`).
+++inputs:
+++  keel-version:
+++    description: The keel-harness version to install; the first with `keel cover` is 0.9.0.
+++    required: false
+++    default: "0.9.0"
+++runs:
+++  using: composite
+++  steps:
+++    - uses: actions/checkout@v5
+++      with:
+++        ref: ${{ github.event.pull_request.head.sha }}
+++    - name: Install keel
+++      shell: bash
+++      run: cargo install keel-harness --version "$KEEL_VERSION" --locked
+++      env:
+++        KEEL_VERSION: ${{ inputs.keel-version }}
+++    - name: keel cover
+++      shell: bash
+++      # The label arrives as an env var, never interpolated into the script.
+++      env:
+++        KEEL_EXEMPT: ${{ contains(github.event.pull_request.labels.*.name, 'keel:exempt') }}
+++      run: |
+++        if [ "$KEEL_EXEMPT" = "true" ]; then
+++          keel cover --exempt "label keel:exempt set on the pull request"
+++        else
+++          keel cover
+++        fi
++diff --git a/schemas/cover.json b/schemas/cover.json
++new file mode 100644
++index 0000000..8a24989
++--- /dev/null
+++++ b/schemas/cover.json
++@@ -0,0 +1,27 @@
+++{
+++  "$schema": "https://json-schema.org/draft/2020-12/schema",
+++  "title": "keel.cover/1 report",
+++  "description": "What `keel cover --json` prints: the content hash of the working tree, whether a committed, verified bundle of a passing run covers it, and why each bundle does or does not.",
+++  "type": "object",
+++  "required": ["schema", "head", "verdict", "bundles"],
+++  "additionalProperties": false,
+++  "properties": {
+++    "schema": { "const": "keel.cover/1" },
+++    "head": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+++    "verdict": { "enum": ["covered", "uncovered", "exempted"] },
+++    "exempt_reason": { "type": "string" },
+++    "bundles": {
+++      "type": "array",
+++      "items": {
+++        "type": "object",
+++        "required": ["bundle", "covers", "reason"],
+++        "additionalProperties": false,
+++        "properties": {
+++          "bundle": { "type": "string", "minLength": 1 },
+++          "covers": { "type": "boolean" },
+++          "reason": { "type": "string", "minLength": 1 }
+++        }
+++      }
+++    }
+++  }
+++}
++diff --git a/src/cmd/cover.rs b/src/cmd/cover.rs
++new file mode 100644
++index 0000000..5b6ec3a
++--- /dev/null
+++++ b/src/cmd/cover.rs
++@@ -0,0 +1,34 @@
+++//! `keel cover` — is the working tree's content covered by a verified bundle
+++//! of a passing run? Built for a pull request check (SPEC-0012).
+++
+++use crate::config::Config;
+++use crate::paths::Paths;
+++use anyhow::Result;
+++
+++pub fn run(exempt: Option<String>, json: bool) -> Result<i32> {
+++    let paths = Paths::require_init()?;
+++    let cfg = Config::load(&paths.config())?;
+++    let report = crate::cover::check(&paths, &cfg, exempt)?;
+++
+++    if json {
+++        println!("{}", serde_json::to_string_pretty(&report)?);
+++        return Ok(report.exit_code());
+++    }
+++    println!("head {}\n", report.head);
+++    if report.bundles.is_empty() {
+++        println!("  no bundles under .keel/bundles/");
+++    }
+++    for b in &report.bundles {
+++        let mark = if b.covers { "covers " } else { "does not" };
+++        println!("  {mark}  {} — {}", b.bundle, b.reason);
+++    }
+++    match report.verdict.as_str() {
+++        "covered" => println!("\ncovered"),
+++        "exempted" => println!(
+++            "\nexempted, not covered — {}",
+++            report.exempt_reason.as_deref().unwrap_or("no reason given")
+++        ),
+++        _ => println!("\nuncovered — commit the bundle of a passing run of exactly this tree"),
+++    }
+++    Ok(report.exit_code())
+++}
++diff --git a/src/cover/mod.rs b/src/cover/mod.rs
++new file mode 100644
++index 0000000..d827633
++--- /dev/null
+++++ b/src/cover/mod.rs
++@@ -0,0 +1,160 @@
+++//! Is this change covered by a verified bundle? (SPEC-0012)
+++//!
+++//! A run is linked to a pull request by the *content* it gated, not by commit
+++//! SHAs: a driver's work is not committed when G2 judges it. G2 records a hash
+++//! of the tree it judged; a PR's head is covered when a committed bundle
+++//! verifies, its run passed, and that hash equals the head's.
+++
+++use crate::config::Config;
+++use crate::evidence;
+++use crate::gate::Verdict;
+++use crate::hashing::SetHasher;
+++use crate::paths::Paths;
+++use anyhow::{Context, Result, bail};
+++use globset::{Glob, GlobSetBuilder};
+++use serde::Serialize;
+++use std::path::Path;
+++
+++pub const REPORT_SCHEMA: &str = "keel.cover/1";
+++
+++/// The content hash of the working tree: every path git would show as part
+++/// of the change, with its bytes as they are on disk now — so the same files
+++/// hash the same whether committed, staged or untracked.
+++///
+++/// Leaves out `.keel/` (committing a bundle and its run records changes it)
+++/// and keel's rendered projections (`store-drift` already checks those). Keeps
+++/// lockfiles, unlike G2's incidental set: a dependency change is exactly what
+++/// has to be covered. The file mode is not part of the hash.
+++pub fn tree_hash(paths: &Paths, cfg: &Config) -> Result<String> {
+++    let out = std::process::Command::new("git")
+++        .args(["ls-files", "--cached", "--others", "--exclude-standard", "-z"])
+++        .current_dir(&paths.repo)
+++        .output()
+++        .context("running git ls-files")?;
+++    if !out.status.success() {
+++        bail!("git ls-files failed: {}", String::from_utf8_lossy(&out.stderr).trim());
+++    }
+++
+++    let mut skip = GlobSetBuilder::new();
+++    skip.add(Glob::new(".keel/**")?);
+++    for a in cfg.adapters.iter().filter(|a| a.enabled) {
+++        if let Ok(g) = Glob::new(&a.out) {
+++            skip.add(g);
+++        }
+++    }
+++    let skip = skip.build()?;
+++
+++    let mut files: Vec<String> = out
+++        .stdout
+++        .split(|b| *b == 0)
+++        .filter(|p| !p.is_empty())
+++        .map(|p| String::from_utf8_lossy(p).into_owned())
+++        .filter(|p| !skip.is_match(p))
+++        .collect();
+++    files.sort();
+++    files.dedup();
+++
+++    let mut h = SetHasher::new();
+++    for rel in &files {
+++        let p = paths.repo.join(rel);
+++        let Ok(meta) = std::fs::symlink_metadata(&p) else {
+++            continue; // tracked, but deleted from the working tree
+++        };
+++        let bytes = if meta.file_type().is_symlink() {
+++            std::fs::read_link(&p)?.to_string_lossy().into_owned().into_bytes()
+++        } else {
+++            std::fs::read(&p).with_context(|| format!("reading {rel}"))?
+++        };
+++        h.add(rel, &bytes);
+++    }
+++    Ok(h.finish())
+++}
+++
+++#[derive(Debug, Clone, Serialize)]
+++pub struct Considered {
+++    pub bundle: String,
+++    pub covers: bool,
+++    pub reason: String,
+++}
+++
+++#[derive(Debug, Clone, Serialize)]
+++pub struct Report {
+++    pub schema: String,
+++    pub head: String,
+++    /// `covered`, `uncovered` or `exempted`.
+++    pub verdict: String,
+++    #[serde(skip_serializing_if = "Option::is_none")]
+++    pub exempt_reason: Option<String>,
+++    pub bundles: Vec<Considered>,
+++}
+++
+++impl Report {
+++    pub fn exit_code(&self) -> i32 {
+++        if self.verdict == "uncovered" { 1 } else { 0 }
+++    }
+++}
+++
+++/// Weigh every committed bundle against the head. The first reason that
+++/// applies is the one reported, in the order a reviewer would ask.
+++pub fn check(paths: &Paths, cfg: &Config, exempt: Option<String>) -> Result<Report> {
+++    let head = tree_hash(paths, cfg)?;
+++    let dir = paths.keel().join("bundles");
+++    let mut archives: Vec<_> = std::fs::read_dir(&dir)
+++        .map(|rd| rd.filter_map(|e| e.ok().map(|e| e.path())).collect())
+++        .unwrap_or_default();
+++    archives.retain(|p: &std::path::PathBuf| p.to_string_lossy().ends_with(".tar.gz"));
+++    archives.sort();
+++
+++    let bundles: Vec<Considered> = archives
+++        .iter()
+++        .map(|a| {
+++            let (covers, reason) = judge(a, &head);
+++            Considered { bundle: paths.rel(a).display().to_string(), covers, reason }
+++        })
+++        .collect();
+++
+++    let covered = bundles.iter().any(|b| b.covers);
+++    let verdict = match (covered, &exempt) {
+++        (true, _) => "covered",
+++        (false, Some(_)) => "exempted",
+++        (false, None) => "uncovered",
+++    };
+++    Ok(Report {
+++        schema: REPORT_SCHEMA.to_string(),
+++        head,
+++        verdict: verdict.to_string(),
+++        exempt_reason: if covered { None } else { exempt },
+++        bundles,
+++    })
+++}
+++
+++fn judge(archive: &Path, head: &str) -> (bool, String) {
+++    let report = match evidence::verify::check(archive) {
+++        Ok(r) => r,
+++        Err(e) => return (false, format!("failed verification: {e:#}")),
+++    };
+++    if report.verdict != Verdict::Pass {
+++        let failing: Vec<&str> =
+++            report.checks.iter().filter(|c| c.verdict != Verdict::Pass).map(|c| c.id.as_str()).collect();
+++        return (false, format!("failed verification ({})", failing.join(", ")));
+++    }
+++    let members = match evidence::read_members(archive) {
+++        Ok(m) => m,
+++        Err(e) => return (false, format!("failed verification: {e:#}")),
+++    };
+++    let member = |name: &str| members.iter().find(|(p, _)| p == name).map(|(_, b)| b.clone());
+++    let verdict = member("manifest.json")
+++        .and_then(|b| serde_json::from_slice::<evidence::Manifest>(&b).ok())
+++        .and_then(|m| m.verdict);
+++    if verdict.as_deref() != Some("pass") {
+++        return (false, format!("run verdict {}", verdict.as_deref().unwrap_or("unknown")));
+++    }
+++    let Some(tree) = member("evidence/tree.txt") else {
+++        return (false, "predates tree hashes (no evidence/tree.txt)".to_string());
+++    };
+++    let tree = String::from_utf8_lossy(&tree).trim().to_string();
+++    if tree != head {
+++        return (false, format!("a different tree ({})", &tree[..12.min(tree.len())]));
+++    }
+++    (true, "covers the head".to_string())
+++}
++diff --git a/tests/cover.rs b/tests/cover.rs
++new file mode 100644
++index 0000000..db203e2
++--- /dev/null
+++++ b/tests/cover.rs
++@@ -0,0 +1,180 @@
+++//! Oracles for SPEC-0012 `keel-cover`.
+++
+++mod support;
+++
+++use serde_json::Value;
+++use std::path::PathBuf;
+++use support::{Repo, noop_driver};
+++
+++fn cover(r: &Repo, extra: &[&str]) -> (i32, String) {
+++    let mut args = vec!["cover"];
+++    args.extend_from_slice(extra);
+++    r.run(&args)
+++}
+++
+++fn report(r: &Repo) -> Value {
+++    let out = r.keel(&["cover", "--json"]);
+++    serde_json::from_slice(&out.stdout).expect("cover --json prints one object")
+++}
+++
+++fn head(r: &Repo) -> String {
+++    report(r)["head"].as_str().unwrap().to_string()
+++}
+++
+++/// Run the demo spec to a `pass` verdict and export its bundle into
+++/// `.keel/bundles/`, where `keel cover` looks. Returns the bundle path.
+++fn passing_bundle(r: &Repo) -> PathBuf {
+++    r.install_driver("noop", &noop_driver());
+++    r.ok(&["approve", "demo", "--stage", "merge"]);
+++    let (code, out) = r.run(&["run", "demo"]);
+++    assert_eq!(code, 0, "the run did not pass:\n{out}");
+++    PathBuf::from(r.ok(&["export"]).trim())
+++}
+++
+++/// AC-1 — G2 writes the hash of the tree it judged.
+++#[test]
+++fn g2_records_the_tree_it_judged() {
+++    let r = Repo::ready("cover-g2");
+++    r.install_driver("noop", &noop_driver());
+++    r.run(&["run", "demo"]);
+++    let run = r.latest_run();
+++    let recorded = r.read(&format!(".keel/runs/{run}/evidence/tree.txt"));
+++    assert_eq!(recorded.trim(), head(&r), "tree.txt is not the tree's content hash");
+++}
+++
+++/// AC-2 — where the bytes live doesn't matter; what is left out doesn't count;
+++/// lockfiles do.
+++#[test]
+++fn content_hash_is_the_same_committed_or_not() {
+++    let r = Repo::ready("cover-hash");
+++    r.write(".gitignore", &format!("{}build/\n", r.read(".gitignore")));
+++    r.git(&["add", "-A"]);
+++    r.git(&["commit", "-q", "-m", "ignore build"]);
+++
+++    r.write("src/api/limit.rs", "pub const RPM: u32 = 100;\n");
+++    let untracked = head(&r);
+++    r.git(&["add", "src/api/limit.rs"]);
+++    let staged = head(&r);
+++    r.git(&["commit", "-q", "-m", "limit"]);
+++    let committed = head(&r);
+++    assert_eq!(untracked, staged);
+++    assert_eq!(staged, committed);
+++
+++    r.write(".keel/runs/scratch.txt", "records\n");
+++    r.write("CLAUDE.md", "re-rendered\n");
+++    r.write("build/out.bin", "ignored\n");
+++    assert_eq!(head(&r), committed, "keel's records, projections or ignored files moved the hash");
+++
+++    r.write("Cargo.lock", "# a dependency changed\n");
+++    assert_ne!(head(&r), committed, "a lockfile change went unnoticed");
+++}
+++
+++/// AC-3 — a verified bundle of a passing run of this tree covers it.
+++#[test]
+++fn a_verified_bundle_of_this_tree_covers_it() {
+++    let r = Repo::ready("cover-yes");
+++    let bundle = passing_bundle(&r);
+++    let (code, out) = cover(&r, &[]);
+++    assert_eq!(code, 0, "{out}");
+++    let name = bundle.file_name().unwrap().to_string_lossy().to_string();
+++    assert!(out.contains("covers ") && out.contains(&name), "bundle not named:\n{out}");
+++    assert!(out.trim_end().ends_with("covered"), "{out}");
+++}
+++
+++/// AC-4 — nothing covers the head: exit 1, the head's hash, and each reason.
+++#[test]
+++fn an_uncovered_change_names_each_reason() {
+++    let r = Repo::ready("cover-reasons");
+++    r.install_driver("noop", &noop_driver());
+++    // A failing run: no merge approval, so G3 fails.
+++    r.run(&["run", "demo"]);
+++    let failing = PathBuf::from(r.ok(&["export"]).trim());
+++    let passing = passing_bundle(&r);
+++    // A corrupt copy of the passing bundle.
+++    let mut bytes = std::fs::read(&passing).unwrap();
+++    let mid = bytes.len() / 2;
+++    bytes[mid] ^= 0xff;
+++    std::fs::write(r.dir.join(".keel/bundles/keel-corrupt.tar.gz"), bytes).unwrap();
+++    // And a change after every run.
+++    r.write("src/api/mod.rs", "pub fn serve() { /* changed */ }\n");
+++
+++    let (code, out) = cover(&r, &[]);
+++    assert_eq!(code, 1, "{out}");
+++    assert!(out.contains(&head(&r)), "head hash not printed:\n{out}");
+++    assert!(out.contains("failed verification"), "{out}");
+++    assert!(out.contains("run verdict fail"), "{}\n{out}", failing.display());
+++    assert!(out.contains("a different tree"), "{out}");
+++    assert!(out.trim_end().contains("uncovered"), "{out}");
+++}
+++
+++/// AC-5 — a lockfile edit after the run means the bundle covers a different tree.
+++#[test]
+++fn an_edit_after_the_run_is_not_covered() {
+++    let r = Repo::ready("cover-edit");
+++    passing_bundle(&r);
+++    assert_eq!(cover(&r, &[]).0, 0);
+++    r.write("Cargo.lock", "# bumped after the run\n");
+++    let (code, out) = cover(&r, &[]);
+++    assert_eq!(code, 1, "{out}");
+++    assert!(out.contains("a different tree"), "{out}");
+++}
+++
+++/// AC-6 — an exemption passes, and says it is an exemption.
+++#[test]
+++fn an_exemption_passes_as_exempted_not_covered() {
+++    let r = Repo::ready("cover-exempt");
+++    let (code, out) = cover(&r, &["--exempt", "docs-only change, reviewed by hand"]);
+++    assert_eq!(code, 0, "{out}");
+++    assert!(out.contains("exempted, not covered — docs-only change, reviewed by hand"), "{out}");
+++    assert!(!out.trim_end().ends_with("\ncovered"), "{out}");
+++}
+++
+++/// AC-7 — `--json` validates against the published schema, in every verdict.
+++#[test]
+++fn json_report_validates_against_the_published_schema() {
+++    let schema: Value = serde_json::from_str(include_str!("../schemas/cover.json")).unwrap();
+++    let validator = jsonschema::validator_for(&schema).unwrap();
+++    let check = |v: &Value| {
+++        let errors: Vec<String> = validator.iter_errors(v).map(|e| e.to_string()).collect();
+++        assert!(errors.is_empty(), "{errors:?}\n{v:#}");
+++    };
+++
+++    let r = Repo::ready("cover-json");
+++    let uncovered = report(&r);
+++    check(&uncovered);
+++    assert_eq!(uncovered["verdict"], "uncovered");
+++
+++    let exempted: Value =
+++        serde_json::from_slice(&r.keel(&["cover", "--json", "--exempt", "why"]).stdout).unwrap();
+++    check(&exempted);
+++    assert_eq!(exempted["verdict"], "exempted");
+++
+++    passing_bundle(&r);
+++    let covered = report(&r);
+++    check(&covered);
+++    assert_eq!(covered["verdict"], "covered");
+++}
+++
+++/// AC-8 — the action checks out the PR head, installs a pinned keel, and runs
+++/// `keel cover`, turning the `keel:exempt` label into `--exempt` via env.
+++#[test]
+++fn the_action_runs_keel_cover_on_the_pr_head() {
+++    let action: Value = serde_yaml::from_str(include_str!("../action.yml")).unwrap();
+++    assert_eq!(action["runs"]["using"], "composite");
+++    let steps = action["runs"]["steps"].as_array().unwrap();
+++
+++    let checkout = steps.iter().find(|s| s["uses"].as_str().is_some_and(|u| u.starts_with("actions/checkout@"))).unwrap();
+++    assert_eq!(checkout["with"]["ref"], "${{ github.event.pull_request.head.sha }}");
+++
+++    let run_of = |needle: &str| steps.iter().find(|s| s["run"].as_str().is_some_and(|r| r.contains(needle)));
+++    let install = run_of("cargo install keel-harness").expect("no install step");
+++    assert!(install["run"].as_str().unwrap().contains("--version \"$KEEL_VERSION\" --locked"));
+++    assert_eq!(install["env"]["KEEL_VERSION"], "${{ inputs.keel-version }}");
+++    assert!(action["inputs"]["keel-version"]["default"].as_str().is_some_and(|v| !v.is_empty()));
+++
+++    let cover = run_of("keel cover").expect("no keel cover step");
+++    let script = cover["run"].as_str().unwrap();
+++    assert!(script.contains("--exempt"), "{script}");
+++    assert!(!script.contains("${{"), "a PR value is interpolated into the script: {script}");
+++    assert!(cover["env"]["KEEL_EXEMPT"].as_str().unwrap().contains("'keel:exempt'"));
+++}
+diff --git a/.keel/runs/2026-09-25-000/evidence/lint.txt b/.keel/runs/2026-09-25-000/evidence/lint.txt
+new file mode 100644
+index 0000000..f68c665
+--- /dev/null
++++ b/.keel/runs/2026-09-25-000/evidence/lint.txt
+@@ -0,0 +1,2 @@
++$ cargo clippy --all-targets --quiet
++
+diff --git a/.keel/runs/2026-09-25-000/evidence/oracles.json b/.keel/runs/2026-09-25-000/evidence/oracles.json
+new file mode 100644
+index 0000000..6b1ef41
+--- /dev/null
++++ b/.keel/runs/2026-09-25-000/evidence/oracles.json
+@@ -0,0 +1,74 @@
++{
++  "runs": [
++    {
++      "criterion": "AC-1",
++      "kind": "test",
++      "oracle": "test tests/cover.rs::g2_records_the_tree_it_judged",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.66s"
++    },
++    {
++      "criterion": "AC-2",
++      "kind": "test",
++      "oracle": "test tests/cover.rs::content_hash_is_the_same_committed_or_not",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.35s"
++    },
++    {
++      "criterion": "AC-3",
++      "kind": "test",
++      "oracle": "test tests/cover.rs::a_verified_bundle_of_this_tree_covers_it",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.59s"
++    },
++    {
++      "criterion": "AC-4",
++      "kind": "test",
++      "oracle": "test tests/cover.rs::an_uncovered_change_names_each_reason",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 2.10s"
++    },
++    {
++      "criterion": "AC-5",
++      "kind": "test",
++      "oracle": "test tests/cover.rs::an_edit_after_the_run_is_not_covered",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.78s"
++    },
++    {
++      "criterion": "AC-6",
++      "kind": "test",
++      "oracle": "test tests/cover.rs::an_exemption_passes_as_exempted_not_covered",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.27s"
++    },
++    {
++      "criterion": "AC-7",
++      "kind": "test",
++      "oracle": "test tests/cover.rs::json_report_validates_against_the_published_schema",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.88s"
++    },
++    {
++      "criterion": "AC-8",
++      "kind": "test",
++      "oracle": "test tests/cover.rs::the_action_runs_keel_cover_on_the_pr_head",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s"
++    }
++  ],
++  "criteria": 8,
++  "executed": 8,
++  "passed": 8,
++  "failed": 0,
++  "blocked": 0,
++  "human": 0
++}
+\ No newline at end of file
+diff --git a/.keel/runs/2026-09-25-000/evidence/ratchet.json b/.keel/runs/2026-09-25-000/evidence/ratchet.json
+new file mode 100644
+index 0000000..48d6b6a
+--- /dev/null
++++ b/.keel/runs/2026-09-25-000/evidence/ratchet.json
+@@ -0,0 +1,14 @@
++[
++  {
++    "id": "clippy-warnings",
++    "direction": "down",
++    "value": 0,
++    "baseline": 0
++  },
++  {
++    "id": "tests-passing",
++    "direction": "up",
++    "value": 528,
++    "baseline": 358
++  }
++]
+\ No newline at end of file
+diff --git a/.keel/runs/2026-09-25-000/evidence/review-test-invalidation.txt b/.keel/runs/2026-09-25-000/evidence/review-test-invalidation.txt
+new file mode 100644
+index 0000000..fd66af7
+--- /dev/null
++++ b/.keel/runs/2026-09-25-000/evidence/review-test-invalidation.txt
+@@ -0,0 +1 @@
++no added mocks or weakened assertions
+diff --git a/.keel/runs/2026-09-25-000/evidence/review.json b/.keel/runs/2026-09-25-000/evidence/review.json
+new file mode 100644
+index 0000000..f41d102
+--- /dev/null
++++ b/.keel/runs/2026-09-25-000/evidence/review.json
+@@ -0,0 +1,5 @@
++{
++  "schema": "keel.reviewresult/1",
++  "findings": [],
++  "summary": "0 finding(s)"
++}
+\ No newline at end of file
+diff --git a/.keel/runs/2026-09-25-000/evidence/test.txt b/.keel/runs/2026-09-25-000/evidence/test.txt
+new file mode 100644
+index 0000000..965a75b
+--- /dev/null
++++ b/.keel/runs/2026-09-25-000/evidence/test.txt
+@@ -0,0 +1,115 @@
++$ cargo test --quiet
++
++
++running 291 tests
++....................................................................................... 87/291
++....................................................................................... 174/291
++....................................................................................... 261/291
++..............................
++test result: ok. 291 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.73s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.57s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.49s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.81s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.57s
++
++
++running 13 tests
++.............
++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.49s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.45s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.45s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.04s
++
++
++running 5 tests
++.....
++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.35s
++
++
++running 25 tests
++.........................
++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.53s
++
++
++running 14 tests
++..............
++test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.33s
++
++
++running 13 tests
++.............
++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.64s
++
++
++running 15 tests
++...............
++test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.16s
++
++
++running 25 tests
++.........................
++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.23s
++
++
++running 12 tests
++............
++test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.86s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.73s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.51s
++
++
++running 34 tests
++..................................
++test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.09s
++
++
++running 0 tests
++
++test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
++
++
++running 7 tests
++.......
++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.92s
++
++
++running 5 tests
++.....
++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.47s
++
+diff --git a/.keel/runs/2026-09-25-000/evidence/tree.txt b/.keel/runs/2026-09-25-000/evidence/tree.txt
+new file mode 100644
+index 0000000..b81ea90
+--- /dev/null
++++ b/.keel/runs/2026-09-25-000/evidence/tree.txt
+@@ -0,0 +1 @@
++3bf85ed53e33ea33b915ef5ffb35d1a0066c8bd7c47f2df15db8f6d6fbddf7d8
+diff --git a/.keel/runs/2026-09-25-000/gates/G2.5.json b/.keel/runs/2026-09-25-000/gates/G2.5.json
+new file mode 100644
+index 0000000..6b06d57
+--- /dev/null
++++ b/.keel/runs/2026-09-25-000/gates/G2.5.json
+@@ -0,0 +1,37 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G2.5",
++  "run": "2026-09-25-001",
++  "spec": "keel-cover",
++  "verdict": "pass",
++  "generated_at": "2026-09-25T15:01:28.773821+02:00",
++  "checks": [
++    {
++      "id": "test-invalidation",
++      "verdict": "pass",
++      "detail": "no mocks or weakened assertions added",
++      "evidence": "evidence/review-test-invalidation.txt"
++    },
++    {
++      "id": "test-movement",
++      "verdict": "pass",
++      "detail": "7 code file(s), 1 test file(s)"
++    },
++    {
++      "id": "conventions",
++      "verdict": "pass",
++      "detail": "4 house rule(s) in force"
++    },
++    {
++      "id": "lessons",
++      "verdict": "pass",
++      "detail": "3 lesson(s) in force"
++    },
++    {
++      "id": "review",
++      "verdict": "pass",
++      "detail": "0 finding(s) (0.0s)",
++      "evidence": "evidence/review.json"
++    }
++  ]
++}
+diff --git a/.keel/runs/2026-09-25-000/gates/G2.json b/.keel/runs/2026-09-25-000/gates/G2.json
+new file mode 100644
+index 0000000..fb4a415
+--- /dev/null
++++ b/.keel/runs/2026-09-25-000/gates/G2.json
+@@ -0,0 +1,84 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G2",
++  "run": "2026-09-25-001",
++  "spec": "keel-cover",
++  "verdict": "pass",
++  "generated_at": "2026-09-25T15:01:28.674820+02:00",
++  "checks": [
++    {
++      "id": "build",
++      "verdict": "pass",
++      "detail": "`cargo build --quiet` exited 0",
++      "evidence": "evidence/build.txt"
++    },
++    {
++      "id": "test",
++      "verdict": "pass",
++      "detail": "`cargo test --quiet` exited 0",
++      "evidence": "evidence/test.txt"
++    },
++    {
++      "id": "lint",
++      "verdict": "pass",
++      "detail": "`cargo clippy --all-targets --quiet` exited 0",
++      "evidence": "evidence/lint.txt"
++    },
++    {
++      "id": "oracle-coverage",
++      "verdict": "pass",
++      "detail": "8/8 oracles pass (0 awaiting human judgement)",
++      "evidence": "evidence/oracles.json"
++    },
++    {
++      "id": "blast-radius",
++      "verdict": "pass",
++      "detail": "8 changed file(s) inside scope, 21 file(s) downstream",
++      "evidence": "evidence/diff-stat.txt"
++    },
++    {
++      "id": "line-budget",
++      "verdict": "pass",
++      "detail": "447/650 lines of churn",
++      "evidence": "evidence/diff-stat.txt"
++    },
++    {
++      "id": "baseline-ratchet",
++      "verdict": "pass",
++      "detail": "2 metric(s) held, 1 improved",
++      "evidence": "evidence/ratchet.json"
++    },
++    {
++      "id": "store-drift",
++      "verdict": "pass",
++      "detail": "4 projections current"
++    },
++    {
++      "id": "shared-stores",
++      "verdict": "pass",
++      "detail": "none configured"
++    },
++    {
++      "id": "lesson:L-0002",
++      "verdict": "pass",
++      "detail": "Changes MUST leave lint and the house rules clean. holds",
++      "from": "L-0002"
++    },
++    {
++      "id": "lesson:L-0003",
++      "verdict": "pass",
++      "detail": "Changes MUST build before the run ends. holds",
++      "from": "L-0003"
++    },
++    {
++      "id": "cargo-audit",
++      "verdict": "pass",
++      "detail": "no known advisories across 282 dependencies."
++    },
++    {
++      "id": "secrets",
++      "verdict": "pass",
++      "detail": "gitleaks found no credentials in the history or the working tree."
++    }
++  ]
++}
+diff --git a/.keel/runs/2026-09-25-000/gates/G3.json b/.keel/runs/2026-09-25-000/gates/G3.json
+new file mode 100644
+index 0000000..bea55ad
+--- /dev/null
++++ b/.keel/runs/2026-09-25-000/gates/G3.json
+@@ -0,0 +1,31 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G3",
++  "run": "2026-09-25-001",
++  "spec": "keel-cover",
++  "verdict": "fail",
++  "generated_at": "2026-09-25T15:01:28.798377+02:00",
++  "checks": [
++    {
++      "id": "earlier-gates",
++      "verdict": "pass",
++      "detail": "G2.5 and G2 passed"
++    },
++    {
++      "id": "reviewable-size",
++      "verdict": "pass",
++      "detail": "447/700 reviewable lines"
++    },
++    {
++      "id": "evidence-complete",
++      "verdict": "pass",
++      "detail": "trajectory, metadata and gate results present"
++    },
++    {
++      "id": "human-verdict",
++      "verdict": "fail",
++      "expected": "a recorded human decision on the change",
++      "actual": "none — run `keel approve keel-cover --stage merge`"
++    }
++  ]
++}
+diff --git a/.keel/runs/2026-09-25-000/run.json b/.keel/runs/2026-09-25-000/run.json
+new file mode 100644
+index 0000000..bcbedac
+--- /dev/null
++++ b/.keel/runs/2026-09-25-000/run.json
+@@ -0,0 +1,11 @@
++{
++  "schema": "keel.run/1",
++  "id": "2026-09-25-000",
++  "spec": "keel-cover",
++  "keel_version": "0.8.0",
++  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
++  "started_at": "2026-09-25T14:59:44.376381+02:00",
++  "finished_at": "2026-09-25T15:01:28.800189+02:00",
++  "verdict": "fail",
++  "base_commit": "356d8eba19e27fd4e9db028419ca77ea214cca0e"
++}
+diff --git a/.keel/runs/2026-09-25-000/trajectory.jsonl b/.keel/runs/2026-09-25-000/trajectory.jsonl
+new file mode 100644
+index 0000000..acc2a22
+--- /dev/null
++++ b/.keel/runs/2026-09-25-000/trajectory.jsonl
+@@ -0,0 +1,22 @@
++{"t":"2026-09-25T14:59:44.376769+02:00","seq":1,"kind":"run_start","spec":"keel-cover","keel_version":"0.8.0","store_hash":"0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2"}
++{"t":"2026-09-25T14:59:44.378357+02:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":424,"bytes":1693}
++{"t":"2026-09-25T14:59:44.378435+02:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
++{"t":"2026-09-25T14:59:44.378599+02:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6268,"bytes":25071}
++{"t":"2026-09-25T14:59:44.379161+02:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
++{"t":"2026-09-25T14:59:44.379278+02:00","seq":6,"kind":"inject","source":".keel/specs/keel-cover/spec.md","tokens":1067,"bytes":4266}
++{"t":"2026-09-25T14:59:44.627617+02:00","seq":7,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
++{"t":"2026-09-25T15:00:25.359169+02:00","seq":8,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
++{"t":"2026-09-25T15:00:28.760903+02:00","seq":9,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
++{"t":"2026-09-25T15:00:41.521011+02:00","seq":10,"kind":"oracle","criterion":"AC-1","oracle":"test tests/cover.rs::g2_records_the_tree_it_judged","verdict":"pass","exit_code":0}
++{"t":"2026-09-25T15:00:41.521232+02:00","seq":11,"kind":"oracle","criterion":"AC-2","oracle":"test tests/cover.rs::content_hash_is_the_same_committed_or_not","verdict":"pass","exit_code":0}
++{"t":"2026-09-25T15:00:41.521256+02:00","seq":12,"kind":"oracle","criterion":"AC-3","oracle":"test tests/cover.rs::a_verified_bundle_of_this_tree_covers_it","verdict":"pass","exit_code":0}
++{"t":"2026-09-25T15:00:41.521267+02:00","seq":13,"kind":"oracle","criterion":"AC-4","oracle":"test tests/cover.rs::an_uncovered_change_names_each_reason","verdict":"pass","exit_code":0}
++{"t":"2026-09-25T15:00:41.521277+02:00","seq":14,"kind":"oracle","criterion":"AC-5","oracle":"test tests/cover.rs::an_edit_after_the_run_is_not_covered","verdict":"pass","exit_code":0}
++{"t":"2026-09-25T15:00:41.521331+02:00","seq":15,"kind":"oracle","criterion":"AC-6","oracle":"test tests/cover.rs::an_exemption_passes_as_exempted_not_covered","verdict":"pass","exit_code":0}
++{"t":"2026-09-25T15:00:41.521395+02:00","seq":16,"kind":"oracle","criterion":"AC-7","oracle":"test tests/cover.rs::json_report_validates_against_the_published_schema","verdict":"pass","exit_code":0}
++{"t":"2026-09-25T15:00:41.521483+02:00","seq":17,"kind":"oracle","criterion":"AC-8","oracle":"test tests/cover.rs::the_action_runs_keel_cover_on_the_pr_head","verdict":"pass","exit_code":0}
++{"t":"2026-09-25T15:01:28.676082+02:00","seq":18,"kind":"gate","gate":"G2","verdict":"pass","result":"gates/G2.json"}
++{"t":"2026-09-25T15:01:28.774785+02:00","seq":19,"kind":"gate","gate":"G2.5","verdict":"pass","result":"gates/G2.5.json"}
++{"t":"2026-09-25T15:01:28.799385+02:00","seq":20,"kind":"gate","gate":"G3","verdict":"fail","result":"gates/G3.json"}
++{"t":"2026-09-25T15:01:28.799410+02:00","seq":21,"kind":"run_end","verdict":"fail","duration_ms":104431}
++{"t":"2026-09-25T15:44:40.531162+02:00","seq":22,"kind":"human","stage":"merge","decision":"approved","by":"Dane Balia"}
+diff --git a/.keel/runs/2026-09-25-001/evidence/build.txt b/.keel/runs/2026-09-25-001/evidence/build.txt
+new file mode 100644
+index 0000000..01700b6
+--- /dev/null
++++ b/.keel/runs/2026-09-25-001/evidence/build.txt
+@@ -0,0 +1,2 @@
++$ cargo build --quiet
++
+diff --git a/.keel/runs/2026-09-25-001/evidence/diff-stat.txt b/.keel/runs/2026-09-25-001/evidence/diff-stat.txt
+new file mode 100644
+index 0000000..a137a12
+--- /dev/null
++++ b/.keel/runs/2026-09-25-001/evidence/diff-stat.txt
+@@ -0,0 +1,41 @@
++    12      0  .keel/chain.jsonl
++     3      3  .keel/lesson-usage.json
++     2      0  .keel/runs/2026-09-25-000/evidence/build.txt
++    24      0  .keel/runs/2026-09-25-000/evidence/diff-stat.txt
++  1341      0  .keel/runs/2026-09-25-000/evidence/diff.patch
++     2      0  .keel/runs/2026-09-25-000/evidence/lint.txt
++    74      0  .keel/runs/2026-09-25-000/evidence/oracles.json
++    14      0  .keel/runs/2026-09-25-000/evidence/ratchet.json
++     1      0  .keel/runs/2026-09-25-000/evidence/review-test-invalidation.txt
++     5      0  .keel/runs/2026-09-25-000/evidence/review.json
++   115      0  .keel/runs/2026-09-25-000/evidence/test.txt
++     1      0  .keel/runs/2026-09-25-000/evidence/tree.txt
++    37      0  .keel/runs/2026-09-25-000/gates/G2.5.json
++    84      0  .keel/runs/2026-09-25-000/gates/G2.json
++    31      0  .keel/runs/2026-09-25-000/gates/G3.json
++    11      0  .keel/runs/2026-09-25-000/run.json
++    22      0  .keel/runs/2026-09-25-000/trajectory.jsonl
++     2      0  .keel/runs/2026-09-25-001/evidence/build.txt
++     2      0  .keel/runs/2026-09-25-001/evidence/lint.txt
++    74      0  .keel/runs/2026-09-25-001/evidence/oracles.json
++   115      0  .keel/runs/2026-09-25-001/evidence/test.txt
++     9      0  .keel/runs/2026-09-25-001/run.json
++    17      0  .keel/runs/2026-09-25-001/trajectory.jsonl
++     3      0  .keel/specs/keel-cover/approvals.jsonl
++    90      0  .keel/specs/keel-cover/gates/G0.json
++    95      0  .keel/specs/keel-cover/gates/G1.json
++   131      0  .keel/specs/keel-cover/plan.md
++     0      0  .keel/specs/keel-cover/review-flags.txt
++     1      0  .keel/specs/keel-cover/security-findings.json
++   117      0  .keel/specs/keel-cover/spec.md
++    34      0  .keel/specs/keel-cover/tasks.md
++    34      0  action.yml
++    27      0  schemas/cover.json
++    34      0  src/cmd/cover.rs
++     1      0  src/cmd/mod.rs
++   160      0  src/cover/mod.rs
++     1      0  src/gate/g2.rs
++    10      0  src/main.rs
++   180      0  tests/cover.rs
++
++39 file(s), +2916 -3 (2919 lines of churn) against 356d8eba19e27fd4e9db028419ca77ea214cca0e
+diff --git a/.keel/runs/2026-09-25-001/evidence/lint.txt b/.keel/runs/2026-09-25-001/evidence/lint.txt
+new file mode 100644
+index 0000000..f68c665
+--- /dev/null
++++ b/.keel/runs/2026-09-25-001/evidence/lint.txt
+@@ -0,0 +1,2 @@
++$ cargo clippy --all-targets --quiet
++
+diff --git a/.keel/runs/2026-09-25-001/evidence/oracles.json b/.keel/runs/2026-09-25-001/evidence/oracles.json
+new file mode 100644
+index 0000000..15c463b
+--- /dev/null
++++ b/.keel/runs/2026-09-25-001/evidence/oracles.json
+@@ -0,0 +1,74 @@
++{
++  "runs": [
++    {
++      "criterion": "AC-1",
++      "kind": "test",
++      "oracle": "test tests/cover.rs::g2_records_the_tree_it_judged",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.55s"
++    },
++    {
++      "criterion": "AC-2",
++      "kind": "test",
++      "oracle": "test tests/cover.rs::content_hash_is_the_same_committed_or_not",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.27s"
++    },
++    {
++      "criterion": "AC-3",
++      "kind": "test",
++      "oracle": "test tests/cover.rs::a_verified_bundle_of_this_tree_covers_it",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.60s"
++    },
++    {
++      "criterion": "AC-4",
++      "kind": "test",
++      "oracle": "test tests/cover.rs::an_uncovered_change_names_each_reason",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.92s"
++    },
++    {
++      "criterion": "AC-5",
++      "kind": "test",
++      "oracle": "test tests/cover.rs::an_edit_after_the_run_is_not_covered",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.59s"
++    },
++    {
++      "criterion": "AC-6",
++      "kind": "test",
++      "oracle": "test tests/cover.rs::an_exemption_passes_as_exempted_not_covered",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.16s"
++    },
++    {
++      "criterion": "AC-7",
++      "kind": "test",
++      "oracle": "test tests/cover.rs::json_report_validates_against_the_published_schema",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 1.58s"
++    },
++    {
++      "criterion": "AC-8",
++      "kind": "test",
++      "oracle": "test tests/cover.rs::the_action_runs_keel_cover_on_the_pr_head",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s"
++    }
++  ],
++  "criteria": 8,
++  "executed": 8,
++  "passed": 8,
++  "failed": 0,
++  "blocked": 0,
++  "human": 0
++}
+\ No newline at end of file
+diff --git a/.keel/runs/2026-09-25-001/evidence/test.txt b/.keel/runs/2026-09-25-001/evidence/test.txt
+new file mode 100644
+index 0000000..6aef33d
+--- /dev/null
++++ b/.keel/runs/2026-09-25-001/evidence/test.txt
+@@ -0,0 +1,115 @@
++$ cargo test --quiet
++
++
++running 291 tests
++....................................................................................... 87/291
++....................................................................................... 174/291
++....................................................................................... 261/291
++..............................
++test result: ok. 291 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.71s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.79s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.75s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.69s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.36s
++
++
++running 13 tests
++.............
++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.03s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.36s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.32s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.00s
++
++
++running 5 tests
++.....
++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.34s
++
++
++running 25 tests
++.........................
++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.31s
++
++
++running 14 tests
++..............
++test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.71s
++
++
++running 13 tests
++.............
++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.57s
++
++
++running 15 tests
++...............
++test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.07s
++
++
++running 25 tests
++.........................
++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.60s
++
++
++running 12 tests
++............
++test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.77s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.74s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.45s
++
++
++running 34 tests
++..................................
++test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.75s
++
++
++running 0 tests
++
++test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
++
++
++running 7 tests
++.......
++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.47s
++
++
++running 5 tests
++.....
++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.38s
++
+diff --git a/.keel/runs/2026-09-25-001/run.json b/.keel/runs/2026-09-25-001/run.json
+new file mode 100644
+index 0000000..57e1573
+--- /dev/null
++++ b/.keel/runs/2026-09-25-001/run.json
+@@ -0,0 +1,9 @@
++{
++  "schema": "keel.run/1",
++  "id": "2026-09-25-001",
++  "spec": "keel-cover",
++  "keel_version": "0.8.0",
++  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
++  "started_at": "2026-09-25T15:45:02.694971+02:00",
++  "base_commit": "356d8eba19e27fd4e9db028419ca77ea214cca0e"
++}
+diff --git a/.keel/runs/2026-09-25-001/trajectory.jsonl b/.keel/runs/2026-09-25-001/trajectory.jsonl
+new file mode 100644
+index 0000000..26af40c
+--- /dev/null
++++ b/.keel/runs/2026-09-25-001/trajectory.jsonl
+@@ -0,0 +1,17 @@
++{"t":"2026-09-25T15:45:02.695454+02:00","seq":1,"kind":"run_start","spec":"keel-cover","keel_version":"0.8.0","store_hash":"0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2"}
++{"t":"2026-09-25T15:45:02.696743+02:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":424,"bytes":1693}
++{"t":"2026-09-25T15:45:02.696798+02:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
++{"t":"2026-09-25T15:45:02.696860+02:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6268,"bytes":25071}
++{"t":"2026-09-25T15:45:02.697259+02:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
++{"t":"2026-09-25T15:45:02.697484+02:00","seq":6,"kind":"inject","source":".keel/specs/keel-cover/spec.md","tokens":1067,"bytes":4266}
++{"t":"2026-09-25T15:45:03.155907+02:00","seq":7,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
++{"t":"2026-09-25T15:45:46.637081+02:00","seq":8,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
++{"t":"2026-09-25T15:45:49.812450+02:00","seq":9,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
++{"t":"2026-09-25T15:46:01.562788+02:00","seq":10,"kind":"oracle","criterion":"AC-1","oracle":"test tests/cover.rs::g2_records_the_tree_it_judged","verdict":"pass","exit_code":0}
++{"t":"2026-09-25T15:46:01.562846+02:00","seq":11,"kind":"oracle","criterion":"AC-2","oracle":"test tests/cover.rs::content_hash_is_the_same_committed_or_not","verdict":"pass","exit_code":0}
++{"t":"2026-09-25T15:46:01.562856+02:00","seq":12,"kind":"oracle","criterion":"AC-3","oracle":"test tests/cover.rs::a_verified_bundle_of_this_tree_covers_it","verdict":"pass","exit_code":0}
++{"t":"2026-09-25T15:46:01.562865+02:00","seq":13,"kind":"oracle","criterion":"AC-4","oracle":"test tests/cover.rs::an_uncovered_change_names_each_reason","verdict":"pass","exit_code":0}
++{"t":"2026-09-25T15:46:01.562873+02:00","seq":14,"kind":"oracle","criterion":"AC-5","oracle":"test tests/cover.rs::an_edit_after_the_run_is_not_covered","verdict":"pass","exit_code":0}
++{"t":"2026-09-25T15:46:01.562883+02:00","seq":15,"kind":"oracle","criterion":"AC-6","oracle":"test tests/cover.rs::an_exemption_passes_as_exempted_not_covered","verdict":"pass","exit_code":0}
++{"t":"2026-09-25T15:46:01.562891+02:00","seq":16,"kind":"oracle","criterion":"AC-7","oracle":"test tests/cover.rs::json_report_validates_against_the_published_schema","verdict":"pass","exit_code":0}
++{"t":"2026-09-25T15:46:01.562906+02:00","seq":17,"kind":"oracle","criterion":"AC-8","oracle":"test tests/cover.rs::the_action_runs_keel_cover_on_the_pr_head","verdict":"pass","exit_code":0}
+diff --git a/.keel/specs/keel-cover/approvals.jsonl b/.keel/specs/keel-cover/approvals.jsonl
+new file mode 100644
+index 0000000..045670f
+--- /dev/null
++++ b/.keel/specs/keel-cover/approvals.jsonl
+@@ -0,0 +1,3 @@
++{"schema":"keel.approval/1","stage":"spec","decision":"approved","artefact_hash":"3d0c21044f4a888e408e4590e3df75ab302a1fc568be07a077139fd5031b6ba6","gate_verdict":"pass","by":"Dane Balia","at":"2026-09-25T14:55:12.803141+02:00"}
++{"schema":"keel.approval/1","stage":"plan","decision":"approved","artefact_hash":"ac4e88801e228ec015f6873981ce39be4f49b2fd7ac42c6ef0c3ae1de6b78c58","gate_verdict":"pass","by":"Dane Balia","at":"2026-09-25T14:56:27.414507+02:00"}
++{"schema":"keel.approval/1","stage":"merge","decision":"approved","artefact_hash":"d761025fa94fad026218c5a6ee74821f62ec208904b4a4f56fdf70d7c35f9214","gate_verdict":"fail","by":"Dane Balia","at":"2026-09-25T15:44:40.527293+02:00"}
+diff --git a/.keel/specs/keel-cover/gates/G0.json b/.keel/specs/keel-cover/gates/G0.json
+new file mode 100644
+index 0000000..8ca3919
+--- /dev/null
++++ b/.keel/specs/keel-cover/gates/G0.json
+@@ -0,0 +1,90 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G0",
++  "run": "2026-09-25-000",
++  "spec": "keel-cover",
++  "verdict": "pass",
++  "generated_at": "2026-09-25T14:54:09.538926+02:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "SPEC-0012 (keel.spec/1)"
++    },
++    {
++      "id": "criteria-present",
++      "verdict": "pass",
++      "detail": "8 criteria"
++    },
++    {
++      "id": "criterion-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate ids"
++    },
++    {
++      "id": "no-placeholders",
++      "verdict": "pass",
++      "detail": "no unfilled scaffold text"
++    },
++    {
++      "id": "ears-conformance",
++      "verdict": "pass",
++      "detail": "8/8 conform (event-driven, optional-feature, ubiquitous, unwanted-behaviour)"
++    },
++    {
++      "id": "oracle-presence",
++      "verdict": "pass",
++      "detail": "8 oracles across 8 criteria"
++    },
++    {
++      "id": "oracle-wellformed",
++      "verdict": "pass",
++      "detail": "all oracles parse"
++    },
++    {
++      "id": "ambiguity",
++      "verdict": "pass",
++      "detail": "no ambiguous phrasing in criteria"
++    },
++    {
++      "id": "criterion-budget",
++      "verdict": "pass",
++      "detail": "8/8 criteria"
++    },
++    {
++      "id": "spec-length",
++      "verdict": "pass",
++      "detail": "117/250 lines"
++    },
++    {
++      "id": "scope-declared",
++      "verdict": "pass",
++      "detail": "9 glob(s): src/cover/**, src/cmd/cover.rs, src/cmd/mod.rs, src/main.rs, src/gate/g2.rs, src/gate/diff.rs, action.yml, schemas/**, tests/cover.rs"
++    },
++    {
++      "id": "change-budget",
++      "verdict": "pass",
++      "detail": "650 lines of diff budgeted"
++    },
++    {
++      "id": "oracle-mix",
++      "verdict": "pass",
++      "detail": "8/8 runnable (8 test)"
++    },
++    {
++      "id": "human-cost",
++      "verdict": "pass",
++      "detail": "0 human oracle(s), none load-bearing"
++    },
++    {
++      "id": "store-drift",
++      "verdict": "pass",
++      "detail": "4 projections current"
++    },
++    {
++      "id": "shared-stores",
++      "verdict": "pass",
++      "detail": "none configured"
++    }
++  ]
++}
+diff --git a/.keel/specs/keel-cover/gates/G1.json b/.keel/specs/keel-cover/gates/G1.json
+new file mode 100644
+index 0000000..51f3fb8
+--- /dev/null
++++ b/.keel/specs/keel-cover/gates/G1.json
+@@ -0,0 +1,95 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G1",
++  "run": "2026-09-25-000",
++  "spec": "keel-cover",
++  "verdict": "pass",
++  "generated_at": "2026-09-25T14:55:54.893046+02:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "PLAN-0012 + TASKS-0012"
++    },
++    {
++      "id": "g0-passed",
++      "verdict": "pass",
++      "detail": "G0 passed in run 2026-09-25-000"
++    },
++    {
++      "id": "spec-approved",
++      "verdict": "pass",
++      "detail": "approved by Dane Balia"
++    },
++    {
++      "id": "tasks-present",
++      "verdict": "pass",
++      "detail": "4/15 tasks"
++    },
++    {
++      "id": "task-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate task ids"
++    },
++    {
++      "id": "task-fields",
++      "verdict": "pass",
++      "detail": "all task fields recognised"
++    },
++    {
++      "id": "task-criterion-traceability",
++      "verdict": "pass",
++      "detail": "4 tasks all traced"
++    },
++    {
++      "id": "criteria-covered",
++      "verdict": "pass",
++      "detail": "8/8 criteria have a task"
++    },
++    {
++      "id": "task-budgets",
++      "verdict": "pass",
++      "detail": "all 4 tasks budgeted, total 470 lines"
++    },
++    {
++      "id": "total-budget",
++      "verdict": "pass",
++      "detail": "470/650 lines"
++    },
++    {
++      "id": "task-exit-conditions",
++      "verdict": "pass",
++      "detail": "every task states when it is done"
++    },
++    {
++      "id": "task-dependencies",
++      "verdict": "pass",
++      "detail": "4 wave(s), widths 1/1/1/1"
++    },
++    {
++      "id": "wave-isolation",
++      "verdict": "pass",
++      "detail": "4 wave(s), no file claimed twice within one"
++    },
++    {
++      "id": "task-files-in-scope",
++      "verdict": "pass",
++      "detail": "all task files inside the declared scope"
++    },
++    {
++      "id": "rollback-stated",
++      "verdict": "pass",
++      "detail": "git revert the merge; keel cover and action.yml are new, an…"
++    },
++    {
++      "id": "blast-radius-declared",
++      "verdict": "pass",
++      "detail": "21 file(s) at depth 2, 6563 lines"
++    },
++    {
++      "id": "blast-radius-current",
++      "verdict": "pass",
++      "detail": "21 files, 6563 lines — matches a fresh computation — no indexed file matches src/cover/**, src/cmd/cover.rs, action.yml, schemas/**, tests/cover.rs (new files, or a typo)"
++    }
++  ]
++}
+diff --git a/.keel/specs/keel-cover/plan.md b/.keel/specs/keel-cover/plan.md
+new file mode 100644
+index 0000000..68485b6
+--- /dev/null
++++ b/.keel/specs/keel-cover/plan.md
+@@ -0,0 +1,131 @@
++---
++id: PLAN-0012
++slug: keel-cover
++schema: keel.plan/1
++blast:
++  depth: 2
++  declared:
++  - src/cover/**
++  - src/cmd/cover.rs
++  - src/cmd/mod.rs
++  - src/main.rs
++  - src/gate/g2.rs
++  - src/gate/diff.rs
++  - action.yml
++  - schemas/**
++  - tests/cover.rs
++  computed:
++  - src/main.rs
++  - src/cmd/mod.rs
++  - src/gate/diff.rs
++  - src/gate/g2.rs
++  - src/gate/mod.rs
++  - src/run.rs
++  - src/lesson/mod.rs
++  - src/failure/mod.rs
++  - src/report/mod.rs
++  - src/pipeline.rs
++  - src/driver/conform.rs
++  - src/metrics.rs
++  - src/cmd/next.rs
++  - src/cmd/run.rs
++  - src/cmd/learn.rs
++  - src/cmd/doctor.rs
++  - src/cmd/spec.rs
++  - src/cmd/approve.rs
++  - src/cmd/report.rs
++  - src/cmd/gate.rs
++  - src/cmd/plan.rs
++  computed_lines: 6563
++rollback: git revert the merge; keel cover and action.yml are new, and tree.txt is one more evidence file nothing else reads
++verified_at: 2026-09-25
++---
++
++# Design — keel-cover
++
++## Approach
++
++A new module, `src/cover/`, owns the content hash and the coverage decision.
++G2 and the command are thin callers.
++
++**Content hash (AC-2).** `cover::tree_hash(paths, cfg)`:
++- Lists `git ls-files --cached --others --exclude-standard -z`, which is
++  tracked plus untracked-but-not-ignored, the same set G2's diff sees.
++- Drops paths under `.keel/` and the enabled adapters' rendered outputs (the
++  same globs `g2::is_incidental_for` uses, minus lockfiles), and drops tracked
++  files deleted from the working tree.
++- Feeds each remaining path and its working-tree bytes, sorted by path, to
++  `SetHasher`.
++
++Because only working-tree bytes are read, it's the same hash committed, staged
++or untracked. A symlink hashes its target path. The file mode isn't part of
++the hash, which is a stated limit.
++
++**G2 (AC-1).** It writes `tree.txt` to evidence next to `diff.patch`, from the
++same call.
++
++**Coverage (AC-3 to AC-6).** `cover::check(paths, cfg, exempt) -> Report`
++hashes the head and considers each `.keel/bundles/*.tar.gz`, taking the first
++reason that applies:
++1. `keel bundle verify` doesn't pass: "failed verification", naming the
++   failing checks.
++2. The manifest's run verdict isn't `pass`: "run verdict <v>".
++3. No `evidence/tree.txt` in the bundle: "predates tree hashes".
++4. The hash differs: "a different tree (<12 chars>)".
++5. Otherwise it covers the head.
++
++The verdict is `covered` if any bundle covers the head, else `exempted` when
++`--exempt` was given, else `uncovered`. Exit codes: 0, 0 and 1. A covered head
++stays `covered` even with `--exempt`, because the stronger statement wins.
++
++**Command and report (AC-7).** `keel cover [--exempt <reason>] [--json]`
++prints the head hash and one line per bundle, or a `keel.cover/1` object
++(`schemas/cover.json`).
++
++**Action (AC-8).** A composite `action.yml` at the repository root. Its only
++input is `keel-version`, defaulting to the first release that ships `keel
++cover`. Its steps:
++1. `actions/checkout` at `github.event.pull_request.head.sha`.
++2. `cargo install keel-harness --version <v> --locked`.
++3. `keel cover`, adding `--exempt "label keel:exempt"` when
++   `contains(github.event.pull_request.labels.*.name, 'keel:exempt')`, passed
++   through an env var, not interpolated into the script.
++
++The test parses the YAML and asserts each of these.
++
++## Blast radius
++
++<!-- generated by `keel plan`; edits here are overwritten -->
++
++Computed from the import graph at depth 2: **21 files, 6563 lines**.
++
++| depth | file | lines |
++| --- | --- | --- |
++| scope | `src/main.rs` | 563 |
++| scope | `src/cmd/mod.rs` | 23 |
++| scope | `src/gate/diff.rs` | 186 |
++| scope | `src/gate/g2.rs` | 382 |
++| +1 | `src/gate/mod.rs` | 375 |
++| +2 | `src/run.rs` | 272 |
++| +2 | `src/lesson/mod.rs` | 719 |
++| +2 | `src/failure/mod.rs` | 573 |
++| +2 | `src/report/mod.rs` | 156 |
++| +2 | `src/pipeline.rs` | 284 |
++| +2 | `src/driver/conform.rs` | 260 |
++| +2 | `src/metrics.rs` | 164 |
++| +2 | `src/cmd/next.rs` | 475 |
++| +2 | `src/cmd/run.rs` | 688 |
++| +2 | `src/cmd/learn.rs` | 371 |
++| +2 | `src/cmd/doctor.rs` | 296 |
++| +2 | `src/cmd/spec.rs` | 208 |
++| +2 | `src/cmd/approve.rs` | 203 |
++| +2 | `src/cmd/report.rs` | 202 |
++| +2 | `src/cmd/gate.rs` | 74 |
++| +2 | `src/cmd/plan.rs` | 89 |
++
++_Scope globs matching no indexed file (new files, or a typo): src/cover/**, src/cmd/cover.rs, action.yml, schemas/**, tests/cover.rs_
++
++
++## Rollback
++
++`git revert` — replace this if the change needs a different rollback.
+diff --git a/.keel/specs/keel-cover/review-flags.txt b/.keel/specs/keel-cover/review-flags.txt
+new file mode 100644
+index 0000000..e69de29
+diff --git a/.keel/specs/keel-cover/security-findings.json b/.keel/specs/keel-cover/security-findings.json
+new file mode 100644
+index 0000000..fe51488
+--- /dev/null
++++ b/.keel/specs/keel-cover/security-findings.json
+@@ -0,0 +1 @@
++[]
+diff --git a/.keel/specs/keel-cover/spec.md b/.keel/specs/keel-cover/spec.md
+new file mode 100644
+index 0000000..0904d10
+--- /dev/null
++++ b/.keel/specs/keel-cover/spec.md
+@@ -0,0 +1,117 @@
++---
++id: SPEC-0012
++slug: keel-cover
++schema: keel.spec/1
++status: approved
++scope:
++- src/cover/**
++- src/cmd/cover.rs
++- src/cmd/mod.rs
++- src/main.rs
++- src/gate/g2.rs
++- src/gate/diff.rs
++- action.yml
++- schemas/**
++- tests/cover.rs
++budget:
++  criteria: 8
++  lines: 650
++verified_at: 2026-09-25
++---
++
++# A PR check: every change covered by a verified bundle
++
++## Context
++
++A bundle proves what one run did (SPEC-0011), but nothing yet stops a change
++reaching `master` without one. Roadmap R10 asks for a PR check: fail when a
++PR's change has no valid bundle. That's the piece an outside team adopts first,
++and it needs nothing but keel: no runtime, no Moor.
++
++The design decisions:
++- **Every commit needs cover, not only agent-marked ones.** A trailer can be
++  deleted, and a check that can be dodged that way checks nothing.
++- **Bundles are committed in the PR** under `.keel/bundles/`, so the check
++  runs offline, with no artifact storage.
++
++Commit SHAs can't link a run to a PR: a driver's work isn't committed when it's
++gated. The link is the **content of the gated tree**. G2 records a hash of the
++tree it judged. The PR's head is covered when a committed bundle verifies, its
++run passed, and its hash equals the head's. The hash leaves out `.keel/**`,
++which committing the bundle itself changes, and keel's rendered projections,
++which `store-drift` already checks. It keeps lockfiles in, because a dependency
++change is exactly what has to be covered.
++
++## Acceptance criteria
++
++### AC-1 G2 records the tree it judged
++
++WHEN G2 runs THE SYSTEM SHALL write the content hash of the working tree it
++judged to the run's evidence as `tree.txt`.
++
++oracle: test tests/cover.rs::g2_records_the_tree_it_judged
++
++### AC-2 The content hash ignores where the bytes live
++
++THE SYSTEM SHALL compute the same content hash for the same files whether they
++are committed, staged or untracked. The hash leaves out `.keel/**`, gitignored
++files and keel's rendered projections, and covers every other path, lockfiles
++included.
++
++oracle: test tests/cover.rs::content_hash_is_the_same_committed_or_not
++
++### AC-3 A covered head passes
++
++WHEN `keel cover` runs and a bundle under `.keel/bundles/` passes `keel bundle
++verify`, records a `pass` run verdict and a tree hash equal to the head's THE
++SYSTEM SHALL exit 0 and name that bundle.
++
++oracle: test tests/cover.rs::a_verified_bundle_of_this_tree_covers_it
++
++### AC-4 An uncovered head fails, saying why
++
++IF no bundle under `.keel/bundles/` covers the head THEN THE SYSTEM SHALL exit
++1, print the head's content hash, and give each bundle's reason: failed
++verification, a verdict other than pass, or a different tree.
++
++oracle: test tests/cover.rs::an_uncovered_change_names_each_reason
++
++### AC-5 A change after the run is not covered
++
++IF the tree changes after a bundle's run, including a lockfile THEN THE
++SYSTEM SHALL report that bundle as covering a different tree.
++
++oracle: test tests/cover.rs::an_edit_after_the_run_is_not_covered
++
++### AC-6 An exemption is a stated human decision
++
++WHERE `keel cover --exempt <reason>` is given THE SYSTEM SHALL exit 0 and print
++that the head is exempted, not covered, with the reason.
++
++oracle: test tests/cover.rs::an_exemption_passes_as_exempted_not_covered
++
++### AC-7 The report is machine-readable
++
++WHEN `keel cover --json` runs THE SYSTEM SHALL print one `keel.cover/1` object
++with the head hash, the verdict (`covered`, `uncovered` or `exempted`), and
++each bundle considered with its reason.
++
++oracle: test tests/cover.rs::json_report_validates_against_the_published_schema
++
++### AC-8 A GitHub Action runs it on pull requests
++
++THE SYSTEM SHALL ship `action.yml`, a composite action that checks out the
++PR's head, installs a pinned keel version, runs `keel cover`, and passes
++`--exempt` with the PR's `keel:exempt` label as the reason when that label is
++set.
++
++oracle: test tests/cover.rs::the_action_runs_keel_cover_on_the_pr_head
++
++## Out of scope
++
++- Changing `keel init`'s `.gitignore`, which still ignores `.keel/bundles/`.
++  Committing a bundle takes `git add -f` for now.
++- Covering each commit separately. The head's tree is what merges, and every
++  commit in the PR contributes to it.
++- A bundle built by CI itself (the GitHub Actions runtime).
++- Branch protection settings, which are the repository owner's to set.
+diff --git a/.keel/specs/keel-cover/tasks.md b/.keel/specs/keel-cover/tasks.md
+new file mode 100644
+index 0000000..6325464
+--- /dev/null
++++ b/.keel/specs/keel-cover/tasks.md
+@@ -0,0 +1,34 @@
++---
++id: TASKS-0012
++slug: keel-cover
++schema: keel.tasks/1
++---
++
++# Tasks
++
++### T-1 Content hash, and G2 records it
++- criteria: AC-1, AC-2
++- files: src/cover/mod.rs, src/gate/g2.rs, src/main.rs, tests/cover.rs
++- budget: 150
++- exit: test tests/cover.rs::content_hash_is_the_same_committed_or_not
++
++### T-2 Coverage decision and the keel cover command
++- criteria: AC-3, AC-4, AC-5, AC-6
++- files: src/cover/mod.rs, src/cmd/cover.rs, src/cmd/mod.rs, src/main.rs, tests/cover.rs
++- budget: 150
++- depends_on: T-1
++- exit: test tests/cover.rs::an_uncovered_change_names_each_reason
++
++### T-3 JSON report and schema
++- criteria: AC-7
++- files: src/cmd/cover.rs, schemas/cover.json, tests/cover.rs
++- budget: 80
++- depends_on: T-2
++- exit: test tests/cover.rs::json_report_validates_against_the_published_schema
++
++### T-4 The GitHub Action
++- criteria: AC-8
++- files: action.yml, tests/cover.rs
++- budget: 90
++- depends_on: T-3
++- exit: test tests/cover.rs::the_action_runs_keel_cover_on_the_pr_head
+diff --git a/action.yml b/action.yml
+new file mode 100644
+index 0000000..d930946
+--- /dev/null
++++ b/action.yml
+@@ -0,0 +1,34 @@
++name: keel cover
++description: >-
++  Fail a pull request unless its change is covered by a committed, verified
++  keel evidence bundle of a passing run of exactly that tree. A maintainer can
++  pass it instead by adding the `keel:exempt` label, which is recorded as an
++  exemption, not as cover. Bundles live under .keel/bundles/ in the PR
++  (`keel export`, then `git add -f`).
++inputs:
++  keel-version:
++    description: The keel-harness version to install; the first with `keel cover` is 0.9.0.
++    required: false
++    default: "0.9.0"
++runs:
++  using: composite
++  steps:
++    - uses: actions/checkout@v5
++      with:
++        ref: ${{ github.event.pull_request.head.sha }}
++    - name: Install keel
++      shell: bash
++      run: cargo install keel-harness --version "$KEEL_VERSION" --locked
++      env:
++        KEEL_VERSION: ${{ inputs.keel-version }}
++    - name: keel cover
++      shell: bash
++      # The label arrives as an env var, never interpolated into the script.
++      env:
++        KEEL_EXEMPT: ${{ contains(github.event.pull_request.labels.*.name, 'keel:exempt') }}
++      run: |
++        if [ "$KEEL_EXEMPT" = "true" ]; then
++          keel cover --exempt "label keel:exempt set on the pull request"
++        else
++          keel cover
++        fi
+diff --git a/schemas/cover.json b/schemas/cover.json
+new file mode 100644
+index 0000000..8a24989
+--- /dev/null
++++ b/schemas/cover.json
+@@ -0,0 +1,27 @@
++{
++  "$schema": "https://json-schema.org/draft/2020-12/schema",
++  "title": "keel.cover/1 report",
++  "description": "What `keel cover --json` prints: the content hash of the working tree, whether a committed, verified bundle of a passing run covers it, and why each bundle does or does not.",
++  "type": "object",
++  "required": ["schema", "head", "verdict", "bundles"],
++  "additionalProperties": false,
++  "properties": {
++    "schema": { "const": "keel.cover/1" },
++    "head": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
++    "verdict": { "enum": ["covered", "uncovered", "exempted"] },
++    "exempt_reason": { "type": "string" },
++    "bundles": {
++      "type": "array",
++      "items": {
++        "type": "object",
++        "required": ["bundle", "covers", "reason"],
++        "additionalProperties": false,
++        "properties": {
++          "bundle": { "type": "string", "minLength": 1 },
++          "covers": { "type": "boolean" },
++          "reason": { "type": "string", "minLength": 1 }
++        }
++      }
++    }
++  }
++}
+diff --git a/src/cmd/cover.rs b/src/cmd/cover.rs
+new file mode 100644
+index 0000000..5b6ec3a
+--- /dev/null
++++ b/src/cmd/cover.rs
+@@ -0,0 +1,34 @@
++//! `keel cover` — is the working tree's content covered by a verified bundle
++//! of a passing run? Built for a pull request check (SPEC-0012).
++
++use crate::config::Config;
++use crate::paths::Paths;
++use anyhow::Result;
++
++pub fn run(exempt: Option<String>, json: bool) -> Result<i32> {
++    let paths = Paths::require_init()?;
++    let cfg = Config::load(&paths.config())?;
++    let report = crate::cover::check(&paths, &cfg, exempt)?;
++
++    if json {
++        println!("{}", serde_json::to_string_pretty(&report)?);
++        return Ok(report.exit_code());
++    }
++    println!("head {}\n", report.head);
++    if report.bundles.is_empty() {
++        println!("  no bundles under .keel/bundles/");
++    }
++    for b in &report.bundles {
++        let mark = if b.covers { "covers " } else { "does not" };
++        println!("  {mark}  {} — {}", b.bundle, b.reason);
++    }
++    match report.verdict.as_str() {
++        "covered" => println!("\ncovered"),
++        "exempted" => println!(
++            "\nexempted, not covered — {}",
++            report.exempt_reason.as_deref().unwrap_or("no reason given")
++        ),
++        _ => println!("\nuncovered — commit the bundle of a passing run of exactly this tree"),
++    }
++    Ok(report.exit_code())
++}
+diff --git a/src/cover/mod.rs b/src/cover/mod.rs
+new file mode 100644
+index 0000000..d827633
+--- /dev/null
++++ b/src/cover/mod.rs
+@@ -0,0 +1,160 @@
++//! Is this change covered by a verified bundle? (SPEC-0012)
++//!
++//! A run is linked to a pull request by the *content* it gated, not by commit
++//! SHAs: a driver's work is not committed when G2 judges it. G2 records a hash
++//! of the tree it judged; a PR's head is covered when a committed bundle
++//! verifies, its run passed, and that hash equals the head's.
++
++use crate::config::Config;
++use crate::evidence;
++use crate::gate::Verdict;
++use crate::hashing::SetHasher;
++use crate::paths::Paths;
++use anyhow::{Context, Result, bail};
++use globset::{Glob, GlobSetBuilder};
++use serde::Serialize;
++use std::path::Path;
++
++pub const REPORT_SCHEMA: &str = "keel.cover/1";
++
++/// The content hash of the working tree: every path git would show as part
++/// of the change, with its bytes as they are on disk now — so the same files
++/// hash the same whether committed, staged or untracked.
++///
++/// Leaves out `.keel/` (committing a bundle and its run records changes it)
++/// and keel's rendered projections (`store-drift` already checks those). Keeps
++/// lockfiles, unlike G2's incidental set: a dependency change is exactly what
++/// has to be covered. The file mode is not part of the hash.
++pub fn tree_hash(paths: &Paths, cfg: &Config) -> Result<String> {
++    let out = std::process::Command::new("git")
++        .args(["ls-files", "--cached", "--others", "--exclude-standard", "-z"])
++        .current_dir(&paths.repo)
++        .output()
++        .context("running git ls-files")?;
++    if !out.status.success() {
++        bail!("git ls-files failed: {}", String::from_utf8_lossy(&out.stderr).trim());
++    }
++
++    let mut skip = GlobSetBuilder::new();
++    skip.add(Glob::new(".keel/**")?);
++    for a in cfg.adapters.iter().filter(|a| a.enabled) {
++        if let Ok(g) = Glob::new(&a.out) {
++            skip.add(g);
++        }
++    }
++    let skip = skip.build()?;
++
++    let mut files: Vec<String> = out
++        .stdout
++        .split(|b| *b == 0)
++        .filter(|p| !p.is_empty())
++        .map(|p| String::from_utf8_lossy(p).into_owned())
++        .filter(|p| !skip.is_match(p))
++        .collect();
++    files.sort();
++    files.dedup();
++
++    let mut h = SetHasher::new();
++    for rel in &files {
++        let p = paths.repo.join(rel);
++        let Ok(meta) = std::fs::symlink_metadata(&p) else {
++            continue; // tracked, but deleted from the working tree
++        };
++        let bytes = if meta.file_type().is_symlink() {
++            std::fs::read_link(&p)?.to_string_lossy().into_owned().into_bytes()
++        } else {
++            std::fs::read(&p).with_context(|| format!("reading {rel}"))?
++        };
++        h.add(rel, &bytes);
++    }
++    Ok(h.finish())
++}
++
++#[derive(Debug, Clone, Serialize)]
++pub struct Considered {
++    pub bundle: String,
++    pub covers: bool,
++    pub reason: String,
++}
++
++#[derive(Debug, Clone, Serialize)]
++pub struct Report {
++    pub schema: String,
++    pub head: String,
++    /// `covered`, `uncovered` or `exempted`.
++    pub verdict: String,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    pub exempt_reason: Option<String>,
++    pub bundles: Vec<Considered>,
++}
++
++impl Report {
++    pub fn exit_code(&self) -> i32 {
++        if self.verdict == "uncovered" { 1 } else { 0 }
++    }
++}
++
++/// Weigh every committed bundle against the head. The first reason that
++/// applies is the one reported, in the order a reviewer would ask.
++pub fn check(paths: &Paths, cfg: &Config, exempt: Option<String>) -> Result<Report> {
++    let head = tree_hash(paths, cfg)?;
++    let dir = paths.keel().join("bundles");
++    let mut archives: Vec<_> = std::fs::read_dir(&dir)
++        .map(|rd| rd.filter_map(|e| e.ok().map(|e| e.path())).collect())
++        .unwrap_or_default();
++    archives.retain(|p: &std::path::PathBuf| p.to_string_lossy().ends_with(".tar.gz"));
++    archives.sort();
++
++    let bundles: Vec<Considered> = archives
++        .iter()
++        .map(|a| {
++            let (covers, reason) = judge(a, &head);
++            Considered { bundle: paths.rel(a).display().to_string(), covers, reason }
++        })
++        .collect();
++
++    let covered = bundles.iter().any(|b| b.covers);
++    let verdict = match (covered, &exempt) {
++        (true, _) => "covered",
++        (false, Some(_)) => "exempted",
++        (false, None) => "uncovered",
++    };
++    Ok(Report {
++        schema: REPORT_SCHEMA.to_string(),
++        head,
++        verdict: verdict.to_string(),
++        exempt_reason: if covered { None } else { exempt },
++        bundles,
++    })
++}
++
++fn judge(archive: &Path, head: &str) -> (bool, String) {
++    let report = match evidence::verify::check(archive) {
++        Ok(r) => r,
++        Err(e) => return (false, format!("failed verification: {e:#}")),
++    };
++    if report.verdict != Verdict::Pass {
++        let failing: Vec<&str> =
++            report.checks.iter().filter(|c| c.verdict != Verdict::Pass).map(|c| c.id.as_str()).collect();
++        return (false, format!("failed verification ({})", failing.join(", ")));
++    }
++    let members = match evidence::read_members(archive) {
++        Ok(m) => m,
++        Err(e) => return (false, format!("failed verification: {e:#}")),
++    };
++    let member = |name: &str| members.iter().find(|(p, _)| p == name).map(|(_, b)| b.clone());
++    let verdict = member("manifest.json")
++        .and_then(|b| serde_json::from_slice::<evidence::Manifest>(&b).ok())
++        .and_then(|m| m.verdict);
++    if verdict.as_deref() != Some("pass") {
++        return (false, format!("run verdict {}", verdict.as_deref().unwrap_or("unknown")));
++    }
++    let Some(tree) = member("evidence/tree.txt") else {
++        return (false, "predates tree hashes (no evidence/tree.txt)".to_string());
++    };
++    let tree = String::from_utf8_lossy(&tree).trim().to_string();
++    if tree != head {
++        return (false, format!("a different tree ({})", &tree[..12.min(tree.len())]));
++    }
++    (true, "covers the head".to_string())
++}
+diff --git a/tests/cover.rs b/tests/cover.rs
+new file mode 100644
+index 0000000..db203e2
+--- /dev/null
++++ b/tests/cover.rs
+@@ -0,0 +1,180 @@
++//! Oracles for SPEC-0012 `keel-cover`.
++
++mod support;
++
++use serde_json::Value;
++use std::path::PathBuf;
++use support::{Repo, noop_driver};
++
++fn cover(r: &Repo, extra: &[&str]) -> (i32, String) {
++    let mut args = vec!["cover"];
++    args.extend_from_slice(extra);
++    r.run(&args)
++}
++
++fn report(r: &Repo) -> Value {
++    let out = r.keel(&["cover", "--json"]);
++    serde_json::from_slice(&out.stdout).expect("cover --json prints one object")
++}
++
++fn head(r: &Repo) -> String {
++    report(r)["head"].as_str().unwrap().to_string()
++}
++
++/// Run the demo spec to a `pass` verdict and export its bundle into
++/// `.keel/bundles/`, where `keel cover` looks. Returns the bundle path.
++fn passing_bundle(r: &Repo) -> PathBuf {
++    r.install_driver("noop", &noop_driver());
++    r.ok(&["approve", "demo", "--stage", "merge"]);
++    let (code, out) = r.run(&["run", "demo"]);
++    assert_eq!(code, 0, "the run did not pass:\n{out}");
++    PathBuf::from(r.ok(&["export"]).trim())
++}
++
++/// AC-1 — G2 writes the hash of the tree it judged.
++#[test]
++fn g2_records_the_tree_it_judged() {
++    let r = Repo::ready("cover-g2");
++    r.install_driver("noop", &noop_driver());
++    r.run(&["run", "demo"]);
++    let run = r.latest_run();
++    let recorded = r.read(&format!(".keel/runs/{run}/evidence/tree.txt"));
++    assert_eq!(recorded.trim(), head(&r), "tree.txt is not the tree's content hash");
++}
++
++/// AC-2 — where the bytes live doesn't matter; what is left out doesn't count;
++/// lockfiles do.
++#[test]
++fn content_hash_is_the_same_committed_or_not() {
++    let r = Repo::ready("cover-hash");
++    r.write(".gitignore", &format!("{}build/\n", r.read(".gitignore")));
++    r.git(&["add", "-A"]);
++    r.git(&["commit", "-q", "-m", "ignore build"]);
++
++    r.write("src/api/limit.rs", "pub const RPM: u32 = 100;\n");
++    let untracked = head(&r);
++    r.git(&["add", "src/api/limit.rs"]);
++    let staged = head(&r);
++    r.git(&["commit", "-q", "-m", "limit"]);
++    let committed = head(&r);
++    assert_eq!(untracked, staged);
++    assert_eq!(staged, committed);
++
++    r.write(".keel/runs/scratch.txt", "records\n");
++    r.write("CLAUDE.md", "re-rendered\n");
++    r.write("build/out.bin", "ignored\n");
++    assert_eq!(head(&r), committed, "keel's records, projections or ignored files moved the hash");
++
++    r.write("Cargo.lock", "# a dependency changed\n");
++    assert_ne!(head(&r), committed, "a lockfile change went unnoticed");
++}
++
++/// AC-3 — a verified bundle of a passing run of this tree covers it.
++#[test]
++fn a_verified_bundle_of_this_tree_covers_it() {
++    let r = Repo::ready("cover-yes");
++    let bundle = passing_bundle(&r);
++    let (code, out) = cover(&r, &[]);
++    assert_eq!(code, 0, "{out}");
++    let name = bundle.file_name().unwrap().to_string_lossy().to_string();
++    assert!(out.contains("covers ") && out.contains(&name), "bundle not named:\n{out}");
++    assert!(out.trim_end().ends_with("covered"), "{out}");
++}
++
++/// AC-4 — nothing covers the head: exit 1, the head's hash, and each reason.
++#[test]
++fn an_uncovered_change_names_each_reason() {
++    let r = Repo::ready("cover-reasons");
++    r.install_driver("noop", &noop_driver());
++    // A failing run: no merge approval, so G3 fails.
++    r.run(&["run", "demo"]);
++    let failing = PathBuf::from(r.ok(&["export"]).trim());
++    let passing = passing_bundle(&r);
++    // A corrupt copy of the passing bundle.
++    let mut bytes = std::fs::read(&passing).unwrap();
++    let mid = bytes.len() / 2;
++    bytes[mid] ^= 0xff;
++    std::fs::write(r.dir.join(".keel/bundles/keel-corrupt.tar.gz"), bytes).unwrap();
++    // And a change after every run.
++    r.write("src/api/mod.rs", "pub fn serve() { /* changed */ }\n");
++
++    let (code, out) = cover(&r, &[]);
++    assert_eq!(code, 1, "{out}");
++    assert!(out.contains(&head(&r)), "head hash not printed:\n{out}");
++    assert!(out.contains("failed verification"), "{out}");
++    assert!(out.contains("run verdict fail"), "{}\n{out}", failing.display());
++    assert!(out.contains("a different tree"), "{out}");
++    assert!(out.trim_end().contains("uncovered"), "{out}");
++}
++
++/// AC-5 — a lockfile edit after the run means the bundle covers a different tree.
++#[test]
++fn an_edit_after_the_run_is_not_covered() {
++    let r = Repo::ready("cover-edit");
++    passing_bundle(&r);
++    assert_eq!(cover(&r, &[]).0, 0);
++    r.write("Cargo.lock", "# bumped after the run\n");
++    let (code, out) = cover(&r, &[]);
++    assert_eq!(code, 1, "{out}");
++    assert!(out.contains("a different tree"), "{out}");
++}
++
++/// AC-6 — an exemption passes, and says it is an exemption.
++#[test]
++fn an_exemption_passes_as_exempted_not_covered() {
++    let r = Repo::ready("cover-exempt");
++    let (code, out) = cover(&r, &["--exempt", "docs-only change, reviewed by hand"]);
++    assert_eq!(code, 0, "{out}");
++    assert!(out.contains("exempted, not covered — docs-only change, reviewed by hand"), "{out}");
++    assert!(!out.trim_end().ends_with("\ncovered"), "{out}");
++}
++
++/// AC-7 — `--json` validates against the published schema, in every verdict.
++#[test]
++fn json_report_validates_against_the_published_schema() {
++    let schema: Value = serde_json::from_str(include_str!("../schemas/cover.json")).unwrap();
++    let validator = jsonschema::validator_for(&schema).unwrap();
++    let check = |v: &Value| {
++        let errors: Vec<String> = validator.iter_errors(v).map(|e| e.to_string()).collect();
++        assert!(errors.is_empty(), "{errors:?}\n{v:#}");
++    };
++
++    let r = Repo::ready("cover-json");
++    let uncovered = report(&r);
++    check(&uncovered);
++    assert_eq!(uncovered["verdict"], "uncovered");
++
++    let exempted: Value =
++        serde_json::from_slice(&r.keel(&["cover", "--json", "--exempt", "why"]).stdout).unwrap();
++    check(&exempted);
++    assert_eq!(exempted["verdict"], "exempted");
++
++    passing_bundle(&r);
++    let covered = report(&r);
++    check(&covered);
++    assert_eq!(covered["verdict"], "covered");
++}
++
++/// AC-8 — the action checks out the PR head, installs a pinned keel, and runs
++/// `keel cover`, turning the `keel:exempt` label into `--exempt` via env.
++#[test]
++fn the_action_runs_keel_cover_on_the_pr_head() {
++    let action: Value = serde_yaml::from_str(include_str!("../action.yml")).unwrap();
++    assert_eq!(action["runs"]["using"], "composite");
++    let steps = action["runs"]["steps"].as_array().unwrap();
++
++    let checkout = steps.iter().find(|s| s["uses"].as_str().is_some_and(|u| u.starts_with("actions/checkout@"))).unwrap();
++    assert_eq!(checkout["with"]["ref"], "${{ github.event.pull_request.head.sha }}");
++
++    let run_of = |needle: &str| steps.iter().find(|s| s["run"].as_str().is_some_and(|r| r.contains(needle)));
++    let install = run_of("cargo install keel-harness").expect("no install step");
++    assert!(install["run"].as_str().unwrap().contains("--version \"$KEEL_VERSION\" --locked"));
++    assert_eq!(install["env"]["KEEL_VERSION"], "${{ inputs.keel-version }}");
++    assert!(action["inputs"]["keel-version"]["default"].as_str().is_some_and(|v| !v.is_empty()));
++
++    let cover = run_of("keel cover").expect("no keel cover step");
++    let script = cover["run"].as_str().unwrap();
++    assert!(script.contains("--exempt"), "{script}");
++    assert!(!script.contains("${{"), "a PR value is interpolated into the script: {script}");
++    assert!(cover["env"]["KEEL_EXEMPT"].as_str().unwrap().contains("'keel:exempt'"));
++}

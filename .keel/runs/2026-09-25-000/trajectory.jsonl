@@ -1,0 +1,22 @@
+{"t":"2026-09-25T14:59:44.376769+02:00","seq":1,"kind":"run_start","spec":"keel-cover","keel_version":"0.8.0","store_hash":"0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2"}
+{"t":"2026-09-25T14:59:44.378357+02:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":424,"bytes":1693}
+{"t":"2026-09-25T14:59:44.378435+02:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
+{"t":"2026-09-25T14:59:44.378599+02:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6268,"bytes":25071}
+{"t":"2026-09-25T14:59:44.379161+02:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
+{"t":"2026-09-25T14:59:44.379278+02:00","seq":6,"kind":"inject","source":".keel/specs/keel-cover/spec.md","tokens":1067,"bytes":4266}
+{"t":"2026-09-25T14:59:44.627617+02:00","seq":7,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
+{"t":"2026-09-25T15:00:25.359169+02:00","seq":8,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
+{"t":"2026-09-25T15:00:28.760903+02:00","seq":9,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
+{"t":"2026-09-25T15:00:41.521011+02:00","seq":10,"kind":"oracle","criterion":"AC-1","oracle":"test tests/cover.rs::g2_records_the_tree_it_judged","verdict":"pass","exit_code":0}
+{"t":"2026-09-25T15:00:41.521232+02:00","seq":11,"kind":"oracle","criterion":"AC-2","oracle":"test tests/cover.rs::content_hash_is_the_same_committed_or_not","verdict":"pass","exit_code":0}
+{"t":"2026-09-25T15:00:41.521256+02:00","seq":12,"kind":"oracle","criterion":"AC-3","oracle":"test tests/cover.rs::a_verified_bundle_of_this_tree_covers_it","verdict":"pass","exit_code":0}
+{"t":"2026-09-25T15:00:41.521267+02:00","seq":13,"kind":"oracle","criterion":"AC-4","oracle":"test tests/cover.rs::an_uncovered_change_names_each_reason","verdict":"pass","exit_code":0}
+{"t":"2026-09-25T15:00:41.521277+02:00","seq":14,"kind":"oracle","criterion":"AC-5","oracle":"test tests/cover.rs::an_edit_after_the_run_is_not_covered","verdict":"pass","exit_code":0}
+{"t":"2026-09-25T15:00:41.521331+02:00","seq":15,"kind":"oracle","criterion":"AC-6","oracle":"test tests/cover.rs::an_exemption_passes_as_exempted_not_covered","verdict":"pass","exit_code":0}
+{"t":"2026-09-25T15:00:41.521395+02:00","seq":16,"kind":"oracle","criterion":"AC-7","oracle":"test tests/cover.rs::json_report_validates_against_the_published_schema","verdict":"pass","exit_code":0}
+{"t":"2026-09-25T15:00:41.521483+02:00","seq":17,"kind":"oracle","criterion":"AC-8","oracle":"test tests/cover.rs::the_action_runs_keel_cover_on_the_pr_head","verdict":"pass","exit_code":0}
+{"t":"2026-09-25T15:01:28.676082+02:00","seq":18,"kind":"gate","gate":"G2","verdict":"pass","result":"gates/G2.json"}
+{"t":"2026-09-25T15:01:28.774785+02:00","seq":19,"kind":"gate","gate":"G2.5","verdict":"pass","result":"gates/G2.5.json"}
+{"t":"2026-09-25T15:01:28.799385+02:00","seq":20,"kind":"gate","gate":"G3","verdict":"fail","result":"gates/G3.json"}
+{"t":"2026-09-25T15:01:28.799410+02:00","seq":21,"kind":"run_end","verdict":"fail","duration_ms":104431}
+{"t":"2026-09-25T15:44:40.531162+02:00","seq":22,"kind":"human","stage":"merge","decision":"approved","by":"Dane Balia"}
