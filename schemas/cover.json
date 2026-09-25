@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "keel.cover/1 report",
+  "description": "What `keel cover --json` prints: the content hash of the working tree, whether a committed, verified bundle of a passing run covers it, and why each bundle does or does not.",
+  "type": "object",
+  "required": ["schema", "head", "verdict", "bundles"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "keel.cover/1" },
+    "head": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "verdict": { "enum": ["covered", "uncovered", "exempted"] },
+    "exempt_reason": { "type": "string" },
+    "bundles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["bundle", "covers", "reason"],
+        "additionalProperties": false,
+        "properties": {
+          "bundle": { "type": "string", "minLength": 1 },
+          "covers": { "type": "boolean" },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

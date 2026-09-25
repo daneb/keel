@@ -88,6 +88,7 @@ pub fn run(
         Ok(d) => {
             let stat = run.write_evidence("diff-stat.txt", &d.stat())?;
             run.write_evidence("diff.patch", &diff::patch(paths, &base)?)?;
+            run.write_evidence("tree.txt", &format!("{}\n", crate::cover::tree_hash(paths, cfg)?))?;
             checks.push(blast_radius(cfg, spec, plan, &d, &stat));
             checks.push(line_budget(cfg, spec, &d, &stat));
         }

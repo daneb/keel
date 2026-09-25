@@ -1,0 +1,34 @@
+name: keel cover
+description: >-
+  Fail a pull request unless its change is covered by a committed, verified
+  keel evidence bundle of a passing run of exactly that tree. A maintainer can
+  pass it instead by adding the `keel:exempt` label, which is recorded as an
+  exemption, not as cover. Bundles live under .keel/bundles/ in the PR
+  (`keel export`, then `git add -f`).
+inputs:
+  keel-version:
+    description: The keel-harness version to install; the first with `keel cover` is 0.9.0.
+    required: false
+    default: "0.9.0"
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v5
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+    - name: Install keel
+      shell: bash
+      run: cargo install keel-harness --version "$KEEL_VERSION" --locked
+      env:
+        KEEL_VERSION: ${{ inputs.keel-version }}
+    - name: keel cover
+      shell: bash
+      # The label arrives as an env var, never interpolated into the script.
+      env:
+        KEEL_EXEMPT: ${{ contains(github.event.pull_request.labels.*.name, 'keel:exempt') }}
+      run: |
+        if [ "$KEEL_EXEMPT" = "true" ]; then
+          keel cover --exempt "label keel:exempt set on the pull request"
+        else
+          keel cover
+        fi

@@ -9,6 +9,7 @@ mod atomic;
 mod chain;
 mod cmd;
 mod config;
+mod cover;
 mod driver;
 mod evidence;
 mod failure;
@@ -128,6 +129,14 @@ enum Command {
     /// Check an evidence bundle using nothing but the bundle
     #[command(subcommand)]
     Bundle(BundleCmd),
+    /// Is this tree covered by a committed, verified bundle of a passing run?
+    Cover {
+        /// Pass as exempted rather than covered, recording why
+        #[arg(long, value_name = "REASON")]
+        exempt: Option<String>,
+        #[arg(long)]
+        json: bool,
+    },
     /// Record a human decision on a stage
     Approve {
         slug: Option<String>,
@@ -555,6 +564,7 @@ fn run() -> Result<i32> {
         Command::Chain(ChainCmd::Verify { head, json }) => cmd::chain::verify(head, json),
         Command::Chain(ChainCmd::Head) => cmd::chain::head(),
         Command::Bundle(BundleCmd::Verify { archive, json }) => cmd::bundle::verify(archive, json),
+        Command::Cover { exempt, json } => cmd::cover::run(exempt, json),
         Command::Learn { run, json } => cmd::learn::learn(run, json),
         Command::Failures { json } => cmd::learn::failures(json),
         Command::Lessons { json } => cmd::learn::list(json),
