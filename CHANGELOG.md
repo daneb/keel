@@ -7,6 +7,27 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.9.0] - 2026-09-25
+
+### Added
+
+- **`keel cover [--exempt <reason>] [--json]`**, a PR check. It passes when a
+  committed bundle under `.keel/bundles/` covers the working tree: the bundle
+  passes `keel bundle verify`, its run's verdict is `pass`, and it gated
+  exactly this content. Otherwise it exits 1 and gives each bundle's reason:
+  failed verification, a run verdict other than pass, no tree hash, or a
+  different tree. `--exempt` passes as exempted, never as covered. `--json`
+  prints a `keel.cover/1` report (`schemas/cover.json`).
+- **G2 records the tree it judged** as `evidence/tree.txt`: a content hash of
+  every path git would show, with the bytes on disk, the same whether files
+  are committed, staged or untracked. It leaves out `.keel/` and keel's
+  rendered projections, and keeps lockfiles in.
+- **A GitHub Action (`action.yml`)** runs `keel cover` on pull requests. It
+  checks out the PR's head, installs a pinned keel (default `0.9.0`), and
+  turns a `keel:exempt` label into `--exempt`. Use it as
+  `uses: daneb/keel@v0.9.0` in a `pull_request` workflow. Bundles are
+  gitignored by `keel init`, so commit them with `git add -f`.
+
 ## [0.8.0] - 2026-09-25
 
 ### Added
