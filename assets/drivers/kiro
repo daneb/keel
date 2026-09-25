@@ -33,6 +33,7 @@
 #                        --region <your-region>
 # `kiro-cli whoami` shows the current identity.
 set -u
+# shellcheck disable=SC1091 # _common.sh is checked as a file of its own
 . "$(dirname "$0")/_common.sh"
 
 task=$(cat)

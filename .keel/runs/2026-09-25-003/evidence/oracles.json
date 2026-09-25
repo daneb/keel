@@ -1,0 +1,49 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "test",
+      "oracle": "test tests/papercuts.rs::a_code_only_change_is_flagged_for_review",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 1.65s"
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "test",
+      "oracle": "test tests/papercuts.rs::a_review_sign_off_clears_test_movement",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 1.97s"
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "test",
+      "oracle": "test tests/papercuts.rs::a_new_change_supersedes_the_review",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 2.07s"
+    },
+    {
+      "criterion": "AC-4",
+      "kind": "test",
+      "oracle": "test tests/papercuts.rs::a_chainless_bundle_is_reported_blocked",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 1.79s"
+    },
+    {
+      "criterion": "AC-5",
+      "kind": "cmd",
+      "oracle": "`shellcheck assets/drivers/claude-code assets/drivers/codex assets/drivers/copilot assets/drivers/kiro assets/drivers/_common.sh` exits 0",
+      "outcome": "pass",
+      "exit_code": 0
+    }
+  ],
+  "criteria": 5,
+  "executed": 5,
+  "passed": 5,
+  "failed": 0,
+  "blocked": 0,
+  "human": 0
+}

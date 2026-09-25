@@ -9,6 +9,7 @@
 # `exec` is Codex's non-interactive mode; the prompt is positional.
 # ───────────────────────────────────────────────────────────────────────────
 set -u
+# shellcheck disable=SC1091 # _common.sh is checked as a file of its own
 . "$(dirname "$0")/_common.sh"
 
 task=$(cat)

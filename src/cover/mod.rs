@@ -136,7 +136,10 @@ fn judge(archive: &Path, head: &str) -> (bool, String) {
     if report.verdict != Verdict::Pass {
         let failing: Vec<&str> =
             report.checks.iter().filter(|c| c.verdict != Verdict::Pass).map(|c| c.id.as_str()).collect();
-        return (false, format!("failed verification ({})", failing.join(", ")));
+        // Blocked means verification could not be completed (a bundle with no
+        // chain, say) — not that something failed it.
+        let how = if report.verdict == Verdict::Blocked { "verification blocked" } else { "failed verification" };
+        return (false, format!("{how} ({})", failing.join(", ")));
     }
     let members = match evidence::read_members(archive) {
         Ok(m) => m,

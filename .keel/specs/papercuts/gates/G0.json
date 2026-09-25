@@ -1,0 +1,90 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G0",
+  "run": "2026-09-25-002",
+  "spec": "papercuts",
+  "verdict": "pass",
+  "generated_at": "2026-09-25T17:59:01.651984+02:00",
+  "checks": [
+    {
+      "id": "schema",
+      "verdict": "pass",
+      "detail": "SPEC-0013 (keel.spec/1)"
+    },
+    {
+      "id": "criteria-present",
+      "verdict": "pass",
+      "detail": "5 criteria"
+    },
+    {
+      "id": "criterion-ids-unique",
+      "verdict": "pass",
+      "detail": "no duplicate ids"
+    },
+    {
+      "id": "no-placeholders",
+      "verdict": "pass",
+      "detail": "no unfilled scaffold text"
+    },
+    {
+      "id": "ears-conformance",
+      "verdict": "pass",
+      "detail": "5/5 conform (state-driven, ubiquitous, unwanted-behaviour)"
+    },
+    {
+      "id": "oracle-presence",
+      "verdict": "pass",
+      "detail": "5 oracles across 5 criteria"
+    },
+    {
+      "id": "oracle-wellformed",
+      "verdict": "pass",
+      "detail": "all oracles parse"
+    },
+    {
+      "id": "ambiguity",
+      "verdict": "pass",
+      "detail": "no ambiguous phrasing in criteria"
+    },
+    {
+      "id": "criterion-budget",
+      "verdict": "pass",
+      "detail": "5/6 criteria"
+    },
+    {
+      "id": "spec-length",
+      "verdict": "pass",
+      "detail": "81/250 lines"
+    },
+    {
+      "id": "scope-declared",
+      "verdict": "pass",
+      "detail": "4 glob(s): src/gate/g25.rs, src/cover/mod.rs, assets/drivers/**, tests/papercuts.rs"
+    },
+    {
+      "id": "change-budget",
+      "verdict": "pass",
+      "detail": "250 lines of diff budgeted"
+    },
+    {
+      "id": "oracle-mix",
+      "verdict": "pass",
+      "detail": "5/5 runnable (1 cmd, 4 test)"
+    },
+    {
+      "id": "human-cost",
+      "verdict": "pass",
+      "detail": "0 human oracle(s), none load-bearing"
+    },
+    {
+      "id": "store-drift",
+      "verdict": "pass",
+      "detail": "4 projections current"
+    },
+    {
+      "id": "shared-stores",
+      "verdict": "pass",
+      "detail": "none configured"
+    }
+  ]
+}
