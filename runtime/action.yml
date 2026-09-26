@@ -22,7 +22,7 @@ inputs:
   keel-version:
     description: The keel-harness version to install.
     required: false
-    default: "0.10.0"
+    default: "0.10.1"
   gvisor-version:
     description: The dated gVisor release to install (releases/release/<version>), pinned so an upstream change can't alter CI.
     required: false

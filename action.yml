@@ -9,7 +9,7 @@ inputs:
   keel-version:
     description: The keel-harness version to install; `keel cover` needs 0.9.0 or later.
     required: false
-    default: "0.10.0"
+    default: "0.10.1"
 runs:
   using: composite
   steps:
