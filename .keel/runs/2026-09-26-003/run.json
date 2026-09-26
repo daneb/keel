@@ -1,0 +1,11 @@
+{
+  "schema": "keel.run/1",
+  "id": "2026-09-26-003",
+  "spec": "runtime-fixes",
+  "keel_version": "0.10.0",
+  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
+  "started_at": "2026-09-26T12:08:54.704576+02:00",
+  "finished_at": "2026-09-26T12:10:27.001759+02:00",
+  "verdict": "fail",
+  "base_commit": "33e4447ecab17d76da039abeb5b9b9ea3e92f9b4"
+}

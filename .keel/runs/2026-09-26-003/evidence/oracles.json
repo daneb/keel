@@ -1,0 +1,34 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "test",
+      "oracle": "test tests/runtime_fixes.rs::gvisor_comes_from_a_pinned_verified_tarball",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s"
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "cmd",
+      "oracle": "`curl -sfI https://storage.googleapis.com/gvisor/releases/release/20260921.0/x86_64/gvisor.tar.zstd` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "HTTP/2 200 \r\ncontent-type: application/octet-stream\r\nx-guploader-uploadid: AP6rU81kUzni1DubXHK9c5pc_VQ8AEemY_jYurnJF-1URfL9Clv2tRsKLJsGHTlulgeS1DcT\r\nexpires: Sat, 26 Sep 2026 11:09:39 GMT\r\ndate: Sat, 26 Sep 2026 10:09:39 GMT\r\ncache-control: public, max-age=3600\r\nlast-modified: Wed, 23 Sep 2026 23:17:53 GMT\r\netag: \"22cd0db3b6ec60e33abbc3243b133e64\"\r\nx-goog-generation: 1790205473267911\r\nx-goog-metageneration: 1\r\nx-goog-stored-content-encoding: identity\r\nx-goog-stored-content-length: 129280755\r\nx-goog-hash: crc32c=bPtdVw==\r\nx-goog-hash: md5=Is0Ns7bsYOM6u8MkOxM+ZA==\r\nx-goog-storage-class: MULTI_REGIONAL\r\naccept-ranges: bytes\r\ncontent-length: 129280755\r\nserver: UploadServer\r\nalt-svc: h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "test",
+      "oracle": "test tests/runtime_fixes.rs::the_action_skips_its_own_bundle_commit",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.22s"
+    }
+  ],
+  "criteria": 3,
+  "executed": 3,
+  "passed": 3,
+  "failed": 0,
+  "blocked": 0,
+  "human": 0
+}

@@ -23,6 +23,10 @@ inputs:
     description: The keel-harness version to install.
     required: false
     default: "0.10.0"
+  gvisor-version:
+    description: The dated gVisor release to install (releases/release/<version>), pinned so an upstream change can't alter CI.
+    required: false
+    default: "20260921.0"
   token:
     description: Token used to push the bundle commit.
     required: false
@@ -36,7 +40,22 @@ runs:
         fetch-depth: 0
         token: ${{ inputs.token }}
 
+    # The bundle commit this Action pushes starts the workflow again; gating
+    # it would push another bundle, and so on. Recognise it and stop.
+    - name: Skip the runtime's own bundle commit
+      shell: bash
+      run: |
+        author=$(git log -1 --format=%an)
+        others=$(git diff --name-only HEAD~1 HEAD | grep -v '^\.keel/bundles/' || true)
+        if [ "$author" = "github-actions[bot]" ] && [ -z "$others" ]; then
+          echo "::notice::the head is the runtime's own bundle commit; nothing to gate"
+          echo "KEEL_SKIP=true" >> "$GITHUB_ENV"
+        else
+          echo "KEEL_SKIP=false" >> "$GITHUB_ENV"
+        fi
+
     - name: Install keel (static, runs in any image)
+      if: env.KEEL_SKIP != 'true'
       shell: bash
       env:
         KEEL_VERSION: ${{ inputs.keel-version }}
@@ -47,18 +66,26 @@ runs:
         echo "KEEL_BIN=$HOME/.cargo/bin/keel" >> "$GITHUB_ENV"
 
     - name: Install gVisor if it can be installed
+      if: env.KEEL_SKIP != 'true'
       shell: bash
+      env:
+        GVISOR_VERSION: ${{ inputs.gvisor-version }}
       run: |
         set +e
-        ARCH=$(uname -m)
-        URL="https://storage.googleapis.com/gvisor/releases/release/latest/${ARCH}"
-        curl -fsSL "${URL}/runsc" -o /tmp/runsc \
-          && curl -fsSL "${URL}/runsc.sha512" -o /tmp/runsc.sha512 \
-          && (cd /tmp && sha512sum -c runsc.sha512) \
-          && sudo install -m 0755 /tmp/runsc /usr/local/bin/runsc \
+        # gVisor ships each release as a tarball with a digest beside it; runsc
+        # is at its top level. Checked before anything is extracted.
+        URL="https://storage.googleapis.com/gvisor/releases/release/${GVISOR_VERSION}/$(uname -m)"
+        G=$(mktemp -d)
+        curl -fsSL "${URL}/gvisor.tar.zstd" -o "$G/gvisor.tar.zstd" \
+          && curl -fsSL "${URL}/gvisor.tar.zstd.sha512" -o "$G/gvisor.tar.zstd.sha512" \
+          && (cd "$G" && sha512sum -c gvisor.tar.zstd.sha512) \
+          && tar --zstd -xf "$G/gvisor.tar.zstd" -C "$G" runsc \
+          && sudo install -m 0755 "$G/runsc" /usr/local/bin/runsc \
           && sudo /usr/local/bin/runsc install \
           && sudo systemctl reload docker
-        if [ $? -eq 0 ] && docker info --format '{{json .Runtimes}}' | grep -q runsc; then
+        ok=$?
+        rm -rf "$G"
+        if [ $ok -eq 0 ] && docker info --format '{{json .Runtimes}}' | grep -q runsc; then
           echo "KEEL_OCI_RUNTIME=runsc" >> "$GITHUB_ENV"
         else
           echo "::warning::gVisor unavailable; running under runc, and kernel.isolated will be attested unproven"
@@ -66,6 +93,7 @@ runs:
         fi
 
     - name: Start the host chain from the repository's, verified
+      if: env.KEEL_SKIP != 'true'
       shell: bash
       run: |
         set -euo pipefail
@@ -77,6 +105,7 @@ runs:
         echo "KEEL_HOST=$H" >> "$GITHUB_ENV"
 
     - name: Start keel's hardened container
+      if: env.KEEL_SKIP != 'true'
       shell: bash
       env:
         IMAGE: ${{ inputs.image }}
@@ -103,6 +132,7 @@ runs:
         docker start keel-gate
 
     - name: Attest the container from outside, then gate
+      if: env.KEEL_SKIP != 'true'
       shell: bash
       env:
         SPEC: ${{ inputs.spec }}
@@ -116,6 +146,7 @@ runs:
         docker rm -f keel-gate >/dev/null
 
     - name: Fold, export and verify the bundle
+      if: env.KEEL_SKIP != 'true'
       shell: bash
       run: |
         set -euo pipefail
@@ -126,6 +157,7 @@ runs:
         echo "KEEL_BUNDLE=$BUNDLE" >> "$GITHUB_ENV"
 
     - name: Commit the bundle to the pull request
+      if: env.KEEL_SKIP != 'true'
       shell: bash
       run: |
         set -euo pipefail

@@ -1,0 +1,2217 @@
+diff --git a/.keel/chain.jsonl b/.keel/chain.jsonl
+index 07de2c5..5bbd3c5 100644
+--- a/.keel/chain.jsonl
++++ b/.keel/chain.jsonl
+@@ -98,3 +98,15 @@
+ {"schema":"keel.chain/1","seq":98,"ts":"2026-09-26T10:51:34.978874+02:00","kind":"gate","writer":"in-process","data":{"gate":"G2.5","run":"2026-09-26-003","sha256":"42846279c4c7f0cce547a1a3abc387238c76d7caa72636f505e4e1e556f2a5ab","spec":"ci-runtime","verdict":"pass"},"prev_hash":"66af817663ec183bcae349da994df465d378d983dfbd6bd3a58adc0662f44c1a","hash":"409e63faf3ad486cbcdbd2b929f7432cff7eb09c066aae7bfe0c6b1349ba8f7d"}
+ {"schema":"keel.chain/1","seq":99,"ts":"2026-09-26T10:51:35.011355+02:00","kind":"gate","writer":"in-process","data":{"gate":"G3","run":"2026-09-26-003","sha256":"1c1586d9f10b08535f47195217af0b7cf23e084a879893e4b8eac12ba98b8856","spec":"ci-runtime","verdict":"pass"},"prev_hash":"409e63faf3ad486cbcdbd2b929f7432cff7eb09c066aae7bfe0c6b1349ba8f7d","hash":"5519bb09a642d7c19bc5edd07d1deb0810d00f570e19d0c803cb5d03c7d18594"}
+ {"schema":"keel.chain/1","seq":100,"ts":"2026-09-26T10:51:35.012492+02:00","kind":"run_end","writer":"in-process","data":{"run":"2026-09-26-002","trajectory_sha256":"894ad159e4391b93ba40a7184aa98942de83b2bb5b9f5491e1ffcb0208cbea46","verdict":"pass"},"prev_hash":"5519bb09a642d7c19bc5edd07d1deb0810d00f570e19d0c803cb5d03c7d18594","hash":"f95247690d92dbf83a47cd1f88a0031a44ea5b905d7e42535c3834ac1352e491"}
++{"schema":"keel.chain/1","seq":101,"ts":"2026-09-26T11:57:18.087629+02:00","kind":"gate","writer":"in-process","data":{"gate":"G0","run":"2026-09-26-003","sha256":"8ed00b85875d7266d064ac0ac439795a16c1d15666d4f946ee178723153dff40","spec":"runtime-fixes","verdict":"fail"},"prev_hash":"f95247690d92dbf83a47cd1f88a0031a44ea5b905d7e42535c3834ac1352e491","hash":"ba367732928e8443edc8857eb62742906810df631e1749a95ebda8212befd9e8"}
++{"schema":"keel.chain/1","seq":102,"ts":"2026-09-26T11:57:30.739350+02:00","kind":"gate","writer":"in-process","data":{"gate":"G0","run":"2026-09-26-003","sha256":"c4684e5864f3b2781d765da4cf671a0c552363d71d31a9dbbe859d92bdbec998","spec":"runtime-fixes","verdict":"pass"},"prev_hash":"ba367732928e8443edc8857eb62742906810df631e1749a95ebda8212befd9e8","hash":"8a666539f4160669f27af107382a944f38d6e15f3f4f2e2911911c05b9e6488d"}
++{"schema":"keel.chain/1","seq":103,"ts":"2026-09-26T12:06:28.016876+02:00","kind":"approval","writer":"in-process","data":{"artefact_hash":"f7d023343210e41579e32573d1b30eb4712ebd27370b2f7b2439575409bddcd9","by":"Dane Balia","decision":"approved","spec":"runtime-fixes","stage":"spec"},"prev_hash":"8a666539f4160669f27af107382a944f38d6e15f3f4f2e2911911c05b9e6488d","hash":"269662446d0b5c5938249e3c67779e555ca047ebe4e2879a665a2dc8766c5470"}
++{"schema":"keel.chain/1","seq":104,"ts":"2026-09-26T12:06:47.274798+02:00","kind":"gate","writer":"in-process","data":{"gate":"G1","run":"2026-09-26-003","sha256":"79c213f8e2833ce02665186a1cd5e3eda97a6ce3adea7c4e707904db5ecc52c9","spec":"runtime-fixes","verdict":"pass"},"prev_hash":"269662446d0b5c5938249e3c67779e555ca047ebe4e2879a665a2dc8766c5470","hash":"569a9ede5b4855201f59935d701a7aef26de95e5f8d3ca74a7731aa96fe4d55c"}
++{"schema":"keel.chain/1","seq":105,"ts":"2026-09-26T12:07:14.165789+02:00","kind":"approval","writer":"in-process","data":{"artefact_hash":"2e4d1f20d8131ffdd53f05e1564de35a534db82639e86bc9a2c3255b8e2011d4","by":"Dane Balia","decision":"approved","spec":"runtime-fixes","stage":"plan"},"prev_hash":"569a9ede5b4855201f59935d701a7aef26de95e5f8d3ca74a7731aa96fe4d55c","hash":"123010fe8b34600be825a7331bbdb5e5e28fa58cbdee83371bb1dc6be11fcc2b"}
++{"schema":"keel.chain/1","seq":106,"ts":"2026-09-26T12:08:54.705916+02:00","kind":"run_start","writer":"in-process","data":{"run":"2026-09-26-003","spec":"runtime-fixes","task":null},"prev_hash":"123010fe8b34600be825a7331bbdb5e5e28fa58cbdee83371bb1dc6be11fcc2b","hash":"e15865c7a83d22f44fb0486de6f5ae644c29b174c091edae042bdc75a45c121c"}
++{"schema":"keel.chain/1","seq":107,"ts":"2026-09-26T12:10:26.870740+02:00","kind":"gate","writer":"in-process","data":{"gate":"G2","run":"2026-09-26-004","sha256":"33298a135b7628ea0b4a1a3ab12c1aa249f9f3b98e1ead93e97751733a72315d","spec":"runtime-fixes","verdict":"pass"},"prev_hash":"e15865c7a83d22f44fb0486de6f5ae644c29b174c091edae042bdc75a45c121c","hash":"be5c6f5f0737c18ce18c78bd8ef6bcdb140f0033721af2ed8feb0366cd1bc417"}
++{"schema":"keel.chain/1","seq":108,"ts":"2026-09-26T12:10:26.975508+02:00","kind":"gate","writer":"in-process","data":{"gate":"G2.5","run":"2026-09-26-004","sha256":"eeeb2979744087ff43ddfeeb57e6e723fa39864b788ea8313827d485512c8128","spec":"runtime-fixes","verdict":"pass"},"prev_hash":"be5c6f5f0737c18ce18c78bd8ef6bcdb140f0033721af2ed8feb0366cd1bc417","hash":"014cec1a85752271472c537af593c4eb0d5c2554631b98ced2702e80b8e44c8a"}
++{"schema":"keel.chain/1","seq":109,"ts":"2026-09-26T12:10:27.000543+02:00","kind":"gate","writer":"in-process","data":{"gate":"G3","run":"2026-09-26-004","sha256":"4d8ce4e7006c14edcdd78a8aa6bb1d5c8587e4fa92ba4aa75738c7dbf52d6e92","spec":"runtime-fixes","verdict":"fail"},"prev_hash":"014cec1a85752271472c537af593c4eb0d5c2554631b98ced2702e80b8e44c8a","hash":"0c8f89f781f542e191a388da04bb4456154a6863e3fa7e9b94e2a75c80dbe8e3"}
++{"schema":"keel.chain/1","seq":110,"ts":"2026-09-26T12:10:27.001710+02:00","kind":"run_end","writer":"in-process","data":{"run":"2026-09-26-003","trajectory_sha256":"e900415a3c1ef9610572a2f53c2785f56d42ee52c394bcba6c6da14537457129","verdict":"fail"},"prev_hash":"0c8f89f781f542e191a388da04bb4456154a6863e3fa7e9b94e2a75c80dbe8e3","hash":"22a19a8fd31b1721a75eda8035639e311d6258cfe8a5bb0003bd1596bdcf4971"}
++{"schema":"keel.chain/1","seq":111,"ts":"2026-09-26T12:12:07.160466+02:00","kind":"approval","writer":"in-process","data":{"artefact_hash":"4740d928a6b0303d7e39f12a6361b56bdd2227332f87798d494a7104e2c2e173","by":"Dane Balia","decision":"approved","spec":"runtime-fixes","stage":"merge"},"prev_hash":"22a19a8fd31b1721a75eda8035639e311d6258cfe8a5bb0003bd1596bdcf4971","hash":"373ebfc0cd089d839c459ad49c052cac16149c67feab60f89a14a3b3c93a2aaf"}
++{"schema":"keel.chain/1","seq":112,"ts":"2026-09-26T12:12:18.124023+02:00","kind":"run_start","writer":"in-process","data":{"run":"2026-09-26-004","spec":"runtime-fixes","task":null},"prev_hash":"373ebfc0cd089d839c459ad49c052cac16149c67feab60f89a14a3b3c93a2aaf","hash":"0aa0743b326ed4e2c8f41ad706639e943fb022cbf458e3a06ec3e8cf8f30e74a"}
+diff --git a/runtime/action.yml b/runtime/action.yml
+index db7d21f..a2903b8 100644
+--- a/runtime/action.yml
++++ b/runtime/action.yml
+@@ -23,6 +23,10 @@ inputs:
+     description: The keel-harness version to install.
+     required: false
+     default: "0.10.0"
++  gvisor-version:
++    description: The dated gVisor release to install (releases/release/<version>), pinned so an upstream change can't alter CI.
++    required: false
++    default: "20260921.0"
+   token:
+     description: Token used to push the bundle commit.
+     required: false
+@@ -36,7 +40,22 @@ runs:
+         fetch-depth: 0
+         token: ${{ inputs.token }}
+ 
++    # The bundle commit this Action pushes starts the workflow again; gating
++    # it would push another bundle, and so on. Recognise it and stop.
++    - name: Skip the runtime's own bundle commit
++      shell: bash
++      run: |
++        author=$(git log -1 --format=%an)
++        others=$(git diff --name-only HEAD~1 HEAD | grep -v '^\.keel/bundles/' || true)
++        if [ "$author" = "github-actions[bot]" ] && [ -z "$others" ]; then
++          echo "::notice::the head is the runtime's own bundle commit; nothing to gate"
++          echo "KEEL_SKIP=true" >> "$GITHUB_ENV"
++        else
++          echo "KEEL_SKIP=false" >> "$GITHUB_ENV"
++        fi
++
+     - name: Install keel (static, runs in any image)
++      if: env.KEEL_SKIP != 'true'
+       shell: bash
+       env:
+         KEEL_VERSION: ${{ inputs.keel-version }}
+@@ -47,18 +66,26 @@ runs:
+         echo "KEEL_BIN=$HOME/.cargo/bin/keel" >> "$GITHUB_ENV"
+ 
+     - name: Install gVisor if it can be installed
++      if: env.KEEL_SKIP != 'true'
+       shell: bash
++      env:
++        GVISOR_VERSION: ${{ inputs.gvisor-version }}
+       run: |
+         set +e
+-        ARCH=$(uname -m)
+-        URL="https://storage.googleapis.com/gvisor/releases/release/latest/${ARCH}"
+-        curl -fsSL "${URL}/runsc" -o /tmp/runsc \
+-          && curl -fsSL "${URL}/runsc.sha512" -o /tmp/runsc.sha512 \
+-          && (cd /tmp && sha512sum -c runsc.sha512) \
+-          && sudo install -m 0755 /tmp/runsc /usr/local/bin/runsc \
++        # gVisor ships each release as a tarball with a digest beside it; runsc
++        # is at its top level. Checked before anything is extracted.
++        URL="https://storage.googleapis.com/gvisor/releases/release/${GVISOR_VERSION}/$(uname -m)"
++        G=$(mktemp -d)
++        curl -fsSL "${URL}/gvisor.tar.zstd" -o "$G/gvisor.tar.zstd" \
++          && curl -fsSL "${URL}/gvisor.tar.zstd.sha512" -o "$G/gvisor.tar.zstd.sha512" \
++          && (cd "$G" && sha512sum -c gvisor.tar.zstd.sha512) \
++          && tar --zstd -xf "$G/gvisor.tar.zstd" -C "$G" runsc \
++          && sudo install -m 0755 "$G/runsc" /usr/local/bin/runsc \
+           && sudo /usr/local/bin/runsc install \
+           && sudo systemctl reload docker
+-        if [ $? -eq 0 ] && docker info --format '{{json .Runtimes}}' | grep -q runsc; then
++        ok=$?
++        rm -rf "$G"
++        if [ $ok -eq 0 ] && docker info --format '{{json .Runtimes}}' | grep -q runsc; then
+           echo "KEEL_OCI_RUNTIME=runsc" >> "$GITHUB_ENV"
+         else
+           echo "::warning::gVisor unavailable; running under runc, and kernel.isolated will be attested unproven"
+@@ -66,6 +93,7 @@ runs:
+         fi
+ 
+     - name: Start the host chain from the repository's, verified
++      if: env.KEEL_SKIP != 'true'
+       shell: bash
+       run: |
+         set -euo pipefail
+@@ -77,6 +105,7 @@ runs:
+         echo "KEEL_HOST=$H" >> "$GITHUB_ENV"
+ 
+     - name: Start keel's hardened container
++      if: env.KEEL_SKIP != 'true'
+       shell: bash
+       env:
+         IMAGE: ${{ inputs.image }}
+@@ -103,6 +132,7 @@ runs:
+         docker start keel-gate
+ 
+     - name: Attest the container from outside, then gate
++      if: env.KEEL_SKIP != 'true'
+       shell: bash
+       env:
+         SPEC: ${{ inputs.spec }}
+@@ -116,6 +146,7 @@ runs:
+         docker rm -f keel-gate >/dev/null
+ 
+     - name: Fold, export and verify the bundle
++      if: env.KEEL_SKIP != 'true'
+       shell: bash
+       run: |
+         set -euo pipefail
+@@ -126,6 +157,7 @@ runs:
+         echo "KEEL_BUNDLE=$BUNDLE" >> "$GITHUB_ENV"
+ 
+     - name: Commit the bundle to the pull request
++      if: env.KEEL_SKIP != 'true'
+       shell: bash
+       run: |
+         set -euo pipefail
+diff --git a/.keel/runs/2026-09-26-003/evidence/build.txt b/.keel/runs/2026-09-26-003/evidence/build.txt
+new file mode 100644
+index 0000000..01700b6
+--- /dev/null
++++ b/.keel/runs/2026-09-26-003/evidence/build.txt
+@@ -0,0 +1,2 @@
++$ cargo build --quiet
++
+diff --git a/.keel/runs/2026-09-26-003/evidence/diff-stat.txt b/.keel/runs/2026-09-26-003/evidence/diff-stat.txt
+new file mode 100644
+index 0000000..4f5cdab
+--- /dev/null
++++ b/.keel/runs/2026-09-26-003/evidence/diff-stat.txt
+@@ -0,0 +1,17 @@
++     6      0  .keel/chain.jsonl
++     2      0  .keel/runs/2026-09-26-003/evidence/build.txt
++     2      0  .keel/runs/2026-09-26-003/evidence/lint.txt
++    34      0  .keel/runs/2026-09-26-003/evidence/oracles.json
++   130      0  .keel/runs/2026-09-26-003/evidence/test.txt
++     9      0  .keel/runs/2026-09-26-003/run.json
++    12      0  .keel/runs/2026-09-26-003/trajectory.jsonl
++     2      0  .keel/specs/runtime-fixes/approvals.jsonl
++    90      0  .keel/specs/runtime-fixes/gates/G0.json
++    95      0  .keel/specs/runtime-fixes/gates/G1.json
++    64      0  .keel/specs/runtime-fixes/plan.md
++    62      0  .keel/specs/runtime-fixes/spec.md
++    20      0  .keel/specs/runtime-fixes/tasks.md
++    39      7  runtime/action.yml
++   102      0  tests/runtime_fixes.rs
++
++15 file(s), +669 -7 (676 lines of churn) against 33e4447ecab17d76da039abeb5b9b9ea3e92f9b4
+diff --git a/.keel/runs/2026-09-26-003/evidence/diff.patch b/.keel/runs/2026-09-26-003/evidence/diff.patch
+new file mode 100644
+index 0000000..31ba0ff
+--- /dev/null
++++ b/.keel/runs/2026-09-26-003/evidence/diff.patch
+@@ -0,0 +1,852 @@
++diff --git a/.keel/chain.jsonl b/.keel/chain.jsonl
++index 07de2c5..b45488c 100644
++--- a/.keel/chain.jsonl
+++++ b/.keel/chain.jsonl
++@@ -98,3 +98,9 @@
++ {"schema":"keel.chain/1","seq":98,"ts":"2026-09-26T10:51:34.978874+02:00","kind":"gate","writer":"in-process","data":{"gate":"G2.5","run":"2026-09-26-003","sha256":"42846279c4c7f0cce547a1a3abc387238c76d7caa72636f505e4e1e556f2a5ab","spec":"ci-runtime","verdict":"pass"},"prev_hash":"66af817663ec183bcae349da994df465d378d983dfbd6bd3a58adc0662f44c1a","hash":"409e63faf3ad486cbcdbd2b929f7432cff7eb09c066aae7bfe0c6b1349ba8f7d"}
++ {"schema":"keel.chain/1","seq":99,"ts":"2026-09-26T10:51:35.011355+02:00","kind":"gate","writer":"in-process","data":{"gate":"G3","run":"2026-09-26-003","sha256":"1c1586d9f10b08535f47195217af0b7cf23e084a879893e4b8eac12ba98b8856","spec":"ci-runtime","verdict":"pass"},"prev_hash":"409e63faf3ad486cbcdbd2b929f7432cff7eb09c066aae7bfe0c6b1349ba8f7d","hash":"5519bb09a642d7c19bc5edd07d1deb0810d00f570e19d0c803cb5d03c7d18594"}
++ {"schema":"keel.chain/1","seq":100,"ts":"2026-09-26T10:51:35.012492+02:00","kind":"run_end","writer":"in-process","data":{"run":"2026-09-26-002","trajectory_sha256":"894ad159e4391b93ba40a7184aa98942de83b2bb5b9f5491e1ffcb0208cbea46","verdict":"pass"},"prev_hash":"5519bb09a642d7c19bc5edd07d1deb0810d00f570e19d0c803cb5d03c7d18594","hash":"f95247690d92dbf83a47cd1f88a0031a44ea5b905d7e42535c3834ac1352e491"}
+++{"schema":"keel.chain/1","seq":101,"ts":"2026-09-26T11:57:18.087629+02:00","kind":"gate","writer":"in-process","data":{"gate":"G0","run":"2026-09-26-003","sha256":"8ed00b85875d7266d064ac0ac439795a16c1d15666d4f946ee178723153dff40","spec":"runtime-fixes","verdict":"fail"},"prev_hash":"f95247690d92dbf83a47cd1f88a0031a44ea5b905d7e42535c3834ac1352e491","hash":"ba367732928e8443edc8857eb62742906810df631e1749a95ebda8212befd9e8"}
+++{"schema":"keel.chain/1","seq":102,"ts":"2026-09-26T11:57:30.739350+02:00","kind":"gate","writer":"in-process","data":{"gate":"G0","run":"2026-09-26-003","sha256":"c4684e5864f3b2781d765da4cf671a0c552363d71d31a9dbbe859d92bdbec998","spec":"runtime-fixes","verdict":"pass"},"prev_hash":"ba367732928e8443edc8857eb62742906810df631e1749a95ebda8212befd9e8","hash":"8a666539f4160669f27af107382a944f38d6e15f3f4f2e2911911c05b9e6488d"}
+++{"schema":"keel.chain/1","seq":103,"ts":"2026-09-26T12:06:28.016876+02:00","kind":"approval","writer":"in-process","data":{"artefact_hash":"f7d023343210e41579e32573d1b30eb4712ebd27370b2f7b2439575409bddcd9","by":"Dane Balia","decision":"approved","spec":"runtime-fixes","stage":"spec"},"prev_hash":"8a666539f4160669f27af107382a944f38d6e15f3f4f2e2911911c05b9e6488d","hash":"269662446d0b5c5938249e3c67779e555ca047ebe4e2879a665a2dc8766c5470"}
+++{"schema":"keel.chain/1","seq":104,"ts":"2026-09-26T12:06:47.274798+02:00","kind":"gate","writer":"in-process","data":{"gate":"G1","run":"2026-09-26-003","sha256":"79c213f8e2833ce02665186a1cd5e3eda97a6ce3adea7c4e707904db5ecc52c9","spec":"runtime-fixes","verdict":"pass"},"prev_hash":"269662446d0b5c5938249e3c67779e555ca047ebe4e2879a665a2dc8766c5470","hash":"569a9ede5b4855201f59935d701a7aef26de95e5f8d3ca74a7731aa96fe4d55c"}
+++{"schema":"keel.chain/1","seq":105,"ts":"2026-09-26T12:07:14.165789+02:00","kind":"approval","writer":"in-process","data":{"artefact_hash":"2e4d1f20d8131ffdd53f05e1564de35a534db82639e86bc9a2c3255b8e2011d4","by":"Dane Balia","decision":"approved","spec":"runtime-fixes","stage":"plan"},"prev_hash":"569a9ede5b4855201f59935d701a7aef26de95e5f8d3ca74a7731aa96fe4d55c","hash":"123010fe8b34600be825a7331bbdb5e5e28fa58cbdee83371bb1dc6be11fcc2b"}
+++{"schema":"keel.chain/1","seq":106,"ts":"2026-09-26T12:08:54.705916+02:00","kind":"run_start","writer":"in-process","data":{"run":"2026-09-26-003","spec":"runtime-fixes","task":null},"prev_hash":"123010fe8b34600be825a7331bbdb5e5e28fa58cbdee83371bb1dc6be11fcc2b","hash":"e15865c7a83d22f44fb0486de6f5ae644c29b174c091edae042bdc75a45c121c"}
++diff --git a/runtime/action.yml b/runtime/action.yml
++index db7d21f..a2903b8 100644
++--- a/runtime/action.yml
+++++ b/runtime/action.yml
++@@ -23,6 +23,10 @@ inputs:
++     description: The keel-harness version to install.
++     required: false
++     default: "0.10.0"
+++  gvisor-version:
+++    description: The dated gVisor release to install (releases/release/<version>), pinned so an upstream change can't alter CI.
+++    required: false
+++    default: "20260921.0"
++   token:
++     description: Token used to push the bundle commit.
++     required: false
++@@ -36,7 +40,22 @@ runs:
++         fetch-depth: 0
++         token: ${{ inputs.token }}
++ 
+++    # The bundle commit this Action pushes starts the workflow again; gating
+++    # it would push another bundle, and so on. Recognise it and stop.
+++    - name: Skip the runtime's own bundle commit
+++      shell: bash
+++      run: |
+++        author=$(git log -1 --format=%an)
+++        others=$(git diff --name-only HEAD~1 HEAD | grep -v '^\.keel/bundles/' || true)
+++        if [ "$author" = "github-actions[bot]" ] && [ -z "$others" ]; then
+++          echo "::notice::the head is the runtime's own bundle commit; nothing to gate"
+++          echo "KEEL_SKIP=true" >> "$GITHUB_ENV"
+++        else
+++          echo "KEEL_SKIP=false" >> "$GITHUB_ENV"
+++        fi
+++
++     - name: Install keel (static, runs in any image)
+++      if: env.KEEL_SKIP != 'true'
++       shell: bash
++       env:
++         KEEL_VERSION: ${{ inputs.keel-version }}
++@@ -47,18 +66,26 @@ runs:
++         echo "KEEL_BIN=$HOME/.cargo/bin/keel" >> "$GITHUB_ENV"
++ 
++     - name: Install gVisor if it can be installed
+++      if: env.KEEL_SKIP != 'true'
++       shell: bash
+++      env:
+++        GVISOR_VERSION: ${{ inputs.gvisor-version }}
++       run: |
++         set +e
++-        ARCH=$(uname -m)
++-        URL="https://storage.googleapis.com/gvisor/releases/release/latest/${ARCH}"
++-        curl -fsSL "${URL}/runsc" -o /tmp/runsc \
++-          && curl -fsSL "${URL}/runsc.sha512" -o /tmp/runsc.sha512 \
++-          && (cd /tmp && sha512sum -c runsc.sha512) \
++-          && sudo install -m 0755 /tmp/runsc /usr/local/bin/runsc \
+++        # gVisor ships each release as a tarball with a digest beside it; runsc
+++        # is at its top level. Checked before anything is extracted.
+++        URL="https://storage.googleapis.com/gvisor/releases/release/${GVISOR_VERSION}/$(uname -m)"
+++        G=$(mktemp -d)
+++        curl -fsSL "${URL}/gvisor.tar.zstd" -o "$G/gvisor.tar.zstd" \
+++          && curl -fsSL "${URL}/gvisor.tar.zstd.sha512" -o "$G/gvisor.tar.zstd.sha512" \
+++          && (cd "$G" && sha512sum -c gvisor.tar.zstd.sha512) \
+++          && tar --zstd -xf "$G/gvisor.tar.zstd" -C "$G" runsc \
+++          && sudo install -m 0755 "$G/runsc" /usr/local/bin/runsc \
++           && sudo /usr/local/bin/runsc install \
++           && sudo systemctl reload docker
++-        if [ $? -eq 0 ] && docker info --format '{{json .Runtimes}}' | grep -q runsc; then
+++        ok=$?
+++        rm -rf "$G"
+++        if [ $ok -eq 0 ] && docker info --format '{{json .Runtimes}}' | grep -q runsc; then
++           echo "KEEL_OCI_RUNTIME=runsc" >> "$GITHUB_ENV"
++         else
++           echo "::warning::gVisor unavailable; running under runc, and kernel.isolated will be attested unproven"
++@@ -66,6 +93,7 @@ runs:
++         fi
++ 
++     - name: Start the host chain from the repository's, verified
+++      if: env.KEEL_SKIP != 'true'
++       shell: bash
++       run: |
++         set -euo pipefail
++@@ -77,6 +105,7 @@ runs:
++         echo "KEEL_HOST=$H" >> "$GITHUB_ENV"
++ 
++     - name: Start keel's hardened container
+++      if: env.KEEL_SKIP != 'true'
++       shell: bash
++       env:
++         IMAGE: ${{ inputs.image }}
++@@ -103,6 +132,7 @@ runs:
++         docker start keel-gate
++ 
++     - name: Attest the container from outside, then gate
+++      if: env.KEEL_SKIP != 'true'
++       shell: bash
++       env:
++         SPEC: ${{ inputs.spec }}
++@@ -116,6 +146,7 @@ runs:
++         docker rm -f keel-gate >/dev/null
++ 
++     - name: Fold, export and verify the bundle
+++      if: env.KEEL_SKIP != 'true'
++       shell: bash
++       run: |
++         set -euo pipefail
++@@ -126,6 +157,7 @@ runs:
++         echo "KEEL_BUNDLE=$BUNDLE" >> "$GITHUB_ENV"
++ 
++     - name: Commit the bundle to the pull request
+++      if: env.KEEL_SKIP != 'true'
++       shell: bash
++       run: |
++         set -euo pipefail
++diff --git a/.keel/runs/2026-09-26-003/evidence/build.txt b/.keel/runs/2026-09-26-003/evidence/build.txt
++new file mode 100644
++index 0000000..01700b6
++--- /dev/null
+++++ b/.keel/runs/2026-09-26-003/evidence/build.txt
++@@ -0,0 +1,2 @@
+++$ cargo build --quiet
+++
++diff --git a/.keel/runs/2026-09-26-003/evidence/diff-stat.txt b/.keel/runs/2026-09-26-003/evidence/diff-stat.txt
++new file mode 100644
++index 0000000..4f5cdab
++--- /dev/null
+++++ b/.keel/runs/2026-09-26-003/evidence/diff-stat.txt
++@@ -0,0 +1,17 @@
+++     6      0  .keel/chain.jsonl
+++     2      0  .keel/runs/2026-09-26-003/evidence/build.txt
+++     2      0  .keel/runs/2026-09-26-003/evidence/lint.txt
+++    34      0  .keel/runs/2026-09-26-003/evidence/oracles.json
+++   130      0  .keel/runs/2026-09-26-003/evidence/test.txt
+++     9      0  .keel/runs/2026-09-26-003/run.json
+++    12      0  .keel/runs/2026-09-26-003/trajectory.jsonl
+++     2      0  .keel/specs/runtime-fixes/approvals.jsonl
+++    90      0  .keel/specs/runtime-fixes/gates/G0.json
+++    95      0  .keel/specs/runtime-fixes/gates/G1.json
+++    64      0  .keel/specs/runtime-fixes/plan.md
+++    62      0  .keel/specs/runtime-fixes/spec.md
+++    20      0  .keel/specs/runtime-fixes/tasks.md
+++    39      7  runtime/action.yml
+++   102      0  tests/runtime_fixes.rs
+++
+++15 file(s), +669 -7 (676 lines of churn) against 33e4447ecab17d76da039abeb5b9b9ea3e92f9b4
++diff --git a/.keel/runs/2026-09-26-003/evidence/lint.txt b/.keel/runs/2026-09-26-003/evidence/lint.txt
++new file mode 100644
++index 0000000..f68c665
++--- /dev/null
+++++ b/.keel/runs/2026-09-26-003/evidence/lint.txt
++@@ -0,0 +1,2 @@
+++$ cargo clippy --all-targets --quiet
+++
++diff --git a/.keel/runs/2026-09-26-003/evidence/oracles.json b/.keel/runs/2026-09-26-003/evidence/oracles.json
++new file mode 100644
++index 0000000..d57e2ff
++--- /dev/null
+++++ b/.keel/runs/2026-09-26-003/evidence/oracles.json
++@@ -0,0 +1,34 @@
+++{
+++  "runs": [
+++    {
+++      "criterion": "AC-1",
+++      "kind": "test",
+++      "oracle": "test tests/runtime_fixes.rs::gvisor_comes_from_a_pinned_verified_tarball",
+++      "outcome": "pass",
+++      "exit_code": 0,
+++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s"
+++    },
+++    {
+++      "criterion": "AC-2",
+++      "kind": "cmd",
+++      "oracle": "`curl -sfI https://storage.googleapis.com/gvisor/releases/release/20260921.0/x86_64/gvisor.tar.zstd` exits 0",
+++      "outcome": "pass",
+++      "exit_code": 0,
+++      "output": "HTTP/2 200 \r\ncontent-type: application/octet-stream\r\nx-guploader-uploadid: AP6rU81kUzni1DubXHK9c5pc_VQ8AEemY_jYurnJF-1URfL9Clv2tRsKLJsGHTlulgeS1DcT\r\nexpires: Sat, 26 Sep 2026 11:09:39 GMT\r\ndate: Sat, 26 Sep 2026 10:09:39 GMT\r\ncache-control: public, max-age=3600\r\nlast-modified: Wed, 23 Sep 2026 23:17:53 GMT\r\netag: \"22cd0db3b6ec60e33abbc3243b133e64\"\r\nx-goog-generation: 1790205473267911\r\nx-goog-metageneration: 1\r\nx-goog-stored-content-encoding: identity\r\nx-goog-stored-content-length: 129280755\r\nx-goog-hash: crc32c=bPtdVw==\r\nx-goog-hash: md5=Is0Ns7bsYOM6u8MkOxM+ZA==\r\nx-goog-storage-class: MULTI_REGIONAL\r\naccept-ranges: bytes\r\ncontent-length: 129280755\r\nserver: UploadServer\r\nalt-svc: h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+++    },
+++    {
+++      "criterion": "AC-3",
+++      "kind": "test",
+++      "oracle": "test tests/runtime_fixes.rs::the_action_skips_its_own_bundle_commit",
+++      "outcome": "pass",
+++      "exit_code": 0,
+++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.22s"
+++    }
+++  ],
+++  "criteria": 3,
+++  "executed": 3,
+++  "passed": 3,
+++  "failed": 0,
+++  "blocked": 0,
+++  "human": 0
+++}
++\ No newline at end of file
++diff --git a/.keel/runs/2026-09-26-003/evidence/test.txt b/.keel/runs/2026-09-26-003/evidence/test.txt
++new file mode 100644
++index 0000000..5376ee0
++--- /dev/null
+++++ b/.keel/runs/2026-09-26-003/evidence/test.txt
++@@ -0,0 +1,130 @@
+++$ cargo test --quiet
+++
+++
+++running 291 tests
+++....................................................................................... 87/291
+++....................................................................................... 174/291
+++....................................................................................... 261/291
+++..............................
+++test result: ok. 291 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.83s
+++
+++
+++running 8 tests
+++........
+++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.63s
+++
+++
+++running 9 tests
+++.........
+++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.53s
+++
+++
+++running 7 tests
+++.......
+++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+++
+++
+++running 9 tests
+++.........
+++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.69s
+++
+++
+++running 8 tests
+++........
+++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.54s
+++
+++
+++running 13 tests
+++.............
+++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.01s
+++
+++
+++running 6 tests
+++......
+++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.57s
+++
+++
+++running 6 tests
+++......
+++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.40s
+++
+++
+++running 9 tests
+++.........
+++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.95s
+++
+++
+++running 5 tests
+++.....
+++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.34s
+++
+++
+++running 4 tests
+++....
+++test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.43s
+++
+++
+++running 25 tests
+++.........................
+++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.26s
+++
+++
+++running 14 tests
+++..............
+++test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.31s
+++
+++
+++running 13 tests
+++.............
+++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.48s
+++
+++
+++running 15 tests
+++...............
+++test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.09s
+++
+++
+++running 25 tests
+++.........................
+++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.09s
+++
+++
+++running 12 tests
+++............
+++test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.74s
+++
+++
+++running 6 tests
+++......
+++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.76s
+++
+++
+++running 8 tests
+++........
+++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.39s
+++
+++
+++running 2 tests
+++..
+++test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+++
+++
+++running 34 tests
+++..................................
+++test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.72s
+++
+++
+++running 0 tests
+++
+++test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+++
+++
+++running 7 tests
+++.......
+++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.48s
+++
+++
+++running 5 tests
+++.....
+++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.39s
+++
++diff --git a/.keel/runs/2026-09-26-003/run.json b/.keel/runs/2026-09-26-003/run.json
++new file mode 100644
++index 0000000..0af646b
++--- /dev/null
+++++ b/.keel/runs/2026-09-26-003/run.json
++@@ -0,0 +1,9 @@
+++{
+++  "schema": "keel.run/1",
+++  "id": "2026-09-26-003",
+++  "spec": "runtime-fixes",
+++  "keel_version": "0.10.0",
+++  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
+++  "started_at": "2026-09-26T12:08:54.704576+02:00",
+++  "base_commit": "33e4447ecab17d76da039abeb5b9b9ea3e92f9b4"
+++}
++diff --git a/.keel/runs/2026-09-26-003/trajectory.jsonl b/.keel/runs/2026-09-26-003/trajectory.jsonl
++new file mode 100644
++index 0000000..3079598
++--- /dev/null
+++++ b/.keel/runs/2026-09-26-003/trajectory.jsonl
++@@ -0,0 +1,12 @@
+++{"t":"2026-09-26T12:08:54.704764+02:00","seq":1,"kind":"run_start","spec":"runtime-fixes","keel_version":"0.10.0","store_hash":"0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2"}
+++{"t":"2026-09-26T12:08:54.706031+02:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":424,"bytes":1693}
+++{"t":"2026-09-26T12:08:54.706069+02:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
+++{"t":"2026-09-26T12:08:54.706118+02:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6268,"bytes":25071}
+++{"t":"2026-09-26T12:08:54.706515+02:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
+++{"t":"2026-09-26T12:08:54.706622+02:00","seq":6,"kind":"inject","source":".keel/specs/runtime-fixes/spec.md","tokens":554,"bytes":2216}
+++{"t":"2026-09-26T12:08:54.918897+02:00","seq":7,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
+++{"t":"2026-09-26T12:09:35.052501+02:00","seq":8,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
+++{"t":"2026-09-26T12:09:38.489232+02:00","seq":9,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
+++{"t":"2026-09-26T12:09:39.580146+02:00","seq":10,"kind":"oracle","criterion":"AC-1","oracle":"test tests/runtime_fixes.rs::gvisor_comes_from_a_pinned_verified_tarball","verdict":"pass","exit_code":0}
+++{"t":"2026-09-26T12:09:39.580200+02:00","seq":11,"kind":"oracle","criterion":"AC-2","oracle":"`curl -sfI https://storage.googleapis.com/gvisor/releases/release/20260921.0/x86_64/gvisor.tar.zstd` exits 0","verdict":"pass","exit_code":0}
+++{"t":"2026-09-26T12:09:39.580213+02:00","seq":12,"kind":"oracle","criterion":"AC-3","oracle":"test tests/runtime_fixes.rs::the_action_skips_its_own_bundle_commit","verdict":"pass","exit_code":0}
++diff --git a/.keel/specs/runtime-fixes/approvals.jsonl b/.keel/specs/runtime-fixes/approvals.jsonl
++new file mode 100644
++index 0000000..227b22b
++--- /dev/null
+++++ b/.keel/specs/runtime-fixes/approvals.jsonl
++@@ -0,0 +1,2 @@
+++{"schema":"keel.approval/1","stage":"spec","decision":"approved","artefact_hash":"f7d023343210e41579e32573d1b30eb4712ebd27370b2f7b2439575409bddcd9","gate_verdict":"pass","by":"Dane Balia","at":"2026-09-26T12:06:28.014607+02:00"}
+++{"schema":"keel.approval/1","stage":"plan","decision":"approved","artefact_hash":"2e4d1f20d8131ffdd53f05e1564de35a534db82639e86bc9a2c3255b8e2011d4","gate_verdict":"pass","by":"Dane Balia","at":"2026-09-26T12:07:14.162864+02:00"}
++diff --git a/.keel/specs/runtime-fixes/gates/G0.json b/.keel/specs/runtime-fixes/gates/G0.json
++new file mode 100644
++index 0000000..7479b7d
++--- /dev/null
+++++ b/.keel/specs/runtime-fixes/gates/G0.json
++@@ -0,0 +1,90 @@
+++{
+++  "schema": "keel.gate/1",
+++  "gate": "G0",
+++  "run": "2026-09-26-003",
+++  "spec": "runtime-fixes",
+++  "verdict": "pass",
+++  "generated_at": "2026-09-26T11:57:30.737987+02:00",
+++  "checks": [
+++    {
+++      "id": "schema",
+++      "verdict": "pass",
+++      "detail": "SPEC-0015 (keel.spec/1)"
+++    },
+++    {
+++      "id": "criteria-present",
+++      "verdict": "pass",
+++      "detail": "3 criteria"
+++    },
+++    {
+++      "id": "criterion-ids-unique",
+++      "verdict": "pass",
+++      "detail": "no duplicate ids"
+++    },
+++    {
+++      "id": "no-placeholders",
+++      "verdict": "pass",
+++      "detail": "no unfilled scaffold text"
+++    },
+++    {
+++      "id": "ears-conformance",
+++      "verdict": "pass",
+++      "detail": "3/3 conform (event-driven, ubiquitous, unwanted-behaviour)"
+++    },
+++    {
+++      "id": "oracle-presence",
+++      "verdict": "pass",
+++      "detail": "3 oracles across 3 criteria"
+++    },
+++    {
+++      "id": "oracle-wellformed",
+++      "verdict": "pass",
+++      "detail": "all oracles parse"
+++    },
+++    {
+++      "id": "ambiguity",
+++      "verdict": "pass",
+++      "detail": "no ambiguous phrasing in criteria"
+++    },
+++    {
+++      "id": "criterion-budget",
+++      "verdict": "pass",
+++      "detail": "3/4 criteria"
+++    },
+++    {
+++      "id": "spec-length",
+++      "verdict": "pass",
+++      "detail": "62/250 lines"
+++    },
+++    {
+++      "id": "scope-declared",
+++      "verdict": "pass",
+++      "detail": "2 glob(s): runtime/action.yml, tests/runtime_fixes.rs"
+++    },
+++    {
+++      "id": "change-budget",
+++      "verdict": "pass",
+++      "detail": "150 lines of diff budgeted"
+++    },
+++    {
+++      "id": "oracle-mix",
+++      "verdict": "pass",
+++      "detail": "3/3 runnable (1 cmd, 2 test)"
+++    },
+++    {
+++      "id": "human-cost",
+++      "verdict": "pass",
+++      "detail": "0 human oracle(s), none load-bearing"
+++    },
+++    {
+++      "id": "store-drift",
+++      "verdict": "pass",
+++      "detail": "4 projections current"
+++    },
+++    {
+++      "id": "shared-stores",
+++      "verdict": "pass",
+++      "detail": "none configured"
+++    }
+++  ]
+++}
++diff --git a/.keel/specs/runtime-fixes/gates/G1.json b/.keel/specs/runtime-fixes/gates/G1.json
++new file mode 100644
++index 0000000..a335d5b
++--- /dev/null
+++++ b/.keel/specs/runtime-fixes/gates/G1.json
++@@ -0,0 +1,95 @@
+++{
+++  "schema": "keel.gate/1",
+++  "gate": "G1",
+++  "run": "2026-09-26-003",
+++  "spec": "runtime-fixes",
+++  "verdict": "pass",
+++  "generated_at": "2026-09-26T12:06:47.274021+02:00",
+++  "checks": [
+++    {
+++      "id": "schema",
+++      "verdict": "pass",
+++      "detail": "PLAN-0015 + TASKS-0015"
+++    },
+++    {
+++      "id": "g0-passed",
+++      "verdict": "pass",
+++      "detail": "G0 passed in run 2026-09-26-003"
+++    },
+++    {
+++      "id": "spec-approved",
+++      "verdict": "pass",
+++      "detail": "approved by Dane Balia"
+++    },
+++    {
+++      "id": "tasks-present",
+++      "verdict": "pass",
+++      "detail": "2/15 tasks"
+++    },
+++    {
+++      "id": "task-ids-unique",
+++      "verdict": "pass",
+++      "detail": "no duplicate task ids"
+++    },
+++    {
+++      "id": "task-fields",
+++      "verdict": "pass",
+++      "detail": "all task fields recognised"
+++    },
+++    {
+++      "id": "task-criterion-traceability",
+++      "verdict": "pass",
+++      "detail": "2 tasks all traced"
+++    },
+++    {
+++      "id": "criteria-covered",
+++      "verdict": "pass",
+++      "detail": "3/3 criteria have a task"
+++    },
+++    {
+++      "id": "task-budgets",
+++      "verdict": "pass",
+++      "detail": "all 2 tasks budgeted, total 130 lines"
+++    },
+++    {
+++      "id": "total-budget",
+++      "verdict": "pass",
+++      "detail": "130/150 lines"
+++    },
+++    {
+++      "id": "task-exit-conditions",
+++      "verdict": "pass",
+++      "detail": "every task states when it is done"
+++    },
+++    {
+++      "id": "task-dependencies",
+++      "verdict": "pass",
+++      "detail": "2 wave(s), widths 1/1"
+++    },
+++    {
+++      "id": "wave-isolation",
+++      "verdict": "pass",
+++      "detail": "2 wave(s), no file claimed twice within one"
+++    },
+++    {
+++      "id": "task-files-in-scope",
+++      "verdict": "pass",
+++      "detail": "all task files inside the declared scope"
+++    },
+++    {
+++      "id": "rollback-stated",
+++      "verdict": "pass",
+++      "detail": "git revert the merge; the Action goes back to the latest/ru…"
+++    },
+++    {
+++      "id": "blast-radius-declared",
+++      "verdict": "pass",
+++      "detail": "0 file(s) at depth 2, 0 lines"
+++    },
+++    {
+++      "id": "blast-radius-current",
+++      "verdict": "pass",
+++      "detail": "0 files, 0 lines — matches a fresh computation — no indexed file matches runtime/action.yml, tests/runtime_fixes.rs (new files, or a typo)"
+++    }
+++  ]
+++}
++diff --git a/.keel/specs/runtime-fixes/plan.md b/.keel/specs/runtime-fixes/plan.md
++new file mode 100644
++index 0000000..02d51ab
++--- /dev/null
+++++ b/.keel/specs/runtime-fixes/plan.md
++@@ -0,0 +1,64 @@
+++---
+++id: PLAN-0015
+++slug: runtime-fixes
+++schema: keel.plan/1
+++blast:
+++  depth: 2
+++  declared:
+++  - runtime/action.yml
+++  - tests/runtime_fixes.rs
+++  computed: []
+++  computed_lines: 0
+++rollback: git revert the merge; the Action goes back to the latest/runsc URL and to gating every commit
+++verified_at: 2026-09-26
+++---
+++
+++# Design — runtime-fixes
+++
+++## Approach
+++
+++Both fixes are in `runtime/action.yml`. No Rust changes.
+++
+++**gVisor (AC-1, AC-2).** A new input, `gvisor-version`, defaults to
+++`20260921.0`, the newest dated release. I checked that its `x86_64` folder
+++holds `gvisor.tar.zstd` and `gvisor.tar.zstd.sha512`, with `runsc` at the top
+++level of the tarball. The install step then:
+++1. Downloads both into a temporary directory.
+++2. Runs `sha512sum -c gvisor.tar.zstd.sha512`. The `.sha512` file names the
+++   tarball.
+++3. Runs `tar --zstd -xf gvisor.tar.zstd runsc`. The runners ship zstd.
+++4. Installs `runsc`, runs `runsc install`, and reloads Docker.
+++
+++Any failure still falls back to runc, with the same warning. The version
+++reaches the script through `env`, never interpolated. AC-2's oracle checks
+++that the pinned release exists, so a pin that disappears fails the gate
+++rather than falling back quietly.
+++
+++**No self-loop (AC-3).** A step right after checkout reads `git log -1
+++--format=%an` and `git diff --name-only HEAD~1 HEAD`. If the author is
+++`github-actions[bot]` and every changed path is under `.keel/bundles/`, it
+++writes `KEEL_SKIP=true` to `$GITHUB_ENV` and emits a notice. Otherwise it
+++writes `false`. Every later step carries `if: env.KEEL_SKIP != 'true'`.
+++
+++**Tests** (`tests/runtime_fixes.rs`) parse the Action and check:
+++- the input's default
+++- the tarball and checksum URLs built from it
+++- that `sha512sum -c` runs before extraction
+++- that the version is passed through `env`
+++- the skip step's author and path test, and that it sits before the install
+++  steps
+++- that every step after it is guarded
+++
+++## Blast radius
+++
+++<!-- generated by `keel plan`; edits here are overwritten -->
+++
+++Computed from the import graph at depth 2: **0 files, 0 lines**.
+++
+++_No indexed file matches the declared scope. If these are new files, that is
+++expected; if not, the scope globs are wrong._
+++
+++
+++## Rollback
+++
+++`git revert` — replace this if the change needs a different rollback.
++diff --git a/.keel/specs/runtime-fixes/spec.md b/.keel/specs/runtime-fixes/spec.md
++new file mode 100644
++index 0000000..4947c5e
++--- /dev/null
+++++ b/.keel/specs/runtime-fixes/spec.md
++@@ -0,0 +1,62 @@
+++---
+++id: SPEC-0015
+++slug: runtime-fixes
+++schema: keel.spec/1
+++status: approved
+++scope:
+++- runtime/action.yml
+++- tests/runtime_fixes.rs
+++budget:
+++  criteria: 4
+++  lines: 150
+++verified_at: 2026-09-26
+++---
+++
+++# Runtime fixes from the first real CI run: gVisor's tarball, and no self-loop
+++
+++## Context
+++
+++The runtime Action's first real run (daneb/keel-cover-demo#4) gated a pull
+++request and pushed a bundle that `keel cover` reported as covering the head,
+++which is AC-8 of SPEC-0014. It also found two bugs:
+++
+++- **gVisor never installed.** gVisor no longer publishes a standalone
+++  `runsc`. Each release is a `gvisor.tar.zstd` with a `.sha512` beside it,
+++  in a dated folder, and the `latest/<arch>/runsc` path from its install docs
+++  returns 404. The Action fell back to runc, and `kernel.isolated` was
+++  honestly attested as unproven, but gVisor never ran.
+++- **The Action would loop.** Its bundle commit, pushed by
+++  `github-actions[bot]`, starts the runtime workflow again, which would gate
+++  that commit and push another bundle. Only GitHub's approval rule for that
+++  actor stopped it.
+++
+++## Acceptance criteria
+++
+++### AC-1 gVisor comes from a pinned release tarball, verified
+++
+++WHEN the Action installs gVisor THE SYSTEM SHALL download `gvisor.tar.zstd`
+++and its `.sha512` from the release named by the `gvisor-version` input
+++(default `20260921.0`) for the runner's architecture, check the digest,
+++extract `runsc`, and register it with Docker.
+++
+++oracle: test tests/runtime_fixes.rs::gvisor_comes_from_a_pinned_verified_tarball
+++
+++### AC-2 The pinned release exists
+++
+++THE SYSTEM SHALL pin a gVisor release whose x86_64 tarball can be downloaded.
+++
+++oracle: cmd `curl -sfI https://storage.googleapis.com/gvisor/releases/release/20260921.0/x86_64/gvisor.tar.zstd` exit 0
+++
+++### AC-3 The Action skips its own bundle commit
+++
+++IF the head commit was authored by `github-actions[bot]` and changes only
+++files under `.keel/bundles/` THEN THE SYSTEM SHALL skip every later step and
+++say the head is the runtime's own bundle commit.
+++
+++oracle: test tests/runtime_fixes.rs::the_action_skips_its_own_bundle_commit
+++
+++## Out of scope
+++
+++- Signing, forks, and running an agent in CI.
+++- Workflows that already use v0.10.0. They need `@v0.10.1` to pick up these
+++  fixes.
++diff --git a/.keel/specs/runtime-fixes/tasks.md b/.keel/specs/runtime-fixes/tasks.md
++new file mode 100644
++index 0000000..5e97ea7
++--- /dev/null
+++++ b/.keel/specs/runtime-fixes/tasks.md
++@@ -0,0 +1,20 @@
+++---
+++id: TASKS-0015
+++slug: runtime-fixes
+++schema: keel.tasks/1
+++---
+++
+++# Tasks
+++
+++### T-1 gVisor from a pinned, verified tarball
+++- criteria: AC-1, AC-2
+++- files: runtime/action.yml, tests/runtime_fixes.rs
+++- budget: 70
+++- exit: test tests/runtime_fixes.rs::gvisor_comes_from_a_pinned_verified_tarball
+++
+++### T-2 Skip the runtime's own bundle commit
+++- criteria: AC-3
+++- files: runtime/action.yml, tests/runtime_fixes.rs
+++- budget: 60
+++- depends_on: T-1
+++- exit: test tests/runtime_fixes.rs::the_action_skips_its_own_bundle_commit
++diff --git a/tests/runtime_fixes.rs b/tests/runtime_fixes.rs
++new file mode 100644
++index 0000000..3850de4
++--- /dev/null
+++++ b/tests/runtime_fixes.rs
++@@ -0,0 +1,102 @@
+++//! Oracles for SPEC-0015 `runtime-fixes`.
+++
+++mod support;
+++
+++use serde_json::Value;
+++use support::unique_dir;
+++
+++fn action() -> Value {
+++    serde_yaml::from_str(include_str!("../runtime/action.yml")).unwrap()
+++}
+++
+++fn steps() -> Vec<Value> {
+++    action()["runs"]["steps"].as_array().unwrap().clone()
+++}
+++
+++fn step_named(name: &str) -> (usize, Value) {
+++    steps()
+++        .into_iter()
+++        .enumerate()
+++        .find(|(_, s)| s["name"].as_str().is_some_and(|n| n.starts_with(name)))
+++        .unwrap_or_else(|| panic!("no step named {name}"))
+++}
+++
+++/// AC-1 — gVisor from the pinned release's tarball, verified before use.
+++#[test]
+++fn gvisor_comes_from_a_pinned_verified_tarball() {
+++    assert_eq!(action()["inputs"]["gvisor-version"]["default"], "20260921.0");
+++    let (_, step) = step_named("Install gVisor");
+++    assert_eq!(step["env"]["GVISOR_VERSION"], "${{ inputs.gvisor-version }}");
+++    let s = step["run"].as_str().unwrap();
+++    assert!(!s.contains("${{"), "a value is interpolated into the script:\n{s}");
+++    assert!(s.contains("releases/release/${GVISOR_VERSION}/$(uname -m)"), "{s}");
+++    assert!(!s.contains("/latest/"), "still pulls latest:\n{s}");
+++    let at = |n: &str| s.find(n).unwrap_or_else(|| panic!("missing {n}:\n{s}"));
+++    let (tarball, digest) = (at("/gvisor.tar.zstd\" -o"), at("/gvisor.tar.zstd.sha512\""));
+++    let (check, extract, install) =
+++        (at("sha512sum -c gvisor.tar.zstd.sha512"), at("tar --zstd -xf"), at("runsc install"));
+++    assert!(tarball < check && digest < check, "checked before downloading:\n{s}");
+++    assert!(check < extract && extract < install, "used before it was checked:\n{s}");
+++    assert!(s.contains("KEEL_OCI_RUNTIME=runc"), "no fallback");
+++}
+++
+++/// Run the skip step's script in a repository whose last commit is as given,
+++/// returning what it wrote for KEEL_SKIP.
+++fn skip_decision(name: &str, author: &str, files: &[&str]) -> String {
+++    let dir = unique_dir(name);
+++    std::fs::create_dir_all(&dir).unwrap();
+++    let git = |args: &[&str]| {
+++        let out = std::process::Command::new("git").args(args).current_dir(&dir).output().unwrap();
+++        assert!(out.status.success(), "git {args:?}: {}", String::from_utf8_lossy(&out.stderr));
+++    };
+++    git(&["init", "-q"]);
+++    std::fs::write(dir.join("README.md"), "base\n").unwrap();
+++    git(&["add", "-A"]);
+++    git(&["-c", "user.name=Dane", "-c", "user.email=d@e", "commit", "-q", "-m", "base"]);
+++    for f in files {
+++        let p = dir.join(f);
+++        std::fs::create_dir_all(p.parent().unwrap()).unwrap();
+++        std::fs::write(&p, "x").unwrap();
+++    }
+++    git(&["add", "-A", "-f"]);
+++    git(&["-c", &format!("user.name={author}"), "-c", "user.email=a@b", "commit", "-q", "-m", "change"]);
+++
+++    let (_, step) = step_named("Skip the runtime's own bundle commit");
+++    let env = dir.join("github_env");
+++    std::fs::write(&env, "").unwrap();
+++    let out = std::process::Command::new("bash")
+++        .args(["-c", step["run"].as_str().unwrap()])
+++        .current_dir(&dir)
+++        .env("GITHUB_ENV", &env)
+++        .output()
+++        .unwrap();
+++    assert!(out.status.success(), "{}", String::from_utf8_lossy(&out.stderr));
+++    let written = std::fs::read_to_string(&env).unwrap();
+++    let _ = std::fs::remove_dir_all(&dir);
+++    written.trim().to_string()
+++}
+++
+++/// AC-3 — its own bundle commit is skipped; anything else is gated, and every
+++/// later step obeys the decision.
+++#[test]
+++fn the_action_skips_its_own_bundle_commit() {
+++    let bot = "github-actions[bot]";
+++    assert_eq!(skip_decision("skip-own", bot, &[".keel/bundles/keel-1.tar.gz"]), "KEEL_SKIP=true");
+++    assert_eq!(
+++        skip_decision("skip-bot-code", bot, &[".keel/bundles/keel-1.tar.gz", "src/lib.rs"]),
+++        "KEEL_SKIP=false",
+++        "a bot commit that changes code must still be gated"
+++    );
+++    assert_eq!(
+++        skip_decision("skip-human", "Dane", &[".keel/bundles/keel-1.tar.gz"]),
+++        "KEEL_SKIP=false",
+++        "a human's bundle-only commit must still be gated"
+++    );
+++
+++    let (at, _) = step_named("Skip the runtime's own bundle commit");
+++    assert!(steps()[0]["uses"].as_str().is_some_and(|u| u.starts_with("actions/checkout@")));
+++    assert!(at > 0, "the skip decision needs the checkout's history");
+++    for (i, s) in steps().iter().enumerate().skip(at + 1) {
+++        assert_eq!(s["if"], "env.KEEL_SKIP != 'true'", "step {i} ({}) is not guarded", s["name"]);
+++    }
+++}
+diff --git a/.keel/runs/2026-09-26-003/evidence/lint.txt b/.keel/runs/2026-09-26-003/evidence/lint.txt
+new file mode 100644
+index 0000000..f68c665
+--- /dev/null
++++ b/.keel/runs/2026-09-26-003/evidence/lint.txt
+@@ -0,0 +1,2 @@
++$ cargo clippy --all-targets --quiet
++
+diff --git a/.keel/runs/2026-09-26-003/evidence/oracles.json b/.keel/runs/2026-09-26-003/evidence/oracles.json
+new file mode 100644
+index 0000000..d57e2ff
+--- /dev/null
++++ b/.keel/runs/2026-09-26-003/evidence/oracles.json
+@@ -0,0 +1,34 @@
++{
++  "runs": [
++    {
++      "criterion": "AC-1",
++      "kind": "test",
++      "oracle": "test tests/runtime_fixes.rs::gvisor_comes_from_a_pinned_verified_tarball",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s"
++    },
++    {
++      "criterion": "AC-2",
++      "kind": "cmd",
++      "oracle": "`curl -sfI https://storage.googleapis.com/gvisor/releases/release/20260921.0/x86_64/gvisor.tar.zstd` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "HTTP/2 200 \r\ncontent-type: application/octet-stream\r\nx-guploader-uploadid: AP6rU81kUzni1DubXHK9c5pc_VQ8AEemY_jYurnJF-1URfL9Clv2tRsKLJsGHTlulgeS1DcT\r\nexpires: Sat, 26 Sep 2026 11:09:39 GMT\r\ndate: Sat, 26 Sep 2026 10:09:39 GMT\r\ncache-control: public, max-age=3600\r\nlast-modified: Wed, 23 Sep 2026 23:17:53 GMT\r\netag: \"22cd0db3b6ec60e33abbc3243b133e64\"\r\nx-goog-generation: 1790205473267911\r\nx-goog-metageneration: 1\r\nx-goog-stored-content-encoding: identity\r\nx-goog-stored-content-length: 129280755\r\nx-goog-hash: crc32c=bPtdVw==\r\nx-goog-hash: md5=Is0Ns7bsYOM6u8MkOxM+ZA==\r\nx-goog-storage-class: MULTI_REGIONAL\r\naccept-ranges: bytes\r\ncontent-length: 129280755\r\nserver: UploadServer\r\nalt-svc: h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
++    },
++    {
++      "criterion": "AC-3",
++      "kind": "test",
++      "oracle": "test tests/runtime_fixes.rs::the_action_skips_its_own_bundle_commit",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.22s"
++    }
++  ],
++  "criteria": 3,
++  "executed": 3,
++  "passed": 3,
++  "failed": 0,
++  "blocked": 0,
++  "human": 0
++}
+\ No newline at end of file
+diff --git a/.keel/runs/2026-09-26-003/evidence/ratchet.json b/.keel/runs/2026-09-26-003/evidence/ratchet.json
+new file mode 100644
+index 0000000..d5fee4c
+--- /dev/null
++++ b/.keel/runs/2026-09-26-003/evidence/ratchet.json
+@@ -0,0 +1,14 @@
++[
++  {
++    "id": "clippy-warnings",
++    "direction": "down",
++    "value": 0,
++    "baseline": 0
++  },
++  {
++    "id": "tests-passing",
++    "direction": "up",
++    "value": 541,
++    "baseline": 358
++  }
++]
+\ No newline at end of file
+diff --git a/.keel/runs/2026-09-26-003/evidence/review-test-invalidation.txt b/.keel/runs/2026-09-26-003/evidence/review-test-invalidation.txt
+new file mode 100644
+index 0000000..fd66af7
+--- /dev/null
++++ b/.keel/runs/2026-09-26-003/evidence/review-test-invalidation.txt
+@@ -0,0 +1 @@
++no added mocks or weakened assertions
+diff --git a/.keel/runs/2026-09-26-003/evidence/review.json b/.keel/runs/2026-09-26-003/evidence/review.json
+new file mode 100644
+index 0000000..f41d102
+--- /dev/null
++++ b/.keel/runs/2026-09-26-003/evidence/review.json
+@@ -0,0 +1,5 @@
++{
++  "schema": "keel.reviewresult/1",
++  "findings": [],
++  "summary": "0 finding(s)"
++}
+\ No newline at end of file
+diff --git a/.keel/runs/2026-09-26-003/evidence/test.txt b/.keel/runs/2026-09-26-003/evidence/test.txt
+new file mode 100644
+index 0000000..5376ee0
+--- /dev/null
++++ b/.keel/runs/2026-09-26-003/evidence/test.txt
+@@ -0,0 +1,130 @@
++$ cargo test --quiet
++
++
++running 291 tests
++....................................................................................... 87/291
++....................................................................................... 174/291
++....................................................................................... 261/291
++..............................
++test result: ok. 291 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.83s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.63s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.53s
++
++
++running 7 tests
++.......
++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.69s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.54s
++
++
++running 13 tests
++.............
++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.01s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.57s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.40s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.95s
++
++
++running 5 tests
++.....
++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.34s
++
++
++running 4 tests
++....
++test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.43s
++
++
++running 25 tests
++.........................
++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.26s
++
++
++running 14 tests
++..............
++test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.31s
++
++
++running 13 tests
++.............
++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.48s
++
++
++running 15 tests
++...............
++test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.09s
++
++
++running 25 tests
++.........................
++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.09s
++
++
++running 12 tests
++............
++test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.74s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.76s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.39s
++
++
++running 2 tests
++..
++test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
++
++
++running 34 tests
++..................................
++test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.72s
++
++
++running 0 tests
++
++test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
++
++
++running 7 tests
++.......
++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.48s
++
++
++running 5 tests
++.....
++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.39s
++
+diff --git a/.keel/runs/2026-09-26-003/evidence/tree.txt b/.keel/runs/2026-09-26-003/evidence/tree.txt
+new file mode 100644
+index 0000000..9917510
+--- /dev/null
++++ b/.keel/runs/2026-09-26-003/evidence/tree.txt
+@@ -0,0 +1 @@
++732e158be26aa0ffc9e8cfb2b5a84ab33528eee44a923d5e29e7b5a8e1a88dbd
+diff --git a/.keel/runs/2026-09-26-003/gates/G2.5.json b/.keel/runs/2026-09-26-003/gates/G2.5.json
+new file mode 100644
+index 0000000..b3c873d
+--- /dev/null
++++ b/.keel/runs/2026-09-26-003/gates/G2.5.json
+@@ -0,0 +1,37 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G2.5",
++  "run": "2026-09-26-004",
++  "spec": "runtime-fixes",
++  "verdict": "pass",
++  "generated_at": "2026-09-26T12:10:26.974215+02:00",
++  "checks": [
++    {
++      "id": "test-invalidation",
++      "verdict": "pass",
++      "detail": "no mocks or weakened assertions added",
++      "evidence": "evidence/review-test-invalidation.txt"
++    },
++    {
++      "id": "test-movement",
++      "verdict": "pass",
++      "detail": "1 code file(s), 1 test file(s)"
++    },
++    {
++      "id": "conventions",
++      "verdict": "pass",
++      "detail": "4 house rule(s) in force"
++    },
++    {
++      "id": "lessons",
++      "verdict": "pass",
++      "detail": "3 lesson(s) in force"
++    },
++    {
++      "id": "review",
++      "verdict": "pass",
++      "detail": "0 finding(s) (0.0s)",
++      "evidence": "evidence/review.json"
++    }
++  ]
++}
+diff --git a/.keel/runs/2026-09-26-003/gates/G2.json b/.keel/runs/2026-09-26-003/gates/G2.json
+new file mode 100644
+index 0000000..f759f90
+--- /dev/null
++++ b/.keel/runs/2026-09-26-003/gates/G2.json
+@@ -0,0 +1,84 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G2",
++  "run": "2026-09-26-004",
++  "spec": "runtime-fixes",
++  "verdict": "pass",
++  "generated_at": "2026-09-26T12:10:26.869144+02:00",
++  "checks": [
++    {
++      "id": "build",
++      "verdict": "pass",
++      "detail": "`cargo build --quiet` exited 0",
++      "evidence": "evidence/build.txt"
++    },
++    {
++      "id": "test",
++      "verdict": "pass",
++      "detail": "`cargo test --quiet` exited 0",
++      "evidence": "evidence/test.txt"
++    },
++    {
++      "id": "lint",
++      "verdict": "pass",
++      "detail": "`cargo clippy --all-targets --quiet` exited 0",
++      "evidence": "evidence/lint.txt"
++    },
++    {
++      "id": "oracle-coverage",
++      "verdict": "pass",
++      "detail": "3/3 oracles pass (0 awaiting human judgement)",
++      "evidence": "evidence/oracles.json"
++    },
++    {
++      "id": "blast-radius",
++      "verdict": "pass",
++      "detail": "2 changed file(s) inside scope, 0 file(s) downstream",
++      "evidence": "evidence/diff-stat.txt"
++    },
++    {
++      "id": "line-budget",
++      "verdict": "pass",
++      "detail": "148/150 lines of churn",
++      "evidence": "evidence/diff-stat.txt"
++    },
++    {
++      "id": "baseline-ratchet",
++      "verdict": "pass",
++      "detail": "2 metric(s) held, 1 improved",
++      "evidence": "evidence/ratchet.json"
++    },
++    {
++      "id": "store-drift",
++      "verdict": "pass",
++      "detail": "4 projections current"
++    },
++    {
++      "id": "shared-stores",
++      "verdict": "pass",
++      "detail": "none configured"
++    },
++    {
++      "id": "lesson:L-0002",
++      "verdict": "pass",
++      "detail": "Changes MUST leave lint and the house rules clean. holds",
++      "from": "L-0002"
++    },
++    {
++      "id": "lesson:L-0003",
++      "verdict": "pass",
++      "detail": "Changes MUST build before the run ends. holds",
++      "from": "L-0003"
++    },
++    {
++      "id": "cargo-audit",
++      "verdict": "pass",
++      "detail": "no known advisories across 282 dependencies."
++    },
++    {
++      "id": "secrets",
++      "verdict": "pass",
++      "detail": "gitleaks found no credentials in the history or the working tree."
++    }
++  ]
++}
+diff --git a/.keel/runs/2026-09-26-003/gates/G3.json b/.keel/runs/2026-09-26-003/gates/G3.json
+new file mode 100644
+index 0000000..cf0b892
+--- /dev/null
++++ b/.keel/runs/2026-09-26-003/gates/G3.json
+@@ -0,0 +1,31 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G3",
++  "run": "2026-09-26-004",
++  "spec": "runtime-fixes",
++  "verdict": "fail",
++  "generated_at": "2026-09-26T12:10:26.999218+02:00",
++  "checks": [
++    {
++      "id": "earlier-gates",
++      "verdict": "pass",
++      "detail": "G2.5 and G2 passed"
++    },
++    {
++      "id": "reviewable-size",
++      "verdict": "pass",
++      "detail": "148/700 reviewable lines"
++    },
++    {
++      "id": "evidence-complete",
++      "verdict": "pass",
++      "detail": "trajectory, metadata and gate results present"
++    },
++    {
++      "id": "human-verdict",
++      "verdict": "fail",
++      "expected": "a recorded human decision on the change",
++      "actual": "none — run `keel approve runtime-fixes --stage merge`"
++    }
++  ]
++}
+diff --git a/.keel/runs/2026-09-26-003/run.json b/.keel/runs/2026-09-26-003/run.json
+new file mode 100644
+index 0000000..522a258
+--- /dev/null
++++ b/.keel/runs/2026-09-26-003/run.json
+@@ -0,0 +1,11 @@
++{
++  "schema": "keel.run/1",
++  "id": "2026-09-26-003",
++  "spec": "runtime-fixes",
++  "keel_version": "0.10.0",
++  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
++  "started_at": "2026-09-26T12:08:54.704576+02:00",
++  "finished_at": "2026-09-26T12:10:27.001759+02:00",
++  "verdict": "fail",
++  "base_commit": "33e4447ecab17d76da039abeb5b9b9ea3e92f9b4"
++}
+diff --git a/.keel/runs/2026-09-26-003/trajectory.jsonl b/.keel/runs/2026-09-26-003/trajectory.jsonl
+new file mode 100644
+index 0000000..f6154d8
+--- /dev/null
++++ b/.keel/runs/2026-09-26-003/trajectory.jsonl
+@@ -0,0 +1,17 @@
++{"t":"2026-09-26T12:08:54.704764+02:00","seq":1,"kind":"run_start","spec":"runtime-fixes","keel_version":"0.10.0","store_hash":"0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2"}
++{"t":"2026-09-26T12:08:54.706031+02:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":424,"bytes":1693}
++{"t":"2026-09-26T12:08:54.706069+02:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
++{"t":"2026-09-26T12:08:54.706118+02:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6268,"bytes":25071}
++{"t":"2026-09-26T12:08:54.706515+02:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
++{"t":"2026-09-26T12:08:54.706622+02:00","seq":6,"kind":"inject","source":".keel/specs/runtime-fixes/spec.md","tokens":554,"bytes":2216}
++{"t":"2026-09-26T12:08:54.918897+02:00","seq":7,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
++{"t":"2026-09-26T12:09:35.052501+02:00","seq":8,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
++{"t":"2026-09-26T12:09:38.489232+02:00","seq":9,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
++{"t":"2026-09-26T12:09:39.580146+02:00","seq":10,"kind":"oracle","criterion":"AC-1","oracle":"test tests/runtime_fixes.rs::gvisor_comes_from_a_pinned_verified_tarball","verdict":"pass","exit_code":0}
++{"t":"2026-09-26T12:09:39.580200+02:00","seq":11,"kind":"oracle","criterion":"AC-2","oracle":"`curl -sfI https://storage.googleapis.com/gvisor/releases/release/20260921.0/x86_64/gvisor.tar.zstd` exits 0","verdict":"pass","exit_code":0}
++{"t":"2026-09-26T12:09:39.580213+02:00","seq":12,"kind":"oracle","criterion":"AC-3","oracle":"test tests/runtime_fixes.rs::the_action_skips_its_own_bundle_commit","verdict":"pass","exit_code":0}
++{"t":"2026-09-26T12:10:26.870837+02:00","seq":13,"kind":"gate","gate":"G2","verdict":"pass","result":"gates/G2.json"}
++{"t":"2026-09-26T12:10:26.975579+02:00","seq":14,"kind":"gate","gate":"G2.5","verdict":"pass","result":"gates/G2.5.json"}
++{"t":"2026-09-26T12:10:27.000607+02:00","seq":15,"kind":"gate","gate":"G3","verdict":"fail","result":"gates/G3.json"}
++{"t":"2026-09-26T12:10:27.000635+02:00","seq":16,"kind":"run_end","verdict":"fail","duration_ms":92301}
++{"t":"2026-09-26T12:12:07.160888+02:00","seq":17,"kind":"human","stage":"merge","decision":"approved","by":"Dane Balia"}
+diff --git a/.keel/runs/2026-09-26-004/evidence/build.txt b/.keel/runs/2026-09-26-004/evidence/build.txt
+new file mode 100644
+index 0000000..01700b6
+--- /dev/null
++++ b/.keel/runs/2026-09-26-004/evidence/build.txt
+@@ -0,0 +1,2 @@
++$ cargo build --quiet
++
+diff --git a/.keel/runs/2026-09-26-004/evidence/diff-stat.txt b/.keel/runs/2026-09-26-004/evidence/diff-stat.txt
+new file mode 100644
+index 0000000..b302847
+--- /dev/null
++++ b/.keel/runs/2026-09-26-004/evidence/diff-stat.txt
+@@ -0,0 +1,34 @@
++    12      0  .keel/chain.jsonl
++     2      0  .keel/runs/2026-09-26-003/evidence/build.txt
++    17      0  .keel/runs/2026-09-26-003/evidence/diff-stat.txt
++   852      0  .keel/runs/2026-09-26-003/evidence/diff.patch
++     2      0  .keel/runs/2026-09-26-003/evidence/lint.txt
++    34      0  .keel/runs/2026-09-26-003/evidence/oracles.json
++    14      0  .keel/runs/2026-09-26-003/evidence/ratchet.json
++     1      0  .keel/runs/2026-09-26-003/evidence/review-test-invalidation.txt
++     5      0  .keel/runs/2026-09-26-003/evidence/review.json
++   130      0  .keel/runs/2026-09-26-003/evidence/test.txt
++     1      0  .keel/runs/2026-09-26-003/evidence/tree.txt
++    37      0  .keel/runs/2026-09-26-003/gates/G2.5.json
++    84      0  .keel/runs/2026-09-26-003/gates/G2.json
++    31      0  .keel/runs/2026-09-26-003/gates/G3.json
++    11      0  .keel/runs/2026-09-26-003/run.json
++    17      0  .keel/runs/2026-09-26-003/trajectory.jsonl
++     2      0  .keel/runs/2026-09-26-004/evidence/build.txt
++     2      0  .keel/runs/2026-09-26-004/evidence/lint.txt
++    34      0  .keel/runs/2026-09-26-004/evidence/oracles.json
++   130      0  .keel/runs/2026-09-26-004/evidence/test.txt
++     9      0  .keel/runs/2026-09-26-004/run.json
++    12      0  .keel/runs/2026-09-26-004/trajectory.jsonl
++     3      0  .keel/specs/runtime-fixes/approvals.jsonl
++    90      0  .keel/specs/runtime-fixes/gates/G0.json
++    95      0  .keel/specs/runtime-fixes/gates/G1.json
++    64      0  .keel/specs/runtime-fixes/plan.md
++     0      0  .keel/specs/runtime-fixes/review-flags.txt
++     1      0  .keel/specs/runtime-fixes/security-findings.json
++    62      0  .keel/specs/runtime-fixes/spec.md
++    20      0  .keel/specs/runtime-fixes/tasks.md
++    39      7  runtime/action.yml
++   102      0  tests/runtime_fixes.rs
++
++32 file(s), +1915 -7 (1922 lines of churn) against 33e4447ecab17d76da039abeb5b9b9ea3e92f9b4
+diff --git a/.keel/runs/2026-09-26-004/evidence/lint.txt b/.keel/runs/2026-09-26-004/evidence/lint.txt
+new file mode 100644
+index 0000000..f68c665
+--- /dev/null
++++ b/.keel/runs/2026-09-26-004/evidence/lint.txt
+@@ -0,0 +1,2 @@
++$ cargo clippy --all-targets --quiet
++
+diff --git a/.keel/runs/2026-09-26-004/evidence/oracles.json b/.keel/runs/2026-09-26-004/evidence/oracles.json
+new file mode 100644
+index 0000000..83bdcd5
+--- /dev/null
++++ b/.keel/runs/2026-09-26-004/evidence/oracles.json
+@@ -0,0 +1,34 @@
++{
++  "runs": [
++    {
++      "criterion": "AC-1",
++      "kind": "test",
++      "oracle": "test tests/runtime_fixes.rs::gvisor_comes_from_a_pinned_verified_tarball",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s"
++    },
++    {
++      "criterion": "AC-2",
++      "kind": "cmd",
++      "oracle": "`curl -sfI https://storage.googleapis.com/gvisor/releases/release/20260921.0/x86_64/gvisor.tar.zstd` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "HTTP/2 200 \r\ncontent-type: application/octet-stream\r\nx-guploader-uploadid: AP6rU820dqjPkc5UWrrFNitnwXVHY2AHHPgSQLwUIDRcQPrUXp4SNqTmYWcvNS8vGLn0Xz05\r\nexpires: Sat, 26 Sep 2026 11:13:05 GMT\r\ndate: Sat, 26 Sep 2026 10:13:05 GMT\r\ncache-control: public, max-age=3600\r\nlast-modified: Wed, 23 Sep 2026 23:17:53 GMT\r\netag: \"22cd0db3b6ec60e33abbc3243b133e64\"\r\nx-goog-generation: 1790205473267911\r\nx-goog-metageneration: 1\r\nx-goog-stored-content-encoding: identity\r\nx-goog-stored-content-length: 129280755\r\nx-goog-hash: crc32c=bPtdVw==\r\nx-goog-hash: md5=Is0Ns7bsYOM6u8MkOxM+ZA==\r\nx-goog-storage-class: MULTI_REGIONAL\r\naccept-ranges: bytes\r\ncontent-length: 129280755\r\nserver: UploadServer\r\nalt-svc: h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
++    },
++    {
++      "criterion": "AC-3",
++      "kind": "test",
++      "oracle": "test tests/runtime_fixes.rs::the_action_skips_its_own_bundle_commit",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.22s"
++    }
++  ],
++  "criteria": 3,
++  "executed": 3,
++  "passed": 3,
++  "failed": 0,
++  "blocked": 0,
++  "human": 0
++}
+\ No newline at end of file
+diff --git a/.keel/runs/2026-09-26-004/evidence/test.txt b/.keel/runs/2026-09-26-004/evidence/test.txt
+new file mode 100644
+index 0000000..fe10a40
+--- /dev/null
++++ b/.keel/runs/2026-09-26-004/evidence/test.txt
+@@ -0,0 +1,130 @@
++$ cargo test --quiet
++
++
++running 291 tests
++....................................................................................... 87/291
++....................................................................................... 174/291
++....................................................................................... 261/291
++..............................
++test result: ok. 291 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.79s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.98s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.70s
++
++
++running 7 tests
++.......
++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.81s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.59s
++
++
++running 13 tests
++.............
++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.04s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.50s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.47s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.30s
++
++
++running 5 tests
++.....
++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.34s
++
++
++running 4 tests
++....
++test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.58s
++
++
++running 25 tests
++.........................
++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.39s
++
++
++running 14 tests
++..............
++test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.67s
++
++
++running 13 tests
++.............
++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.49s
++
++
++running 15 tests
++...............
++test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.11s
++
++
++running 25 tests
++.........................
++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.30s
++
++
++running 12 tests
++............
++test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.83s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.76s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.35s
++
++
++running 2 tests
++..
++test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
++
++
++running 34 tests
++..................................
++test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.88s
++
++
++running 0 tests
++
++test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
++
++
++running 7 tests
++.......
++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.52s
++
++
++running 5 tests
++.....
++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
++
+diff --git a/.keel/runs/2026-09-26-004/run.json b/.keel/runs/2026-09-26-004/run.json
+new file mode 100644
+index 0000000..f0c2b32
+--- /dev/null
++++ b/.keel/runs/2026-09-26-004/run.json
+@@ -0,0 +1,9 @@
++{
++  "schema": "keel.run/1",
++  "id": "2026-09-26-004",
++  "spec": "runtime-fixes",
++  "keel_version": "0.10.0",
++  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
++  "started_at": "2026-09-26T12:12:18.121240+02:00",
++  "base_commit": "33e4447ecab17d76da039abeb5b9b9ea3e92f9b4"
++}
+diff --git a/.keel/runs/2026-09-26-004/trajectory.jsonl b/.keel/runs/2026-09-26-004/trajectory.jsonl
+new file mode 100644
+index 0000000..f30981e
+--- /dev/null
++++ b/.keel/runs/2026-09-26-004/trajectory.jsonl
+@@ -0,0 +1,12 @@
++{"t":"2026-09-26T12:12:18.121626+02:00","seq":1,"kind":"run_start","spec":"runtime-fixes","keel_version":"0.10.0","store_hash":"0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2"}
++{"t":"2026-09-26T12:12:18.124237+02:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":424,"bytes":1693}
++{"t":"2026-09-26T12:12:18.124305+02:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
++{"t":"2026-09-26T12:12:18.124372+02:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6268,"bytes":25071}
++{"t":"2026-09-26T12:12:18.124812+02:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
++{"t":"2026-09-26T12:12:18.124955+02:00","seq":6,"kind":"inject","source":".keel/specs/runtime-fixes/spec.md","tokens":554,"bytes":2216}
++{"t":"2026-09-26T12:12:18.311922+02:00","seq":7,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
++{"t":"2026-09-26T12:13:01.672803+02:00","seq":8,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
++{"t":"2026-09-26T12:13:05.249629+02:00","seq":9,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
++{"t":"2026-09-26T12:13:06.299377+02:00","seq":10,"kind":"oracle","criterion":"AC-1","oracle":"test tests/runtime_fixes.rs::gvisor_comes_from_a_pinned_verified_tarball","verdict":"pass","exit_code":0}
++{"t":"2026-09-26T12:13:06.299427+02:00","seq":11,"kind":"oracle","criterion":"AC-2","oracle":"`curl -sfI https://storage.googleapis.com/gvisor/releases/release/20260921.0/x86_64/gvisor.tar.zstd` exits 0","verdict":"pass","exit_code":0}
++{"t":"2026-09-26T12:13:06.299439+02:00","seq":12,"kind":"oracle","criterion":"AC-3","oracle":"test tests/runtime_fixes.rs::the_action_skips_its_own_bundle_commit","verdict":"pass","exit_code":0}
+diff --git a/.keel/specs/runtime-fixes/approvals.jsonl b/.keel/specs/runtime-fixes/approvals.jsonl
+new file mode 100644
+index 0000000..4cb204e
+--- /dev/null
++++ b/.keel/specs/runtime-fixes/approvals.jsonl
+@@ -0,0 +1,3 @@
++{"schema":"keel.approval/1","stage":"spec","decision":"approved","artefact_hash":"f7d023343210e41579e32573d1b30eb4712ebd27370b2f7b2439575409bddcd9","gate_verdict":"pass","by":"Dane Balia","at":"2026-09-26T12:06:28.014607+02:00"}
++{"schema":"keel.approval/1","stage":"plan","decision":"approved","artefact_hash":"2e4d1f20d8131ffdd53f05e1564de35a534db82639e86bc9a2c3255b8e2011d4","gate_verdict":"pass","by":"Dane Balia","at":"2026-09-26T12:07:14.162864+02:00"}
++{"schema":"keel.approval/1","stage":"merge","decision":"approved","artefact_hash":"4740d928a6b0303d7e39f12a6361b56bdd2227332f87798d494a7104e2c2e173","gate_verdict":"fail","by":"Dane Balia","at":"2026-09-26T12:12:07.158158+02:00"}
+diff --git a/.keel/specs/runtime-fixes/gates/G0.json b/.keel/specs/runtime-fixes/gates/G0.json
+new file mode 100644
+index 0000000..7479b7d
+--- /dev/null
++++ b/.keel/specs/runtime-fixes/gates/G0.json
+@@ -0,0 +1,90 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G0",
++  "run": "2026-09-26-003",
++  "spec": "runtime-fixes",
++  "verdict": "pass",
++  "generated_at": "2026-09-26T11:57:30.737987+02:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "SPEC-0015 (keel.spec/1)"
++    },
++    {
++      "id": "criteria-present",
++      "verdict": "pass",
++      "detail": "3 criteria"
++    },
++    {
++      "id": "criterion-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate ids"
++    },
++    {
++      "id": "no-placeholders",
++      "verdict": "pass",
++      "detail": "no unfilled scaffold text"
++    },
++    {
++      "id": "ears-conformance",
++      "verdict": "pass",
++      "detail": "3/3 conform (event-driven, ubiquitous, unwanted-behaviour)"
++    },
++    {
++      "id": "oracle-presence",
++      "verdict": "pass",
++      "detail": "3 oracles across 3 criteria"
++    },
++    {
++      "id": "oracle-wellformed",
++      "verdict": "pass",
++      "detail": "all oracles parse"
++    },
++    {
++      "id": "ambiguity",
++      "verdict": "pass",
++      "detail": "no ambiguous phrasing in criteria"
++    },
++    {
++      "id": "criterion-budget",
++      "verdict": "pass",
++      "detail": "3/4 criteria"
++    },
++    {
++      "id": "spec-length",
++      "verdict": "pass",
++      "detail": "62/250 lines"
++    },
++    {
++      "id": "scope-declared",
++      "verdict": "pass",
++      "detail": "2 glob(s): runtime/action.yml, tests/runtime_fixes.rs"
++    },
++    {
++      "id": "change-budget",
++      "verdict": "pass",
++      "detail": "150 lines of diff budgeted"
++    },
++    {
++      "id": "oracle-mix",
++      "verdict": "pass",
++      "detail": "3/3 runnable (1 cmd, 2 test)"
++    },
++    {
++      "id": "human-cost",
++      "verdict": "pass",
++      "detail": "0 human oracle(s), none load-bearing"
++    },
++    {
++      "id": "store-drift",
++      "verdict": "pass",
++      "detail": "4 projections current"
++    },
++    {
++      "id": "shared-stores",
++      "verdict": "pass",
++      "detail": "none configured"
++    }
++  ]
++}
+diff --git a/.keel/specs/runtime-fixes/gates/G1.json b/.keel/specs/runtime-fixes/gates/G1.json
+new file mode 100644
+index 0000000..a335d5b
+--- /dev/null
++++ b/.keel/specs/runtime-fixes/gates/G1.json
+@@ -0,0 +1,95 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G1",
++  "run": "2026-09-26-003",
++  "spec": "runtime-fixes",
++  "verdict": "pass",
++  "generated_at": "2026-09-26T12:06:47.274021+02:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "PLAN-0015 + TASKS-0015"
++    },
++    {
++      "id": "g0-passed",
++      "verdict": "pass",
++      "detail": "G0 passed in run 2026-09-26-003"
++    },
++    {
++      "id": "spec-approved",
++      "verdict": "pass",
++      "detail": "approved by Dane Balia"
++    },
++    {
++      "id": "tasks-present",
++      "verdict": "pass",
++      "detail": "2/15 tasks"
++    },
++    {
++      "id": "task-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate task ids"
++    },
++    {
++      "id": "task-fields",
++      "verdict": "pass",
++      "detail": "all task fields recognised"
++    },
++    {
++      "id": "task-criterion-traceability",
++      "verdict": "pass",
++      "detail": "2 tasks all traced"
++    },
++    {
++      "id": "criteria-covered",
++      "verdict": "pass",
++      "detail": "3/3 criteria have a task"
++    },
++    {
++      "id": "task-budgets",
++      "verdict": "pass",
++      "detail": "all 2 tasks budgeted, total 130 lines"
++    },
++    {
++      "id": "total-budget",
++      "verdict": "pass",
++      "detail": "130/150 lines"
++    },
++    {
++      "id": "task-exit-conditions",
++      "verdict": "pass",
++      "detail": "every task states when it is done"
++    },
++    {
++      "id": "task-dependencies",
++      "verdict": "pass",
++      "detail": "2 wave(s), widths 1/1"
++    },
++    {
++      "id": "wave-isolation",
++      "verdict": "pass",
++      "detail": "2 wave(s), no file claimed twice within one"
++    },
++    {
++      "id": "task-files-in-scope",
++      "verdict": "pass",
++      "detail": "all task files inside the declared scope"
++    },
++    {
++      "id": "rollback-stated",
++      "verdict": "pass",
++      "detail": "git revert the merge; the Action goes back to the latest/ru…"
++    },
++    {
++      "id": "blast-radius-declared",
++      "verdict": "pass",
++      "detail": "0 file(s) at depth 2, 0 lines"
++    },
++    {
++      "id": "blast-radius-current",
++      "verdict": "pass",
++      "detail": "0 files, 0 lines — matches a fresh computation — no indexed file matches runtime/action.yml, tests/runtime_fixes.rs (new files, or a typo)"
++    }
++  ]
++}
+diff --git a/.keel/specs/runtime-fixes/plan.md b/.keel/specs/runtime-fixes/plan.md
+new file mode 100644
+index 0000000..02d51ab
+--- /dev/null
++++ b/.keel/specs/runtime-fixes/plan.md
+@@ -0,0 +1,64 @@
++---
++id: PLAN-0015
++slug: runtime-fixes
++schema: keel.plan/1
++blast:
++  depth: 2
++  declared:
++  - runtime/action.yml
++  - tests/runtime_fixes.rs
++  computed: []
++  computed_lines: 0
++rollback: git revert the merge; the Action goes back to the latest/runsc URL and to gating every commit
++verified_at: 2026-09-26
++---
++
++# Design — runtime-fixes
++
++## Approach
++
++Both fixes are in `runtime/action.yml`. No Rust changes.
++
++**gVisor (AC-1, AC-2).** A new input, `gvisor-version`, defaults to
++`20260921.0`, the newest dated release. I checked that its `x86_64` folder
++holds `gvisor.tar.zstd` and `gvisor.tar.zstd.sha512`, with `runsc` at the top
++level of the tarball. The install step then:
++1. Downloads both into a temporary directory.
++2. Runs `sha512sum -c gvisor.tar.zstd.sha512`. The `.sha512` file names the
++   tarball.
++3. Runs `tar --zstd -xf gvisor.tar.zstd runsc`. The runners ship zstd.
++4. Installs `runsc`, runs `runsc install`, and reloads Docker.
++
++Any failure still falls back to runc, with the same warning. The version
++reaches the script through `env`, never interpolated. AC-2's oracle checks
++that the pinned release exists, so a pin that disappears fails the gate
++rather than falling back quietly.
++
++**No self-loop (AC-3).** A step right after checkout reads `git log -1
++--format=%an` and `git diff --name-only HEAD~1 HEAD`. If the author is
++`github-actions[bot]` and every changed path is under `.keel/bundles/`, it
++writes `KEEL_SKIP=true` to `$GITHUB_ENV` and emits a notice. Otherwise it
++writes `false`. Every later step carries `if: env.KEEL_SKIP != 'true'`.
++
++**Tests** (`tests/runtime_fixes.rs`) parse the Action and check:
++- the input's default
++- the tarball and checksum URLs built from it
++- that `sha512sum -c` runs before extraction
++- that the version is passed through `env`
++- the skip step's author and path test, and that it sits before the install
++  steps
++- that every step after it is guarded
++
++## Blast radius
++
++<!-- generated by `keel plan`; edits here are overwritten -->
++
++Computed from the import graph at depth 2: **0 files, 0 lines**.
++
++_No indexed file matches the declared scope. If these are new files, that is
++expected; if not, the scope globs are wrong._
++
++
++## Rollback
++
++`git revert` — replace this if the change needs a different rollback.
+diff --git a/.keel/specs/runtime-fixes/review-flags.txt b/.keel/specs/runtime-fixes/review-flags.txt
+new file mode 100644
+index 0000000..e69de29
+diff --git a/.keel/specs/runtime-fixes/security-findings.json b/.keel/specs/runtime-fixes/security-findings.json
+new file mode 100644
+index 0000000..fe51488
+--- /dev/null
++++ b/.keel/specs/runtime-fixes/security-findings.json
+@@ -0,0 +1 @@
++[]
+diff --git a/.keel/specs/runtime-fixes/spec.md b/.keel/specs/runtime-fixes/spec.md
+new file mode 100644
+index 0000000..4947c5e
+--- /dev/null
++++ b/.keel/specs/runtime-fixes/spec.md
+@@ -0,0 +1,62 @@
++---
++id: SPEC-0015
++slug: runtime-fixes
++schema: keel.spec/1
++status: approved
++scope:
++- runtime/action.yml
++- tests/runtime_fixes.rs
++budget:
++  criteria: 4
++  lines: 150
++verified_at: 2026-09-26
++---
++
++# Runtime fixes from the first real CI run: gVisor's tarball, and no self-loop
++
++## Context
++
++The runtime Action's first real run (daneb/keel-cover-demo#4) gated a pull
++request and pushed a bundle that `keel cover` reported as covering the head,
++which is AC-8 of SPEC-0014. It also found two bugs:
++
++- **gVisor never installed.** gVisor no longer publishes a standalone
++  `runsc`. Each release is a `gvisor.tar.zstd` with a `.sha512` beside it,
++  in a dated folder, and the `latest/<arch>/runsc` path from its install docs
++  returns 404. The Action fell back to runc, and `kernel.isolated` was
++  honestly attested as unproven, but gVisor never ran.
++- **The Action would loop.** Its bundle commit, pushed by
++  `github-actions[bot]`, starts the runtime workflow again, which would gate
++  that commit and push another bundle. Only GitHub's approval rule for that
++  actor stopped it.
++
++## Acceptance criteria
++
++### AC-1 gVisor comes from a pinned release tarball, verified
++
++WHEN the Action installs gVisor THE SYSTEM SHALL download `gvisor.tar.zstd`
++and its `.sha512` from the release named by the `gvisor-version` input
++(default `20260921.0`) for the runner's architecture, check the digest,
++extract `runsc`, and register it with Docker.
++
++oracle: test tests/runtime_fixes.rs::gvisor_comes_from_a_pinned_verified_tarball
++
++### AC-2 The pinned release exists
++
++THE SYSTEM SHALL pin a gVisor release whose x86_64 tarball can be downloaded.
++
++oracle: cmd `curl -sfI https://storage.googleapis.com/gvisor/releases/release/20260921.0/x86_64/gvisor.tar.zstd` exit 0
++
++### AC-3 The Action skips its own bundle commit
++
++IF the head commit was authored by `github-actions[bot]` and changes only
++files under `.keel/bundles/` THEN THE SYSTEM SHALL skip every later step and
++say the head is the runtime's own bundle commit.
++
++oracle: test tests/runtime_fixes.rs::the_action_skips_its_own_bundle_commit
++
++## Out of scope
++
++- Signing, forks, and running an agent in CI.
++- Workflows that already use v0.10.0. They need `@v0.10.1` to pick up these
++  fixes.
+diff --git a/.keel/specs/runtime-fixes/tasks.md b/.keel/specs/runtime-fixes/tasks.md
+new file mode 100644
+index 0000000..5e97ea7
+--- /dev/null
++++ b/.keel/specs/runtime-fixes/tasks.md
+@@ -0,0 +1,20 @@
++---
++id: TASKS-0015
++slug: runtime-fixes
++schema: keel.tasks/1
++---
++
++# Tasks
++
++### T-1 gVisor from a pinned, verified tarball
++- criteria: AC-1, AC-2
++- files: runtime/action.yml, tests/runtime_fixes.rs
++- budget: 70
++- exit: test tests/runtime_fixes.rs::gvisor_comes_from_a_pinned_verified_tarball
++
++### T-2 Skip the runtime's own bundle commit
++- criteria: AC-3
++- files: runtime/action.yml, tests/runtime_fixes.rs
++- budget: 60
++- depends_on: T-1
++- exit: test tests/runtime_fixes.rs::the_action_skips_its_own_bundle_commit
+diff --git a/tests/runtime_fixes.rs b/tests/runtime_fixes.rs
+new file mode 100644
+index 0000000..3850de4
+--- /dev/null
++++ b/tests/runtime_fixes.rs
+@@ -0,0 +1,102 @@
++//! Oracles for SPEC-0015 `runtime-fixes`.
++
++mod support;
++
++use serde_json::Value;
++use support::unique_dir;
++
++fn action() -> Value {
++    serde_yaml::from_str(include_str!("../runtime/action.yml")).unwrap()
++}
++
++fn steps() -> Vec<Value> {
++    action()["runs"]["steps"].as_array().unwrap().clone()
++}
++
++fn step_named(name: &str) -> (usize, Value) {
++    steps()
++        .into_iter()
++        .enumerate()
++        .find(|(_, s)| s["name"].as_str().is_some_and(|n| n.starts_with(name)))
++        .unwrap_or_else(|| panic!("no step named {name}"))
++}
++
++/// AC-1 — gVisor from the pinned release's tarball, verified before use.
++#[test]
++fn gvisor_comes_from_a_pinned_verified_tarball() {
++    assert_eq!(action()["inputs"]["gvisor-version"]["default"], "20260921.0");
++    let (_, step) = step_named("Install gVisor");
++    assert_eq!(step["env"]["GVISOR_VERSION"], "${{ inputs.gvisor-version }}");
++    let s = step["run"].as_str().unwrap();
++    assert!(!s.contains("${{"), "a value is interpolated into the script:\n{s}");
++    assert!(s.contains("releases/release/${GVISOR_VERSION}/$(uname -m)"), "{s}");
++    assert!(!s.contains("/latest/"), "still pulls latest:\n{s}");
++    let at = |n: &str| s.find(n).unwrap_or_else(|| panic!("missing {n}:\n{s}"));
++    let (tarball, digest) = (at("/gvisor.tar.zstd\" -o"), at("/gvisor.tar.zstd.sha512\""));
++    let (check, extract, install) =
++        (at("sha512sum -c gvisor.tar.zstd.sha512"), at("tar --zstd -xf"), at("runsc install"));
++    assert!(tarball < check && digest < check, "checked before downloading:\n{s}");
++    assert!(check < extract && extract < install, "used before it was checked:\n{s}");
++    assert!(s.contains("KEEL_OCI_RUNTIME=runc"), "no fallback");
++}
++
++/// Run the skip step's script in a repository whose last commit is as given,
++/// returning what it wrote for KEEL_SKIP.
++fn skip_decision(name: &str, author: &str, files: &[&str]) -> String {
++    let dir = unique_dir(name);
++    std::fs::create_dir_all(&dir).unwrap();
++    let git = |args: &[&str]| {
++        let out = std::process::Command::new("git").args(args).current_dir(&dir).output().unwrap();
++        assert!(out.status.success(), "git {args:?}: {}", String::from_utf8_lossy(&out.stderr));
++    };
++    git(&["init", "-q"]);
++    std::fs::write(dir.join("README.md"), "base\n").unwrap();
++    git(&["add", "-A"]);
++    git(&["-c", "user.name=Dane", "-c", "user.email=d@e", "commit", "-q", "-m", "base"]);
++    for f in files {
++        let p = dir.join(f);
++        std::fs::create_dir_all(p.parent().unwrap()).unwrap();
++        std::fs::write(&p, "x").unwrap();
++    }
++    git(&["add", "-A", "-f"]);
++    git(&["-c", &format!("user.name={author}"), "-c", "user.email=a@b", "commit", "-q", "-m", "change"]);
++
++    let (_, step) = step_named("Skip the runtime's own bundle commit");
++    let env = dir.join("github_env");
++    std::fs::write(&env, "").unwrap();
++    let out = std::process::Command::new("bash")
++        .args(["-c", step["run"].as_str().unwrap()])
++        .current_dir(&dir)
++        .env("GITHUB_ENV", &env)
++        .output()
++        .unwrap();
++    assert!(out.status.success(), "{}", String::from_utf8_lossy(&out.stderr));
++    let written = std::fs::read_to_string(&env).unwrap();
++    let _ = std::fs::remove_dir_all(&dir);
++    written.trim().to_string()
++}
++
++/// AC-3 — its own bundle commit is skipped; anything else is gated, and every
++/// later step obeys the decision.
++#[test]
++fn the_action_skips_its_own_bundle_commit() {
++    let bot = "github-actions[bot]";
++    assert_eq!(skip_decision("skip-own", bot, &[".keel/bundles/keel-1.tar.gz"]), "KEEL_SKIP=true");
++    assert_eq!(
++        skip_decision("skip-bot-code", bot, &[".keel/bundles/keel-1.tar.gz", "src/lib.rs"]),
++        "KEEL_SKIP=false",
++        "a bot commit that changes code must still be gated"
++    );
++    assert_eq!(
++        skip_decision("skip-human", "Dane", &[".keel/bundles/keel-1.tar.gz"]),
++        "KEEL_SKIP=false",
++        "a human's bundle-only commit must still be gated"
++    );
++
++    let (at, _) = step_named("Skip the runtime's own bundle commit");
++    assert!(steps()[0]["uses"].as_str().is_some_and(|u| u.starts_with("actions/checkout@")));
++    assert!(at > 0, "the skip decision needs the checkout's history");
++    for (i, s) in steps().iter().enumerate().skip(at + 1) {
++        assert_eq!(s["if"], "env.KEEL_SKIP != 'true'", "step {i} ({}) is not guarded", s["name"]);
++    }
++}
