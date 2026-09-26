@@ -1,12 +1,101 @@
 # keel
 
-A gated harness for AI-assisted delivery.
+**keel makes AI coding agents prove their work.**
 
-**[daneb.github.io/keel](https://daneb.github.io/keel/)**
+You say what "done" means. An agent (Claude Code, Codex, Copilot, Kiro) does
+the work. keel checks it, stops the line when a check fails or you haven't
+signed off, and keeps a tamper-evident record anyone can verify, even without
+the repo.
 
 ```sh
 cargo install keel-harness   # installs a binary called `keel`
 ```
+
+<p align="center"><img src="docs/img/keel-loop.svg" alt="Spec and plan you approve, the agent works, gates check it, you sign off, keel produces an evidence bundle. A failed gate goes back to the agent." width="900"></p>
+
+## What you can do with it
+
+**Keep an agent on a short leash.** Write a spec with testable criteria, approve
+it, approve the plan, and let the agent work. keel runs the build, the tests and
+a review pass, and nothing counts as done until they're green and you've signed
+off.
+
+```sh
+keel spec new rate-limit      # what "done" means, as testable criteria
+keel approve rate-limit --stage spec
+keel plan rate-limit          # which files it may touch, how big
+keel run rate-limit           # the agent works; the gates judge it
+```
+
+**Show an auditor what happened.** Every approval and every gate verdict goes
+into a hash chain. One command packs the chain, the spec, the verdicts and the
+exact diff into a single file. Anyone can check it offline, with no access to
+your repo.
+
+```sh
+keel export                   # → keel-<run>.tar.gz
+keel bundle verify keel-<run>.tar.gz
+```
+
+<p align="center"><img src="docs/img/keel-evidence.svg" alt="Approvals and gate verdicts form a hash chain; the bundle carries the chain, spec, verdicts and diff, and keel bundle verify checks it offline." width="900"></p>
+
+**Block pull requests nobody gated.** Add one line to a workflow. A PR passes
+only if it carries the bundle of a passing run of *exactly* its content, or a
+maintainer labels it `keel:exempt`.
+
+```yaml
+# .github/workflows/keel-cover.yml
+on: pull_request
+jobs:
+  keel-cover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: daneb/keel@v0.10.1
+```
+
+<p align="center"><img src="docs/img/keel-pr-check.svg" alt="A PR with the bundle of a passing run of its exact content is covered; one with no bundle is uncovered; one labelled keel:exempt passes as exempted." width="900"></p>
+
+**Let CI do the gating.** Instead of you committing the bundle, GitHub Actions
+gates the PR inside a locked-down container (gVisor when it's available), keeps
+the record out of that container's reach, and commits the bundle back to the PR.
+
+```yaml
+# .github/workflows/keel-runtime.yml (needs contents: write)
+      - uses: daneb/keel/runtime@v0.10.1
+        with:
+          spec: rate-limit
+          image: rust:1-bookworm       # your toolchain
+```
+
+<p align="center"><img src="docs/img/keel-ci-runtime.svg" alt="The GitHub runner holds the evidence chain and attests the container from outside; keel gates the PR inside a gVisor container; the bundle is committed back to the PR." width="900"></p>
+
+**Run the agent in a sandbox on your own machine.** That's
+[moor](https://github.com/daneb/moor): Docker sandboxes with no host mounts and
+an egress allowlist. moor writes keel's record from outside the sandbox, so the
+agent can't rewrite it.
+
+## What's new
+
+| Version | What you get |
+| --- | --- |
+| **0.7** | **One evidence chain.** Approvals, verdicts and runs are hash-linked; `keel chain verify` names any edit, deletion or reorder. A sandbox (moor) can hold the pen so the agent can't. |
+| **0.7** | **Sandbox posture checks.** Require the sandbox to prove it's read-only, has no capabilities, etc. (`[runtime] require`), and keel blocks a run that can't. |
+| **0.8** | **Bundles that prove themselves.** The chain and the exact diff travel in the bundle; `keel bundle verify` checks every link offline. |
+| **0.9** | **`keel cover`, the PR check**, and its GitHub Action. |
+| **0.10** | **GitHub Actions as a runtime**, which gates PRs in a gVisor container and commits the bundle. Also `keel.chain/1` and `keel.posture/1` are now frozen formats. |
+| **0.10.1** | gVisor really installs on runners; the runtime no longer re-gates its own bundle commit. |
+
+## keel and moor, in one line each
+
+- **keel** decides what's allowed, checks the work, and keeps the record.
+- **moor** decides *where* the agent runs: a sealed sandbox, with keel's record
+  kept outside it.
+
+Each works without the other. They're built to work together.
+
+---
+
+## In depth
 
 The `keel` and `keel-cli` names on crates.io belong to unrelated projects,
 so the package publishes as `keel-harness`. Only the package name differs.
@@ -20,8 +109,10 @@ keel sits above them and owns the two things none of them give you:
 New here? Start with **[GETTING-STARTED.md](GETTING-STARTED.md)** — about ten
 minutes. The full design is [PLAN.md](PLAN.md), what is deferred and why is
 [ROADMAP.md](ROADMAP.md), the decisions that had a real alternative are in
-[`.keel/store/decisions/`](.keel/store/decisions/ADR-0000-index.md), and the
-threat model is [SECURITY.md](SECURITY.md).
+[`.keel/store/decisions/`](.keel/store/decisions/ADR-0000-index.md) and
+[`docs/decisions/`](docs/decisions/), the threat model is
+[SECURITY.md](SECURITY.md), and the site is
+**[daneb.github.io/keel](https://daneb.github.io/keel/)**.
 
 ---
 
@@ -264,7 +355,11 @@ keel serve                    # the same, in a browser, read-only, on loopback
 
 # Evidence and learning
 keel replay <run> / keel runs / keel runs --prune
-keel export <run> / keel export --verify <bundle>
+keel export <run> [--chain <file>]   # the bundle, with the evidence chain
+keel bundle verify [--json] <bundle> # check every link, offline
+keel chain verify [--head <hash>] / keel chain head
+keel cover [--exempt <reason>]       # is this tree covered by a passing run's bundle?
+keel runtime fold|attest             # a runtime host's side of the chain
 keel learn / keel failures / keel lessons
 keel lesson promote|reject|demote
 keel metrics                  # pass rates, failure classes, tokens, gate theatre
@@ -300,7 +395,7 @@ compiling is named in `keel map` output rather than silently yielding nothing.
 
 ## Status
 
-**461 tests · 0 clippy warnings · macOS.** All five phases of PLAN.md.
+**541 tests · 0 clippy warnings · macOS and Linux.** All five phases of PLAN.md, plus the evidence chain, bundle verification, the PR check and the GitHub Actions runtime.
 
 Honest limits before you trust it: G2's *green* path is under-exercised (11%
 pass across 18 runs, because keel was developed inside keel), and every number

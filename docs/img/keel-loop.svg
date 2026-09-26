@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 250" role="img" aria-label="keel's loop: a spec and a plan you approve, an agent does the work, gates check it, you sign off, and keel produces an evidence bundle">
+  <style>
+    .bg { fill: #ffffff; }
+    .t { font: 600 15px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1f2328; }
+    .s { font: 12.5px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #59636e; }
+    .h { font: 600 12.5px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #0969da; }
+    .box { fill: #f6f8fa; stroke: #d0d7de; stroke-width: 1.5; }
+    .end { fill: #dafbe1; stroke: #1a7f37; stroke-width: 1.5; }
+    .pill { fill: #ddf4ff; stroke: #0969da; stroke-width: 1.5; }
+    .line { stroke: #59636e; stroke-width: 1.8; fill: none; }
+    .tick { stroke: #0969da; stroke-width: 1.5; stroke-dasharray: 3 3; }
+    .head { fill: #59636e; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #0d1117; }
+      .t { fill: #e6edf3; } .s { fill: #9198a1; } .h { fill: #4493f8; }
+      .box { fill: #151b23; stroke: #3d444d; }
+      .end { fill: #0f2a19; stroke: #3fb950; }
+      .pill { fill: #0c2d4a; stroke: #4493f8; }
+      .line { stroke: #9198a1; } .head { fill: #9198a1; } .tick { stroke: #4493f8; }
+    }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" class="head"/>
+    </marker>
+  </defs>
+  <rect class="bg" x="0" y="0" width="960" height="250" rx="14"/>
+
+  <!-- human checkpoints -->
+  <rect class="pill" x="110" y="22" width="140" height="30" rx="15"/>
+  <text class="h" x="180" y="42" text-anchor="middle">✋ you approve</text>
+  <line class="tick" x1="180" y1="52" x2="180" y2="118"/>
+  <rect class="pill" x="300" y="22" width="140" height="30" rx="15"/>
+  <text class="h" x="370" y="42" text-anchor="middle">✋ you approve</text>
+  <line class="tick" x1="370" y1="52" x2="370" y2="118"/>
+  <rect class="pill" x="680" y="22" width="140" height="30" rx="15"/>
+  <text class="h" x="750" y="42" text-anchor="middle">✋ you sign off</text>
+  <line class="tick" x1="750" y1="52" x2="750" y2="118"/>
+
+  <!-- steps -->
+  <rect class="box" x="20" y="86" width="150" height="64" rx="10"/>
+  <text class="t" x="95" y="113" text-anchor="middle">Spec</text>
+  <text class="s" x="95" y="133" text-anchor="middle">what “done” means</text>
+
+  <rect class="box" x="210" y="86" width="150" height="64" rx="10"/>
+  <text class="t" x="285" y="113" text-anchor="middle">Plan</text>
+  <text class="s" x="285" y="133" text-anchor="middle">which files, how big</text>
+
+  <rect class="box" x="400" y="86" width="150" height="64" rx="10"/>
+  <text class="t" x="475" y="113" text-anchor="middle">Agent works</text>
+  <text class="s" x="475" y="133" text-anchor="middle">Claude Code, Codex…</text>
+
+  <rect class="box" x="590" y="86" width="150" height="64" rx="10"/>
+  <text class="t" x="665" y="113" text-anchor="middle">Gates</text>
+  <text class="s" x="665" y="133" text-anchor="middle">build · test · review</text>
+
+  <rect class="end" x="780" y="86" width="160" height="64" rx="10"/>
+  <text class="t" x="860" y="113" text-anchor="middle">Evidence bundle</text>
+  <text class="s" x="860" y="133" text-anchor="middle">proof anyone can check</text>
+
+  <line class="line" x1="170" y1="118" x2="206" y2="118" marker-end="url(#a)"/>
+  <line class="line" x1="360" y1="118" x2="396" y2="118" marker-end="url(#a)"/>
+  <line class="line" x1="550" y1="118" x2="586" y2="118" marker-end="url(#a)"/>
+  <line class="line" x1="740" y1="118" x2="776" y2="118" marker-end="url(#a)"/>
+
+  <!-- the loop back when a gate fails -->
+  <path class="line" d="M665,150 V196 H475 V154" marker-end="url(#a)"/>
+  <text class="s" x="570" y="216" text-anchor="middle">a gate fails → back to the agent, nothing ships</text>
+</svg>
