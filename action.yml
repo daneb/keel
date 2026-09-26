@@ -7,9 +7,9 @@ description: >-
   (`keel export`, then `git add -f`).
 inputs:
   keel-version:
-    description: The keel-harness version to install; the first with `keel cover` is 0.9.0.
+    description: The keel-harness version to install; `keel cover` needs 0.9.0 or later.
     required: false
-    default: "0.9.0"
+    default: "0.10.0"
 runs:
   using: composite
   steps:

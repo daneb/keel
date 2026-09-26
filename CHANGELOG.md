@@ -7,6 +7,51 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.10.0] - 2026-09-26
+
+### Added
+
+- **GitHub Actions as a runtime** (ADR-0002). `runtime/action.yml`
+  (`uses: daneb/keel/runtime@v0.10.0`) gates a pull request's head with keel
+  in a hardened container on the runner, then commits the evidence bundle
+  back, so `keel cover` counts it. The runner step holds the chain in
+  `$RUNNER_TEMP`, where the container can't reach it, starting from the
+  repository's verified chain.
+  - **Container:** read-only root, all capabilities dropped,
+    `no-new-privileges`, non-root user, and a `network` input (`bridge` or
+    `none`). It runs under gVisor when that installs, and falls back to runc.
+  - **keel:** installed as a static musl binary, so it runs in any toolchain
+    image.
+  - **Scope:** gate only. No coding agent runs in CI.
+- **`keel runtime fold` and `keel runtime attest`**, the host's side of the
+  evidence chain for any runtime whose host can run keel.
+  - `fold` appends sink payloads to the host chain under a named writer.
+  - `attest` builds `keel.posture/1` from `docker inspect`, including
+    `network.internal_only` and `kernel.isolated`. The latter is proven only
+    under gVisor's `runsc`.
+- **`keel.posture/1` gains an optional `runtime_identity`**: the run's
+  repository, workflow, run id and SHA, marked as the runner's claim. It's an
+  additive change.
+
+### Fixed
+
+- **`test-movement` can be reviewed.** It blocked any change with code but no
+  test, and nothing could record a confirmation, so a config or docs change
+  stayed blocked for good. It now writes a flag naming the changed files to
+  `review-flags.txt`. `keel approve --stage review` clears it, and a
+  different change makes that sign-off lapse.
+- **`keel cover` says "verification blocked"** for a bundle whose checks
+  couldn't complete, and "failed verification" only when a check failed.
+- **The driver scripts pass Shellcheck** without `-x`. Existing copies in
+  `.keel/drivers/` aren't changed.
+
+### Changed
+
+- **`keel.chain/1` and `keel.posture/1` are frozen**, along with
+  `KEEL_CHAIN_SINK` and `KEEL_RUNTIME_ATTESTATION`: additive changes only,
+  anything else is a design review (ROADMAP, *Spine freeze*). Moor, and now the
+  GitHub Actions runtime, depend on them byte for byte.
+
 ## [0.9.0] - 2026-09-25
 
 ### Added
