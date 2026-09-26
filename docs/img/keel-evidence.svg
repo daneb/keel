@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 330" role="img" aria-label="Every approval and gate verdict is appended to a hash chain; the chain, the spec, the verdicts, the diff and the run's record go into one bundle that keel bundle verify checks offline">
+  <style>
+    .bg { fill: #ffffff; }
+    .t { font: 600 14px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1f2328; }
+    .s { font: 12px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #59636e; }
+    .m { font: 11.5px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #59636e; }
+    .ok { font: 600 14px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1a7f37; }
+    .blk { fill: #f6f8fa; stroke: #d0d7de; stroke-width: 1.5; }
+    .you { fill: #ddf4ff; stroke: #0969da; stroke-width: 1.5; }
+    .bun { fill: none; stroke: #1a7f37; stroke-width: 2; stroke-dasharray: 6 4; }
+    .file { fill: #ffffff; stroke: #d0d7de; stroke-width: 1.2; }
+    .line { stroke: #59636e; stroke-width: 1.8; fill: none; }
+    .head { fill: #59636e; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #0d1117; }
+      .t { fill: #e6edf3; } .s, .m { fill: #9198a1; } .ok { fill: #3fb950; }
+      .blk { fill: #151b23; stroke: #3d444d; } .you { fill: #0c2d4a; stroke: #4493f8; }
+      .bun { stroke: #3fb950; } .file { fill: #0d1117; stroke: #3d444d; }
+      .line { stroke: #9198a1; } .head { fill: #9198a1; }
+    }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" class="head"/>
+    </marker>
+  </defs>
+  <rect class="bg" x="0" y="0" width="960" height="330" rx="14"/>
+
+  <text class="t" x="20" y="28">The evidence chain — each entry locks in the one before it</text>
+
+  <rect class="you" x="20" y="48" width="160" height="64" rx="8"/>
+  <text class="t" x="100" y="74" text-anchor="middle">spec approved</text>
+  <text class="m" x="100" y="96" text-anchor="middle">prev: 0000…</text>
+
+  <rect class="blk" x="210" y="48" width="160" height="64" rx="8"/>
+  <text class="t" x="290" y="74" text-anchor="middle">G1 passed</text>
+  <text class="m" x="290" y="96" text-anchor="middle">prev: 7bce…</text>
+
+  <rect class="blk" x="400" y="48" width="160" height="64" rx="8"/>
+  <text class="t" x="480" y="74" text-anchor="middle">run started</text>
+  <text class="m" x="480" y="96" text-anchor="middle">prev: 26a0…</text>
+
+  <rect class="blk" x="590" y="48" width="160" height="64" rx="8"/>
+  <text class="t" x="670" y="74" text-anchor="middle">G2 passed</text>
+  <text class="m" x="670" y="96" text-anchor="middle">prev: 9e9a…</text>
+
+  <rect class="blk" x="780" y="48" width="160" height="64" rx="8"/>
+  <text class="t" x="860" y="74" text-anchor="middle">run ended</text>
+  <text class="m" x="860" y="96" text-anchor="middle">prev: 5355…</text>
+
+  <line class="line" x1="180" y1="80" x2="206" y2="80" marker-end="url(#a)"/>
+  <line class="line" x1="370" y1="80" x2="396" y2="80" marker-end="url(#a)"/>
+  <line class="line" x1="560" y1="80" x2="586" y2="80" marker-end="url(#a)"/>
+  <line class="line" x1="750" y1="80" x2="776" y2="80" marker-end="url(#a)"/>
+  <text class="s" x="480" y="136" text-anchor="middle">edit, delete or reorder any entry and every link after it breaks — keel names exactly where</text>
+
+  <!-- bundle -->
+  <rect class="bun" x="20" y="162" width="620" height="146" rx="12"/>
+  <text class="t" x="40" y="188">Evidence bundle — one .tar.gz</text>
+  <rect class="file" x="40" y="204" width="110" height="40" rx="5"/><text class="s" x="95" y="229" text-anchor="middle">the chain</text>
+  <rect class="file" x="160" y="204" width="110" height="40" rx="5"/><text class="s" x="215" y="229" text-anchor="middle">spec + plan</text>
+  <rect class="file" x="280" y="204" width="110" height="40" rx="5"/><text class="s" x="335" y="229" text-anchor="middle">gate verdicts</text>
+  <rect class="file" x="400" y="204" width="110" height="40" rx="5"/><text class="s" x="455" y="229" text-anchor="middle">the exact diff</text>
+  <rect class="file" x="520" y="204" width="100" height="40" rx="5"/><text class="s" x="570" y="229" text-anchor="middle">what ran</text>
+  <text class="s" x="40" y="282">approvals must match the spec that shipped · verdicts must match the chain</text>
+
+  <line class="line" x1="640" y1="235" x2="706" y2="235" marker-end="url(#a)"/>
+  <rect class="blk" x="710" y="196" width="230" height="78" rx="10"/>
+  <text class="m" x="825" y="226" text-anchor="middle">keel bundle verify</text>
+  <text class="ok" x="825" y="252" text-anchor="middle">✓ pass — offline, no repo</text>
+</svg>

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 260" role="img" aria-label="keel cover on pull requests: a PR carrying the bundle of a passing run of its exact tree is covered; a PR with no bundle is uncovered and blocked; a PR a maintainer labels keel:exempt passes as exempted">
+  <style>
+    .bg { fill: #ffffff; }
+    .t { font: 600 14px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1f2328; }
+    .s { font: 12.5px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #59636e; }
+    .ok { font: 600 14px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1a7f37; }
+    .no { font: 600 14px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #cf222e; }
+    .ex { font: 600 14px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #9a6700; }
+    .pr { fill: #f6f8fa; stroke: #d0d7de; stroke-width: 1.5; }
+    .okb { fill: #dafbe1; stroke: #1a7f37; stroke-width: 1.5; }
+    .nob { fill: #ffebe9; stroke: #cf222e; stroke-width: 1.5; }
+    .exb { fill: #fff8c5; stroke: #9a6700; stroke-width: 1.5; }
+    .line { stroke: #59636e; stroke-width: 1.8; fill: none; }
+    .head { fill: #59636e; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #0d1117; }
+      .t { fill: #e6edf3; } .s { fill: #9198a1; }
+      .ok { fill: #3fb950; } .no { fill: #f85149; } .ex { fill: #d29922; }
+      .pr { fill: #151b23; stroke: #3d444d; }
+      .okb { fill: #0f2a19; stroke: #3fb950; } .nob { fill: #3a0f12; stroke: #f85149; } .exb { fill: #2e2408; stroke: #d29922; }
+      .line { stroke: #9198a1; } .head { fill: #9198a1; }
+    }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" class="head"/>
+    </marker>
+  </defs>
+  <rect class="bg" x="0" y="0" width="960" height="260" rx="14"/>
+
+  <text class="t" x="20" y="28">Pull request</text>
+  <text class="t" x="640" y="28">keel cover says</text>
+
+  <rect class="pr" x="20" y="44" width="460" height="56" rx="8"/>
+  <text class="t" x="40" y="68">change + bundle of a passing run</text>
+  <text class="s" x="40" y="88">gated this exact content, approvals and all</text>
+  <line class="line" x1="480" y1="72" x2="636" y2="72" marker-end="url(#a)"/>
+  <rect class="okb" x="640" y="44" width="300" height="56" rx="8"/>
+  <text class="ok" x="660" y="68">✓ covered</text>
+  <text class="s" x="660" y="88">merge away</text>
+
+  <rect class="pr" x="20" y="116" width="460" height="56" rx="8"/>
+  <text class="t" x="40" y="140">change, no bundle — or edited after the run</text>
+  <text class="s" x="40" y="160">even a lockfile bump counts as a change</text>
+  <line class="line" x1="480" y1="144" x2="636" y2="144" marker-end="url(#a)"/>
+  <rect class="nob" x="640" y="116" width="300" height="56" rx="8"/>
+  <text class="no" x="660" y="140">✗ uncovered</text>
+  <text class="s" x="660" y="160">blocked, with the reason per bundle</text>
+
+  <rect class="pr" x="20" y="188" width="460" height="56" rx="8"/>
+  <text class="t" x="40" y="212">docs change, labelled keel:exempt</text>
+  <text class="s" x="40" y="232">a maintainer's stated decision</text>
+  <line class="line" x1="480" y1="216" x2="636" y2="216" marker-end="url(#a)"/>
+  <rect class="exb" x="640" y="188" width="300" height="56" rx="8"/>
+  <text class="ex" x="660" y="212">~ exempted, not covered</text>
+  <text class="s" x="660" y="232">passes, and says so</text>
+</svg>

@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 330" role="img" aria-label="The GitHub Actions runtime: the runner holds the evidence chain; keel gates the pull request inside a gVisor container that can't reach the chain; the runner attests the container, folds keel's records in, and commits the bundle back to the pull request">
+  <style>
+    .bg { fill: #ffffff; }
+    .t { font: 600 14px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1f2328; }
+    .s { font: 12.5px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #59636e; }
+    .k { font: 600 12.5px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #8250df; }
+    .host { fill: #f6f8fa; stroke: #d0d7de; stroke-width: 1.5; }
+    .box { fill: #ffffff; stroke: #d0d7de; stroke-width: 1.5; }
+    .cage { fill: #fbefff; stroke: #8250df; stroke-width: 2; }
+    .pr { fill: #dafbe1; stroke: #1a7f37; stroke-width: 1.5; }
+    .line { stroke: #59636e; stroke-width: 1.8; fill: none; }
+    .head { fill: #59636e; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #0d1117; }
+      .t { fill: #e6edf3; } .s { fill: #9198a1; } .k { fill: #ab7df8; }
+      .host { fill: #151b23; stroke: #3d444d; } .box { fill: #0d1117; stroke: #3d444d; }
+      .cage { fill: #1f1233; stroke: #ab7df8; } .pr { fill: #0f2a19; stroke: #3fb950; }
+      .line { stroke: #9198a1; } .head { fill: #9198a1; }
+    }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" class="head"/>
+    </marker>
+  </defs>
+  <rect class="bg" x="0" y="0" width="960" height="330" rx="14"/>
+
+  <!-- runner (host) -->
+  <rect class="host" x="20" y="20" width="700" height="290" rx="12"/>
+  <text class="t" x="40" y="46">GitHub runner — the host, holds the pen</text>
+
+  <rect class="box" x="40" y="64" width="180" height="96" rx="8"/>
+  <text class="t" x="130" y="92" text-anchor="middle">Evidence chain</text>
+  <text class="s" x="130" y="114" text-anchor="middle">starts from your repo's,</text>
+  <text class="s" x="130" y="132" text-anchor="middle">in $RUNNER_TEMP</text>
+  <text class="s" x="130" y="150" text-anchor="middle">— out of keel's reach</text>
+
+  <rect class="box" x="40" y="192" width="180" height="96" rx="8"/>
+  <text class="t" x="130" y="220" text-anchor="middle">Attest from outside</text>
+  <text class="s" x="130" y="242" text-anchor="middle">docker inspect →</text>
+  <text class="s" x="130" y="260" text-anchor="middle">read-only, no caps,</text>
+  <text class="s" x="130" y="278" text-anchor="middle">gVisor: proven</text>
+
+  <!-- container -->
+  <rect class="cage" x="360" y="64" width="340" height="224" rx="12"/>
+  <text class="k" x="378" y="90">gVisor container (runc if gVisor can't install)</text>
+  <rect class="box" x="378" y="108" width="304" height="70" rx="8"/>
+  <text class="t" x="530" y="136" text-anchor="middle">keel run --no-driver</text>
+  <text class="s" x="530" y="158" text-anchor="middle">gates your PR's head: build · test · review</text>
+  <text class="s" x="378" y="214">read-only root · all capabilities dropped</text>
+  <text class="s" x="378" y="236">non-root user · no secrets inside</text>
+  <text class="s" x="378" y="258">your toolchain image (rust, node, …)</text>
+
+  <line class="line" x1="220" y1="240" x2="356" y2="240" marker-end="url(#a)"/>
+  <text class="s" x="290" y="216" text-anchor="middle">attestation</text>
+  <text class="s" x="290" y="232" text-anchor="middle">(read-only)</text>
+  <line class="line" x1="378" y1="143" x2="224" y2="143" marker-end="url(#a)"/>
+  <text class="s" x="300" y="119" text-anchor="middle">keel's records,</text>
+  <text class="s" x="300" y="135" text-anchor="middle">folded in</text>
+
+  <!-- PR -->
+  <line class="line" x1="720" y1="164" x2="776" y2="164" marker-end="url(#a)"/>
+  <rect class="pr" x="780" y="116" width="160" height="96" rx="10"/>
+  <text class="t" x="860" y="146" text-anchor="middle">Your PR</text>
+  <text class="s" x="860" y="168" text-anchor="middle">gets a bundle commit</text>
+  <text class="s" x="860" y="188" text-anchor="middle">→ keel cover ✓</text>
+</svg>
