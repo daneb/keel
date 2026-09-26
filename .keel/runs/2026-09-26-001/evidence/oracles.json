@@ -1,0 +1,73 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "test",
+      "oracle": "test tests/ci_runtime.rs::fold_appends_payloads_once_with_the_writer",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.89s"
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "test",
+      "oracle": "test tests/ci_runtime.rs::attest_derives_posture_from_inspect_output",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.89s"
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "test",
+      "oracle": "test tests/ci_runtime.rs::kernel_isolated_is_proven_only_under_runsc",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.90s"
+    },
+    {
+      "criterion": "AC-4",
+      "kind": "test",
+      "oracle": "test tests/ci_runtime.rs::run_identity_is_recorded_as_a_claim",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.91s"
+    },
+    {
+      "criterion": "AC-5",
+      "kind": "test",
+      "oracle": "test tests/ci_runtime.rs::the_action_hardens_the_container_and_keeps_host_files_out",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s"
+    },
+    {
+      "criterion": "AC-6",
+      "kind": "test",
+      "oracle": "test tests/ci_runtime.rs::the_action_starts_from_the_verified_repository_chain",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s"
+    },
+    {
+      "criterion": "AC-7",
+      "kind": "test",
+      "oracle": "test tests/ci_runtime.rs::the_action_builds_verifies_and_commits_the_bundle",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s"
+    },
+    {
+      "criterion": "AC-8",
+      "kind": "human",
+      "oracle": "human: a maintainer runs the action on a pull request in daneb/keel-cover-demo and sees keel cover report covered on the bundle commit",
+      "outcome": "human",
+      "detail": "a maintainer runs the action on a pull request in daneb/keel-cover-demo and sees keel cover report covered on the bundle commit"
+    }
+  ],
+  "criteria": 8,
+  "executed": 7,
+  "passed": 7,
+  "failed": 0,
+  "blocked": 0,
+  "human": 1
+}

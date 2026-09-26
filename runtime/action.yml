@@ -1,0 +1,138 @@
+name: keel runtime (GitHub Actions)
+description: >-
+  Gate a pull request's head with keel inside a hardened container on the
+  runner, under gVisor when it installs, and commit the resulting evidence
+  bundle back to the pull request so `keel cover` counts it. The runner step is
+  the host: it holds the evidence chain in $RUNNER_TEMP, which the container
+  never sees (ADR-0002). Gate only: no coding agent runs here.
+  Pushes made with the default GITHUB_TOKEN do not start new workflow runs, so
+  pass a fine-grained PAT or GitHub App token as `token` if the cover check
+  should re-run on the bundle commit.
+inputs:
+  spec:
+    description: The keel spec slug to gate.
+    required: true
+  image:
+    description: The repository's toolchain image, in which keel runs the gates (e.g. rust:1-bookworm).
+    required: true
+  network:
+    description: The container's network, bridge or none. Attested either way.
+    required: false
+    default: bridge
+  keel-version:
+    description: The keel-harness version to install.
+    required: false
+    default: "0.10.0"
+  token:
+    description: Token used to push the bundle commit.
+    required: false
+    default: ${{ github.token }}
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v5
+      with:
+        ref: ${{ github.head_ref }}
+        fetch-depth: 0
+        token: ${{ inputs.token }}
+
+    - name: Install keel (static, runs in any image)
+      shell: bash
+      env:
+        KEEL_VERSION: ${{ inputs.keel-version }}
+      run: |
+        sudo apt-get update -qq && sudo apt-get install -y -qq musl-tools
+        rustup target add x86_64-unknown-linux-musl
+        cargo install keel-harness --version "$KEEL_VERSION" --locked --target x86_64-unknown-linux-musl
+        echo "KEEL_BIN=$HOME/.cargo/bin/keel" >> "$GITHUB_ENV"
+
+    - name: Install gVisor if it can be installed
+      shell: bash
+      run: |
+        set +e
+        ARCH=$(uname -m)
+        URL="https://storage.googleapis.com/gvisor/releases/release/latest/${ARCH}"
+        curl -fsSL "${URL}/runsc" -o /tmp/runsc \
+          && curl -fsSL "${URL}/runsc.sha512" -o /tmp/runsc.sha512 \
+          && (cd /tmp && sha512sum -c runsc.sha512) \
+          && sudo install -m 0755 /tmp/runsc /usr/local/bin/runsc \
+          && sudo /usr/local/bin/runsc install \
+          && sudo systemctl reload docker
+        if [ $? -eq 0 ] && docker info --format '{{json .Runtimes}}' | grep -q runsc; then
+          echo "KEEL_OCI_RUNTIME=runsc" >> "$GITHUB_ENV"
+        else
+          echo "::warning::gVisor unavailable; running under runc, and kernel.isolated will be attested unproven"
+          echo "KEEL_OCI_RUNTIME=runc" >> "$GITHUB_ENV"
+        fi
+
+    - name: Start the host chain from the repository's, verified
+      shell: bash
+      run: |
+        set -euo pipefail
+        "$KEEL_BIN" chain verify
+        H="$RUNNER_TEMP/keel"
+        mkdir -p "$H/sink" "$H/posture" "$H/out"
+        cp .keel/chain.jsonl "$H/chain.jsonl"
+        chmod 0777 "$H/sink"
+        echo "KEEL_HOST=$H" >> "$GITHUB_ENV"
+
+    - name: Start keel's hardened container
+      shell: bash
+      env:
+        IMAGE: ${{ inputs.image }}
+        NETWORK: ${{ inputs.network }}
+      run: |
+        set -euo pipefail
+        case "$NETWORK" in bridge|none) ;; *) echo "network must be bridge or none"; exit 1;; esac
+        RUNTIME_FLAG=()
+        [ "$KEEL_OCI_RUNTIME" = runsc ] && RUNTIME_FLAG=(--runtime runsc)
+        # Only the sink and the read-only attestation come from $RUNNER_TEMP;
+        # the host chain stays out of reach.
+        docker create --name keel-gate "${RUNTIME_FLAG[@]}" \
+          --read-only --tmpfs /tmp:exec --cap-drop ALL \
+          --security-opt no-new-privileges \
+          --user "$(id -u):$(id -g)" --network "$NETWORK" \
+          -e HOME=/tmp \
+          -e KEEL_CHAIN_SINK=/run/keel-sink/keel.jsonl \
+          -e KEEL_RUNTIME_ATTESTATION=/run/keel-posture/posture.json \
+          -v "$GITHUB_WORKSPACE:/workspace" -w /workspace \
+          -v "$KEEL_HOST/sink:/run/keel-sink" \
+          -v "$KEEL_HOST/posture:/run/keel-posture:ro" \
+          -v "$KEEL_BIN:/usr/local/bin/keel:ro" \
+          --entrypoint sleep "$IMAGE" infinity
+        docker start keel-gate
+
+    - name: Attest the container from outside, then gate
+      shell: bash
+      env:
+        SPEC: ${{ inputs.spec }}
+      run: |
+        set -euo pipefail
+        docker inspect keel-gate > "$KEEL_HOST/inspect.json"
+        "$KEEL_BIN" runtime attest --inspect "$KEEL_HOST/inspect.json" \
+          --chain "$KEEL_HOST/chain.jsonl" --out "$KEEL_HOST/posture/posture.json"
+        # The run's verdict is evidence, not a reason to stop here.
+        docker exec keel-gate keel run "$SPEC" --no-driver || true
+        docker rm -f keel-gate >/dev/null
+
+    - name: Fold, export and verify the bundle
+      shell: bash
+      run: |
+        set -euo pipefail
+        "$KEEL_BIN" runtime fold --sink "$KEEL_HOST/sink/keel.jsonl" \
+          --chain "$KEEL_HOST/chain.jsonl" --writer github-actions
+        BUNDLE=$("$KEEL_BIN" export --chain "$KEEL_HOST/chain.jsonl" --out "$KEEL_HOST/out")
+        "$KEEL_BIN" bundle verify "$BUNDLE"
+        echo "KEEL_BUNDLE=$BUNDLE" >> "$GITHUB_ENV"
+
+    - name: Commit the bundle to the pull request
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir -p .keel/bundles
+        cp "$KEEL_BUNDLE" .keel/bundles/
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add -f ".keel/bundles/$(basename "$KEEL_BUNDLE")"
+        git commit -m "keel: evidence bundle $(basename "$KEEL_BUNDLE")"
+        git push

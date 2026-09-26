@@ -129,6 +129,9 @@ enum Command {
     /// Check an evidence bundle using nothing but the bundle
     #[command(subcommand)]
     Bundle(BundleCmd),
+    /// A runtime host's side of the evidence chain — run on the host, never in the sandbox
+    #[command(subcommand)]
+    Runtime(RuntimeCmd),
     /// Is this tree covered by a committed, verified bundle of a passing run?
     Cover {
         /// Pass as exempted rather than covered, recording why
@@ -435,6 +438,32 @@ enum GateCmd {
 }
 
 #[derive(Subcommand)]
+enum RuntimeCmd {
+    /// Fold new lines from keel's sink into the host chain
+    Fold {
+        #[arg(long)]
+        sink: String,
+        #[arg(long)]
+        chain: String,
+        /// The runtime writing the entries, e.g. github-actions
+        #[arg(long)]
+        writer: String,
+    },
+    /// Derive keel.posture/1 from `docker inspect` output and record it on the chain
+    Attest {
+        #[arg(long)]
+        inspect: String,
+        #[arg(long)]
+        chain: String,
+        #[arg(long)]
+        out: String,
+        /// The runtime's name, written as the attestation's runtime and the entry's writer
+        #[arg(long, default_value = "github-actions")]
+        runtime: String,
+    },
+}
+
+#[derive(Subcommand)]
 enum BundleCmd {
     /// Members, chain, approvals, verdicts and trajectory: every link, offline
     Verify {
@@ -565,6 +594,10 @@ fn run() -> Result<i32> {
         Command::Chain(ChainCmd::Head) => cmd::chain::head(),
         Command::Bundle(BundleCmd::Verify { archive, json }) => cmd::bundle::verify(archive, json),
         Command::Cover { exempt, json } => cmd::cover::run(exempt, json),
+        Command::Runtime(RuntimeCmd::Fold { sink, chain, writer }) => cmd::runtime::fold(sink, chain, writer),
+        Command::Runtime(RuntimeCmd::Attest { inspect, chain, out, runtime }) => {
+            cmd::runtime::attest(inspect, chain, out, runtime)
+        }
         Command::Learn { run, json } => cmd::learn::learn(run, json),
         Command::Failures { json } => cmd::learn::failures(json),
         Command::Lessons { json } => cmd::learn::list(json),

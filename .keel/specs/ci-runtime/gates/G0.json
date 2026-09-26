@@ -1,0 +1,90 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G0",
+  "run": "2026-09-25-004",
+  "spec": "ci-runtime",
+  "verdict": "pass",
+  "generated_at": "2026-09-25T22:23:15.115137+02:00",
+  "checks": [
+    {
+      "id": "schema",
+      "verdict": "pass",
+      "detail": "SPEC-0014 (keel.spec/1)"
+    },
+    {
+      "id": "criteria-present",
+      "verdict": "pass",
+      "detail": "8 criteria"
+    },
+    {
+      "id": "criterion-ids-unique",
+      "verdict": "pass",
+      "detail": "no duplicate ids"
+    },
+    {
+      "id": "no-placeholders",
+      "verdict": "pass",
+      "detail": "no unfilled scaffold text"
+    },
+    {
+      "id": "ears-conformance",
+      "verdict": "pass",
+      "detail": "8/8 conform (event-driven, optional-feature, ubiquitous, unwanted-behaviour)"
+    },
+    {
+      "id": "oracle-presence",
+      "verdict": "pass",
+      "detail": "8 oracles across 8 criteria"
+    },
+    {
+      "id": "oracle-wellformed",
+      "verdict": "pass",
+      "detail": "all oracles parse"
+    },
+    {
+      "id": "ambiguity",
+      "verdict": "pass",
+      "detail": "no ambiguous phrasing in criteria"
+    },
+    {
+      "id": "criterion-budget",
+      "verdict": "pass",
+      "detail": "8/8 criteria"
+    },
+    {
+      "id": "spec-length",
+      "verdict": "pass",
+      "detail": "111/250 lines"
+    },
+    {
+      "id": "scope-declared",
+      "verdict": "pass",
+      "detail": "8 glob(s): src/runtime/**, src/cmd/runtime.rs, src/cmd/mod.rs, src/main.rs, runtime/**, docs/decisions/**, tests/ci_runtime.rs, schemas/posture.json"
+    },
+    {
+      "id": "change-budget",
+      "verdict": "pass",
+      "detail": "700 lines of diff budgeted"
+    },
+    {
+      "id": "oracle-mix",
+      "verdict": "pass",
+      "detail": "7/8 runnable (1 human, 7 test)"
+    },
+    {
+      "id": "human-cost",
+      "verdict": "pass",
+      "detail": "1 criteria verifiable only by a person — budget review time: AC-8 (human: a maintainer runs the action on a pull request in daneb/keel-cover-demo and sees keel cover report covered on the bundle commit)"
+    },
+    {
+      "id": "store-drift",
+      "verdict": "pass",
+      "detail": "4 projections current"
+    },
+    {
+      "id": "shared-stores",
+      "verdict": "pass",
+      "detail": "none configured"
+    }
+  ]
+}

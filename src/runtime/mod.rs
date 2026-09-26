@@ -10,6 +10,8 @@
 //! An attestation is a claim, not proof. A property the runtime cannot vouch
 //! for is `blocked`, never `pass` — the rule every gate follows.
 
+pub mod host;
+
 use crate::config::Config;
 use crate::gate::{Check, GateResult};
 use crate::paths::Paths;
