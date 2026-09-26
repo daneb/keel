@@ -1,0 +1,16 @@
+{"t":"2026-09-26T12:12:18.121626+02:00","seq":1,"kind":"run_start","spec":"runtime-fixes","keel_version":"0.10.0","store_hash":"0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2"}
+{"t":"2026-09-26T12:12:18.124237+02:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":424,"bytes":1693}
+{"t":"2026-09-26T12:12:18.124305+02:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
+{"t":"2026-09-26T12:12:18.124372+02:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6268,"bytes":25071}
+{"t":"2026-09-26T12:12:18.124812+02:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
+{"t":"2026-09-26T12:12:18.124955+02:00","seq":6,"kind":"inject","source":".keel/specs/runtime-fixes/spec.md","tokens":554,"bytes":2216}
+{"t":"2026-09-26T12:12:18.311922+02:00","seq":7,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
+{"t":"2026-09-26T12:13:01.672803+02:00","seq":8,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
+{"t":"2026-09-26T12:13:05.249629+02:00","seq":9,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
+{"t":"2026-09-26T12:13:06.299377+02:00","seq":10,"kind":"oracle","criterion":"AC-1","oracle":"test tests/runtime_fixes.rs::gvisor_comes_from_a_pinned_verified_tarball","verdict":"pass","exit_code":0}
+{"t":"2026-09-26T12:13:06.299427+02:00","seq":11,"kind":"oracle","criterion":"AC-2","oracle":"`curl -sfI https://storage.googleapis.com/gvisor/releases/release/20260921.0/x86_64/gvisor.tar.zstd` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-09-26T12:13:06.299439+02:00","seq":12,"kind":"oracle","criterion":"AC-3","oracle":"test tests/runtime_fixes.rs::the_action_skips_its_own_bundle_commit","verdict":"pass","exit_code":0}
+{"t":"2026-09-26T12:13:56.751716+02:00","seq":13,"kind":"gate","gate":"G2","verdict":"pass","result":"gates/G2.json"}
+{"t":"2026-09-26T12:13:56.865326+02:00","seq":14,"kind":"gate","gate":"G2.5","verdict":"pass","result":"gates/G2.5.json"}
+{"t":"2026-09-26T12:13:56.893377+02:00","seq":15,"kind":"gate","gate":"G3","verdict":"pass","result":"gates/G3.json"}
+{"t":"2026-09-26T12:13:56.893402+02:00","seq":16,"kind":"run_end","verdict":"pass","duration_ms":98785}

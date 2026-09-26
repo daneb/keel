@@ -1,0 +1,17 @@
+     6      0  .keel/chain.jsonl
+     2      0  .keel/runs/2026-09-26-003/evidence/build.txt
+     2      0  .keel/runs/2026-09-26-003/evidence/lint.txt
+    34      0  .keel/runs/2026-09-26-003/evidence/oracles.json
+   130      0  .keel/runs/2026-09-26-003/evidence/test.txt
+     9      0  .keel/runs/2026-09-26-003/run.json
+    12      0  .keel/runs/2026-09-26-003/trajectory.jsonl
+     2      0  .keel/specs/runtime-fixes/approvals.jsonl
+    90      0  .keel/specs/runtime-fixes/gates/G0.json
+    95      0  .keel/specs/runtime-fixes/gates/G1.json
+    64      0  .keel/specs/runtime-fixes/plan.md
+    62      0  .keel/specs/runtime-fixes/spec.md
+    20      0  .keel/specs/runtime-fixes/tasks.md
+    39      7  runtime/action.yml
+   102      0  tests/runtime_fixes.rs
+
+15 file(s), +669 -7 (676 lines of churn) against 33e4447ecab17d76da039abeb5b9b9ea3e92f9b4

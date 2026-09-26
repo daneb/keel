@@ -7,6 +7,21 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.10.1] - 2026-09-26
+
+### Fixed
+
+- **The runtime Action now installs gVisor.** gVisor ships each release as a
+  `gvisor.tar.zstd` with a `.sha512` beside it. The `latest/<arch>/runsc`
+  path the Action used returned 404, so it quietly fell back to runc and
+  attested `kernel.isolated` as unproven. A new input, `gvisor-version`
+  (default `20260921.0`), names the release, and the tarball's digest is
+  checked before `runsc` is extracted.
+- **The runtime Action no longer gates its own bundle commit.** That commit,
+  pushed by `github-actions[bot]`, starts the workflow again, and gating it
+  would push another bundle, over and over. A commit by that author that only
+  adds files under `.keel/bundles/` is now recognised and skipped.
+
 ## [0.10.0] - 2026-09-26
 
 ### Added
