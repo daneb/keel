@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>keel — a conductor, not an agent loop</title>
-<meta name="description" content="keel owns the auditable stopping conditions and the durable memory that AI coding agents don't. Specs with falsifiable oracles, gates with three verdicts, evidence you can hand to an auditor.">
+<title>keel — AI coding agents that prove their work</title>
+<meta name="description" content="keel makes AI coding agents prove their work: you define done, the agent works, keel checks it and keeps a tamper-evident record anyone can verify offline. Plus a PR check and a GitHub Actions runtime.">
 <meta property="og:title" content="keel">
-<meta property="og:description" content="A conductor, not an agent loop. Gates, evidence and durable memory for AI-assisted delivery.">
+<meta property="og:description" content="AI coding agents that prove their work. Gates, a tamper-evident record, and a PR check that blocks anything unproven.">
 <meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -184,6 +184,33 @@ pre .c{color:var(--muted)} pre .k{color:var(--brass); font-weight:500}
 footer{border-top:1px solid var(--rule); padding:44px 0; color:var(--muted); font-size:14.5px}
 footer .wrap{display:flex; justify-content:space-between; gap:22px; flex-wrap:wrap; align-items:center}
 footer a{color:var(--body)}
+
+/* ── added: diagrams, pillars, use cases ───────────────── */
+.shot{margin:34px 0 0}
+.shot img{display:block; width:100%; height:auto; border-radius:8px}
+.pillars{display:grid; grid-template-columns:repeat(2,1fr); gap:18px; margin-top:44px}
+@media(max-width:760px){ .pillars{grid-template-columns:1fr} }
+.pillar{background:var(--card); border:1px solid var(--rule); border-radius:12px; padding:26px 26px 22px}
+.pillar .n{font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600; color:var(--brass); letter-spacing:.17em}
+.pillar h3{font-size:22px; margin:8px 0 12px; letter-spacing:-.02em}
+.pillar ul{margin:0; padding-left:0; list-style:none}
+.pillar li{position:relative; padding-left:24px; margin-bottom:10px; font-size:15.3px; line-height:1.55}
+.pillar li::before{content:"✓"; position:absolute; left:0; top:0; color:var(--sage); font-weight:700}
+.pillar li:last-child{margin-bottom:0}
+.pillar strong{color:var(--ink)}
+.use{display:grid; grid-template-columns:1fr 1fr; gap:34px; align-items:start; padding:34px 0; border-top:1px dashed var(--rule)}
+.use:first-of-type{border-top:none; padding-top:10px}
+.use>*{min-width:0}
+@media(max-width:860px){ .use{grid-template-columns:1fr; gap:16px} }
+.use h3{font-size:23px; letter-spacing:-.02em; margin-bottom:10px}
+.use p{margin:0; font-size:16px}
+.use pre{font-size:13.5px; padding:18px}
+.use .who{font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--brass); margin-bottom:8px}
+.steps{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:30px}
+@media(max-width:760px){ .steps{grid-template-columns:1fr} }
+.step{border-left:3px solid var(--brass); padding:4px 0 4px 16px}
+.step b{display:block; color:var(--ink); font-family:"Space Grotesk",sans-serif; font-size:18px; margin-bottom:4px}
+.step span{font-size:15px}
 </style>
 </head>
 <body>
@@ -198,11 +225,10 @@ footer a{color:var(--body)}
     keel
   </a>
   <nav>
-    <a href="#what">What it is</a>
-    <a href="#parts">Components</a>
+    <a href="#how">How it works</a>
+    <a href="#use">Use cases</a>
+    <a href="#trust">Why trust it</a>
     <a href="#gates">Gates</a>
-    <a href="#evidence">Evidence</a>
-    <a href="#see">Seeing it</a>
     <a href="#start">Get started</a>
     <a class="gh" href="https://github.com/daneb/keel">GitHub</a>
   </nav>
@@ -210,18 +236,18 @@ footer a{color:var(--body)}
 
 <div id="top" class="hero"><div class="wrap hero-grid">
   <div>
-    <div class="tag">Rust · macOS · v0.5.0</div>
+    <div class="tag">Rust · macOS &amp; Linux · v0.10.1</div>
     <h1>keel</h1>
-    <p class="lede">A conductor, not an agent loop.</p>
-    <p class="sub">The keel is the one member every rib bolts to — the part that decides
-      whether a hull holds its shape under load. Coding agents are good at writing code
-      and bad at knowing when to stop. keel owns the two things they don't: <strong>auditable
-      stopping conditions</strong>, and <strong>memory that outlives the session</strong>.</p>
+    <p class="lede">AI coding agents that prove their work.</p>
+    <p class="sub">You say what “done” means. An agent — Claude Code, Codex, Copilot,
+      Kiro — does the work. keel checks it, stops the line when a check fails or you
+      haven't signed off, and keeps a <strong>tamper-evident record</strong> anyone can
+      verify, even without your repo.</p>
     <div class="cmd"><span class="p">$</span><code>cargo install keel-harness</code></div>
-    <p class="instnote">Installs a binary called <code>keel</code>. The <code>keel</code> and <code>keel-cli</code> names on crates.io belong to unrelated projects.</p>
+    <p class="instnote">Installs a binary called <code>keel</code>. Works with the agent you already use.</p>
     <div class="cta">
       <a class="btn btn-p" href="#start">Get started</a>
-      <a class="btn btn-s" href="https://github.com/daneb/keel">Read the source</a>
+      <a class="btn btn-s" href="#use">See what it does</a>
     </div>
   </div>
 
@@ -234,8 +260,6 @@ footer a{color:var(--body)}
                    C132,246 82,198 70,104 Z"/>
         </clipPath>
       </defs>
-
-      <!-- stations and waterlines, clipped to the hull -->
       <g clip-path="url(#hull)">
         <g class="station">
           <path d="M150 0v330M230 0v330M310 0v330M390 0v330M470 0v330
@@ -243,17 +267,11 @@ footer a{color:var(--body)}
           <path d="M0 130h900M0 165h900M0 200h900"/>
         </g>
       </g>
-
-      <!-- hull outline -->
       <path class="hull-line" d="M70,104 C280,120 620,116 838,86 C848,120 844,152 836,170
                                  C800,218 690,244 540,246 L232,246
                                  C132,246 82,198 70,104 Z"/>
-
-      <!-- designed waterline -->
       <path class="wl" d="M34,200 H872"/>
       <text class="dim-t" x="34" y="192">DWL</text>
-
-      <!-- the keel -->
       <path class="keel-line" d="M212,246 H556 C660,244 742,232 792,214"/>
       <g fill="var(--brass)" opacity=".85">
         <circle cx="250" cy="246" r="2.6"/><circle cx="316" cy="246" r="2.6"/>
@@ -263,85 +281,182 @@ footer a{color:var(--body)}
       </g>
       <path class="dim" d="M300,246 L300,292"/>
       <text class="dim-t brass-t" x="300" y="308" text-anchor="middle">KEEL</text>
-
-      <!-- length dimension -->
-      <g class="dim">
-        <path d="M70,318 H838M70,312v12M838,312v12"/>
-      </g>
+      <g class="dim"><path d="M70,318 H838M70,312v12M838,312v12"/></g>
       <text class="dim-t" x="454" y="310" text-anchor="middle"
             style="fill:var(--muted)">EVERY FRAME BOLTS TO IT</text>
-
       <text class="dim-t" x="856" y="80" text-anchor="end">STEM</text>
       <text class="dim-t" x="46" y="98">STERN</text>
     </svg>
-    <figcaption><span>Plate I — Side elevation</span><span>Sheer · stations · keel</span></figcaption>
+    <figcaption><span>Plate I — Side elevation</span><span>The part that keeps the hull true</span></figcaption>
   </figure>
 </div></div>
 
-<section id="what"><div class="wrap">
-  <div class="tag">The problem</div>
-  <h2>Agents don't know when to stop</h2>
-  <p class="intro">An agent will happily rewrite a module you never mentioned, declare
-    victory on a test it weakened, and forget by Tuesday what it learned on Monday.
-    None of that is a model failure — it's a missing harness. keel supplies the harness
-    and stays out of the way of the model.</p>
+<section id="how"><div class="wrap">
+  <div class="tag">How it works</div>
+  <h2>You decide. The agent works. keel keeps score.</h2>
+  <p class="intro">Coding agents are brilliant at writing code and bad at knowing when
+    to stop. keel is the part that knows: what “done” means, whether the work got
+    there, and who said so.</p>
 
-  <div class="grid g2" style="margin-top:38px">
-    <div class="card">
-      <div class="n">01</div>
-      <h3>Stopping conditions you can audit</h3>
-      <p>Every acceptance criterion carries a falsifiable oracle — a command, a test, a
-        schema, a doctest, or a named human. A gate that cannot fail is not a gate,
-        so keel reports which of its own checks have never fired.</p>
+  <div class="steps">
+    <div class="step"><b>1 · Define done</b><span>A short spec whose every criterion
+      has a test that can say no. You approve it, and the plan.</span></div>
+    <div class="step"><b>2 · Let it work</b><span>Any agent you like. keel hands it
+      the task and nothing it doesn't need.</span></div>
+    <div class="step"><b>3 · Prove it</b><span>Build, tests, review, your sign-off —
+      then one file of evidence anyone can check.</span></div>
+  </div>
+
+  <figure class="plate shot">
+    <img src="img/keel-loop.svg" alt="Spec and plan you approve, the agent works, gates check it, you sign off, keel produces an evidence bundle. A failed gate goes back to the agent.">
+    <figcaption><span>Plate II — The loop</span><span>Three human checkpoints · nothing ships on a red gate</span></figcaption>
+  </figure>
+</div></section>
+
+<section id="use"><div class="wrap">
+  <div class="tag">Use cases</div>
+  <h2>What you can do with it</h2>
+  <p class="intro">Start with one. Each works on its own.</p>
+
+  <div style="margin-top:36px">
+    <div class="use">
+      <div>
+        <div class="who">For anyone using an agent</div>
+        <h3>Keep an agent on a short leash</h3>
+        <p>Nothing counts as done until the build and tests are green, a review pass
+          has run, and you've signed off. A gate that fails sends the work back —
+          it never quietly ships.</p>
+      </div>
+<pre><span class="k">keel</span> spec new rate-limit     <span class="c"># what done means</span>
+<span class="k">keel</span> approve rate-limit --stage spec
+<span class="k">keel</span> plan rate-limit         <span class="c"># which files, how big</span>
+<span class="k">keel</span> run rate-limit          <span class="c"># agent works, gates judge</span></pre>
     </div>
-    <div class="card">
-      <div class="n">02</div>
-      <h3>Memory that outlives the session</h3>
-      <p>Knowledge lives in a durable store and is projected into whatever file your
-        agent reads. Recurring mistakes are classified, and the ones that recur across
-        <em>distinct</em> runs become gate checks rather than more prose to ignore.</p>
+
+    <div class="use">
+      <div>
+        <div class="who">For audit, risk and compliance</div>
+        <h3>Show an auditor exactly what happened</h3>
+        <p>Every approval and verdict is locked into a hash chain. One command packs
+          the chain, the spec, the verdicts and the exact diff into a single file that
+          anyone can verify <strong>offline</strong>, with no access to your code.</p>
+      </div>
+<pre><span class="k">keel</span> export
+<span class="k">keel</span> bundle verify keel-&lt;run&gt;.tar.gz
+<span class="c">  pass  members · chain · approvals</span>
+<span class="c">  pass  gate-verdicts · trajectory</span></pre>
+    </div>
+    <figure class="plate shot" style="margin-top:6px">
+      <img src="img/keel-evidence.svg" alt="Approvals and gate verdicts form a hash chain; the bundle carries the chain, spec, verdicts and diff, and keel bundle verify checks it offline.">
+      <figcaption><span>Plate III — The evidence chain</span><span>Edit one entry and every link after it breaks</span></figcaption>
+    </figure>
+
+    <div class="use" style="margin-top:34px">
+      <div>
+        <div class="who">For teams on GitHub</div>
+        <h3>Block pull requests nobody gated</h3>
+        <p>Add one step to a workflow. A PR passes only if it carries the evidence of
+          a passing run of <em>exactly</em> its content — or a maintainer labels it
+          <code>keel:exempt</code>, and the record says so.</p>
+      </div>
+<pre><span class="c"># .github/workflows/keel-cover.yml</span>
+on: pull_request
+jobs:
+  keel-cover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: <span class="k">daneb/keel@v0.10.1</span></pre>
+    </div>
+    <figure class="plate shot" style="margin-top:6px">
+      <img src="img/keel-pr-check.svg" alt="A PR with the bundle of a passing run of its exact content is covered; one with no bundle is uncovered; one labelled keel:exempt passes as exempted.">
+      <figcaption><span>Plate IV — The PR check</span><span>Covered · uncovered · exempted</span></figcaption>
+    </figure>
+
+    <div class="use" style="margin-top:34px">
+      <div>
+        <div class="who">For platform teams</div>
+        <h3>Let CI do the gating</h3>
+        <p>GitHub Actions gates each PR inside a locked-down container —
+          <strong>gVisor</strong>, when the runner has it — keeps the record where
+          that container can't reach it, and commits the evidence back to the PR.</p>
+      </div>
+<pre><span class="c"># in a pull_request workflow</span>
+- uses: <span class="k">daneb/keel/runtime@v0.10.1</span>
+  with:
+    spec: rate-limit
+    image: rust:1-bookworm</pre>
+    </div>
+    <figure class="plate shot" style="margin-top:6px">
+      <img src="img/keel-ci-runtime.svg" alt="The GitHub runner holds the evidence chain and attests the container from outside; keel gates the PR inside a gVisor container; the bundle is committed back to the PR.">
+      <figcaption><span>Plate V — The CI runtime</span><span>The runner holds the pen · keel never can</span></figcaption>
+    </figure>
+
+    <div class="use" style="margin-top:34px">
+      <div>
+        <div class="who">For running agents locally</div>
+        <h3>Put the agent in a sealed box</h3>
+        <p>Pair keel with <a href="https://daneb.github.io/moor/">moor</a>: a sandbox
+          per project, no access to your disk, an allowlist for the internet — and
+          keel's record written from outside, so the agent can't rewrite it.</p>
+      </div>
+<pre>moor new my-app
+moor ask my-app "add rate limiting"
+moor bundle -p my-app   <span class="c"># ✓ bundle pass</span></pre>
     </div>
   </div>
 </div></section>
 
-<section id="parts"><div class="wrap">
-  <div class="tag">Components</div>
-  <h2>Six parts, one spine</h2>
-  <p class="intro">Each is useful alone. The wire schemas between them are frozen and
-    additive-only, so a new agent or a new check plugs in without touching the spine.</p>
+<section id="trust"><div class="wrap">
+  <div class="tag">Why trust it</div>
+  <h2>Every claim here is checked, not asserted</h2>
+  <p class="intro">keel is built with keel. Every change to it carried a spec, passed
+    its gates, and ships its own evidence bundle.</p>
 
-  <div class="grid g3">
-    <div class="card"><div class="n">KNOWLEDGE</div>
-      <h3>Store &amp; projections</h3>
-      <p>One store per repository, projected into every agent's own file —
-        <code>CLAUDE.md</code>, <code>AGENTS.md</code>, <code>.kiro</code>,
-        <code>copilot-instructions</code>. Two hashes: one goes stale when the
-        source moves, one refuses to overwrite a human edit. House rules
-        travel between repos; the map and product notes stay local.</p></div>
-    <div class="card"><div class="n">STRUCTURE</div>
-      <h3>Symbol index</h3>
-      <p>tree-sitter across 8 languages — Rust, Python, JS, TS/TSX, Go, Java, C#.
-        Agents work from outlines and symbols, and
-        pull a full body only when they need one.</p></div>
-    <div class="card"><div class="n">ARTEFACTS</div>
-      <h3>Spec → plan → tasks</h3>
-      <p>Reviewable files, not chat scrollback. Requirements in EARS; every criterion
-        carries an oracle that can say no.</p></div>
-    <div class="card"><div class="n">GATES</div>
-      <h3>G0 – G4</h3>
-      <p>Five checkpoints, three verdicts. Blast radius is computed from the import
-        graph and rechecked, not taken on trust.</p></div>
-    <div class="card"><div class="n">EVIDENCE</div>
-      <h3>Trajectory &amp; bundle</h3>
-      <p>An event stream per run, exportable and re-verifiable against its manifest.
-        Approvals bind to the artefact's hash.</p></div>
-    <div class="card"><div class="n">LEARNING</div>
-      <h3>Failures → lessons</h3>
-      <p>Episodes are classified and promoted only on a second occurrence in a
-        separate run, and only with a human decision.</p></div>
+  <div class="pillars">
+    <div class="pillar"><div class="n">VALUE</div><h3>Less babysitting, more shipping</h3>
+      <ul>
+        <li><strong>Works with the agent you have</strong> — Claude Code, Codex, Copilot,
+          Kiro — through one small adapter each.</li>
+        <li><strong>14.6× less context</strong> fed to the agent, at 100% recall, by
+          handing it outlines and symbols instead of whole files.</li>
+        <li><strong>One line in a workflow</strong> turns it into a PR check.</li>
+        <li><strong>Remembers across sessions</strong>: mistakes that recur become
+          checks, not more instructions to ignore.</li>
+      </ul></div>
+    <div class="pillar"><div class="n">QUALITY</div><h3>Nothing is done until it's proven</h3>
+      <ul>
+        <li><strong>Five gates</strong>, from “is this spec testable?” to “did a human
+          sign off?” — each one a verdict with its evidence.</li>
+        <li><strong>A test that can say no</strong> on every acceptance criterion; a
+          spec that can't fail can't pass either.</li>
+        <li><strong>Review built in</strong>: weakened tests and added mocks are caught,
+          and serious security findings block.</li>
+        <li><strong>541 tests, 0 warnings</strong> at <code>clippy -D warnings</code>.</li>
+      </ul></div>
+    <div class="pillar"><div class="n">SECURITY</div><h3>The agent can't mark its own homework</h3>
+      <ul>
+        <li><strong>Tamper-evident record</strong>: every approval and verdict is
+          hash-linked; edit, delete or reorder one and keel names where.</li>
+        <li><strong>The pen stays outside the sandbox</strong>: under moor or CI, the
+          record is written by the host, never by the agent.</li>
+        <li><strong>gVisor, proven</strong>: on GitHub runners the gate runs in a
+          user-space kernel, and the record says so — or says it couldn't.</li>
+        <li><strong>Approvals bind to content</strong>: change the spec after sign-off
+          and the approval stops counting.</li>
+      </ul></div>
+    <div class="pillar"><div class="n">RELIABILITY</div><h3>It never guesses green</h3>
+      <ul>
+        <li><strong>Three verdicts, not two</strong>: a check that couldn't run is
+          <code>blocked</code> (exit 3) — never a silent pass.</li>
+        <li><strong>Verifies offline</strong>: a bundle checks out with no repo, no
+          network, no account — on a plane, or in an auditor's sandbox.</li>
+        <li><strong>Tested on real pull requests</strong>, not just in unit tests:
+          covered, uncovered and exempted, on live GitHub runners.</li>
+        <li><strong>Frozen formats</strong>: the record and attestation formats change
+          only additively, so evidence written today still verifies tomorrow.</li>
+      </ul></div>
   </div>
 </div></section>
-
 <section id="gates"><div class="wrap">
   <div class="tag">Gates</div>
   <h2>Where the load is carried</h2>
@@ -395,7 +510,7 @@ footer a{color:var(--body)}
     <div class="m"><div class="val">1.25<span style="font-size:20px"> s</span></div>
       <div class="lbl">To index 5,705 files</div>
       <div class="note">Cold, across eight languages.</div></div>
-    <div class="m"><div class="val">461</div><div class="lbl">Tests · 0 warnings</div>
+    <div class="m"><div class="val">541</div><div class="lbl">Tests · 0 warnings</div>
       <div class="note">Clippy clean at <code>-D warnings</code>.</div></div>
     <div class="m"><div class="val">11 → 54%</div><div class="lbl">G2 pass rate</div>
       <div class="note">Inside keel vs. on a real project. The low number was the
@@ -430,76 +545,9 @@ footer a{color:var(--body)}
   </figure>
 </div></section>
 
-<section id="see"><div class="wrap">
-  <div class="tag">Seeing it</div>
-  <h2>The run, while it is running</h2>
-  <p class="intro">keel could gate a change but not show you one. A verdict is only
-    useful if you can see what produced it — which check, wanting what, getting
-    what.</p>
-
-  <figure class="plate" style="margin:0 0 8px">
-    <svg viewBox="0 0 900 96" role="img" aria-label="The pipeline spine: eight stages from spec to done, with the current stage highlighted">
-      <g class="station"><path d="M0,48 H900"/></g>
-      <g class="dim-t" text-anchor="middle" font-size="12">
-        <g fill="none" stroke="var(--rule)">
-          <rect x="14"  y="32" width="92"  height="32" rx="5"/>
-          <rect x="118" y="32" width="122" height="32" rx="5"/>
-          <rect x="252" y="32" width="78"  height="32" rx="5"/>
-          <rect x="342" y="32" width="62"  height="32" rx="5"/>
-          <rect x="416" y="32" width="122" height="32" rx="5"/>
-          <rect x="654" y="32" width="132" height="32" rx="5"/>
-          <rect x="798" y="32" width="78"  height="32" rx="5"/>
-        </g>
-        <rect x="550" y="32" width="92" height="32" rx="5"
-              fill="none" stroke="var(--brass)" stroke-width="2"/>
-        <text x="60"  y="52">spec</text>
-        <text x="179" y="52">approve spec</text>
-        <text x="291" y="52">plan</text>
-        <text x="373" y="52">G1</text>
-        <text x="477" y="52">approve plan</text>
-        <text class="brass-t" x="596" y="52">run</text>
-        <text x="720" y="52">approve merge</text>
-        <text x="837" y="52">done</text>
-      </g>
-      <path class="dim" d="M596,64 L596,84"/>
-      <text class="dim-t brass-t" x="596" y="94" text-anchor="middle">YOU ARE HERE</text>
-    </svg>
-    <figcaption><span>Plate III — The spine</span><span>G0 → G4 · one feature</span></figcaption>
-  </figure>
-
-  <div class="grid g2">
-    <div class="card"><div class="n">TERMINAL</div>
-      <h3><code>keel report</code></h3>
-      <p>A feature's whole life in one place: the spine above, every approval and
-        who it binds to, every run, and every failing check with its
-        <em>expected</em> and <em>actual</em> side by side — plus the lesson that
-        put the check there. <code>--json</code> emits the same model, so anything
-        else can render its own.</p></div>
-    <div class="card"><div class="n">BROWSER</div>
-      <h3><code>keel serve</code></h3>
-      <p>The same model as a page on loopback, updating while a run is still going.
-        Click a failing check through to the evidence it points at. No account, no
-        telemetry, no network — the page's own Content-Security-Policy forbids
-        reaching one, so that is enforced rather than promised.</p></div>
-  </div>
-
-  <div class="honest" style="margin-top:26px">
-    <h3 style="font-size:19px">It cannot do anything</h3>
-    <p style="font-size:15.5px; margin:12px 0 0">There is no button that approves,
-      runs or gates — and not by omission. Anything but <code>GET</code> is refused
-      in the request parser, before routing, so read-only is a property of the code
-      rather than a promise about the routes. A human decision stays a deliberate
-      act on the command line, bound to the hash of what was approved. The server
-      binds loopback only, validates <code>Host</code> against DNS rebinding, and
-      reaches the filesystem by name on exactly one route. The reasoning is written
-      down in <a href="https://github.com/daneb/keel/blob/master/SECURITY.md">SECURITY.md</a>
-      before the code it describes.</p>
-  </div>
-</div></section>
-
 <section id="start"><div class="wrap">
   <div class="tag">Get started</div>
-  <h2>Five commands</h2>
+  <h2>Ten minutes to your first gated change</h2>
   <p class="intro">Point keel at a repository and take one small change all the way
     through. The <a href="https://github.com/daneb/keel/blob/master/GETTING-STARTED.md">getting-started
     guide</a> walks the same path with commentary.</p>
@@ -507,33 +555,30 @@ footer a{color:var(--body)}
 <pre><span class="c"># install</span>
 cargo install keel-harness      <span class="c"># binary is called `keel`</span>
 
-<span class="c"># set up the store, index the repo, render projections</span>
+<span class="c"># set up, then describe one change</span>
 <span class="k">keel</span> init
-<span class="k">keel</span> map
-
-<span class="c"># describe one change, then let the gates argue with you</span>
 <span class="k">keel</span> spec new short-invocation
-<span class="k">keel</span> gate g0 short-invocation
+<span class="k">keel</span> approve short-invocation --stage spec
 
-<span class="c"># plan it, run it, and export what happened</span>
+<span class="c"># plan it, run it, prove it</span>
 <span class="k">keel</span> plan short-invocation
 <span class="k">keel</span> run  short-invocation
-<span class="k">keel</span> export --verify
+<span class="k">keel</span> bundle verify "$(<span class="k">keel</span> export)"
 
-<span class="c"># and to see where any of it stands</span>
-<span class="k">keel</span> report short-invocation
-<span class="k">keel</span> serve                    <span class="c"># the same, in a browser, read-only</span></pre>
+<span class="c"># where does it stand? what's next?</span>
+<span class="k">keel</span> next
+<span class="k">keel</span> serve                    <span class="c"># read-only, in a browser</span></pre>
 
   <div class="honest">
     <h3 style="font-size:19px">Before you trust it on real work</h3>
     <ul>
-      <li><strong>macOS only.</strong> The Windows branches compile and are unexercised.
-        That is a decision, not an oversight.</li>
-      <li><strong>G2.5 passes on heuristics</strong> unless you configure an adversarial
-        reviewer. Configure one.</li>
-      <li><strong>Three lessons in force</strong> against the five the design wants.
-        They accrue with use, and they are not manufactured.</li>
-      <li><strong>The evidence is thin and young</strong> — two repositories, one
+      <li><strong>macOS and Linux.</strong> Windows branches compile and are
+        unexercised. That is a decision, not an oversight.</li>
+      <li><strong>Configure a reviewer.</strong> Without a model or scanner behind it,
+        G2.5 reviews with heuristics.</li>
+      <li><strong>Pull requests from forks</strong> can't receive the CI runtime's
+        bundle commit yet.</li>
+      <li><strong>The evidence is young</strong> — a handful of repositories, one
         operator. The <a href="https://github.com/daneb/keel/blob/master/ROADMAP.md">roadmap</a>
         keeps a full accounting of what is deferred and why.</li>
     </ul>
@@ -541,11 +586,12 @@ cargo install keel-harness      <span class="c"># binary is called `keel`</span>
 </div></section>
 
 <footer><div class="wrap">
-  <div>keel — a gated harness for AI-assisted delivery.<br>
-       <span style="font-size:13px">Dual-licensed MIT or Apache-2.0.</span></div>
+  <div>keel — AI coding agents that prove their work.<br>
+       <span style="font-size:13px">Dual-licensed MIT or Apache-2.0 · pairs with <a href="https://daneb.github.io/moor/">moor</a>.</span></div>
   <div><a href="https://github.com/daneb/keel">GitHub</a> ·
        <a href="https://github.com/daneb/keel/blob/master/ROADMAP.md">Roadmap</a> ·
        <a href="https://github.com/daneb/keel/blob/master/CHANGELOG.md">Changelog</a> ·
+       <a href="https://github.com/daneb/keel/blob/master/SECURITY.md">Security</a> ·
        <a href="https://crates.io/crates/keel-harness">crates.io</a></div>
 </div></footer>
 
