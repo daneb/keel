@@ -1,0 +1,1615 @@
+diff --git a/.keel/chain.jsonl b/.keel/chain.jsonl
+index 63f6da3..6d81e96 100644
+--- a/.keel/chain.jsonl
++++ b/.keel/chain.jsonl
+@@ -76,3 +76,12 @@
+ {"schema":"keel.chain/1","seq":76,"ts":"2026-09-25T19:11:18.527233+02:00","kind":"gate","writer":"in-process","data":{"gate":"G2.5","run":"2026-09-25-004","sha256":"c0dfd750bc383c5a9843ae8eb724d29ba479c822aa1d7f9be21d029a81a53717","spec":"papercuts","verdict":"pass"},"prev_hash":"b64c7324c3c221abf79785fb44e63551d9aee087c7cd8274a3438f5a1fb65735","hash":"f2be2f309ae6933d17eeb39c21a296a1e0fa66f9429d0053c1a233035fea100f"}
+ {"schema":"keel.chain/1","seq":77,"ts":"2026-09-25T19:11:18.552852+02:00","kind":"gate","writer":"in-process","data":{"gate":"G3","run":"2026-09-25-004","sha256":"ae4464f373848fef3532044bcfcbd694c761c411fb657a7b432216aa2c675d11","spec":"papercuts","verdict":"pass"},"prev_hash":"f2be2f309ae6933d17eeb39c21a296a1e0fa66f9429d0053c1a233035fea100f","hash":"8cde00d19a754d1d73757ccf89d7e382770b71781e8ec17ad460fd50b3c84033"}
+ {"schema":"keel.chain/1","seq":78,"ts":"2026-09-25T19:11:18.553784+02:00","kind":"run_end","writer":"in-process","data":{"run":"2026-09-25-003","trajectory_sha256":"befd3dea8260118b5a56c9d694b88a5615d310a295948a0a6cfe54090b41be85","verdict":"pass"},"prev_hash":"8cde00d19a754d1d73757ccf89d7e382770b71781e8ec17ad460fd50b3c84033","hash":"46750a92e1dd880477a5094cd0204f864e9a0acf218d43ca8580a4d58eb95469"}
++{"schema":"keel.chain/1","seq":79,"ts":"2026-09-25T22:14:28.788246+02:00","kind":"gate","writer":"in-process","data":{"gate":"G0","run":"2026-09-25-004","sha256":"b49a2ae237d207b634b4280096a005d6931f364315bf782848aeb78c303aca20","spec":"ci-runtime","verdict":"fail"},"prev_hash":"46750a92e1dd880477a5094cd0204f864e9a0acf218d43ca8580a4d58eb95469","hash":"017eedc07c9adac7a4363e330be2fa31d6210fd389b18e691f47e1834fd81a9d"}
++{"schema":"keel.chain/1","seq":80,"ts":"2026-09-25T22:14:48.225238+02:00","kind":"gate","writer":"in-process","data":{"gate":"G0","run":"2026-09-25-004","sha256":"78eca7bcb88b979335ea0bfa2ff1dc305636ed13be508ce739df56e65d7adf5b","spec":"ci-runtime","verdict":"pass"},"prev_hash":"017eedc07c9adac7a4363e330be2fa31d6210fd389b18e691f47e1834fd81a9d","hash":"ab8d2a87f6c32a1797de81a4fa6ade42e014ba7346683c77ecb51b3453c69720"}
++{"schema":"keel.chain/1","seq":81,"ts":"2026-09-25T22:22:01.205704+02:00","kind":"approval","writer":"in-process","data":{"artefact_hash":"5e4baa34b00351e4f046add65deae8a0098d7ec4c42eb5c64f4aee370ab1fcdf","by":"Dane Balia","decision":"approved","spec":"ci-runtime","stage":"spec"},"prev_hash":"ab8d2a87f6c32a1797de81a4fa6ade42e014ba7346683c77ecb51b3453c69720","hash":"5997915bdcb34e5ce5c26ba6b9af3d50ee948af8c115ca9cd7d9b07700bd3ed8"}
++{"schema":"keel.chain/1","seq":82,"ts":"2026-09-25T22:23:06.424613+02:00","kind":"gate","writer":"in-process","data":{"gate":"G0","run":"2026-09-25-004","sha256":"807c1e0e1aae52560219e02fd0e0f5377492dbc744db679a99af4427331857c9","spec":"ci-runtime","verdict":"pass"},"prev_hash":"5997915bdcb34e5ce5c26ba6b9af3d50ee948af8c115ca9cd7d9b07700bd3ed8","hash":"140242a99ceebc53bcf4014053b4ed5eb3348ae1132253fe0236c497a238341e"}
++{"schema":"keel.chain/1","seq":83,"ts":"2026-09-25T22:23:15.115653+02:00","kind":"gate","writer":"in-process","data":{"gate":"G0","run":"2026-09-25-004","sha256":"656bd864e621813772325f5d8c7d33b5aacc1e4acff0d817c8253266f3517a67","spec":"ci-runtime","verdict":"pass"},"prev_hash":"140242a99ceebc53bcf4014053b4ed5eb3348ae1132253fe0236c497a238341e","hash":"67512007783e871326b58da314ca2db58d598417970a66ed82e2037503864fc8"}
++{"schema":"keel.chain/1","seq":84,"ts":"2026-09-26T09:36:41.244760+02:00","kind":"approval","writer":"in-process","data":{"artefact_hash":"47f6a952a3673789a319a4615c2437c83f649ed13e50b069a03ce8e47c1c9cd9","by":"Dane Balia","decision":"approved","spec":"ci-runtime","stage":"spec"},"prev_hash":"67512007783e871326b58da314ca2db58d598417970a66ed82e2037503864fc8","hash":"4fd1cda94cbccb50abf0ba3f8ff0d432355104132194e44c8ace006cc2dfcc1e"}
++{"schema":"keel.chain/1","seq":85,"ts":"2026-09-26T09:40:14.328049+02:00","kind":"gate","writer":"in-process","data":{"gate":"G1","run":"2026-09-26-000","sha256":"629248a95c9d38e4ed56789c17d329fe0a01d9e415d8226932f2bb3d26975c1f","spec":"ci-runtime","verdict":"pass"},"prev_hash":"4fd1cda94cbccb50abf0ba3f8ff0d432355104132194e44c8ace006cc2dfcc1e","hash":"ae1384a84d52e2a70209d95991d5240774f4ef5215251ec03283ed0444d507fd"}
++{"schema":"keel.chain/1","seq":86,"ts":"2026-09-26T09:57:12.737029+02:00","kind":"approval","writer":"in-process","data":{"artefact_hash":"e933b92c1d6784ab6d88a056bf9ec38295a5841857a7bd9420d9a2721e0c5ebe","by":"Dane Balia","decision":"approved","spec":"ci-runtime","stage":"plan"},"prev_hash":"ae1384a84d52e2a70209d95991d5240774f4ef5215251ec03283ed0444d507fd","hash":"fc010d4cfdef580eaf1ef6f6853977f23e55befeb24b83b8c7794f4e9213de2b"}
++{"schema":"keel.chain/1","seq":87,"ts":"2026-09-26T10:01:09.681882+02:00","kind":"run_start","writer":"in-process","data":{"run":"2026-09-26-000","spec":"ci-runtime","task":null},"prev_hash":"fc010d4cfdef580eaf1ef6f6853977f23e55befeb24b83b8c7794f4e9213de2b","hash":"8bd8f8c5a1ed9c83d7dd3306e6aabe0b2f6b840d6aab0a144b7052c7e38b07e5"}
+diff --git a/.keel/lesson-usage.json b/.keel/lesson-usage.json
+index 1c091f8..f845fe5 100644
+--- a/.keel/lesson-usage.json
++++ b/.keel/lesson-usage.json
+@@ -1,6 +1,6 @@
+ {
+   "injected": {
+-    "L-0001": "2026-09-25",
++    "L-0001": "2026-09-26",
+     "L-0002": "2026-08-22",
+     "L-0003": "2026-08-22"
+   },
+diff --git a/schemas/posture.json b/schemas/posture.json
+index 7095a92..f0e7695 100644
+--- a/schemas/posture.json
++++ b/schemas/posture.json
+@@ -10,6 +10,13 @@
+     "runtime": { "type": "string", "minLength": 1 },
+     "image_digest": { "type": "string" },
+     "attested_at": { "type": "string", "format": "date-time" },
++    "runtime_identity": {
++      "description": "Who ran this, as the runtime reports it: a claim, not proof, until signed. Additive to keel.posture/1.",
++      "type": "object",
++      "required": ["claimed_by"],
++      "additionalProperties": { "type": "string" },
++      "properties": { "claimed_by": { "type": "string", "minLength": 1 } }
++    },
+     "properties": {
+       "type": "object",
+       "additionalProperties": {
+diff --git a/src/cmd/mod.rs b/src/cmd/mod.rs
+index 611a4b2..53a2d36 100644
+--- a/src/cmd/mod.rs
++++ b/src/cmd/mod.rs
+@@ -22,5 +22,6 @@ pub mod serve;
+ pub mod ratchet;
+ pub mod retrieve;
+ pub mod run;
++pub mod runtime;
+ pub mod spec;
+ pub mod tasks;
+diff --git a/src/main.rs b/src/main.rs
+index 7837ec0..60637d0 100644
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -129,6 +129,9 @@ enum Command {
+     /// Check an evidence bundle using nothing but the bundle
+     #[command(subcommand)]
+     Bundle(BundleCmd),
++    /// A runtime host's side of the evidence chain — run on the host, never in the sandbox
++    #[command(subcommand)]
++    Runtime(RuntimeCmd),
+     /// Is this tree covered by a committed, verified bundle of a passing run?
+     Cover {
+         /// Pass as exempted rather than covered, recording why
+@@ -434,6 +437,32 @@ enum GateCmd {
+     },
+ }
+ 
++#[derive(Subcommand)]
++enum RuntimeCmd {
++    /// Fold new lines from keel's sink into the host chain
++    Fold {
++        #[arg(long)]
++        sink: String,
++        #[arg(long)]
++        chain: String,
++        /// The runtime writing the entries, e.g. github-actions
++        #[arg(long)]
++        writer: String,
++    },
++    /// Derive keel.posture/1 from `docker inspect` output and record it on the chain
++    Attest {
++        #[arg(long)]
++        inspect: String,
++        #[arg(long)]
++        chain: String,
++        #[arg(long)]
++        out: String,
++        /// The runtime's name, written as the attestation's runtime and the entry's writer
++        #[arg(long, default_value = "github-actions")]
++        runtime: String,
++    },
++}
++
+ #[derive(Subcommand)]
+ enum BundleCmd {
+     /// Members, chain, approvals, verdicts and trajectory: every link, offline
+@@ -565,6 +594,10 @@ fn run() -> Result<i32> {
+         Command::Chain(ChainCmd::Head) => cmd::chain::head(),
+         Command::Bundle(BundleCmd::Verify { archive, json }) => cmd::bundle::verify(archive, json),
+         Command::Cover { exempt, json } => cmd::cover::run(exempt, json),
++        Command::Runtime(RuntimeCmd::Fold { sink, chain, writer }) => cmd::runtime::fold(sink, chain, writer),
++        Command::Runtime(RuntimeCmd::Attest { inspect, chain, out, runtime }) => {
++            cmd::runtime::attest(inspect, chain, out, runtime)
++        }
+         Command::Learn { run, json } => cmd::learn::learn(run, json),
+         Command::Failures { json } => cmd::learn::failures(json),
+         Command::Lessons { json } => cmd::learn::list(json),
+diff --git a/src/runtime/mod.rs b/src/runtime/mod.rs
+index 4ea4ca3..f5a9106 100644
+--- a/src/runtime/mod.rs
++++ b/src/runtime/mod.rs
+@@ -10,6 +10,8 @@
+ //! An attestation is a claim, not proof. A property the runtime cannot vouch
+ //! for is `blocked`, never `pass` — the rule every gate follows.
+ 
++pub mod host;
++
+ use crate::config::Config;
+ use crate::gate::{Check, GateResult};
+ use crate::paths::Paths;
+diff --git a/.keel/runs/2026-09-26-000/evidence/build.txt b/.keel/runs/2026-09-26-000/evidence/build.txt
+new file mode 100644
+index 0000000..01700b6
+--- /dev/null
++++ b/.keel/runs/2026-09-26-000/evidence/build.txt
+@@ -0,0 +1,2 @@
++$ cargo build --quiet
++
+diff --git a/.keel/runs/2026-09-26-000/evidence/diff-stat.txt b/.keel/runs/2026-09-26-000/evidence/diff-stat.txt
+new file mode 100644
+index 0000000..e1af44b
+--- /dev/null
++++ b/.keel/runs/2026-09-26-000/evidence/diff-stat.txt
+@@ -0,0 +1,25 @@
++     9      0  .keel/chain.jsonl
++     1      1  .keel/lesson-usage.json
++     2      0  .keel/runs/2026-09-26-000/evidence/build.txt
++     2      0  .keel/runs/2026-09-26-000/evidence/lint.txt
++    73      0  .keel/runs/2026-09-26-000/evidence/oracles.json
++   125      0  .keel/runs/2026-09-26-000/evidence/test.txt
++     9      0  .keel/runs/2026-09-26-000/run.json
++    17      0  .keel/runs/2026-09-26-000/trajectory.jsonl
++     3      0  .keel/specs/ci-runtime/approvals.jsonl
++    90      0  .keel/specs/ci-runtime/gates/G0.json
++    95      0  .keel/specs/ci-runtime/gates/G1.json
++    99      0  .keel/specs/ci-runtime/plan.md
++   111      0  .keel/specs/ci-runtime/spec.md
++    34      0  .keel/specs/ci-runtime/tasks.md
++    90      0  docs/decisions/0002-github-actions-runtime.md
++   138      0  runtime/action.yml
++     7      0  schemas/posture.json
++     1      0  src/cmd/mod.rs
++    18      0  src/cmd/runtime.rs
++    33      0  src/main.rs
++   231      0  src/runtime/host.rs
++     2      0  src/runtime/mod.rs
++   215      0  tests/ci_runtime.rs
++
++23 file(s), +1405 -1 (1406 lines of churn) against 646a7ebda6fd18f55b1779d2ef9982306e5f83a3
+diff --git a/.keel/runs/2026-09-26-000/evidence/lint.txt b/.keel/runs/2026-09-26-000/evidence/lint.txt
+new file mode 100644
+index 0000000..f68c665
+--- /dev/null
++++ b/.keel/runs/2026-09-26-000/evidence/lint.txt
+@@ -0,0 +1,2 @@
++$ cargo clippy --all-targets --quiet
++
+diff --git a/.keel/runs/2026-09-26-000/evidence/oracles.json b/.keel/runs/2026-09-26-000/evidence/oracles.json
+new file mode 100644
+index 0000000..cb421b4
+--- /dev/null
++++ b/.keel/runs/2026-09-26-000/evidence/oracles.json
+@@ -0,0 +1,73 @@
++{
++  "runs": [
++    {
++      "criterion": "AC-1",
++      "kind": "test",
++      "oracle": "test tests/ci_runtime.rs::fold_appends_payloads_once_with_the_writer",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.87s"
++    },
++    {
++      "criterion": "AC-2",
++      "kind": "test",
++      "oracle": "test tests/ci_runtime.rs::attest_derives_posture_from_inspect_output",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.88s"
++    },
++    {
++      "criterion": "AC-3",
++      "kind": "test",
++      "oracle": "test tests/ci_runtime.rs::kernel_isolated_is_proven_only_under_runsc",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.90s"
++    },
++    {
++      "criterion": "AC-4",
++      "kind": "test",
++      "oracle": "test tests/ci_runtime.rs::run_identity_is_recorded_as_a_claim",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.89s"
++    },
++    {
++      "criterion": "AC-5",
++      "kind": "test",
++      "oracle": "test tests/ci_runtime.rs::the_action_hardens_the_container_and_keeps_host_files_out",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s"
++    },
++    {
++      "criterion": "AC-6",
++      "kind": "test",
++      "oracle": "test tests/ci_runtime.rs::the_action_starts_from_the_verified_repository_chain",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s"
++    },
++    {
++      "criterion": "AC-7",
++      "kind": "test",
++      "oracle": "test tests/ci_runtime.rs::the_action_builds_verifies_and_commits_the_bundle",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s"
++    },
++    {
++      "criterion": "AC-8",
++      "kind": "human",
++      "oracle": "human: a maintainer runs the action on a pull request in daneb/keel-cover-demo and sees keel cover report covered on the bundle commit",
++      "outcome": "human",
++      "detail": "a maintainer runs the action on a pull request in daneb/keel-cover-demo and sees keel cover report covered on the bundle commit"
++    }
++  ],
++  "criteria": 8,
++  "executed": 7,
++  "passed": 7,
++  "failed": 0,
++  "blocked": 0,
++  "human": 1
++}
+\ No newline at end of file
+diff --git a/.keel/runs/2026-09-26-000/evidence/test.txt b/.keel/runs/2026-09-26-000/evidence/test.txt
+new file mode 100644
+index 0000000..58ffb9a
+--- /dev/null
++++ b/.keel/runs/2026-09-26-000/evidence/test.txt
+@@ -0,0 +1,125 @@
++$ cargo test --quiet
++
++
++running 291 tests
++....................................................................................... 87/291
++....................................................................................... 174/291
++....................................................................................... 261/291
++..............................
++test result: ok. 291 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.73s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.50s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.47s
++
++
++running 7 tests
++.......
++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.69s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.59s
++
++
++running 13 tests
++.............
++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.36s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.48s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.41s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.95s
++
++
++running 5 tests
++.....
++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.33s
++
++
++running 4 tests
++....
++test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.43s
++
++
++running 25 tests
++.........................
++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.26s
++
++
++running 14 tests
++..............
++test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.15s
++
++
++running 13 tests
++.............
++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.51s
++
++
++running 15 tests
++...............
++test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.12s
++
++
++running 25 tests
++.........................
++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.10s
++
++
++running 12 tests
++............
++test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.84s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.76s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.41s
++
++
++running 34 tests
++..................................
++test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.96s
++
++
++running 0 tests
++
++test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
++
++
++running 7 tests
++.......
++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.49s
++
++
++running 5 tests
++.....
++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.40s
++
+diff --git a/.keel/runs/2026-09-26-000/run.json b/.keel/runs/2026-09-26-000/run.json
+new file mode 100644
+index 0000000..91df1d5
+--- /dev/null
++++ b/.keel/runs/2026-09-26-000/run.json
+@@ -0,0 +1,9 @@
++{
++  "schema": "keel.run/1",
++  "id": "2026-09-26-000",
++  "spec": "ci-runtime",
++  "keel_version": "0.9.0",
++  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
++  "started_at": "2026-09-26T10:01:09.680282+02:00",
++  "base_commit": "646a7ebda6fd18f55b1779d2ef9982306e5f83a3"
++}
+diff --git a/.keel/runs/2026-09-26-000/trajectory.jsonl b/.keel/runs/2026-09-26-000/trajectory.jsonl
+new file mode 100644
+index 0000000..cf45cc5
+--- /dev/null
++++ b/.keel/runs/2026-09-26-000/trajectory.jsonl
+@@ -0,0 +1,17 @@
++{"t":"2026-09-26T10:01:09.680529+02:00","seq":1,"kind":"run_start","spec":"ci-runtime","keel_version":"0.9.0","store_hash":"0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2"}
++{"t":"2026-09-26T10:01:09.682158+02:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":424,"bytes":1693}
++{"t":"2026-09-26T10:01:09.682207+02:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
++{"t":"2026-09-26T10:01:09.682272+02:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6268,"bytes":25071}
++{"t":"2026-09-26T10:01:09.682671+02:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
++{"t":"2026-09-26T10:01:09.682772+02:00","seq":6,"kind":"inject","source":".keel/specs/ci-runtime/spec.md","tokens":1072,"bytes":4286}
++{"t":"2026-09-26T10:01:09.899269+02:00","seq":7,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
++{"t":"2026-09-26T10:01:50.094465+02:00","seq":8,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
++{"t":"2026-09-26T10:01:53.375220+02:00","seq":9,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
++{"t":"2026-09-26T10:01:57.843191+02:00","seq":10,"kind":"oracle","criterion":"AC-1","oracle":"test tests/ci_runtime.rs::fold_appends_payloads_once_with_the_writer","verdict":"pass","exit_code":0}
++{"t":"2026-09-26T10:01:57.843258+02:00","seq":11,"kind":"oracle","criterion":"AC-2","oracle":"test tests/ci_runtime.rs::attest_derives_posture_from_inspect_output","verdict":"pass","exit_code":0}
++{"t":"2026-09-26T10:01:57.843270+02:00","seq":12,"kind":"oracle","criterion":"AC-3","oracle":"test tests/ci_runtime.rs::kernel_isolated_is_proven_only_under_runsc","verdict":"pass","exit_code":0}
++{"t":"2026-09-26T10:01:57.843284+02:00","seq":13,"kind":"oracle","criterion":"AC-4","oracle":"test tests/ci_runtime.rs::run_identity_is_recorded_as_a_claim","verdict":"pass","exit_code":0}
++{"t":"2026-09-26T10:01:57.843294+02:00","seq":14,"kind":"oracle","criterion":"AC-5","oracle":"test tests/ci_runtime.rs::the_action_hardens_the_container_and_keeps_host_files_out","verdict":"pass","exit_code":0}
++{"t":"2026-09-26T10:01:57.843303+02:00","seq":15,"kind":"oracle","criterion":"AC-6","oracle":"test tests/ci_runtime.rs::the_action_starts_from_the_verified_repository_chain","verdict":"pass","exit_code":0}
++{"t":"2026-09-26T10:01:57.843312+02:00","seq":16,"kind":"oracle","criterion":"AC-7","oracle":"test tests/ci_runtime.rs::the_action_builds_verifies_and_commits_the_bundle","verdict":"pass","exit_code":0}
++{"t":"2026-09-26T10:01:57.843321+02:00","seq":17,"kind":"oracle","criterion":"AC-8","oracle":"human: a maintainer runs the action on a pull request in daneb/keel-cover-demo and sees keel cover report covered on the bundle commit","verdict":"human"}
+diff --git a/.keel/specs/ci-runtime/approvals.jsonl b/.keel/specs/ci-runtime/approvals.jsonl
+new file mode 100644
+index 0000000..601675a
+--- /dev/null
++++ b/.keel/specs/ci-runtime/approvals.jsonl
+@@ -0,0 +1,3 @@
++{"schema":"keel.approval/1","stage":"spec","decision":"approved","artefact_hash":"5e4baa34b00351e4f046add65deae8a0098d7ec4c42eb5c64f4aee370ab1fcdf","gate_verdict":"pass","by":"Dane Balia","at":"2026-09-25T22:22:01.202826+02:00"}
++{"schema":"keel.approval/1","stage":"spec","decision":"approved","artefact_hash":"47f6a952a3673789a319a4615c2437c83f649ed13e50b069a03ce8e47c1c9cd9","gate_verdict":"pass","by":"Dane Balia","at":"2026-09-26T09:36:41.242422+02:00"}
++{"schema":"keel.approval/1","stage":"plan","decision":"approved","artefact_hash":"e933b92c1d6784ab6d88a056bf9ec38295a5841857a7bd9420d9a2721e0c5ebe","gate_verdict":"pass","by":"Dane Balia","at":"2026-09-26T09:57:12.733378+02:00"}
+diff --git a/.keel/specs/ci-runtime/gates/G0.json b/.keel/specs/ci-runtime/gates/G0.json
+new file mode 100644
+index 0000000..cc3a73d
+--- /dev/null
++++ b/.keel/specs/ci-runtime/gates/G0.json
+@@ -0,0 +1,90 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G0",
++  "run": "2026-09-25-004",
++  "spec": "ci-runtime",
++  "verdict": "pass",
++  "generated_at": "2026-09-25T22:23:15.115137+02:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "SPEC-0014 (keel.spec/1)"
++    },
++    {
++      "id": "criteria-present",
++      "verdict": "pass",
++      "detail": "8 criteria"
++    },
++    {
++      "id": "criterion-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate ids"
++    },
++    {
++      "id": "no-placeholders",
++      "verdict": "pass",
++      "detail": "no unfilled scaffold text"
++    },
++    {
++      "id": "ears-conformance",
++      "verdict": "pass",
++      "detail": "8/8 conform (event-driven, optional-feature, ubiquitous, unwanted-behaviour)"
++    },
++    {
++      "id": "oracle-presence",
++      "verdict": "pass",
++      "detail": "8 oracles across 8 criteria"
++    },
++    {
++      "id": "oracle-wellformed",
++      "verdict": "pass",
++      "detail": "all oracles parse"
++    },
++    {
++      "id": "ambiguity",
++      "verdict": "pass",
++      "detail": "no ambiguous phrasing in criteria"
++    },
++    {
++      "id": "criterion-budget",
++      "verdict": "pass",
++      "detail": "8/8 criteria"
++    },
++    {
++      "id": "spec-length",
++      "verdict": "pass",
++      "detail": "111/250 lines"
++    },
++    {
++      "id": "scope-declared",
++      "verdict": "pass",
++      "detail": "8 glob(s): src/runtime/**, src/cmd/runtime.rs, src/cmd/mod.rs, src/main.rs, runtime/**, docs/decisions/**, tests/ci_runtime.rs, schemas/posture.json"
++    },
++    {
++      "id": "change-budget",
++      "verdict": "pass",
++      "detail": "700 lines of diff budgeted"
++    },
++    {
++      "id": "oracle-mix",
++      "verdict": "pass",
++      "detail": "7/8 runnable (1 human, 7 test)"
++    },
++    {
++      "id": "human-cost",
++      "verdict": "pass",
++      "detail": "1 criteria verifiable only by a person — budget review time: AC-8 (human: a maintainer runs the action on a pull request in daneb/keel-cover-demo and sees keel cover report covered on the bundle commit)"
++    },
++    {
++      "id": "store-drift",
++      "verdict": "pass",
++      "detail": "4 projections current"
++    },
++    {
++      "id": "shared-stores",
++      "verdict": "pass",
++      "detail": "none configured"
++    }
++  ]
++}
+diff --git a/.keel/specs/ci-runtime/gates/G1.json b/.keel/specs/ci-runtime/gates/G1.json
+new file mode 100644
+index 0000000..b1b5b54
+--- /dev/null
++++ b/.keel/specs/ci-runtime/gates/G1.json
+@@ -0,0 +1,95 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G1",
++  "run": "2026-09-26-000",
++  "spec": "ci-runtime",
++  "verdict": "pass",
++  "generated_at": "2026-09-26T09:40:14.326961+02:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "PLAN-0014 + TASKS-0014"
++    },
++    {
++      "id": "g0-passed",
++      "verdict": "pass",
++      "detail": "G0 passed in run 2026-09-25-004"
++    },
++    {
++      "id": "spec-approved",
++      "verdict": "pass",
++      "detail": "approved by Dane Balia"
++    },
++    {
++      "id": "tasks-present",
++      "verdict": "pass",
++      "detail": "4/15 tasks"
++    },
++    {
++      "id": "task-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate task ids"
++    },
++    {
++      "id": "task-fields",
++      "verdict": "pass",
++      "detail": "all task fields recognised"
++    },
++    {
++      "id": "task-criterion-traceability",
++      "verdict": "pass",
++      "detail": "4 tasks all traced"
++    },
++    {
++      "id": "criteria-covered",
++      "verdict": "pass",
++      "detail": "8/8 criteria have a task"
++    },
++    {
++      "id": "task-budgets",
++      "verdict": "pass",
++      "detail": "all 4 tasks budgeted, total 450 lines"
++    },
++    {
++      "id": "total-budget",
++      "verdict": "pass",
++      "detail": "450/700 lines"
++    },
++    {
++      "id": "task-exit-conditions",
++      "verdict": "pass",
++      "detail": "every task states when it is done"
++    },
++    {
++      "id": "task-dependencies",
++      "verdict": "pass",
++      "detail": "4 wave(s), widths 1/1/1/1"
++    },
++    {
++      "id": "wave-isolation",
++      "verdict": "pass",
++      "detail": "4 wave(s), no file claimed twice within one"
++    },
++    {
++      "id": "task-files-in-scope",
++      "verdict": "pass",
++      "detail": "all task files inside the declared scope"
++    },
++    {
++      "id": "rollback-stated",
++      "verdict": "pass",
++      "detail": "git revert the merge; keel runtime and runtime/action.yml a…"
++    },
++    {
++      "id": "blast-radius-declared",
++      "verdict": "pass",
++      "detail": "2 file(s) at depth 2, 586 lines"
++    },
++    {
++      "id": "blast-radius-current",
++      "verdict": "pass",
++      "detail": "2 files, 586 lines — matches a fresh computation — no indexed file matches src/runtime/**, src/cmd/runtime.rs, runtime/**, docs/decisions/**, tests/ci_runtime.rs, schemas/posture.json (new files, or a typo)"
++    }
++  ]
++}
+diff --git a/.keel/specs/ci-runtime/plan.md b/.keel/specs/ci-runtime/plan.md
+new file mode 100644
+index 0000000..482f8fa
+--- /dev/null
++++ b/.keel/specs/ci-runtime/plan.md
+@@ -0,0 +1,99 @@
++---
++id: PLAN-0014
++slug: ci-runtime
++schema: keel.plan/1
++blast:
++  depth: 2
++  declared:
++  - src/runtime/**
++  - src/cmd/runtime.rs
++  - src/cmd/mod.rs
++  - src/main.rs
++  - runtime/**
++  - docs/decisions/**
++  - tests/ci_runtime.rs
++  - schemas/posture.json
++  computed:
++  - src/main.rs
++  - src/cmd/mod.rs
++  computed_lines: 586
++rollback: git revert the merge; keel runtime and runtime/action.yml are new, and posture.json gains one optional field
++verified_at: 2026-09-26
++---
++
++# Design — ci-runtime
++
++## Approach
++
++The host's work goes in a new `src/runtime/host.rs`, next to the posture
++preflight keel already has in `src/runtime/`. The GitHub specifics live in
++`runtime/action.yml`, and nothing in Rust knows it's in CI except the
++`GITHUB_*` identity.
++
++**`keel runtime fold` (AC-1).** `host::fold(sink, chain, writer)` reads sink
++lines from the offset in `<chain>.sink-offset`, resetting the offset when the
++sink got shorter. It appends each `{kind, data}` through `chain::append(chain,
++kind, writer, data)` with `source: "sandbox"` added, and appends anything else
++as `sink_malformed`. The same rules as Moor's fold, in keel's code.
++
++**`keel runtime attest` (AC-2 to AC-4).** `host::derive(inspect)` is pure over
++one `docker inspect` object. It uses Moor's property rules (read-only root,
++privileged, bind mounts named as evidence, non-root user, all capabilities
++dropped, no-new-privileges), plus:
++- `network.internal_only`: proven for `--network none` or all-internal
++  networks, violated for `bridge`, with the network names as evidence.
++- `kernel.isolated`: proven only when `HostConfig.Runtime` is `runsc`,
++  unproven otherwise (AC-3).
++
++`attest` writes `keel.posture/1` with `runtime: "github-actions"`, the image
++digest, the properties, and `runtime_identity { claimed_by: "runner",
++repository, workflow, run_id, sha }` from the `GITHUB_*` variables that are set
++(AC-4). It then appends `attest { sha256, properties }` to the chain.
++`schemas/posture.json` gains `runtime_identity` as an optional object.
++
++**`runtime/action.yml` (AC-5 to AC-7).** A composite action with inputs `spec`
++(required), `image` (required: the repository's toolchain image), `network`
++(`bridge`), `keel-version`, and `token` (`github.token`; a PAT or App token
++makes the bundle push trigger the cover check). Its steps:
++1. Check out the PR's head branch with full history and the token.
++2. Install keel as a static musl binary (`--target
++   x86_64-unknown-linux-musl`), so one binary runs in any toolchain image.
++   Checked by building keel for musl and running it in Alpine and in Debian
++   bullseye.
++3. Try to install `runsc` and register it with Docker. On any failure, use
++   runc and say so.
++4. `keel chain verify` on the checkout, stopping the job on failure, then copy
++   `.keel/chain.jsonl` to `$RUNNER_TEMP/keel/chain.jsonl` (AC-6).
++5. Start the container with `docker create`: read-only, tmpfs `/tmp`, `--cap-drop
++   ALL`, `no-new-privileges`, `--user $(id -u):$(id -g)`, `--network`
++   input, `--runtime runsc` when available. Mounts: the checkout at
++   `/workspace`, `$RUNNER_TEMP/keel/sink`, `$RUNNER_TEMP/keel/posture` read-only,
++   and the keel binary read-only. `KEEL_CHAIN_SINK` and
++   `KEEL_RUNTIME_ATTESTATION` point into those mounts (AC-5).
++6. Run `docker inspect`, then `keel runtime attest`, then `docker exec keel run
++   <spec> --no-driver`. The run's verdict is recorded, not treated as fatal.
++7. `keel runtime fold`, `keel export --chain`, `keel bundle verify`, stopping
++   the job unless it passes. Then copy the bundle into `.keel/bundles/`, `git
++   add -f`, commit as `github-actions[bot]`, and push (AC-7).
++
++The tests parse the action and assert each of those properties. The Rust
++commands are tested against fixture `docker inspect` JSON, a sink file and a
++real chain, with no Docker needed.
++
++## Blast radius
++
++<!-- generated by `keel plan`; edits here are overwritten -->
++
++Computed from the import graph at depth 2: **2 files, 586 lines**.
++
++| depth | file | lines |
++| --- | --- | --- |
++| scope | `src/main.rs` | 563 |
++| scope | `src/cmd/mod.rs` | 23 |
++
++_Scope globs matching no indexed file (new files, or a typo): src/runtime/**, src/cmd/runtime.rs, runtime/**, docs/decisions/**, tests/ci_runtime.rs, schemas/posture.json_
++
++
++## Rollback
++
++`git revert` — replace this if the change needs a different rollback.
+diff --git a/.keel/specs/ci-runtime/spec.md b/.keel/specs/ci-runtime/spec.md
+new file mode 100644
+index 0000000..15b053c
+--- /dev/null
++++ b/.keel/specs/ci-runtime/spec.md
+@@ -0,0 +1,111 @@
++---
++id: SPEC-0014
++slug: ci-runtime
++schema: keel.spec/1
++status: approved
++scope:
++- src/runtime/**
++- src/cmd/runtime.rs
++- src/cmd/mod.rs
++- src/main.rs
++- runtime/**
++- docs/decisions/**
++- tests/ci_runtime.rs
++- schemas/posture.json
++budget:
++  criteria: 8
++  lines: 700
++verified_at: 2026-09-25
++---
++
++# GitHub Actions as a runtime: CI builds and attests the bundle
++
++## Context
++
++ADR-0002 (`docs/decisions/0002-github-actions-runtime.md`) makes GitHub Actions
++keel's second runtime, after Moor. The runner step is the host; keel runs in a
++hardened container on it, under gVisor where available; the host chain starts
++from the repository's and the runner appends to it; the bundle is committed
++back to the pull request so `keel cover` counts it. This spec is gate-only:
++no coding agent runs in CI.
++
++The host's work is done by keel itself, run on the runner outside the
++container: two runtime-neutral subcommands, and a composite action that drives
++Docker around them.
++
++## Acceptance criteria
++
++### AC-1 The host folds keel's sink into its chain
++
++WHEN `keel runtime fold --sink <file> --chain <file> --writer <name>` runs THE
++SYSTEM SHALL append each new sink payload to the chain as a `keel.chain/1`
++entry with that writer, keep an unparseable line as `sink_malformed`, and
++append nothing for lines already folded.
++
++oracle: test tests/ci_runtime.rs::fold_appends_payloads_once_with_the_writer
++
++### AC-2 The host attests the container from outside
++
++WHEN `keel runtime attest --inspect <file> --chain <file> --out <file>` runs
++THE SYSTEM SHALL write a `keel.posture/1` attestation derived from the
++`docker inspect` output, and append an `attest` entry carrying its SHA-256 to
++the chain.
++
++oracle: test tests/ci_runtime.rs::attest_derives_posture_from_inspect_output
++
++### AC-3 Kernel isolation is proven only by gVisor
++
++IF the inspected container's runtime is not `runsc` THEN THE SYSTEM SHALL mark
++`kernel.isolated` as `unproven`, and SHALL mark it `proven` only when it is.
++
++oracle: test tests/ci_runtime.rs::kernel_isolated_is_proven_only_under_runsc
++
++### AC-4 The run's identity is recorded, as a claim
++
++WHERE the `GITHUB_REPOSITORY`, `GITHUB_WORKFLOW`, `GITHUB_RUN_ID` and
++`GITHUB_SHA` variables are set THE SYSTEM SHALL include them in the
++attestation's `runtime_identity`, marked as claimed by the runner, as an
++optional field `schemas/posture.json` allows.
++
++oracle: test tests/ci_runtime.rs::run_identity_is_recorded_as_a_claim
++
++### AC-5 The container is hardened and the host's files are out of reach
++
++THE SYSTEM SHALL start keel's container with a read-only root filesystem, all
++capabilities dropped, `no-new-privileges`, a non-root user, the network named
++by the `network` input (default `bridge`), and `runsc` when installed. It
++SHALL mount no path under `$RUNNER_TEMP` except the sink directory and the
++read-only attestation.
++
++oracle: test tests/ci_runtime.rs::the_action_hardens_the_container_and_keeps_host_files_out
++
++### AC-6 The chain starts from the repository's, verified
++
++WHEN the action starts THE SYSTEM SHALL copy the repository's
++`.keel/chain.jsonl` to `$RUNNER_TEMP`, stop the job if `keel chain verify`
++fails on it, and append to that copy.
++
++oracle: test tests/ci_runtime.rs::the_action_starts_from_the_verified_repository_chain
++
++### AC-7 The bundle is built, verified and committed back
++
++WHEN the gated run ends THE SYSTEM SHALL fold the sink, run `keel export
++--chain` on the host chain, stop the job unless `keel bundle verify` passes,
++and commit the bundle under `.keel/bundles/` to the pull request's branch.
++
++oracle: test tests/ci_runtime.rs::the_action_builds_verifies_and_commits_the_bundle
++
++### AC-8 It works on a real pull request
++
++WHEN the action runs on a pull request in a repository with an approved spec
++THE SYSTEM SHALL push a bundle commit that `keel cover` then reports as
++covering the pull request's head.
++
++oracle: human a maintainer runs the action on a pull request in daneb/keel-cover-demo and sees keel cover report covered on the bundle commit
++
++## Out of scope
++
++- Running a coding agent in CI (a driver, model API keys, egress to them).
++- Signing: GitHub OIDC tokens, build-provenance attestations, cosign.
++- Pull requests from forks, which can't be given `contents: write`.
++- Changing Moor, which keeps its own implementation of the same frozen formats.
+diff --git a/.keel/specs/ci-runtime/tasks.md b/.keel/specs/ci-runtime/tasks.md
+new file mode 100644
+index 0000000..0c29fdd
+--- /dev/null
++++ b/.keel/specs/ci-runtime/tasks.md
+@@ -0,0 +1,34 @@
++---
++id: TASKS-0014
++slug: ci-runtime
++schema: keel.tasks/1
++---
++
++# Tasks
++
++### T-1 keel runtime fold
++- criteria: AC-1
++- files: src/runtime/host.rs, src/runtime/mod.rs, src/cmd/runtime.rs, src/cmd/mod.rs, src/main.rs, tests/ci_runtime.rs
++- budget: 130
++- exit: test tests/ci_runtime.rs::fold_appends_payloads_once_with_the_writer
++
++### T-2 keel runtime attest
++- criteria: AC-2, AC-3, AC-4
++- files: src/runtime/host.rs, src/cmd/runtime.rs, schemas/posture.json, tests/ci_runtime.rs
++- budget: 150
++- depends_on: T-1
++- exit: test tests/ci_runtime.rs::kernel_isolated_is_proven_only_under_runsc
++
++### T-3 The runtime action
++- criteria: AC-5, AC-6, AC-7
++- files: runtime/action.yml, tests/ci_runtime.rs
++- budget: 150
++- depends_on: T-2
++- exit: test tests/ci_runtime.rs::the_action_builds_verifies_and_commits_the_bundle
++
++### T-4 A real pull request
++- criteria: AC-8
++- files: docs/decisions/0002-github-actions-runtime.md
++- budget: 20
++- depends_on: T-3
++- exit: human a maintainer runs the action on a pull request in daneb/keel-cover-demo and sees keel cover report covered on the bundle commit
+diff --git a/docs/decisions/0002-github-actions-runtime.md b/docs/decisions/0002-github-actions-runtime.md
+new file mode 100644
+index 0000000..45c49c9
+--- /dev/null
++++ b/docs/decisions/0002-github-actions-runtime.md
+@@ -0,0 +1,90 @@
++# ADR-0002: GitHub Actions as a runtime — the runner holds the pen
++
++**Status:** Proposed
++**Date:** 2026-09-25
++
++## Context
++
++ADR-0001 split the evidence chain: keel owns the format and the verifier, and
++a runtime's host process, which the sandbox can't reach, is the only writer.
++Moor implemented that on a Mac. Roadmap R9 asks for a second runtime producing
++the identical bundle schema, and phase 3 names GitHub Actions. That's also
++where `keel cover` (SPEC-0012) runs: a CI runtime lets the bundle a pull
++request needs be built and attested by CI, instead of committed by its author.
++
++On a runner, the job's VM is disposable, but everything in it shares one trust
++domain unless we split it. So we split it the way Moor does.
++
++## Decision
++
++1. **Gate only, for now.** CI runs `keel run --no-driver` on the PR's head:
++   the gates, the chain, the attestation and the bundle. No coding agent, and
++   no model API key in CI. A driver is a later, additive flag.
++
++2. **keel runs in a hardened container; the runner step is the host.**
++   - The container gets a read-only root filesystem, all capabilities dropped,
++     `no-new-privileges`, and a non-root user.
++   - Its network is an input, `network: bridge | none`, defaulting to
++     `bridge`. G2 runs the repository's own build and test, which fetch
++     dependencies, and this runtime has no egress proxy yet. A repository
++     that vendors its dependencies can choose `none`. Either way the
++     attestation says which, so a repository can require it.
++   - It gets the checkout bind-mounted at `/workspace`, a sink directory, and
++     the attestation read-only. In CI, mounting the checkout is the point, so
++     the attestation records the bind mounts it finds rather than claiming
++     there are none.
++   - Everything the host writes lives in `$RUNNER_TEMP`, which is never
++     mounted into the container: the chain, the posture attestation, and the
++     folded sink.
++
++3. **gVisor when it's there, hardened runc when it isn't.** The runner is
++   Linux, so `runsc` works. The runtime installs it and runs the container
++   under it, and attests `kernel.isolated` as proven only when `docker
++   inspect` reports that runtime. If `runsc` can't be installed, the job falls
++   back to runc and attests `kernel.isolated` as `unproven`. A repository that
++   requires it (`[runtime] require = ["kernel.isolated"]`) then blocks, rather
++   than passing quietly.
++
++4. **The host chain starts from the repository's.** Approvals are human
++   decisions recorded where the human is, usually in the repository's
++   committed `.keel/chain.jsonl`, written in-process. CI copies that chain into
++   `$RUNNER_TEMP`, verifies it, and appends to it with `writer:
++   "github-actions"`. The bundle's `approvals` check then has the approvals to
++   check, and every entry still says who wrote it. keel's own verifier already
++   treats in-process entries as self-attested.
++
++5. **The attestation says what GitHub says.** It combines the same `docker
++   inspect` properties Moor derives with `kernel.isolated` and the run's
++   identity (repository, workflow, run id, head SHA) from the runner's
++   environment. GitHub's OIDC-signed identity token is the stronger form and
++   comes with signing; until then the identity is a claim from the runner,
++   recorded as such.
++
++6. **The bundle is committed back to the PR.** A bot commit adds it under
++   `.keel/bundles/`, so `keel cover` counts it unchanged. That commit only
++   touches `.keel/`, which the tree hash leaves out, so the bundle covers the
++   head it was built for.
++
++7. **The host side is keel's own code, run on the runner.** Two runtime-neutral
++   subcommands do the host's work: `keel runtime fold` (sink into chain) and
++   `keel runtime attest` (container into `keel.posture/1`). A composite action,
++   `runtime/action.yml`, drives Docker. Moor keeps its own Rust
++   implementation; both write the frozen formats.
++
++## Consequences
++
++- R9 becomes testable: the same spec run under Moor and under this runtime
++  must give bundles with the same schema, which `keel bundle verify` checks
++  alike.
++- The action needs `contents: write` to push the bundle commit. A PR from a
++  fork can't get it, so fork PRs fall back to an artifact plus a comment.
++  That's stated, not solved, here.
++- Until OIDC signing, the run identity in the attestation is the runner's
++  claim. It's a strong claim, but it isn't signed.
++- With the default `bridge` network, the pull request's own code runs its
++  tests with internet access. Nothing secret is inside the container: no
++  token, and the host chain is out of reach. So the exposure is exfiltration
++  of the repository's own contents, which the PR author already has.
++  `network: none` removes even that for repositories that can build offline.
++- `keel.posture/1` gains an optional top-level `runtime_identity`, an
++  additive change the Spine freeze allows.
+diff --git a/runtime/action.yml b/runtime/action.yml
+new file mode 100644
+index 0000000..db7d21f
+--- /dev/null
++++ b/runtime/action.yml
+@@ -0,0 +1,138 @@
++name: keel runtime (GitHub Actions)
++description: >-
++  Gate a pull request's head with keel inside a hardened container on the
++  runner, under gVisor when it installs, and commit the resulting evidence
++  bundle back to the pull request so `keel cover` counts it. The runner step is
++  the host: it holds the evidence chain in $RUNNER_TEMP, which the container
++  never sees (ADR-0002). Gate only: no coding agent runs here.
++  Pushes made with the default GITHUB_TOKEN do not start new workflow runs, so
++  pass a fine-grained PAT or GitHub App token as `token` if the cover check
++  should re-run on the bundle commit.
++inputs:
++  spec:
++    description: The keel spec slug to gate.
++    required: true
++  image:
++    description: The repository's toolchain image, in which keel runs the gates (e.g. rust:1-bookworm).
++    required: true
++  network:
++    description: The container's network, bridge or none. Attested either way.
++    required: false
++    default: bridge
++  keel-version:
++    description: The keel-harness version to install.
++    required: false
++    default: "0.10.0"
++  token:
++    description: Token used to push the bundle commit.
++    required: false
++    default: ${{ github.token }}
++runs:
++  using: composite
++  steps:
++    - uses: actions/checkout@v5
++      with:
++        ref: ${{ github.head_ref }}
++        fetch-depth: 0
++        token: ${{ inputs.token }}
++
++    - name: Install keel (static, runs in any image)
++      shell: bash
++      env:
++        KEEL_VERSION: ${{ inputs.keel-version }}
++      run: |
++        sudo apt-get update -qq && sudo apt-get install -y -qq musl-tools
++        rustup target add x86_64-unknown-linux-musl
++        cargo install keel-harness --version "$KEEL_VERSION" --locked --target x86_64-unknown-linux-musl
++        echo "KEEL_BIN=$HOME/.cargo/bin/keel" >> "$GITHUB_ENV"
++
++    - name: Install gVisor if it can be installed
++      shell: bash
++      run: |
++        set +e
++        ARCH=$(uname -m)
++        URL="https://storage.googleapis.com/gvisor/releases/release/latest/${ARCH}"
++        curl -fsSL "${URL}/runsc" -o /tmp/runsc \
++          && curl -fsSL "${URL}/runsc.sha512" -o /tmp/runsc.sha512 \
++          && (cd /tmp && sha512sum -c runsc.sha512) \
++          && sudo install -m 0755 /tmp/runsc /usr/local/bin/runsc \
++          && sudo /usr/local/bin/runsc install \
++          && sudo systemctl reload docker
++        if [ $? -eq 0 ] && docker info --format '{{json .Runtimes}}' | grep -q runsc; then
++          echo "KEEL_OCI_RUNTIME=runsc" >> "$GITHUB_ENV"
++        else
++          echo "::warning::gVisor unavailable; running under runc, and kernel.isolated will be attested unproven"
++          echo "KEEL_OCI_RUNTIME=runc" >> "$GITHUB_ENV"
++        fi
++
++    - name: Start the host chain from the repository's, verified
++      shell: bash
++      run: |
++        set -euo pipefail
++        "$KEEL_BIN" chain verify
++        H="$RUNNER_TEMP/keel"
++        mkdir -p "$H/sink" "$H/posture" "$H/out"
++        cp .keel/chain.jsonl "$H/chain.jsonl"
++        chmod 0777 "$H/sink"
++        echo "KEEL_HOST=$H" >> "$GITHUB_ENV"
++
++    - name: Start keel's hardened container
++      shell: bash
++      env:
++        IMAGE: ${{ inputs.image }}
++        NETWORK: ${{ inputs.network }}
++      run: |
++        set -euo pipefail
++        case "$NETWORK" in bridge|none) ;; *) echo "network must be bridge or none"; exit 1;; esac
++        RUNTIME_FLAG=()
++        [ "$KEEL_OCI_RUNTIME" = runsc ] && RUNTIME_FLAG=(--runtime runsc)
++        # Only the sink and the read-only attestation come from $RUNNER_TEMP;
++        # the host chain stays out of reach.
++        docker create --name keel-gate "${RUNTIME_FLAG[@]}" \
++          --read-only --tmpfs /tmp:exec --cap-drop ALL \
++          --security-opt no-new-privileges \
++          --user "$(id -u):$(id -g)" --network "$NETWORK" \
++          -e HOME=/tmp \
++          -e KEEL_CHAIN_SINK=/run/keel-sink/keel.jsonl \
++          -e KEEL_RUNTIME_ATTESTATION=/run/keel-posture/posture.json \
++          -v "$GITHUB_WORKSPACE:/workspace" -w /workspace \
++          -v "$KEEL_HOST/sink:/run/keel-sink" \
++          -v "$KEEL_HOST/posture:/run/keel-posture:ro" \
++          -v "$KEEL_BIN:/usr/local/bin/keel:ro" \
++          --entrypoint sleep "$IMAGE" infinity
++        docker start keel-gate
++
++    - name: Attest the container from outside, then gate
++      shell: bash
++      env:
++        SPEC: ${{ inputs.spec }}
++      run: |
++        set -euo pipefail
++        docker inspect keel-gate > "$KEEL_HOST/inspect.json"
++        "$KEEL_BIN" runtime attest --inspect "$KEEL_HOST/inspect.json" \
++          --chain "$KEEL_HOST/chain.jsonl" --out "$KEEL_HOST/posture/posture.json"
++        # The run's verdict is evidence, not a reason to stop here.
++        docker exec keel-gate keel run "$SPEC" --no-driver || true
++        docker rm -f keel-gate >/dev/null
++
++    - name: Fold, export and verify the bundle
++      shell: bash
++      run: |
++        set -euo pipefail
++        "$KEEL_BIN" runtime fold --sink "$KEEL_HOST/sink/keel.jsonl" \
++          --chain "$KEEL_HOST/chain.jsonl" --writer github-actions
++        BUNDLE=$("$KEEL_BIN" export --chain "$KEEL_HOST/chain.jsonl" --out "$KEEL_HOST/out")
++        "$KEEL_BIN" bundle verify "$BUNDLE"
++        echo "KEEL_BUNDLE=$BUNDLE" >> "$GITHUB_ENV"
++
++    - name: Commit the bundle to the pull request
++      shell: bash
++      run: |
++        set -euo pipefail
++        mkdir -p .keel/bundles
++        cp "$KEEL_BUNDLE" .keel/bundles/
++        git config user.name "github-actions[bot]"
++        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
++        git add -f ".keel/bundles/$(basename "$KEEL_BUNDLE")"
++        git commit -m "keel: evidence bundle $(basename "$KEEL_BUNDLE")"
++        git push
+diff --git a/src/cmd/runtime.rs b/src/cmd/runtime.rs
+new file mode 100644
+index 0000000..994d56a
+--- /dev/null
++++ b/src/cmd/runtime.rs
+@@ -0,0 +1,18 @@
++//! `keel runtime fold|attest` — a runtime host's side of the evidence chain
++//! (ADR-0001, ADR-0002), run on the host, never inside the sandbox.
++
++use crate::runtime::host;
++use anyhow::Result;
++use std::path::Path;
++
++pub fn fold(sink: String, chain: String, writer: String) -> Result<i32> {
++    let n = host::fold(Path::new(&sink), Path::new(&chain), &writer)?;
++    println!("folded {n} sink line(s) into {chain} as {writer}");
++    Ok(0)
++}
++
++pub fn attest(inspect: String, chain: String, out: String, runtime: String) -> Result<i32> {
++    host::attest(Path::new(&inspect), Path::new(&chain), Path::new(&out), &runtime)?;
++    println!("attested {out} and recorded it in {chain}");
++    Ok(0)
++}
+diff --git a/src/runtime/host.rs b/src/runtime/host.rs
+new file mode 100644
+index 0000000..e7a9880
+--- /dev/null
++++ b/src/runtime/host.rs
+@@ -0,0 +1,231 @@
++//! The host's side of the runtime contract (ADR-0001, ADR-0002).
++//!
++//! A runtime's host process, which the sandbox can't reach, is the only writer
++//! of the evidence chain. Moor does this in its own code; these are the same
++//! jobs as keel subcommands, so any runtime whose host can run keel (GitHub
++//! Actions, first) gets them without reimplementing the frozen formats.
++
++use crate::chain;
++use anyhow::{Context, Result};
++use serde_json::{Value, json};
++use std::path::{Path, PathBuf};
++
++fn offset_path(chain: &Path) -> PathBuf {
++    let mut p = chain.as_os_str().to_owned();
++    p.push(".sink-offset");
++    PathBuf::from(p)
++}
++
++/// Fold new sink lines into the host chain under `writer`. Each payload keeps
++/// its own `kind`, marked `source: "sandbox"`: it is what the sandbox said,
++/// recorded faithfully. A line that is not a payload is kept as
++/// `sink_malformed` — dropping it would let the sandbox hide a line by
++/// breaking it. Progress is kept beside the chain, and reset when the sink got
++/// shorter (it was recreated).
++pub fn fold(sink: &Path, chain_path: &Path, writer: &str) -> Result<usize> {
++    let text = match std::fs::read_to_string(sink) {
++        Ok(t) => t,
++        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(0),
++        Err(e) => return Err(e).with_context(|| format!("reading {}", sink.display())),
++    };
++    let lines: Vec<&str> = text.lines().collect();
++    let offsets = offset_path(chain_path);
++    let prev: usize = std::fs::read_to_string(&offsets).ok().and_then(|s| s.trim().parse().ok()).unwrap_or(0);
++    let start = if prev > lines.len() { 0 } else { prev };
++
++    let mut folded = 0;
++    for (i, raw) in lines.iter().enumerate().skip(start) {
++        if raw.trim().is_empty() {
++            continue;
++        }
++        let payload = serde_json::from_str::<Value>(raw).ok().and_then(|v| {
++            let kind = v.get("kind")?.as_str()?.to_string();
++            let data = v.get("data")?.as_object()?.clone();
++            Some((kind, data))
++        });
++        match payload {
++            Some((kind, mut data)) => {
++                data.insert("source".into(), json!("sandbox"));
++                chain::append(chain_path, &kind, writer, Value::Object(data))?;
++            }
++            None => {
++                chain::append(
++                    chain_path,
++                    "sink_malformed",
++                    writer,
++                    json!({ "line_no": i + 1, "line": raw, "source": "sandbox" }),
++                )?;
++            }
++        }
++        folded += 1;
++    }
++    std::fs::write(&offsets, lines.len().to_string())?;
++    Ok(folded)
++}
++
++fn verdict(status: &str, evidence: String) -> Value {
++    json!({ "status": status, "evidence": evidence })
++}
++
++fn unproven(what: &str) -> Value {
++    verdict("unproven", format!("docker inspect does not report {what}"))
++}
++
++fn flag(v: &Value, what: &str, good: bool) -> Value {
++    match v.as_bool() {
++        Some(b) if b == good => verdict("proven", format!("{what} is {b}")),
++        Some(b) => verdict("violated", format!("{what} is {b}")),
++        None => unproven(what),
++    }
++}
++
++fn listed(host: &Value, field: &str, wanted: fn(&str) -> bool, what: &str) -> Value {
++    match host[field].as_array() {
++        None => unproven(&format!("HostConfig.{field}")),
++        Some(items) => {
++            let items: Vec<&str> = items.iter().filter_map(Value::as_str).collect();
++            let status = if items.iter().any(|i| wanted(i)) { "proven" } else { "violated" };
++            verdict(status, format!("HostConfig.{field} is [{}] ({what})", items.join(", ")))
++        }
++    }
++}
++
++/// Posture properties from one `docker inspect` object — the same rules as
++/// Moor's, plus two a CI runner needs. Anything the output does not establish
++/// is `unproven`, never assumed.
++pub fn derive(inspect: &Value) -> Value {
++    let host = &inspect["HostConfig"];
++    let mut p = serde_json::Map::new();
++    p.insert("fs.read_only_root".into(), flag(&host["ReadonlyRootfs"], "HostConfig.ReadonlyRootfs", true));
++    p.insert("privileged.off".into(), flag(&host["Privileged"], "HostConfig.Privileged", false));
++    p.insert(
++        "caps.dropped_all".into(),
++        listed(host, "CapDrop", |c| c.eq_ignore_ascii_case("ALL"), "needs ALL"),
++    );
++    p.insert(
++        "privileges.no_new".into(),
++        listed(
++            host,
++            "SecurityOpt",
++            |o| o == "no-new-privileges" || o == "no-new-privileges:true",
++            "needs no-new-privileges",
++        ),
++    );
++    p.insert(
++        "user.non_root".into(),
++        match inspect["Config"]["User"].as_str() {
++            None => unproven("Config.User"),
++            Some(u) => {
++                let name = u.split(':').next().unwrap_or("");
++                let root = name.is_empty() || name == "root" || name == "0";
++                verdict(if root { "violated" } else { "proven" }, format!("Config.User is {u:?}"))
++            }
++        },
++    );
++    // In CI, mounting the checkout is the point: say what is mounted.
++    p.insert(
++        "mounts.no_host_bind".into(),
++        match inspect["Mounts"].as_array() {
++            None => unproven("Mounts"),
++            Some(mounts) => {
++                let binds: Vec<&str> = mounts
++                    .iter()
++                    .filter(|m| m["Type"] == "bind")
++                    .filter_map(|m| m["Destination"].as_str())
++                    .collect();
++                if binds.is_empty() {
++                    verdict("proven", format!("{} mount(s), none of type bind", mounts.len()))
++                } else {
++                    verdict("violated", format!("bind mount(s) at {}", binds.join(", ")))
++                }
++            }
++        },
++    );
++    // `--network none` attaches a network named "none", which is not marked
++    // internal but carries no traffic.
++    p.insert(
++        "network.internal_only".into(),
++        match inspect["NetworkSettings"]["Networks"].as_object() {
++            None => unproven("NetworkSettings.Networks"),
++            Some(nets) if nets.is_empty() => unproven("any attached network"),
++            Some(nets) if nets.keys().all(|n| n == "none") => verdict("proven", "network none".to_string()),
++            Some(nets) => verdict(
++                "violated",
++                format!("attached to {}", nets.keys().cloned().collect::<Vec<_>>().join(", ")),
++            ),
++        },
++    );
++    // Only gVisor keeps the workload's syscalls off the host kernel.
++    p.insert(
++        "kernel.isolated".into(),
++        match host["Runtime"].as_str() {
++            Some("runsc") => verdict("proven", "HostConfig.Runtime is runsc (gVisor)".to_string()),
++            Some(other) => verdict("unproven", format!("HostConfig.Runtime is {other}, not runsc")),
++            None => unproven("HostConfig.Runtime"),
++        },
++    );
++    Value::Object(p)
++}
++
++/// The run's identity as the runner reports it. A claim, not proof, until it
++/// is signed; `claimed_by` says whose claim it is.
++pub fn runtime_identity(env: impl Fn(&str) -> Option<String>) -> Option<Value> {
++    let fields = [
++        ("repository", "GITHUB_REPOSITORY"),
++        ("workflow", "GITHUB_WORKFLOW"),
++        ("run_id", "GITHUB_RUN_ID"),
++        ("sha", "GITHUB_SHA"),
++    ];
++    let mut id = serde_json::Map::new();
++    for (key, var) in fields {
++        if let Some(v) = env(var).filter(|v| !v.is_empty()) {
++            id.insert(key.into(), json!(v));
++        }
++    }
++    if id.is_empty() {
++        return None;
++    }
++    id.insert("claimed_by".into(), json!("runner"));
++    Some(Value::Object(id))
++}
++
++/// Attest a container from its `docker inspect` output: write the
++/// `keel.posture/1` document keel inside will read, and put its hash on the
++/// host chain.
++pub fn attest(inspect_path: &Path, chain_path: &Path, out: &Path, runtime: &str) -> Result<()> {
++    let raw = std::fs::read_to_string(inspect_path)
++        .with_context(|| format!("reading {}", inspect_path.display()))?;
++    let parsed: Value = serde_json::from_str(&raw).context("parsing docker inspect output")?;
++    let inspect = parsed.as_array().and_then(|a| a.first()).cloned().unwrap_or(parsed);
++
++    let mut doc = json!({
++        "schema": super::POSTURE_SCHEMA,
++        "runtime": runtime,
++        "attested_at": chrono::Utc::now().to_rfc3339(),
++        "properties": derive(&inspect),
++    });
++    if let Some(digest) = inspect["Image"].as_str() {
++        doc["image_digest"] = json!(digest);
++    }
++    if let Some(id) = runtime_identity(|k| std::env::var(k).ok()) {
++        doc["runtime_identity"] = id;
++    }
++    let text = format!("{}\n", serde_json::to_string_pretty(&doc)?);
++    // Checked against the published schema before anyone relies on it.
++    super::parse(&text).map_err(|e| anyhow::anyhow!("the attestation does not match keel.posture/1: {e}"))?;
++    if let Some(dir) = out.parent() {
++        std::fs::create_dir_all(dir)?;
++    }
++    std::fs::write(out, &text).with_context(|| format!("writing {}", out.display()))?;
++
++    let mut entry = json!({
++        "sha256": crate::hashing::sha256_hex(text.as_bytes()),
++        "runtime": runtime,
++        "properties": doc["properties"],
++    });
++    if let Some(id) = doc.get("runtime_identity") {
++        entry["runtime_identity"] = id.clone();
++    }
++    chain::append(chain_path, "attest", runtime, entry)?;
++    Ok(())
++}
+diff --git a/tests/ci_runtime.rs b/tests/ci_runtime.rs
+new file mode 100644
+index 0000000..56c0dad
+--- /dev/null
++++ b/tests/ci_runtime.rs
+@@ -0,0 +1,215 @@
++//! Oracles for SPEC-0014 `ci-runtime`.
++
++mod support;
++
++use serde_json::{Value, json};
++use std::path::Path;
++use support::{BIN, unique_dir};
++
++fn keel(args: &[&str], env: &[(&str, &str)]) -> (i32, String) {
++    let mut cmd = std::process::Command::new(BIN);
++    cmd.args(args);
++    for k in ["GITHUB_REPOSITORY", "GITHUB_WORKFLOW", "GITHUB_RUN_ID", "GITHUB_SHA"] {
++        cmd.env_remove(k);
++    }
++    for (k, v) in env {
++        cmd.env(k, v);
++    }
++    let out = cmd.output().unwrap();
++    let text = format!("{}{}", String::from_utf8_lossy(&out.stdout), String::from_utf8_lossy(&out.stderr));
++    (out.status.code().unwrap_or(-1), text)
++}
++
++fn entries(chain: &Path) -> Vec<Value> {
++    std::fs::read_to_string(chain).unwrap().lines().map(|l| serde_json::from_str(l).unwrap()).collect()
++}
++
++/// A container as `docker create` in runtime/action.yml makes it.
++fn inspect(runtime: &str, network: &str) -> Value {
++    json!([{
++        "Image": "sha256:feedface",
++        "Config": { "User": "1001:1001" },
++        "HostConfig": {
++            "Runtime": runtime,
++            "ReadonlyRootfs": true,
++            "Privileged": false,
++            "CapDrop": ["ALL"],
++            "SecurityOpt": ["no-new-privileges"],
++        },
++        "Mounts": [
++            { "Type": "bind", "Destination": "/workspace" },
++            { "Type": "bind", "Destination": "/run/keel-sink" },
++        ],
++        "NetworkSettings": { "Networks": { network: {} } },
++    }])
++}
++
++fn attest(dir: &Path, runtime: &str, network: &str, env: &[(&str, &str)]) -> (i32, String, Value) {
++    let insp = dir.join("inspect.json");
++    std::fs::write(&insp, inspect(runtime, network).to_string()).unwrap();
++    let out = dir.join("posture/posture.json");
++    let (code, text) = keel(
++        &[
++            "runtime", "attest",
++            "--inspect", insp.to_str().unwrap(),
++            "--chain", dir.join("chain.jsonl").to_str().unwrap(),
++            "--out", out.to_str().unwrap(),
++        ],
++        env,
++    );
++    let doc = std::fs::read_to_string(&out).map(|t| serde_json::from_str(&t).unwrap()).unwrap_or(Value::Null);
++    (code, text, doc)
++}
++
++fn fresh(name: &str) -> std::path::PathBuf {
++    let d = unique_dir(name);
++    std::fs::create_dir_all(&d).unwrap();
++    d
++}
++
++/// AC-1 — payloads folded once, under the writer; bad lines kept.
++#[test]
++fn fold_appends_payloads_once_with_the_writer() {
++    let d = fresh("ci-fold");
++    let (sink, chain) = (d.join("sink.jsonl"), d.join("chain.jsonl"));
++    std::fs::write(&sink, "{\"schema\":\"keel.chain/1\",\"kind\":\"gate\",\"data\":{\"gate\":\"G2\"}}\nnot json\n").unwrap();
++    let fold = || keel(&["runtime", "fold", "--sink", sink.to_str().unwrap(), "--chain", chain.to_str().unwrap(), "--writer", "github-actions"], &[]);
++
++    assert_eq!(fold().0, 0);
++    std::fs::write(&sink, format!("{}{{\"kind\":\"run_end\",\"data\":{{\"run\":\"r\"}}}}\n", std::fs::read_to_string(&sink).unwrap())).unwrap();
++    assert_eq!(fold().0, 0);
++
++    let e = entries(&chain);
++    let kinds: Vec<&str> = e.iter().map(|x| x["kind"].as_str().unwrap()).collect();
++    assert_eq!(kinds, ["gate", "sink_malformed", "run_end"], "folded twice or lost a line");
++    assert!(e.iter().all(|x| x["writer"] == "github-actions" && x["data"]["source"] == "sandbox"));
++    let _ = std::fs::remove_dir_all(&d);
++}
++
++/// AC-2 — a keel.posture/1 document derived from inspect, its hash on the chain.
++#[test]
++fn attest_derives_posture_from_inspect_output() {
++    let d = fresh("ci-attest");
++    let (code, out, doc) = attest(&d, "runsc", "bridge", &[]);
++    assert_eq!(code, 0, "{out}");
++    assert_eq!(doc["schema"], "keel.posture/1");
++    assert_eq!(doc["runtime"], "github-actions");
++    let p = &doc["properties"];
++    for good in ["fs.read_only_root", "privileged.off", "caps.dropped_all", "privileges.no_new", "user.non_root"] {
++        assert_eq!(p[good]["status"], "proven", "{good}: {}", p[good]);
++    }
++    assert_eq!(p["mounts.no_host_bind"]["status"], "violated");
++    assert!(p["mounts.no_host_bind"]["evidence"].as_str().unwrap().contains("/workspace"));
++    assert_eq!(p["network.internal_only"]["status"], "violated", "bridge is not internal");
++
++    let text = std::fs::read_to_string(d.join("posture/posture.json")).unwrap();
++    let e = entries(&d.join("chain.jsonl"));
++    assert_eq!(e[0]["kind"], "attest");
++    use sha2::{Digest, Sha256};
++    let sha: String = Sha256::digest(text.as_bytes()).iter().map(|b| format!("{b:02x}")).collect();
++    assert_eq!(e[0]["data"]["sha256"], sha.as_str());
++
++    let (_, _, none) = attest(&fresh("ci-attest-none"), "runsc", "none", &[]);
++    assert_eq!(none["properties"]["network.internal_only"]["status"], "proven", "--network none");
++    let _ = std::fs::remove_dir_all(&d);
++}
++
++/// AC-3 — kernel.isolated is proven only under runsc.
++#[test]
++fn kernel_isolated_is_proven_only_under_runsc() {
++    let (_, _, gvisor) = attest(&fresh("ci-runsc"), "runsc", "none", &[]);
++    assert_eq!(gvisor["properties"]["kernel.isolated"]["status"], "proven");
++    let (_, _, runc) = attest(&fresh("ci-runc"), "runc", "none", &[]);
++    assert_eq!(runc["properties"]["kernel.isolated"]["status"], "unproven");
++    assert!(runc["properties"]["kernel.isolated"]["evidence"].as_str().unwrap().contains("runc"));
++}
++
++/// AC-4 — the run's identity is recorded, as the runner's claim.
++#[test]
++fn run_identity_is_recorded_as_a_claim() {
++    let env = [
++        ("GITHUB_REPOSITORY", "daneb/keel-cover-demo"),
++        ("GITHUB_WORKFLOW", "keel runtime"),
++        ("GITHUB_RUN_ID", "12345"),
++        ("GITHUB_SHA", "abc123"),
++    ];
++    let d = fresh("ci-identity");
++    let (code, out, doc) = attest(&d, "runsc", "none", &env);
++    assert_eq!(code, 0, "{out}");
++    let id = &doc["runtime_identity"];
++    assert_eq!(id["claimed_by"], "runner");
++    assert_eq!(id["repository"], "daneb/keel-cover-demo");
++    assert_eq!(id["run_id"], "12345");
++    assert_eq!(entries(&d.join("chain.jsonl"))[0]["data"]["runtime_identity"]["sha"], "abc123");
++
++    let (_, _, bare) = attest(&fresh("ci-no-identity"), "runsc", "none", &[]);
++    assert!(bare.get("runtime_identity").is_none(), "an identity invented from nothing");
++}
++
++fn action() -> Value {
++    serde_yaml::from_str(include_str!("../runtime/action.yml")).unwrap()
++}
++
++fn script_with(needle: &str) -> String {
++    let a = action();
++    a["runs"]["steps"]
++        .as_array()
++        .unwrap()
++        .iter()
++        .filter_map(|s| s["run"].as_str())
++        .find(|r| r.contains(needle))
++        .unwrap_or_else(|| panic!("no step runs {needle}"))
++        .to_string()
++}
++
++/// AC-5 — the container is hardened, and $RUNNER_TEMP is out of its reach
++/// except the sink and the read-only attestation.
++#[test]
++fn the_action_hardens_the_container_and_keeps_host_files_out() {
++    let s = script_with("docker create");
++    for flag in [
++        "--read-only",
++        "--cap-drop ALL",
++        "--security-opt no-new-privileges",
++        "--user \"$(id -u):$(id -g)\"",
++        "--network \"$NETWORK\"",
++        "RUNTIME_FLAG=(--runtime runsc)",
++    ] {
++        assert!(s.contains(flag), "missing {flag}:\n{s}");
++    }
++    let mounts: Vec<&str> = s.lines().filter(|l| l.contains("-v \"")).collect();
++    let host_mounts: Vec<&&str> = mounts.iter().filter(|l| l.contains("$KEEL_HOST")).collect();
++    assert_eq!(host_mounts.len(), 2, "{mounts:?}");
++    assert!(host_mounts.iter().any(|l| l.contains("/sink:/run/keel-sink\"")));
++    assert!(host_mounts.iter().any(|l| l.contains("/posture:/run/keel-posture:ro\"")));
++    assert!(!s.contains("chain.jsonl"), "the host chain is mounted:\n{s}");
++    assert_eq!(action()["inputs"]["network"]["default"], "bridge");
++}
++
++/// AC-6 — the host chain starts as a verified copy of the repository's.
++#[test]
++fn the_action_starts_from_the_verified_repository_chain() {
++    let s = script_with("chain verify");
++    let verify = s.find("chain verify").unwrap();
++    let copy = s.find("cp .keel/chain.jsonl \"$H/chain.jsonl\"").expect("no copy of the repository chain");
++    assert!(verify < copy, "copied before verifying:\n{s}");
++    assert!(s.contains("set -euo pipefail"), "a failed verify would not stop the job");
++    assert!(script_with("runtime fold").contains("--chain \"$KEEL_HOST/chain.jsonl\""));
++}
++
++/// AC-7 — fold, export with the host chain, verify or stop, commit back.
++#[test]
++fn the_action_builds_verifies_and_commits_the_bundle() {
++    let s = script_with("runtime fold");
++    let order = ["runtime fold", "export --chain \"$KEEL_HOST/chain.jsonl\"", "bundle verify \"$BUNDLE\""];
++    let at: Vec<usize> = order.iter().map(|n| s.find(n).unwrap_or_else(|| panic!("missing {n}:\n{s}"))).collect();
++    assert!(at.windows(2).all(|w| w[0] < w[1]), "out of order:\n{s}");
++    assert!(s.contains("set -euo pipefail"));
++
++    let commit = script_with("git push");
++    assert!(commit.contains("git add -f \".keel/bundles/"), "{commit}");
++    assert!(commit.contains("github-actions[bot]"));
++    let checkout = &action()["runs"]["steps"][0];
++    assert_eq!(checkout["with"]["ref"], "${{ github.head_ref }}", "can't push to a detached head");
++    assert_eq!(checkout["with"]["token"], "${{ inputs.token }}");
++}

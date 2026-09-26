@@ -10,6 +10,13 @@
     "runtime": { "type": "string", "minLength": 1 },
     "image_digest": { "type": "string" },
     "attested_at": { "type": "string", "format": "date-time" },
+    "runtime_identity": {
+      "description": "Who ran this, as the runtime reports it: a claim, not proof, until signed. Additive to keel.posture/1.",
+      "type": "object",
+      "required": ["claimed_by"],
+      "additionalProperties": { "type": "string" },
+      "properties": { "claimed_by": { "type": "string", "minLength": 1 } }
+    },
     "properties": {
       "type": "object",
       "additionalProperties": {

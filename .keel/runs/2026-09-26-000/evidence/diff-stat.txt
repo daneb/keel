@@ -1,0 +1,25 @@
+     9      0  .keel/chain.jsonl
+     1      1  .keel/lesson-usage.json
+     2      0  .keel/runs/2026-09-26-000/evidence/build.txt
+     2      0  .keel/runs/2026-09-26-000/evidence/lint.txt
+    73      0  .keel/runs/2026-09-26-000/evidence/oracles.json
+   125      0  .keel/runs/2026-09-26-000/evidence/test.txt
+     9      0  .keel/runs/2026-09-26-000/run.json
+    17      0  .keel/runs/2026-09-26-000/trajectory.jsonl
+     3      0  .keel/specs/ci-runtime/approvals.jsonl
+    90      0  .keel/specs/ci-runtime/gates/G0.json
+    95      0  .keel/specs/ci-runtime/gates/G1.json
+    99      0  .keel/specs/ci-runtime/plan.md
+   111      0  .keel/specs/ci-runtime/spec.md
+    34      0  .keel/specs/ci-runtime/tasks.md
+    90      0  docs/decisions/0002-github-actions-runtime.md
+   138      0  runtime/action.yml
+     7      0  schemas/posture.json
+     1      0  src/cmd/mod.rs
+    18      0  src/cmd/runtime.rs
+    33      0  src/main.rs
+   231      0  src/runtime/host.rs
+     2      0  src/runtime/mod.rs
+   215      0  tests/ci_runtime.rs
+
+23 file(s), +1405 -1 (1406 lines of churn) against 646a7ebda6fd18f55b1779d2ef9982306e5f83a3

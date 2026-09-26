@@ -22,5 +22,6 @@ pub mod serve;
 pub mod ratchet;
 pub mod retrieve;
 pub mod run;
+pub mod runtime;
 pub mod spec;
 pub mod tasks;
