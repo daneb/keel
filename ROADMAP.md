@@ -129,6 +129,13 @@ review, not a patch.
 `keel.reviewrequest/1` · `keel.reviewresult/1` · `keel.approval/1`
 `keel.baseline/1` · `keel.adr/1` · `keel.index/2` · `keel.report/1`
 `keel.next/1` · `keel.runs/1` · `keel.approvals/1` · trajectory events
+`keel.chain/1` · `keel.posture/1`
+
+`keel.chain/1` and `keel.posture/1` are the runtime contract (ADR-0001): a
+runtime writes the first on the host and produces the second, so another
+repository depends on them byte for byte. The environment variables that
+carry them, `KEEL_CHAIN_SINK` and `KEEL_RUNTIME_ATTESTATION`, are frozen
+with them.
 
 The JSON under `keel serve`'s `/api/run/` and `/api/insights` is deliberately
 **not** on this list. `keel.insights/1`'s version number is a name, not a
