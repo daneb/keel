@@ -10,7 +10,7 @@
 
 use super::Answer;
 use crate::paths::Paths;
-use anyhow::{Result, bail};
+use anyhow::{Context, Result, bail};
 
 /// The grep binary to use. ripgrep is preferred; plain grep is the floor.
 fn grep(paths: &Paths, args: &[&str], pattern: &str) -> Result<String> {
@@ -37,7 +37,21 @@ pub fn outline(paths: &Paths, path: &str) -> Result<Answer> {
     if !abs.is_file() {
         bail!("{path} is neither indexed nor present on disk");
     }
-    let content = std::fs::read_to_string(&abs)?;
+    // `path` comes straight from the MCP tool call / CLI argument, so an
+    // absolute path or a `../` traversal must not be able to walk outside the
+    // repo — canonicalize both sides and require containment, same as
+    // `serve::evidence_route`'s symlink guard.
+    let root = paths
+        .repo
+        .canonicalize()
+        .with_context(|| format!("canonicalizing {}", paths.repo.display()))?;
+    let target = abs
+        .canonicalize()
+        .with_context(|| format!("canonicalizing {}", abs.display()))?;
+    if !target.starts_with(&root) {
+        bail!("{path} is outside the repository");
+    }
+    let content = std::fs::read_to_string(&target)?;
     // Without a grammar, the honest skeleton is "lines that look like
     // declarations" — stated as a guess rather than presented as structure.
     let mut out = format!("{path} (no index — textual skeleton, not parsed)\n");
@@ -143,6 +157,40 @@ mod tests {
         assert!(a.text.contains("not parsed"), "the answer does not admit it is textual");
         assert!(a.text.contains("pub fn serve"), "{}", a.text);
         assert!(a.text.contains("struct Router"), "{}", a.text);
+        let _ = std::fs::remove_dir_all(&p.repo);
+    }
+
+    #[test]
+    fn outline_rejects_a_relative_traversal_outside_the_repo() {
+        let p = tmp_repo();
+        // A sibling of the repo dir, i.e. reachable via `../`, holding content
+        // that would otherwise pass the "looks declarative" filter.
+        let secret = p.repo.parent().unwrap().join(format!(
+            "keel-fallback-secret-{}",
+            std::process::id()
+        ));
+        std::fs::write(&secret, "fn top_secret() {}\n").unwrap();
+
+        let escape = format!("../{}", secret.file_name().unwrap().to_str().unwrap());
+        assert!(outline(&p, &escape).is_err(), "traversal outside the repo must be rejected");
+
+        let _ = std::fs::remove_file(&secret);
+        let _ = std::fs::remove_dir_all(&p.repo);
+    }
+
+    #[test]
+    fn outline_rejects_an_absolute_path_outside_the_repo() {
+        let p = tmp_repo();
+        let secret = p.repo.parent().unwrap().join(format!(
+            "keel-fallback-abs-secret-{}",
+            std::process::id()
+        ));
+        std::fs::write(&secret, "fn top_secret() {}\n").unwrap();
+
+        let abs = secret.to_str().unwrap().to_string();
+        assert!(outline(&p, &abs).is_err(), "an absolute path outside the repo must be rejected");
+
+        let _ = std::fs::remove_file(&secret);
         let _ = std::fs::remove_dir_all(&p.repo);
     }
 
