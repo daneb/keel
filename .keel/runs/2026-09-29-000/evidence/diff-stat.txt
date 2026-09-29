@@ -1,0 +1,25 @@
+     1      1  .keel/lesson-usage.json
+     6      0  .keel/runs/2026-09-29-000/evidence/build.txt
+    14      0  .keel/runs/2026-09-29-000/evidence/driver.json
+     4      0  .keel/runs/2026-09-29-000/evidence/lint.txt
+    62      0  .keel/runs/2026-09-29-000/evidence/oracles.json
+     6      0  .keel/runs/2026-09-29-000/evidence/test.txt
+    10      0  .keel/runs/2026-09-29-000/run.json
+    17      0  .keel/runs/2026-09-29-000/trajectory.jsonl
+     1      0  .keel/specs/blast-radius/approvals.jsonl
+    90      0  .keel/specs/blast-radius/gates/G0.json
+    97      0  .keel/specs/blast-radius/gates/G1.json
+   164      0  .keel/specs/blast-radius/plan.md
+   112      0  .keel/specs/blast-radius/spec.md
+    63      0  .keel/specs/blast-radius/tasks.md
+     2      0  .keel/specs/next-json-approval-standing/approvals.jsonl
+    90      0  .keel/specs/next-json-approval-standing/gates/G0.json
+    95      0  .keel/specs/next-json-approval-standing/gates/G1.json
+    45      0  .keel/specs/next-json-approval-standing/plan.md
+    94      0  .keel/specs/next-json-approval-standing/spec.md
+    51      0  .keel/specs/next-json-approval-standing/tasks.md
+    13      0  CHANGELOG.md
+    48      3  src/cmd/next.rs
+    63      0  tests/json.rs
+
+23 file(s), +1148 -4 (1152 lines of churn) against 613320c5d4d2fa4ffd7c1d815395ec3eb4e2e0fd

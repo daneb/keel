@@ -1,0 +1,90 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G2",
+  "run": "2026-09-29-001",
+  "spec": "next-json-approval-standing",
+  "verdict": "fail",
+  "generated_at": "2026-09-29T14:43:14.034930963+00:00",
+  "checks": [
+    {
+      "id": "build",
+      "verdict": "fail",
+      "expected": "`cargo build --quiet` exits 0",
+      "actual": "exited 101",
+      "evidence": "evidence/build.txt"
+    },
+    {
+      "id": "test",
+      "verdict": "fail",
+      "expected": "`cargo test --quiet` exits 0",
+      "actual": "exited 101",
+      "evidence": "evidence/test.txt"
+    },
+    {
+      "id": "lint",
+      "verdict": "fail",
+      "expected": "`cargo clippy --all-targets --quiet` exits 0",
+      "actual": "exited 1",
+      "evidence": "evidence/lint.txt"
+    },
+    {
+      "id": "oracle-coverage",
+      "verdict": "fail",
+      "expected": "all 6 criteria satisfied",
+      "actual": "AC-1 (expected exit 0, got 101), AC-2 (expected exit 0, got 101), AC-3 (expected exit 0, got 101), AC-4 (expected exit 0, got 101), … and 1 more",
+      "evidence": "evidence/oracles.json"
+    },
+    {
+      "id": "blast-radius",
+      "verdict": "pass",
+      "detail": "3 changed file(s) inside scope, 4 file(s) downstream",
+      "evidence": "evidence/diff-stat.txt"
+    },
+    {
+      "id": "line-budget",
+      "verdict": "pass",
+      "detail": "127/150 lines of churn",
+      "evidence": "evidence/diff-stat.txt"
+    },
+    {
+      "id": "baseline-ratchet",
+      "verdict": "blocked",
+      "detail": "tests-passing (`cargo test --quiet 2>&1 | grep -o '[0-9]* passed' | awk '{s+=$1} END {print s}'` printed no integer (got ``))",
+      "evidence": "evidence/ratchet.json"
+    },
+    {
+      "id": "store-drift",
+      "verdict": "pass",
+      "detail": "4 projections current"
+    },
+    {
+      "id": "shared-stores",
+      "verdict": "pass",
+      "detail": "none configured"
+    },
+    {
+      "id": "lesson:L-0002",
+      "verdict": "fail",
+      "expected": "Changes MUST leave lint and the house rules clean.",
+      "actual": "expected exit 0, got 1",
+      "from": "L-0002"
+    },
+    {
+      "id": "lesson:L-0003",
+      "verdict": "fail",
+      "expected": "Changes MUST build before the run ends.",
+      "actual": "expected exit 0, got 101",
+      "from": "L-0003"
+    },
+    {
+      "id": "cargo-audit",
+      "verdict": "blocked",
+      "detail": "cargo-audit is not installed — `cargo install cargo-audit`. Advisories were not checked."
+    },
+    {
+      "id": "secrets",
+      "verdict": "blocked",
+      "detail": "gitleaks is not installed — `brew install gitleaks`, or see https://github.com/gitleaks/gitleaks. Nothing was scanned for credentials."
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "cmd",
+      "oracle": "`cargo test --test json next_json_reports_approval_standing` exits 0",
+      "outcome": "fail",
+      "exit_code": 101,
+      "detail": "expected exit 0, got 101",
+      "output": "    Updating crates.io index\nwarning: failed to write cache, path: /home/agent/.cargo/registry/index/index.crates.io-1949cf8c6b5b557f/.cache/tr/ee/tree-sitter-typescript, error: Read-only file system (os error 30)\n Downloading crates ...\n  Downloaded anstream v1.0.0\nerror: failed to create directory `/home/agent/.cargo/registry/cache/index.crates.io-1949cf8c6b5b557f`\n\nCaused by:\n  Read-only file system (os error 30)"
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "cmd",
+      "oracle": "`cargo test --test json next_json_reports_who_rejected_and_why` exits 0",
+      "outcome": "fail",
+      "exit_code": 101,
+      "detail": "expected exit 0, got 101",
+      "output": "    Updating crates.io index\nwarning: failed to write cache, path: /home/agent/.cargo/registry/index/index.crates.io-1949cf8c6b5b557f/.cache/tr/ee/tree-sitter-go, error: Read-only file system (os error 30)\n Downloading crates ...\n  Downloaded adler2 v2.0.1\nerror: failed to create directory `/home/agent/.cargo/registry/cache/index.crates.io-1949cf8c6b5b557f`\n\nCaused by:\n  Read-only file system (os error 30)"
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "cmd",
+      "oracle": "`cargo test --test json next_json_names_the_recheck_command` exits 0",
+      "outcome": "fail",
+      "exit_code": 101,
+      "detail": "expected exit 0, got 101",
+      "output": "    Updating crates.io index\nwarning: failed to write cache, path: /home/agent/.cargo/registry/index/index.crates.io-1949cf8c6b5b557f/.cache/tr/ee/tree-sitter-go, error: Read-only file system (os error 30)\n Downloading crates ...\n  Downloaded adler2 v2.0.1\nerror: failed to create directory `/home/agent/.cargo/registry/cache/index.crates.io-1949cf8c6b5b557f`\n\nCaused by:\n  Read-only file system (os error 30)"
+    },
+    {
+      "criterion": "AC-4",
+      "kind": "cmd",
+      "oracle": "`cargo test --test json next_json_omits_approval_outside_approval_stages` exits 0",
+      "outcome": "fail",
+      "exit_code": 101,
+      "detail": "expected exit 0, got 101",
+      "output": "    Updating crates.io index\nwarning: failed to write cache, path: /home/agent/.cargo/registry/index/index.crates.io-1949cf8c6b5b557f/.cache/an/yh/anyhow, error: Read-only file system (os error 30)\n Downloading crates ...\n  Downloaded atomic-waker v1.1.2\nerror: failed to create directory `/home/agent/.cargo/registry/cache/index.crates.io-1949cf8c6b5b557f`\n\nCaused by:\n  Read-only file system (os error 30)"
+    },
+    {
+      "criterion": "AC-5",
+      "kind": "cmd",
+      "oracle": "`cargo test --test json next_json` exits 0",
+      "outcome": "fail",
+      "exit_code": 101,
+      "detail": "expected exit 0, got 101",
+      "output": "    Updating crates.io index\nwarning: failed to write cache, path: /home/agent/.cargo/registry/index/index.crates.io-1949cf8c6b5b557f/.cache/tr/ee/tree-sitter-rust, error: Read-only file system (os error 30)\n Downloading crates ...\n  Downloaded zerofrom v0.1.8\nerror: failed to create directory `/home/agent/.cargo/registry/cache/index.crates.io-1949cf8c6b5b557f`\n\nCaused by:\n  Read-only file system (os error 30)"
+    },
+    {
+      "criterion": "AC-6",
+      "kind": "cmd",
+      "oracle": "`grep -q 'approval.recheck' CHANGELOG.md` exits 0",
+      "outcome": "pass",
+      "exit_code": 0
+    }
+  ],
+  "criteria": 6,
+  "executed": 6,
+  "passed": 1,
+  "failed": 5,
+  "blocked": 0,
+  "human": 0
+}

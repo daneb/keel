@@ -49,6 +49,69 @@ fn next_json_uses_stable_keys_not_display_labels() {
 }
 
 #[test]
+fn next_json_reports_approval_standing() {
+    let r = Repo::bare("json-next-approval-standing");
+    r.write_spec();
+    r.ok(&["gate", "g0", "demo"]);
+
+    let v = json(&r, &["next", "--json"]);
+    assert_eq!(v["specs"][0]["stage"], "spec_approval");
+    assert_eq!(v["specs"][0]["approval"]["stage"], "spec");
+    assert_eq!(v["specs"][0]["approval"]["standing"], "absent");
+}
+
+#[test]
+fn next_json_reports_who_rejected_and_why() {
+    let r = Repo::bare("json-next-rejected");
+    r.write_spec();
+    r.ok(&["gate", "g0", "demo"]);
+    r.ok(&["approve", "demo", "--stage", "spec", "--reject", "--note", "too vague"]);
+
+    let v = json(&r, &["next", "--json"]);
+    assert_eq!(v["specs"][0]["stage"], "spec_approval");
+    assert_eq!(v["specs"][0]["approval"]["standing"], "rejected");
+    assert!(v["specs"][0]["approval"]["by"].as_str().is_some_and(|s| !s.is_empty()));
+    assert_eq!(v["specs"][0]["approval"]["note"], "too vague");
+}
+
+#[test]
+fn next_json_names_the_recheck_command() {
+    let r = Repo::bare("json-next-recheck");
+    r.write_spec();
+    r.ok(&["gate", "g0", "demo"]);
+    r.ok(&["approve", "demo", "--stage", "spec", "--reject"]);
+
+    let v = json(&r, &["next", "--json"]);
+    assert_eq!(v["specs"][0]["approval"]["standing"], "rejected");
+    assert_eq!(v["specs"][0]["approval"]["note"], serde_json::Value::Null);
+    assert_eq!(v["specs"][0]["approval"]["recheck"], "keel gate g0 demo");
+
+    // A superseded spec approval must also carry a recheck command.
+    r.ok(&["approve", "demo", "--stage", "spec"]);
+    let p = ".keel/specs/demo/spec.md";
+    r.write(p, &r.read(p).replace("HTTP 429", "HTTP 503"));
+    let v = json(&r, &["next", "--json"]);
+    assert_eq!(v["specs"][0]["approval"]["standing"], "superseded");
+    assert_eq!(v["specs"][0]["approval"]["recheck"], "keel gate g0 demo");
+}
+
+#[test]
+fn next_json_omits_approval_outside_approval_stages() {
+    let r = Repo::bare("json-next-no-approval");
+    r.write_spec();
+
+    let v = json(&r, &["next", "--json"]);
+    assert_eq!(v["specs"][0]["stage"], "spec", "G0 has not run yet");
+    assert!(v["specs"][0].get("approval").is_none(), "spec stage must omit approval");
+
+    r.ok(&["gate", "g0", "demo"]);
+    r.ok(&["approve", "demo", "--stage", "spec"]);
+    let v = json(&r, &["next", "--json"]);
+    assert_eq!(v["specs"][0]["stage"], "plan");
+    assert!(v["specs"][0].get("approval").is_none(), "plan stage must omit approval");
+}
+
+#[test]
 fn next_json_reports_an_uninitialised_repo_as_a_blocker_not_an_error() {
     let dir = support::unique_dir("json-next-bare");
     std::fs::create_dir_all(&dir).unwrap();

@@ -1,0 +1,11 @@
+{
+  "schema": "keel.run/1",
+  "id": "2026-09-29-006",
+  "spec": "next-json-approval-standing",
+  "keel_version": "0.10.1",
+  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
+  "started_at": "2026-09-29T18:37:47.806522867+00:00",
+  "finished_at": "2026-09-29T18:39:43.451563978+00:00",
+  "verdict": "fail",
+  "base_commit": "adefcb06d3a46f09e429809616c3c6735077748c"
+}

@@ -7,6 +7,19 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [Unreleased]
+
+### Added
+
+- **`keel next --json` reports approval standing.** A spec entry whose stage
+  is `spec_approval`, `plan_approval` or `merge_approval` now carries an
+  `approval` object: `stage` (`spec`, `plan` or `merge`), `standing`
+  (`absent`, `rejected` or `superseded`), and — when rejected — `by` and
+  `note` (`null` when the rejection carried none). When `standing` is
+  `rejected` or `superseded`, `approval.recheck` names the command that
+  re-verifies the artefact (`keel gate g0 <slug>`, `keel gate g1 <slug>` or
+  `keel run <slug>`). Additive to `keel.next/1`; other stages omit the field.
+
 ## [0.10.1] - 2026-09-26
 
 ### Fixed

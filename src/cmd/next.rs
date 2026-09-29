@@ -12,6 +12,7 @@ use crate::pipeline::{self, Position, Stage};
 use crate::plan::Tasks;
 use crate::spec::{self, Spec};
 use anyhow::Result;
+use serde_json::json;
 
 /// The one command that moves this spec forward from where it stands.
 fn command_for(slug: &str, stage: Stage) -> String {
@@ -25,6 +26,37 @@ fn command_for(slug: &str, stage: Stage) -> String {
         Stage::MergeApproval => format!("keel approve {slug} --stage merge"),
         Stage::Complete => "keel spec new <slug>".to_string(),
     }
+}
+
+/// The `approval` object for a spec sitting at an approval stage, or `None`
+/// for any other stage.
+///
+/// A `Current` standing never reaches here: the pipeline stage moves past an
+/// approval as soon as it is current, so at an approval stage the standing is
+/// always `absent`, `rejected` or `superseded` (see `Position::stage`).
+fn approval_json(stage: Stage, standing: &Standing, slug: &str) -> Option<serde_json::Value> {
+    let (name, recheck) = match stage {
+        Stage::SpecApproval => ("spec", format!("keel gate g0 {slug}")),
+        Stage::PlanApproval => ("plan", format!("keel gate g1 {slug}")),
+        Stage::MergeApproval => ("merge", format!("keel run {slug}")),
+        _ => return None,
+    };
+    Some(match standing {
+        Standing::Absent => json!({ "stage": name, "standing": "absent" }),
+        Standing::Rejected { by, note } => json!({
+            "stage": name,
+            "standing": "rejected",
+            "by": by,
+            "note": note,
+            "recheck": recheck,
+        }),
+        Standing::Superseded { .. } => json!({
+            "stage": name,
+            "standing": "superseded",
+            "recheck": recheck,
+        }),
+        Standing::Current { .. } => json!({ "stage": name, "standing": "absent" }),
+    })
 }
 
 /// `keel next --json`.
@@ -60,13 +92,26 @@ fn run_json(slug: Option<String>) -> Result<i32> {
             }));
         }
         for s in slugs {
-            let stage = pipeline::stage(&paths, &s);
-            specs.push(serde_json::json!({
+            let pos = pipeline::position(&paths, &s);
+            let stage = pos.stage;
+            let standing = match stage {
+                Stage::SpecApproval => Some(&pos.spec_approval),
+                Stage::PlanApproval => Some(&pos.plan_approval),
+                Stage::MergeApproval => Some(&pos.merge_approval),
+                _ => None,
+            };
+            let approval = standing.and_then(|st| approval_json(stage, st, &s));
+
+            let mut entry = serde_json::json!({
                 "slug": s,
                 "stage": stage.key(),
                 "command": command_for(&s, stage),
                 "complete": stage == Stage::Complete,
-            }));
+            });
+            if let Some(approval) = approval {
+                entry["approval"] = approval;
+            }
+            specs.push(entry);
         }
     } else {
         blockers.push(serde_json::json!({

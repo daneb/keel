@@ -1,0 +1,12 @@
+{
+  "schema": "keel.run/1",
+  "id": "2026-09-29-005",
+  "spec": "next-json-approval-standing",
+  "driver": "claude-code",
+  "keel_version": "0.10.1",
+  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
+  "started_at": "2026-09-29T18:29:40.632898135+00:00",
+  "finished_at": "2026-09-29T18:34:49.934740848+00:00",
+  "verdict": "fail",
+  "base_commit": "613320c5d4d2fa4ffd7c1d815395ec3eb4e2e0fd"
+}
