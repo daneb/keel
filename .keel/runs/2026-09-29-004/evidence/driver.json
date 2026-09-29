@@ -1,0 +1,27 @@
+{
+  "schema": "keel.driverresult/1",
+  "status": "ok",
+  "files_changed": [
+    ".keel/lesson-usage.json",
+    "src/chain/mod.rs",
+    "src/worktree.rs",
+    "tests/bundle.rs",
+    "tests/chain.rs",
+    "tests/ci_runtime.rs",
+    "tests/cli.rs",
+    "tests/phase1.rs",
+    "tests/runtime.rs",
+    "tests/serve.rs",
+    "tests/support.rs",
+    "tests/ui.rs",
+    ".keel/runs/2026-09-29-000/",
+    ".keel/runs/2026-09-29-001/",
+    ".keel/runs/2026-09-29-002/",
+    ".keel/runs/2026-09-29-003/",
+    ".keel/runs/2026-09-29-004/",
+    ".keel/specs/blast-radius/",
+    ".keel/specs/next-json-approval-standing/",
+    ".keel/specs/worktree-test-older-git/"
+  ],
+  "detail": "claude completed"
+}

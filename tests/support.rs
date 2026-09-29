@@ -6,6 +6,21 @@ use std::process::{Command, Output};
 
 pub const BIN: &str = env!("CARGO_BIN_EXE_keel");
 
+/// Strip the environment a moor sandbox always sets: `KEEL_CHAIN_SINK` and
+/// `KEEL_RUNTIME_ATTESTATION` (keel's own), and every `GIT_CONFIG_*` (the
+/// operator's git identity). Left inherited, a spawned keel would send its
+/// chain to the sandbox's sink instead of the test repo, and the operator's
+/// name would override the test repo's own `user.name`. Callers that want
+/// one of these set for a specific test set it again after calling this.
+pub fn sanitize_env(cmd: &mut Command) {
+    cmd.env_remove("KEEL_CHAIN_SINK").env_remove("KEEL_RUNTIME_ATTESTATION");
+    for (key, _) in std::env::vars() {
+        if key.starts_with("GIT_CONFIG_") {
+            cmd.env_remove(key);
+        }
+    }
+}
+
 /// Unique per call, not merely per nanosecond: the clock is coarse enough on
 /// some platforms that two tests starting together share a directory.
 pub fn unique_dir(name: &str) -> PathBuf {
@@ -101,7 +116,9 @@ impl Repo {
     }
 
     pub fn keel(&self, args: &[&str]) -> Output {
-        Command::new(BIN).args(args).current_dir(&self.dir).output().expect("running keel")
+        let mut cmd = Command::new(BIN);
+        sanitize_env(&mut cmd);
+        cmd.args(args).current_dir(&self.dir).output().expect("running keel")
     }
 
     pub fn ok(&self, args: &[&str]) -> String {

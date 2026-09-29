@@ -1,0 +1,120 @@
+$ cargo test --quiet
+
+
+running 291 tests
+....................................................................................... 87/291
+....................................................................................... 174/291
+....................................................................................... 261/291
+..............................
+test result: ok. 291 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.43s
+
+
+running 8 tests
+a_supplied_chain_replaces_the_local_one --- FAILED
+a_replaced_verdict_or_trajectory_is_named --- FAILED
+a_swapped_spec_fails_its_approval --- FAILED
+an_intact_bundle_verifies --- FAILED
+bundle_carries_the_chain_through_run_end --- FAILED
+. 6/8
+verifies_with_nothing_but_the_bundle --- FAILED
+json_report_validates_against_the_published_schema --- FAILED
+
+failures:
+
+---- a_supplied_chain_replaces_the_local_one stdout ----
+
+thread 'a_supplied_chain_replaces_the_local_one' (5975) panicked at tests/support.rs:96:33:
+reading .keel/chain.jsonl: No such file or directory (os error 2)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- a_replaced_verdict_or_trajectory_is_named stdout ----
+
+thread 'a_replaced_verdict_or_trajectory_is_named' (5974) panicked at tests/bundle.rs:172:5:
+replaced verdict not named:
+bundle /tmp/keel-p2-bundle-tamper-5973-3.tar.gz — run 2026-09-29-000, spec demo
+
+  FAIL     members
+           expected: every member matches the manifest
+           actual:   unlisted steering/, unlisted gates/, unlisted evidence/, unlisted demo/, unlisted demo/gates/
+  BLOCKED  chain — the bundle carries no chain.jsonl — nothing to check the joins against
+  BLOCKED  approvals — the bundle carries no chain.jsonl — nothing to check the joins against
+  BLOCKED  gate-verdicts — the bundle carries no chain.jsonl — nothing to check the joins against
+  BLOCKED  trajectory — the bundle carries no chain.jsonl — nothing to check the joins against
+
+bundle FAIL
+
+
+---- a_swapped_spec_fails_its_approval stdout ----
+
+thread 'a_swapped_spec_fails_its_approval' (6109) panicked at tests/bundle.rs:154:5:
+stage not named:
+bundle /tmp/keel-p2-bundle-tamper-5973-5.tar.gz — run 2026-09-29-000, spec demo
+
+  FAIL     members
+           expected: every member matches the manifest
+           actual:   unlisted steering/, unlisted gates/, unlisted evidence/, unlisted demo/, unlisted demo/gates/
+  BLOCKED  chain — the bundle carries no chain.jsonl — nothing to check the joins against
+  BLOCKED  approvals — the bundle carries no chain.jsonl — nothing to check the joins against
+  BLOCKED  gate-verdicts — the bundle carries no chain.jsonl — nothing to check the joins against
+  BLOCKED  trajectory — the bundle carries no chain.jsonl — nothing to check the joins against
+
+bundle FAIL
+
+
+---- an_intact_bundle_verifies stdout ----
+
+thread 'an_intact_bundle_verifies' (6120) panicked at tests/bundle.rs:140:5:
+assertion `left == right` failed: bundle /tmp/keel-p2-bundle-intact-5973-4/.keel/bundles/keel-2026-09-29-000.tar.gz — run 2026-09-29-000, spec demo
+
+  pass     members — 27 member(s) match the manifest
+  BLOCKED  chain — the bundle carries no chain.jsonl — nothing to check the joins against
+  BLOCKED  approvals — the bundle carries no chain.jsonl — nothing to check the joins against
+  BLOCKED  gate-verdicts — the bundle carries no chain.jsonl — nothing to check the joins against
+  BLOCKED  trajectory — the bundle carries no chain.jsonl — nothing to check the joins against
+
+bundle BLOCKED
+
+  left: 3
+ right: 0
+
+---- bundle_carries_the_chain_through_run_end stdout ----
+
+thread 'bundle_carries_the_chain_through_run_end' (6255) panicked at tests/bundle.rs:94:56:
+no chain.jsonl in the bundle
+
+---- verifies_with_nothing_but_the_bundle stdout ----
+
+thread 'verifies_with_nothing_but_the_bundle' (6399) panicked at tests/bundle.rs:232:5:
+assertion `left == right` failed: bundle /tmp/keel-p2-bundle-offline-5973-9/.keel/bundles/keel-2026-09-29-000.tar.gz — run 2026-09-29-000, spec demo
+
+  pass     members — 27 member(s) match the manifest
+  BLOCKED  chain — the bundle carries no chain.jsonl — nothing to check the joins against
+  BLOCKED  approvals — the bundle carries no chain.jsonl — nothing to check the joins against
+  BLOCKED  gate-verdicts — the bundle carries no chain.jsonl — nothing to check the joins against
+  BLOCKED  trajectory — the bundle carries no chain.jsonl — nothing to check the joins against
+
+bundle BLOCKED
+
+  left: 3
+ right: 0
+
+---- json_report_validates_against_the_published_schema stdout ----
+
+thread 'json_report_validates_against_the_published_schema' (6393) panicked at tests/bundle.rs:201:5:
+assertion `left == right` failed
+  left: String("blocked")
+ right: "pass"
+
+
+failures:
+    a_replaced_verdict_or_trajectory_is_named
+    a_supplied_chain_replaces_the_local_one
+    a_swapped_spec_fails_its_approval
+    an_intact_bundle_verifies
+    bundle_carries_the_chain_through_run_end
+    json_report_validates_against_the_published_schema
+    verifies_with_nothing_but_the_bundle
+
+test result: FAILED. 1 passed; 7 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.37s
+
+error: test failed, to rerun pass `--test bundle`

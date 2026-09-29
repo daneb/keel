@@ -4,11 +4,12 @@ mod support;
 
 use serde_json::{Value, json};
 use std::path::Path;
-use support::{BIN, unique_dir};
+use support::{BIN, sanitize_env, unique_dir};
 
 fn keel(args: &[&str], env: &[(&str, &str)]) -> (i32, String) {
     let mut cmd = std::process::Command::new(BIN);
     cmd.args(args);
+    sanitize_env(&mut cmd);
     for k in ["GITHUB_REPOSITORY", "GITHUB_WORKFLOW", "GITHUB_RUN_ID", "GITHUB_SHA"] {
         cmd.env_remove(k);
     }

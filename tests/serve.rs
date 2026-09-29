@@ -10,7 +10,7 @@ mod support;
 use std::io::{BufRead, BufReader, Read, Write};
 use std::net::TcpStream;
 use std::process::{Child, Command, Stdio};
-use support::{BIN, Repo};
+use support::{BIN, Repo, sanitize_env};
 
 /// A `keel serve` on an ephemeral port, killed when the test ends.
 struct Server {
@@ -20,7 +20,9 @@ struct Server {
 
 impl Server {
     fn start(repo: &Repo) -> Self {
-        let mut child = Command::new(BIN)
+        let mut cmd = Command::new(BIN);
+        sanitize_env(&mut cmd);
+        let mut child = cmd
             .args(["serve", "--port", "0"])
             .current_dir(&repo.dir)
             .stdout(Stdio::piped())

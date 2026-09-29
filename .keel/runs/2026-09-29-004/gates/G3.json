@@ -1,0 +1,31 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G3",
+  "run": "2026-09-29-005",
+  "spec": "worktree-test-older-git",
+  "verdict": "fail",
+  "generated_at": "2026-09-29T18:22:57.695025919+00:00",
+  "checks": [
+    {
+      "id": "earlier-gates",
+      "verdict": "pass",
+      "detail": "G2.5 and G2 passed"
+    },
+    {
+      "id": "reviewable-size",
+      "verdict": "pass",
+      "detail": "108/700 reviewable lines"
+    },
+    {
+      "id": "evidence-complete",
+      "verdict": "pass",
+      "detail": "trajectory, metadata and gate results present"
+    },
+    {
+      "id": "human-verdict",
+      "verdict": "fail",
+      "expected": "a recorded human decision on the change",
+      "actual": "none — run `keel approve worktree-test-older-git --stage merge`"
+    }
+  ]
+}

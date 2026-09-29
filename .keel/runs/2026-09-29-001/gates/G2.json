@@ -1,0 +1,87 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G2",
+  "run": "2026-09-29-002",
+  "spec": "worktree-test-older-git",
+  "verdict": "fail",
+  "generated_at": "2026-09-29T16:27:40.030750165+00:00",
+  "checks": [
+    {
+      "id": "build",
+      "verdict": "pass",
+      "detail": "`cargo build --quiet` exited 0",
+      "evidence": "evidence/build.txt"
+    },
+    {
+      "id": "test",
+      "verdict": "fail",
+      "expected": "`cargo test --quiet` exits 0",
+      "actual": "exited 101",
+      "evidence": "evidence/test.txt"
+    },
+    {
+      "id": "lint",
+      "verdict": "pass",
+      "detail": "`cargo clippy --all-targets --quiet` exited 0",
+      "evidence": "evidence/lint.txt"
+    },
+    {
+      "id": "oracle-coverage",
+      "verdict": "fail",
+      "expected": "all 3 criteria satisfied",
+      "actual": "AC-3 (expected exit 0, got 101)",
+      "evidence": "evidence/oracles.json"
+    },
+    {
+      "id": "blast-radius",
+      "verdict": "pass",
+      "detail": "1 changed file(s) inside scope, 2 file(s) downstream",
+      "evidence": "evidence/diff-stat.txt"
+    },
+    {
+      "id": "line-budget",
+      "verdict": "pass",
+      "detail": "11/40 lines of churn",
+      "evidence": "evidence/diff-stat.txt"
+    },
+    {
+      "id": "baseline-ratchet",
+      "verdict": "fail",
+      "expected": "no metric moves the wrong way",
+      "actual": "tests-passing 358 → 292",
+      "evidence": "evidence/ratchet.json"
+    },
+    {
+      "id": "store-drift",
+      "verdict": "pass",
+      "detail": "4 projections current"
+    },
+    {
+      "id": "shared-stores",
+      "verdict": "pass",
+      "detail": "none configured"
+    },
+    {
+      "id": "lesson:L-0002",
+      "verdict": "pass",
+      "detail": "Changes MUST leave lint and the house rules clean. holds",
+      "from": "L-0002"
+    },
+    {
+      "id": "lesson:L-0003",
+      "verdict": "pass",
+      "detail": "Changes MUST build before the run ends. holds",
+      "from": "L-0003"
+    },
+    {
+      "id": "cargo-audit",
+      "verdict": "pass",
+      "detail": "no known advisories across 282 dependencies."
+    },
+    {
+      "id": "secrets",
+      "verdict": "pass",
+      "detail": "gitleaks found no credentials in the history or the working tree."
+    }
+  ]
+}

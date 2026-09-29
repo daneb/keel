@@ -22,6 +22,7 @@ use std::path::{Path, PathBuf};
 
 pub const CHAIN_SCHEMA: &str = "keel.chain/1";
 pub const GENESIS_HASH: &str = "0000000000000000000000000000000000000000000000000000000000000000";
+#[cfg_attr(test, allow(dead_code))]
 pub const SINK_ENV: &str = "KEEL_CHAIN_SINK";
 pub const WRITER_IN_PROCESS: &str = "in-process";
 const REDACTED: &str = "[REDACTED]";
@@ -74,10 +75,28 @@ pub fn record(near: &Path, kind: &str, data: Value) -> Result<()> {
         return Ok(());
     };
     let data = redact(data, &secret_values(repo)?);
-    if let Some(sink) = std::env::var_os(SINK_ENV) {
-        return send(Path::new(&sink), kind, data);
+    if let Some(sink) = sink_path() {
+        return send(&sink, kind, data);
     }
     append(&path_in(repo), kind, WRITER_IN_PROCESS, data).map(|_| ())
+}
+
+/// Where to send a chain entry, from `KEEL_CHAIN_SINK`.
+///
+/// In-crate unit tests run in the same process as whoever invoked `cargo
+/// test`, so an inherited `KEEL_CHAIN_SINK` (a moor sandbox always sets one)
+/// would otherwise pull every fixture entry these tests write — approvals,
+/// gate results, trajectory events — out of the test repo's own chain and
+/// into the real sink. Integration tests spawn the keel binary as a fresh
+/// process and exercise the sink honestly there instead.
+#[cfg(not(test))]
+fn sink_path() -> Option<PathBuf> {
+    std::env::var_os(SINK_ENV).map(PathBuf::from)
+}
+
+#[cfg(test)]
+fn sink_path() -> Option<PathBuf> {
+    None
 }
 
 /// The values of the secrets `[chain] secrets` names, as the environment holds

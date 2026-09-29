@@ -3,7 +3,7 @@
 mod support;
 
 use serde_json::Value;
-use support::{BIN, Repo, noop_driver};
+use support::{BIN, Repo, noop_driver, sanitize_env};
 
 const CHAIN: &str = ".keel/chain.jsonl";
 
@@ -21,7 +21,8 @@ fn with_run(name: &str) -> Repo {
 
 fn keel_with_env(r: &Repo, args: &[&str], env: &[(&str, &str)]) -> std::process::Output {
     let mut cmd = std::process::Command::new(BIN);
-    cmd.args(args).current_dir(&r.dir).env_remove("KEEL_CHAIN_SINK");
+    sanitize_env(&mut cmd);
+    cmd.args(args).current_dir(&r.dir);
     for (k, v) in env {
         cmd.env(k, v);
     }
