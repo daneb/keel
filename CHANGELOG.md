@@ -20,6 +20,15 @@ and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
   re-verifies the artefact (`keel gate g0 <slug>`, `keel gate g1 <slug>` or
   `keel run <slug>`). Additive to `keel.next/1`; other stages omit the field.
 
+### Fixed
+
+- **`keel outline` could read files outside the repository.** When a path had
+  no row in the symbol index, the fallback joined it onto the repo root and
+  read it with no containment check, so an absolute path or a `../` traversal
+  read arbitrary host files, through the CLI and the MCP `outline` tool that
+  exist to scope an agent's reads to the repository. Both paths are now
+  canonicalized and the target must sit inside the repo.
+
 ## [0.10.1] - 2026-09-26
 
 ### Fixed
