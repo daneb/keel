@@ -50,7 +50,7 @@ jobs:
   keel-cover:
     runs-on: ubuntu-latest
     steps:
-      - uses: daneb/keel@v0.10.1
+      - uses: daneb/keel@v0.11.0
 ```
 
 <p align="center"><img src="docs/img/keel-pr-check.svg" alt="A PR with the bundle of a passing run of its exact content is covered; one with no bundle is uncovered; one labelled keel:exempt passes as exempted." width="900"></p>
@@ -61,7 +61,7 @@ the record out of that container's reach, and commits the bundle back to the PR.
 
 ```yaml
 # .github/workflows/keel-runtime.yml (needs contents: write)
-      - uses: daneb/keel/runtime@v0.10.1
+      - uses: daneb/keel/runtime@v0.11.0
         with:
           spec: rate-limit
           image: rust:1-bookworm       # your toolchain
@@ -84,6 +84,7 @@ agent can't rewrite it.
 | **0.9** | **`keel cover`, the PR check**, and its GitHub Action. |
 | **0.10** | **GitHub Actions as a runtime**, which gates PRs in a gVisor container and commits the bundle. Also `keel.chain/1` and `keel.posture/1` are now frozen formats. |
 | **0.10.1** | gVisor really installs on runners; the runtime no longer re-gates its own bundle commit. |
+| **0.11** | **`keel next --json` reports approval standing**: who rejected an approval, why, and the command that re-checks it, so a driving tool can guide the next step. |
 
 ## keel and moor, in one line each
 
