@@ -236,7 +236,7 @@ footer a{color:var(--body)}
 
 <div id="top" class="hero"><div class="wrap hero-grid">
   <div>
-    <div class="tag">Rust · macOS &amp; Linux · v0.10.1</div>
+    <div class="tag">Rust · macOS &amp; Linux · v0.11.0</div>
     <h1>keel</h1>
     <p class="lede">AI coding agents that prove their work.</p>
     <p class="sub">You say what “done” means. An agent — Claude Code, Codex, Copilot,
@@ -365,7 +365,7 @@ jobs:
   keel-cover:
     runs-on: ubuntu-latest
     steps:
-      - uses: <span class="k">daneb/keel@v0.10.1</span></pre>
+      - uses: <span class="k">daneb/keel@v0.11.0</span></pre>
     </div>
     <figure class="plate shot" style="margin-top:6px">
       <img src="img/keel-pr-check.svg" alt="A PR with the bundle of a passing run of its exact content is covered; one with no bundle is uncovered; one labelled keel:exempt passes as exempted.">
@@ -381,7 +381,7 @@ jobs:
           that container can't reach it, and commits the evidence back to the PR.</p>
       </div>
 <pre><span class="c"># in a pull_request workflow</span>
-- uses: <span class="k">daneb/keel/runtime@v0.10.1</span>
+- uses: <span class="k">daneb/keel/runtime@v0.11.0</span>
   with:
     spec: rate-limit
     image: rust:1-bookworm</pre>
