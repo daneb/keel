@@ -1,0 +1,57 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "cmd",
+      "oracle": "`cargo test --test json next_json_reports_approval_standing` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest next_json_reports_approval_standing ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.30s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s\n     Running tests/json.rs (target/debug/deps/json-49ecd07b5df1eba0)"
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "cmd",
+      "oracle": "`cargo test --test json next_json_reports_who_rejected_and_why` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest next_json_reports_who_rejected_and_why ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.22s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.05s\n     Running tests/json.rs (target/debug/deps/json-49ecd07b5df1eba0)"
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "cmd",
+      "oracle": "`cargo test --test json next_json_names_the_recheck_command` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest next_json_names_the_recheck_command ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.53s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.05s\n     Running tests/json.rs (target/debug/deps/json-49ecd07b5df1eba0)"
+    },
+    {
+      "criterion": "AC-4",
+      "kind": "cmd",
+      "oracle": "`cargo test --test json next_json_omits_approval_outside_approval_stages` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest next_json_omits_approval_outside_approval_stages ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.31s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.05s\n     Running tests/json.rs (target/debug/deps/json-49ecd07b5df1eba0)"
+    },
+    {
+      "criterion": "AC-5",
+      "kind": "cmd",
+      "oracle": "`cargo test --test json next_json` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 7 tests\ntest next_json_names_the_stage_and_the_command_that_advances_it ... ok\ntest next_json_names_the_recheck_command ... ok\ntest next_json_reports_an_uninitialised_repo_as_a_blocker_not_an_error ... ok\ntest next_json_omits_approval_outside_approval_stages ... ok\ntest next_json_reports_who_rejected_and_why ... ok\ntest next_json_reports_approval_standing ... ok\ntest next_json_uses_stable_keys_not_display_labels ... ok\n\ntest result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 1.03s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.05s\n     Running tests/json.rs (target/debug/deps/json-49ecd07b5df1eba0)"
+    },
+    {
+      "criterion": "AC-6",
+      "kind": "cmd",
+      "oracle": "`grep -q 'approval.recheck' CHANGELOG.md` exits 0",
+      "outcome": "pass",
+      "exit_code": 0
+    }
+  ],
+  "criteria": 6,
+  "executed": 6,
+  "passed": 6,
+  "failed": 0,
+  "blocked": 0,
+  "human": 0
+}

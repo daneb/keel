@@ -1,0 +1,14 @@
+{
+  "schema": "keel.driverresult/1",
+  "status": "ok",
+  "files_changed": [
+    ".keel/lesson-usage.json",
+    "CHANGELOG.md",
+    "src/cmd/next.rs",
+    "tests/json.rs",
+    ".keel/runs/2026-09-29-000/",
+    ".keel/specs/blast-radius/",
+    ".keel/specs/next-json-approval-standing/"
+  ],
+  "detail": "claude completed"
+}

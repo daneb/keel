@@ -1,0 +1,6 @@
+$ cargo build --quiet
+
+error: failed to create directory `/home/agent/.cargo/registry/cache/index.crates.io-1949cf8c6b5b557f`
+
+Caused by:
+  Read-only file system (os error 30)
