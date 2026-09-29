@@ -1,0 +1,41 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "cmd",
+      "oracle": "`cargo test --bin keel worktree::tests::gate_base_prefers_the_fetched_remote_trunk_over_a_stale_local_branch` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest worktree::tests::gate_base_prefers_the_fetched_remote_trunk_over_a_stale_local_branch ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 290 filtered out; finished in 0.03s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s\n     Running unittests src/main.rs (target/debug/deps/keel-f7fb271114e2ae7f)"
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "cmd",
+      "oracle": "`grep -q 'refs/remotes/origin/HEAD' src/worktree.rs` exits 0",
+      "outcome": "pass",
+      "exit_code": 0
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "human",
+      "oracle": "human: the test asserts the ref is absent (for example with `git rev-parse --verify --quiet refs/remotes/origin/HEAD` failing) before it calls the gate base",
+      "outcome": "human",
+      "detail": "the test asserts the ref is absent (for example with `git rev-parse --verify --quiet refs/remotes/origin/HEAD` failing) before it calls the gate base"
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "cmd",
+      "oracle": "`cargo test --quiet` exits 0",
+      "outcome": "fail",
+      "exit_code": 101,
+      "detail": "expected exit 0, got 101",
+      "output": "…\nicked at tests/bundle.rs:172:5:\nreplaced verdict not named:\nbundle /tmp/keel-p2-bundle-tamper-7195-3.tar.gz — run 2026-09-29-000, spec demo\n\n  FAIL     members\n           expected: every member matches the manifest\n           actual:   unlisted steering/, unlisted gates/, unlisted evidence/, unlisted demo/, unlisted demo/gates/\n  BLOCKED  chain — the bundle carries no chain.jsonl — nothing to check the joins against\n  BLOCKED  approvals — the bundle carries no chain.jsonl — nothing to check the joins against\n  BLOCKED  gate-verdicts — the bundle carries no chain.jsonl — nothing to check the joins against\n  BLOCKED  trajectory — the bundle carries no chain.jsonl — nothing to check the joins against\n\nbundle FAIL\n\n\n---- a_swapped_spec_fails_its_approval stdout ----\n\nthread 'a_swapped_spec_fails_its_approval' (7331) panicked at tests/bundle.rs:154:5:\nstage not named:\nbundle /tmp/keel-p2-bundle-tamper-7195-5.tar.gz — run 2026-09-29-000, spec demo\n\n  FAIL     members\n           expected: every member matches the manifest\n           actual:   unlisted steering/, unlisted gates/, unlisted evidence/, unlisted demo/, unlisted demo/gates/\n  BLOCKED  chain — the bundle carries no chain.jsonl — nothing to check the joins against\n  BLOCKED  approvals — the bundle carries no chain.jsonl — nothing to check the joins against\n  BLOCKED  gate-verdicts — the bundle carries no chain.jsonl — nothing to check the joins against\n  BLOCKED  trajectory — the bundle carries no chain.jsonl — nothing to check the joins against\n\nbundle FAIL\n\n\n---- an_intact_bundle_verifies stdout ----\n\nthread 'an_intact_bundle_verifies' (7342) panicked at tests/bundle.rs:140:5:\nassertion `left == right` failed: bundle /tmp/keel-p2-bundle-intact-7195-4/.keel/bundles/keel-2026-09-29-000.tar.gz — run 2026-09-29-000, spec demo\n\n  pass     members — 27 member(s) match the manifest\n  BLOCKED  chain — the bundle carries no chain.jsonl — nothing to check the joins against\n  BLOCKED  approvals — the bundle carries no chain.jsonl — nothing to check the joins against\n  BLOCKED  gate-verdicts — the bundle carries no chain.jsonl — nothing to check the joins against\n  BLOCKED  trajectory — the bundle carries no chain.jsonl — nothing to check the joins against\n\nbundle BLOCKED\n\n  left: 3\n right: 0\n\n---- bundle_carries_the_chain_through_run_end stdout ----\n\nthread 'bundle_carries_the_chain_through_run_end' (7480) panicked at tests/bundle.rs:94:56:\nno chain.jsonl in the bundle\n\n---- verifies_with_nothing_but_the_bundle stdout ----\n\nthread 'verifies_with_nothing_but_the_bundle' (7621) panicked at tests/bundle.rs:232:5:\nassertion `left == right` failed: bundle /tmp/keel-p2-bundle-offline-7195-9/.keel/bundles/keel-2026-09-29-000.tar.gz — run 2026-09-29-000, spec demo\n\n  pass     members — 27 member(s) match the manifest\n  BLOCKED  chain — the bundle carries no chain.jsonl — nothing to check the joins against\n  BLOCKED  approvals — the bundle carries no chain.jsonl — nothing to check the joins against\n  BLOCKED  gate-verdicts — the bundle carries no chain.jsonl — nothing to check the joins against\n  BLOCKED  trajectory — the bundle carries no chain.jsonl — nothing to check the joins against\n\nbundle BLOCKED\n\n  left: 3\n right: 0\n\n---- json_report_validates_against_the_published_schema stdout ----\n\nthread 'json_report_validates_against_the_published_schema' (7616) panicked at tests/bundle.rs:201:5:\nassertion `left == right` failed\n  left: String(\"blocked\")\n right: \"pass\"\n\n\nfailures:\n    a_replaced_verdict_or_trajectory_is_named\n    a_supplied_chain_replaces_the_local_one\n    a_swapped_spec_fails_its_approval\n    an_intact_bundle_verifies\n    bundle_carries_the_chain_through_run_end\n    json_report_validates_against_the_published_schema\n    verifies_with_nothing_but_the_bundle\n\ntest result: FAILED. 1 passed; 7 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.37s\n\nerror: test failed, to rerun pass `--test bundle`"
+    }
+  ],
+  "criteria": 3,
+  "executed": 3,
+  "passed": 2,
+  "failed": 1,
+  "blocked": 0,
+  "human": 1
+}

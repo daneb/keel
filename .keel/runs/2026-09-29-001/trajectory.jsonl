@@ -1,0 +1,19 @@
+{"t":"2026-09-29T16:26:13.510872726+00:00","seq":1,"kind":"run_start","spec":"worktree-test-older-git","driver":"claude-code","keel_version":"0.10.1","store_hash":"0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2"}
+{"t":"2026-09-29T16:26:13.515030855+00:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":424,"bytes":1693}
+{"t":"2026-09-29T16:26:13.515064023+00:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
+{"t":"2026-09-29T16:26:13.515095482+00:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6268,"bytes":25071}
+{"t":"2026-09-29T16:26:13.515286197+00:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
+{"t":"2026-09-29T16:26:13.515592873+00:00","seq":6,"kind":"inject","source":".keel/specs/worktree-test-older-git/spec.md","tokens":513,"bytes":2049}
+{"t":"2026-09-29T16:26:13.515598581+00:00","seq":7,"kind":"driver_call","driver":"claude-code","prompt_tokens":7433}
+{"t":"2026-09-29T16:27:26.962121137+00:00","seq":8,"kind":"driver_result","driver":"claude-code","status":"ok","files_changed":7,"detail":"claude completed"}
+{"t":"2026-09-29T16:27:27.108900489+00:00","seq":9,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
+{"t":"2026-09-29T16:27:28.992423847+00:00","seq":10,"kind":"command","cmd":"cargo test --quiet","exit_code":101,"evidence":"evidence/test.txt"}
+{"t":"2026-09-29T16:27:29.087130665+00:00","seq":11,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
+{"t":"2026-09-29T16:27:31.072823156+00:00","seq":12,"kind":"oracle","criterion":"AC-1","oracle":"`cargo test --bin keel worktree::tests::gate_base_prefers_the_fetched_remote_trunk_over_a_stale_local_branch` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-09-29T16:27:31.072843615+00:00","seq":13,"kind":"oracle","criterion":"AC-2","oracle":"`grep -q 'refs/remotes/origin/HEAD' src/worktree.rs` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-09-29T16:27:31.072845824+00:00","seq":14,"kind":"oracle","criterion":"AC-2","oracle":"human: the test asserts the ref is absent (for example with `git rev-parse --verify --quiet refs/remotes/origin/HEAD` failing) before it calls the gate base","verdict":"human"}
+{"t":"2026-09-29T16:27:31.072847574+00:00","seq":15,"kind":"oracle","criterion":"AC-3","oracle":"`cargo test --quiet` exits 0","verdict":"fail","exit_code":101}
+{"t":"2026-09-29T16:27:40.031061175+00:00","seq":16,"kind":"gate","gate":"G2","verdict":"fail","result":"gates/G2.json"}
+{"t":"2026-09-29T16:27:40.031092301+00:00","seq":17,"kind":"run_end","verdict":"fail","duration_ms":86521}
+{"t":"2026-09-29T17:02:18.231483829+00:00","seq":18,"kind":"human","stage":"spec","decision":"approved","by":"Dane Balia"}
+{"t":"2026-09-29T17:03:03.246388665+00:00","seq":19,"kind":"human","stage":"plan","decision":"approved","by":"Dane Balia"}

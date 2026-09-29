@@ -4,8 +4,11 @@
 //! criterion is falsifiable, a plan whose blast radius is computed rather than
 //! guessed, and no way to hand a vague spec to an agent by accident.
 
+mod support;
+
 use std::path::PathBuf;
 use std::process::{Command, Output};
+use support::sanitize_env;
 
 const BIN: &str = env!("CARGO_BIN_EXE_keel");
 
@@ -52,7 +55,9 @@ impl Repo {
     }
 
     fn keel(&self, args: &[&str]) -> Output {
-        Command::new(BIN).args(args).current_dir(&self.dir).output().expect("running keel")
+        let mut cmd = Command::new(BIN);
+        sanitize_env(&mut cmd);
+        cmd.args(args).current_dir(&self.dir).output().expect("running keel")
     }
 
     fn ok(&self, args: &[&str]) -> String {

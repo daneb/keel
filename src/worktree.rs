@@ -382,8 +382,15 @@ mod tests {
         // is missing, which would otherwise mask exactly the bug this test
         // guards: drop it so the fallback candidate order — the actual fix —
         // is what gets exercised, the way an older git or a repo that has
-        // pruned this ref would leave it.
-        git(&p.repo, &["symbolic-ref", "--delete", "refs/remotes/origin/HEAD"]).unwrap();
+        // pruned this ref would leave it. Older git never creates the ref on
+        // fetch, so only delete it when fetch actually did.
+        if git(&p.repo, &["rev-parse", "--verify", "--quiet", "refs/remotes/origin/HEAD"]).is_ok() {
+            git(&p.repo, &["symbolic-ref", "--delete", "refs/remotes/origin/HEAD"]).unwrap();
+        }
+        assert!(
+            git(&p.repo, &["rev-parse", "--verify", "--quiet", "refs/remotes/origin/HEAD"]).is_err(),
+            "refs/remotes/origin/HEAD must be absent so the fallback candidate order is exercised"
+        );
 
         git(&p.repo, &["checkout", "-q", "-b", "feature", &format!("origin/{trunk}")]).unwrap();
         std::fs::write(p.repo.join("a.txt"), "one\ntwo\n").unwrap();

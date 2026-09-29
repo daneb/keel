@@ -1,0 +1,12 @@
+{
+  "schema": "keel.run/1",
+  "id": "2026-09-29-001",
+  "spec": "worktree-test-older-git",
+  "driver": "claude-code",
+  "keel_version": "0.10.1",
+  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
+  "started_at": "2026-09-29T16:26:13.510750972+00:00",
+  "finished_at": "2026-09-29T16:27:40.031148427+00:00",
+  "verdict": "fail",
+  "base_commit": "613320c5d4d2fa4ffd7c1d815395ec3eb4e2e0fd"
+}

@@ -3,7 +3,7 @@
 mod support;
 
 use serde_json::Value;
-use support::{BIN, Repo};
+use support::{BIN, Repo, sanitize_env};
 
 const MARKER: &str = "driver-saw-chain.jsonl";
 
@@ -46,7 +46,8 @@ fn write_attestation(r: &Repo, raw: &str) -> String {
 /// `keel run` with the attestation env var set (or cleared, for `None`).
 fn run(r: &Repo, args: &[&str], attest: Option<&str>) -> (i32, String) {
     let mut cmd = std::process::Command::new(BIN);
-    cmd.args(args).current_dir(&r.dir).env_remove("KEEL_CHAIN_SINK").env_remove("KEEL_RUNTIME_ATTESTATION");
+    sanitize_env(&mut cmd);
+    cmd.args(args).current_dir(&r.dir);
     if let Some(path) = attest {
         cmd.env("KEEL_RUNTIME_ATTESTATION", path);
     }

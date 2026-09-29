@@ -4,7 +4,7 @@ mod support;
 
 use serde_json::Value;
 use std::path::{Path, PathBuf};
-use support::{BIN, Repo, noop_driver, unique_dir};
+use support::{BIN, Repo, noop_driver, sanitize_env, unique_dir};
 
 /// A repo with an approved spec, a finished run, and a chain entry after the
 /// run too — so "through run_end" is distinguishable from "the whole chain".
@@ -74,12 +74,9 @@ fn tamper(archive: &Path, path: &str, edit: impl FnOnce(&mut Vec<u8>)) -> PathBu
 }
 
 fn verify(archive: &Path, cwd: &Path) -> (i32, String) {
-    let out = std::process::Command::new(BIN)
-        .args(["bundle", "verify"])
-        .arg(archive)
-        .current_dir(cwd)
-        .output()
-        .unwrap();
+    let mut cmd = std::process::Command::new(BIN);
+    sanitize_env(&mut cmd);
+    let out = cmd.args(["bundle", "verify"]).arg(archive).current_dir(cwd).output().unwrap();
     let text = format!("{}{}", String::from_utf8_lossy(&out.stdout), String::from_utf8_lossy(&out.stderr));
     (out.status.code().unwrap_or(-1), text)
 }
@@ -191,7 +188,9 @@ fn a_replaced_verdict_or_trajectory_is_named() {
 fn json_report_validates_against_the_published_schema() {
     let r = ran("bundle-json");
     let archive = export(&r, &[]);
-    let out = std::process::Command::new(BIN).args(["bundle", "verify", "--json"]).arg(&archive).output().unwrap();
+    let mut cmd = std::process::Command::new(BIN);
+    sanitize_env(&mut cmd);
+    let out = cmd.args(["bundle", "verify", "--json"]).arg(&archive).output().unwrap();
     let report: Value = serde_json::from_slice(&out.stdout).expect("stdout is one JSON object");
 
     let schema: Value = serde_json::from_str(include_str!("../schemas/bundleverify.json")).unwrap();

@@ -10,12 +10,13 @@
 mod support;
 
 use std::process::Command;
-use support::{BIN, Repo};
+use support::{BIN, Repo, sanitize_env};
 
 const ESC: char = '\x1b';
 
 fn keel_with_env(r: &Repo, args: &[&str], env: &[(&str, &str)]) -> String {
     let mut cmd = Command::new(BIN);
+    sanitize_env(&mut cmd);
     cmd.args(args).current_dir(&r.dir);
     for (k, v) in env {
         cmd.env(k, v);
