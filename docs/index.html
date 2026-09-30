@@ -397,11 +397,14 @@ jobs:
         <h3>Put the agent in a sealed box</h3>
         <p>Pair keel with <a href="https://daneb.github.io/moor/">moor</a>: a sandbox
           per project, no access to your disk, an allowlist for the internet — and
-          keel's record written from outside, so the agent can't rewrite it.</p>
+          keel's record written from outside, so the agent can't rewrite it. moor
+          reads keel's next step and turns it into one command at a time, from a
+          spec you write on your Mac to a pull request.</p>
       </div>
-<pre>moor new my-app
-moor ask my-app "add rate limiting"
-moor bundle -p my-app   <span class="c"># ✓ bundle pass</span></pre>
+<pre>moor spec push login.spec.md
+moor go        <span class="c"># plan, build, gates</span>
+moor approve   <span class="c"># your sign-off</span>
+moor ship      <span class="c"># branch, push, PR</span></pre>
     </div>
   </div>
 </div></section>
@@ -410,7 +413,8 @@ moor bundle -p my-app   <span class="c"># ✓ bundle pass</span></pre>
   <div class="tag">Why trust it</div>
   <h2>Every claim here is checked, not asserted</h2>
   <p class="intro">keel is built with keel. Every change to it carried a spec, passed
-    its gates, and ships its own evidence bundle.</p>
+    its gates, and ships its own evidence bundle — and its latest changes were
+    built by an agent inside a moor sandbox, then pushed from there.</p>
 
   <div class="pillars">
     <div class="pillar"><div class="n">VALUE</div><h3>Less babysitting, more shipping</h3>
@@ -431,7 +435,7 @@ moor bundle -p my-app   <span class="c"># ✓ bundle pass</span></pre>
           spec that can't fail can't pass either.</li>
         <li><strong>Review built in</strong>: weakened tests and added mocks are caught,
           and serious security findings block.</li>
-        <li><strong>541 tests, 0 warnings</strong> at <code>clippy -D warnings</code>.</li>
+        <li><strong>545 tests, 0 warnings</strong> at <code>clippy -D warnings</code>.</li>
       </ul></div>
     <div class="pillar"><div class="n">SECURITY</div><h3>The agent can't mark its own homework</h3>
       <ul>
@@ -454,6 +458,10 @@ moor bundle -p my-app   <span class="c"># ✓ bundle pass</span></pre>
           covered, uncovered and exempted, on live GitHub runners.</li>
         <li><strong>Frozen formats</strong>: the record and attestation formats change
           only additively, so evidence written today still verifies tomorrow.</li>
+        <li><strong>Says what's next, for tools too</strong>: <code>keel next --json</code>
+          names each spec's step and the command that moves it, including who
+          rejected an approval and why, so a tool like moor can guide you without
+          parsing prose.</li>
       </ul></div>
   </div>
 </div></section>
@@ -510,7 +518,7 @@ moor bundle -p my-app   <span class="c"># ✓ bundle pass</span></pre>
     <div class="m"><div class="val">1.25<span style="font-size:20px"> s</span></div>
       <div class="lbl">To index 5,705 files</div>
       <div class="note">Cold, across eight languages.</div></div>
-    <div class="m"><div class="val">541</div><div class="lbl">Tests · 0 warnings</div>
+    <div class="m"><div class="val">545</div><div class="lbl">Tests · 0 warnings</div>
       <div class="note">Clippy clean at <code>-D warnings</code>.</div></div>
     <div class="m"><div class="val">11 → 54%</div><div class="lbl">G2 pass rate</div>
       <div class="note">Inside keel vs. on a real project. The low number was the
