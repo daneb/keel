@@ -42,6 +42,41 @@ set -u
 task=$(cat)
 
 keel_require python3
+
+# ── CREDENTIAL PREFLIGHT ───────────────────────────────────────────────────
+# Learn the credential is unusable *now*, before requiring the binary, spending
+# an agent call, or (in a wave run) having a worktree created for us. The CLI
+# accepts a device-flow token (gho_, from `copilot` + /login) but rejects
+# classic PATs (ghp_) and usually fine-grained ones. The host supplies the
+# token; we only validate the shape and name the fix — the fix is always
+# `copilot /login` on the host, because the device flow cannot run inside this
+# non-interactive sandbox. The CLI's precedence is COPILOT_GITHUB_TOKEN >
+# GH_TOKEN > GITHUB_TOKEN, so preflight the first one that is set.
+token=${COPILOT_GITHUB_TOKEN:-${GH_TOKEN:-${GITHUB_TOKEN:-}}}
+case "$token" in
+  gho_*)
+    : # device-flow token — the only shape the CLI reliably accepts
+    ;;
+  ghp_*)
+    keel_emit blocked "copilot rejects classic personal access tokens (ghp_); it needs a device-flow token — run copilot /login on the host, which sets COPILOT_GITHUB_TOKEN (gho_)."
+    exit 0
+    ;;
+  '')
+    keel_emit blocked "no copilot credential: set COPILOT_GITHUB_TOKEN/GH_TOKEN/GITHUB_TOKEN (and GH_HOST or COPILOT_GH_HOST for enterprise), or run copilot /login on the host."
+    exit 0
+    ;;
+  *)
+    keel_emit blocked "copilot credential has an unrecognised shape; it needs a device-flow token — run copilot /login on the host (COPILOT_GITHUB_TOKEN, gho_)."
+    exit 0
+    ;;
+esac
+
+# Enterprise data residency: COPILOT_GH_HOST overrides GH_HOST for Copilot. The
+# CLI reads these from the environment, which we inherit; export them so the
+# child sees the intended host even if they arrived unexported.
+[ -n "${COPILOT_GH_HOST:-}" ] && export COPILOT_GH_HOST
+[ -n "${GH_HOST:-}" ] && export GH_HOST
+
 keel_require copilot 'npm install -g @github/copilot — note that gh copilot is a different, non-agentic tool'
 
 prompt=$(keel_prompt "$task") || { keel_emit blocked "could not read the task JSON"; exit 0; }
