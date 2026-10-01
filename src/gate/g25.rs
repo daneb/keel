@@ -52,9 +52,9 @@ pub fn run(
             let patch = read_patch(paths, cfg, &base);
             // Written into the same flags file as test-invalidation's hits, so
             // one review sign-off acknowledges both and lapses when either moves.
-            let movement: Vec<String> = movement_flag(cfg, &d).into_iter().collect();
+            let movement: Vec<String> = movement_flag(cfg, &d, patch.as_deref()).into_iter().collect();
             checks.push(test_invalidation(paths, spec, run, &d, patch.as_deref(), &movement)?);
-            checks.push(test_movement(paths, cfg, spec, &d));
+            checks.push(test_movement(paths, cfg, spec, &d, patch.as_deref()));
         }
         Err(e) => {
             checks.push(Check::blocked("test-invalidation", format!("could not read the diff: {e}")));
@@ -377,9 +377,17 @@ fn flags_text(hits: &[String], extra: &[String]) -> String {
 
 /// The review flag for code that changed with no test beside it, naming the
 /// files so a sign-off binds to exactly this change.
-fn movement_flag(cfg: &Config, d: &diff::Diff) -> Option<String> {
-    let is_test = |p: &str| crate::map::rank::is_test(p);
-    let counted = |f: &&diff::FileChange| !crate::gate::g2::is_incidental_for(cfg, &f.path);
+///
+/// Documentation is neither code nor a test, so a prose-only change has nothing
+/// to exercise and raises no flag. A source file whose added lines introduce an
+/// inline `#[test]`/`#[cfg(test)]` — Rust's dominant convention, which moves no
+/// separate file — is tested by definition and counts as test movement.
+fn movement_flag(cfg: &Config, d: &diff::Diff, patch: Option<&str>) -> Option<String> {
+    let inline = patch.map(inline_test_files).unwrap_or_default();
+    let is_test = |p: &str| crate::map::rank::is_test(p) || inline.contains(p);
+    let counted = |f: &&diff::FileChange| {
+        !crate::gate::g2::is_incidental_for(cfg, &f.path) && !is_docs(&f.path)
+    };
     if d.files.iter().filter(counted).any(|f| is_test(&f.path)) {
         return None;
     }
@@ -387,27 +395,58 @@ fn movement_flag(cfg: &Config, d: &diff::Diff) -> Option<String> {
     (!code.is_empty()).then(|| format!("test-movement: no test changed with {}", code.join(", ")))
 }
 
+/// Documentation files carry prose, not behaviour: there is nothing for an
+/// oracle to exercise, so a docs-only change must not demand a moved test.
+/// Config files (`*.toml`, `*.yaml`, `*.json`) are deliberately excluded —
+/// their existing treatment as substantive is unchanged.
+fn is_docs(path: &str) -> bool {
+    let lower = path.to_ascii_lowercase();
+    lower.ends_with(".md")
+        || lower.ends_with(".markdown")
+        || lower.ends_with(".rst")
+        || lower.ends_with(".adoc")
+        || lower.ends_with(".txt")
+}
+
+/// Files whose added lines introduce an inline Rust test attribute. Only added
+/// lines count: a removed `#[test]` is a deletion, not test movement.
+fn inline_test_files(patch: &str) -> std::collections::BTreeSet<String> {
+    let mut files = std::collections::BTreeSet::new();
+    let mut current = String::new();
+    for line in patch.lines() {
+        if let Some(rest) = line.strip_prefix("+++ b/") {
+            current = rest.trim().to_string();
+            continue;
+        }
+        let Some(added) = line.strip_prefix('+') else { continue };
+        if added.starts_with("++") {
+            continue;
+        }
+        let t = added.trim_start();
+        if t.starts_with("#[test]") || t.starts_with("#[cfg(test)]") {
+            files.insert(current.clone());
+        }
+    }
+    files
+}
+
 /// Code changed with no test changed at all is worth a look; so is the reverse.
 /// A human can say "the oracles cover this" with `keel approve --stage review`,
 /// which binds to the flag naming these files.
-fn test_movement(paths: &Paths, cfg: &Config, spec: &Spec, d: &diff::Diff) -> Check {
-    if movement_flag(cfg, d).is_some()
+fn test_movement(paths: &Paths, cfg: &Config, spec: &Spec, d: &diff::Diff, patch: Option<&str>) -> Check {
+    if movement_flag(cfg, d, patch).is_some()
         && let Ok(crate::approval::Standing::Current { by, .. }) =
             crate::approval::standing(paths, &spec.front.slug, "review")
     {
         return Check::pass("test-movement", format!("no test changed; reviewed and accepted by {by}"));
     }
-    let is_test = |p: &str| crate::map::rank::is_test(p);
-    let changed_tests = d
-        .files
-        .iter()
-        .filter(|f| is_test(&f.path) && !crate::gate::g2::is_incidental_for(cfg, &f.path))
-        .count();
-    let changed_code = d
-        .files
-        .iter()
-        .filter(|f| !is_test(&f.path) && !crate::gate::g2::is_incidental_for(cfg, &f.path))
-        .count();
+    let inline = patch.map(inline_test_files).unwrap_or_default();
+    let is_test = |p: &str| crate::map::rank::is_test(p) || inline.contains(p);
+    let counted = |f: &&diff::FileChange| {
+        !crate::gate::g2::is_incidental_for(cfg, &f.path) && !is_docs(&f.path)
+    };
+    let changed_tests = d.files.iter().filter(counted).filter(|f| is_test(&f.path)).count();
+    let changed_code = d.files.iter().filter(counted).filter(|f| !is_test(&f.path)).count();
 
     if changed_code > 0 && changed_tests == 0 {
         return Check::blocked(
@@ -555,29 +594,66 @@ mod tests {
         }
     }
 
+    fn file(path: &str, added: usize) -> diff::FileChange {
+        diff::FileChange { path: path.into(), added, removed: 0, binary: false }
+    }
+
+    fn diff_of(files: Vec<diff::FileChange>) -> diff::Diff {
+        let added = files.iter().map(|f| f.added).sum();
+        diff::Diff { base: "HEAD".into(), files, added, removed: 0 }
+    }
+
+    /// A `Spec` and a `Paths` pointing at a directory with no approval log, so
+    /// the review-sign-off branch of `test_movement` never fires and only the
+    /// code/test/docs classification is under test.
+    fn fixture() -> (crate::paths::Paths, Spec) {
+        let paths = crate::paths::Paths { repo: std::env::temp_dir().join("keel-g25-no-such-run") };
+        let spec = Spec::parse(
+            std::path::Path::new("spec.md"),
+            "---\nid: SPEC-0000\nslug: fixture\n---\n\n# Fixture\n",
+        )
+        .expect("minimal spec parses");
+        (paths, spec)
+    }
+
+    #[test]
+    fn docs_only_change_does_not_block_test_movement() {
+        let (paths, spec) = fixture();
+        let d = diff_of(vec![file("README.md", 30), file("GETTING-STARTED.md", 10)]);
+        let check = test_movement(&paths, &Config::default(), &spec, &d, None);
+        assert_eq!(check.verdict, crate::gate::Verdict::Pass, "{:?}", check.detail);
+    }
+
     #[test]
     fn code_without_tests_is_flagged_for_a_look() {
-        let d = diff::Diff {
-            base: "HEAD".into(),
-            files: vec![diff::FileChange { path: "src/api.rs".into(), added: 40, removed: 0, binary: false }],
-            added: 40,
-            removed: 0,
-        };
-        let flag = movement_flag(&Config::default(), &d).expect("code without tests is flagged");
-        assert!(flag.contains("src/api.rs"), "{flag}");
+        let (paths, spec) = fixture();
+        let d = diff_of(vec![file("src/api.rs", 40)]);
+        let check = test_movement(&paths, &Config::default(), &spec, &d, None);
+        assert_eq!(check.verdict, crate::gate::Verdict::Blocked, "{:?}", check.detail);
+    }
+
+    #[test]
+    fn docs_do_not_mask_a_missing_test() {
+        let (paths, spec) = fixture();
+        let d = diff_of(vec![file("src/api.rs", 40), file("README.md", 10)]);
+        let check = test_movement(&paths, &Config::default(), &spec, &d, None);
+        assert_eq!(check.verdict, crate::gate::Verdict::Blocked, "{:?}", check.detail);
     }
 
     #[test]
     fn code_with_tests_passes() {
-        let d = diff::Diff {
-            base: "HEAD".into(),
-            files: vec![
-                diff::FileChange { path: "src/api.rs".into(), added: 40, removed: 0, binary: false },
-                diff::FileChange { path: "tests/api.rs".into(), added: 20, removed: 0, binary: false },
-            ],
-            added: 60,
-            removed: 0,
-        };
-        assert_eq!(movement_flag(&Config::default(), &d), None);
+        let (paths, spec) = fixture();
+        let d = diff_of(vec![file("src/api.rs", 40), file("tests/api.rs", 20)]);
+        let check = test_movement(&paths, &Config::default(), &spec, &d, None);
+        assert_eq!(check.verdict, crate::gate::Verdict::Pass, "{:?}", check.detail);
+    }
+
+    #[test]
+    fn inline_rust_tests_count_as_test_movement() {
+        let (paths, spec) = fixture();
+        let d = diff_of(vec![file("src/api.rs", 40)]);
+        let patch = "+++ b/src/api.rs\n+pub fn f() {}\n+#[cfg(test)]\n+mod tests {\n+    #[test]\n+    fn works() {}\n+}\n";
+        let check = test_movement(&paths, &Config::default(), &spec, &d, Some(patch));
+        assert_eq!(check.verdict, crate::gate::Verdict::Pass, "{:?}", check.detail);
     }
 }
