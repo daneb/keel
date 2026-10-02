@@ -1,0 +1,11 @@
+{
+  "schema": "keel.run/1",
+  "id": "2026-10-01-006",
+  "spec": "copilot-credential-preflight",
+  "keel_version": "0.11.0",
+  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
+  "started_at": "2026-10-01T20:18:16.208468+02:00",
+  "finished_at": "2026-10-01T20:20:15.865886+02:00",
+  "verdict": "blocked",
+  "base_commit": "2a3ce524188404586bf4866cbb154f650315e80e"
+}

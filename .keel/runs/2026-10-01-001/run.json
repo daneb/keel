@@ -1,0 +1,12 @@
+{
+  "schema": "keel.run/1",
+  "id": "2026-10-01-001",
+  "spec": "copilot-credential-preflight",
+  "driver": "kiro",
+  "keel_version": "0.11.0",
+  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
+  "started_at": "2026-10-01T19:55:30.278687+02:00",
+  "finished_at": "2026-10-01T20:01:52.410542+02:00",
+  "verdict": "fail",
+  "base_commit": "07bae2617b6f33b98a4ea900af9b0bbf2e4ac5ed"
+}

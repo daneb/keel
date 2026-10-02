@@ -1,0 +1,90 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G0",
+  "run": "2026-10-01-002",
+  "spec": "copilot-credential-preflight",
+  "verdict": "pass",
+  "generated_at": "2026-10-01T19:59:57.286454+02:00",
+  "checks": [
+    {
+      "id": "schema",
+      "verdict": "pass",
+      "detail": "SPEC-0010 (keel.spec/1)"
+    },
+    {
+      "id": "criteria-present",
+      "verdict": "pass",
+      "detail": "6 criteria"
+    },
+    {
+      "id": "criterion-ids-unique",
+      "verdict": "pass",
+      "detail": "no duplicate ids"
+    },
+    {
+      "id": "no-placeholders",
+      "verdict": "pass",
+      "detail": "no unfilled scaffold text"
+    },
+    {
+      "id": "ears-conformance",
+      "verdict": "pass",
+      "detail": "6/6 conform (event-driven, optional-feature, unwanted-behaviour)"
+    },
+    {
+      "id": "oracle-presence",
+      "verdict": "pass",
+      "detail": "6 oracles across 6 criteria"
+    },
+    {
+      "id": "oracle-wellformed",
+      "verdict": "pass",
+      "detail": "all oracles parse"
+    },
+    {
+      "id": "ambiguity",
+      "verdict": "pass",
+      "detail": "no ambiguous phrasing in criteria"
+    },
+    {
+      "id": "criterion-budget",
+      "verdict": "pass",
+      "detail": "6/6 criteria"
+    },
+    {
+      "id": "spec-length",
+      "verdict": "pass",
+      "detail": "92/250 lines"
+    },
+    {
+      "id": "scope-declared",
+      "verdict": "pass",
+      "detail": "2 glob(s): .keel/drivers/copilot, .keel/drivers/_common.sh"
+    },
+    {
+      "id": "change-budget",
+      "verdict": "pass",
+      "detail": "120 lines of diff budgeted"
+    },
+    {
+      "id": "oracle-mix",
+      "verdict": "pass",
+      "detail": "3/6 runnable (3 cmd, 3 human)"
+    },
+    {
+      "id": "human-cost",
+      "verdict": "pass",
+      "detail": "3 criteria verifiable only by a person — budget review time: AC-4 (human: with a real gho_ device-flow token set, the driver reaches and runs copilot -p rather than blocking in preflight); AC-5 (human: with COPILOT_GH_HOST set, the driver exports/passes it so copilot targets that host — reviewed against the driver source); AC-6 (human: starting a --waves copilot build with no credential leaves .keel/worktrees/ with no new entry)"
+    },
+    {
+      "id": "store-drift",
+      "verdict": "pass",
+      "detail": "4 projections current"
+    },
+    {
+      "id": "shared-stores",
+      "verdict": "pass",
+      "detail": "none configured"
+    }
+  ]
+}
