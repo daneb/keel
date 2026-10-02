@@ -1,0 +1,37 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G2.5",
+  "run": "2026-10-01-009",
+  "spec": "test-movement-docs-aware",
+  "verdict": "blocked",
+  "generated_at": "2026-10-01T21:50:51.452822+02:00",
+  "checks": [
+    {
+      "id": "test-invalidation",
+      "verdict": "pass",
+      "detail": "no mocks or weakened assertions added",
+      "evidence": "evidence/review-test-invalidation.txt"
+    },
+    {
+      "id": "test-movement",
+      "verdict": "blocked",
+      "detail": "1 code file(s) changed and no test file did — confirm the criteria's oracles exercise this, then `keel approve --stage review test-movement-docs-aware`"
+    },
+    {
+      "id": "conventions",
+      "verdict": "pass",
+      "detail": "4 house rule(s) in force"
+    },
+    {
+      "id": "lessons",
+      "verdict": "pass",
+      "detail": "3 lesson(s) in force"
+    },
+    {
+      "id": "review",
+      "verdict": "pass",
+      "detail": "0 finding(s) (0.3s)",
+      "evidence": "evidence/review.json"
+    }
+  ]
+}

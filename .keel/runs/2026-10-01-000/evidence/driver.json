@@ -1,0 +1,6 @@
+{
+  "schema": "keel.driverresult/1",
+  "status": "blocked",
+  "files_changed": [],
+  "detail": "claude exited non-zero: Not logged in · Please run /login"
+}

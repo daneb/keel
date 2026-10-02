@@ -1,0 +1,20 @@
+{
+  "schema": "keel.driverresult/1",
+  "status": "ok",
+  "files_changed": [
+    ".gitignore",
+    ".keel/drivers/copilot",
+    ".keel/lesson-usage.json",
+    "src/gate/g25.rs",
+    ".keel/chain.jsonl",
+    ".keel/runs/2026-09-23-000/",
+    ".keel/runs/2026-09-23-001/",
+    ".keel/runs/2026-09-23-002/",
+    ".keel/runs/2026-09-23-003/",
+    ".keel/runs/2026-10-01-000/",
+    ".keel/runs/2026-10-01-001/",
+    ".keel/specs/copilot-credential-preflight/",
+    ".keel/specs/test-movement-docs-aware/"
+  ],
+  "detail": "kiro-cli completed"
+}

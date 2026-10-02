@@ -1,0 +1,12 @@
+{
+  "schema": "keel.run/1",
+  "id": "2026-10-01-008",
+  "spec": "test-movement-docs-aware",
+  "driver": "kiro",
+  "keel_version": "0.11.0",
+  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
+  "started_at": "2026-10-01T21:37:12.437833+02:00",
+  "finished_at": "2026-10-01T21:50:51.559305+02:00",
+  "verdict": "fail",
+  "base_commit": "079efd7b555920be981fcc7f6463f8cb1fe7911e"
+}

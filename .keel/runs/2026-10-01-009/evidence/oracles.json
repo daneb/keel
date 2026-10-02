@@ -1,0 +1,50 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "cmd",
+      "oracle": "`cargo test --bin keel gate::g25::tests::docs_only_change_does_not_block_test_movement` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest gate::g25::tests::docs_only_change_does_not_block_test_movement ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 295 filtered out; finished in 0.02s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.56s\n     Running unittests src/main.rs (target/debug/deps/keel-62724dcf7fef79be)"
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "cmd",
+      "oracle": "`cargo test --bin keel gate::g25::tests::code_without_tests_is_flagged_for_a_look` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest gate::g25::tests::code_without_tests_is_flagged_for_a_look ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 295 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.39s\n     Running unittests src/main.rs (target/debug/deps/keel-62724dcf7fef79be)"
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "cmd",
+      "oracle": "`cargo test --bin keel gate::g25::tests::docs_do_not_mask_a_missing_test` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest gate::g25::tests::docs_do_not_mask_a_missing_test ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 295 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.37s\n     Running unittests src/main.rs (target/debug/deps/keel-62724dcf7fef79be)"
+    },
+    {
+      "criterion": "AC-4",
+      "kind": "cmd",
+      "oracle": "`cargo test --bin keel gate::g25::tests::code_with_tests_passes` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest gate::g25::tests::code_with_tests_passes ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 295 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.40s\n     Running unittests src/main.rs (target/debug/deps/keel-62724dcf7fef79be)"
+    },
+    {
+      "criterion": "AC-5",
+      "kind": "cmd",
+      "oracle": "`cargo test --bin keel gate::g25::tests::inline_rust_tests_count_as_test_movement` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest gate::g25::tests::inline_rust_tests_count_as_test_movement ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 295 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.38s\n     Running unittests src/main.rs (target/debug/deps/keel-62724dcf7fef79be)"
+    }
+  ],
+  "criteria": 5,
+  "executed": 5,
+  "passed": 5,
+  "failed": 0,
+  "blocked": 0,
+  "human": 0
+}

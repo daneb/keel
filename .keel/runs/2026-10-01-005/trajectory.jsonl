@@ -1,0 +1,24 @@
+{"t":"2026-10-01T20:14:27.992903+02:00","seq":1,"kind":"run_start","spec":"copilot-credential-preflight","keel_version":"0.11.0","store_hash":"0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2"}
+{"t":"2026-10-01T20:14:27.993560+02:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":424,"bytes":1693}
+{"t":"2026-10-01T20:14:27.993595+02:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
+{"t":"2026-10-01T20:14:27.993655+02:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6268,"bytes":25071}
+{"t":"2026-10-01T20:14:27.994006+02:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
+{"t":"2026-10-01T20:14:27.994115+02:00","seq":6,"kind":"inject","source":".keel/specs/copilot-credential-preflight/spec.md","tokens":961,"bytes":3842}
+{"t":"2026-10-01T20:14:41.333050+02:00","seq":7,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
+{"t":"2026-10-01T20:15:32.570010+02:00","seq":8,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
+{"t":"2026-10-01T20:15:41.842418+02:00","seq":9,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
+{"t":"2026-10-01T20:15:41.945455+02:00","seq":10,"kind":"oracle","criterion":"AC-1","oracle":"`COPILOT_GITHUB_TOKEN=ghp_x .keel/drivers/copilot < /dev/null 2>&1 | grep -qi blocked` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-10-01T20:15:41.945489+02:00","seq":11,"kind":"oracle","criterion":"AC-2","oracle":"`.keel/drivers/copilot < /dev/null 2>&1 | grep -q \"copilot /login\"` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-10-01T20:15:41.945495+02:00","seq":12,"kind":"oracle","criterion":"AC-3","oracle":"`env -u COPILOT_GITHUB_TOKEN -u GH_TOKEN -u GITHUB_TOKEN .keel/drivers/copilot < /dev/null 2>&1 | grep -qi blocked` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-10-01T20:15:41.945499+02:00","seq":13,"kind":"oracle","criterion":"AC-4","oracle":"human: with a real gho_ device-flow token set, the driver reaches and runs copilot -p rather than blocking in preflight","verdict":"human"}
+{"t":"2026-10-01T20:15:41.945502+02:00","seq":14,"kind":"oracle","criterion":"AC-5","oracle":"human: with COPILOT_GH_HOST set, the driver exports/passes it so copilot targets that host — reviewed against the driver source","verdict":"human"}
+{"t":"2026-10-01T20:15:41.945505+02:00","seq":15,"kind":"oracle","criterion":"AC-6","oracle":"human: starting a --waves copilot build with no credential leaves .keel/worktrees/ with no new entry","verdict":"human"}
+{"t":"2026-10-01T20:16:31.848334+02:00","seq":16,"kind":"gate","gate":"G2","verdict":"pass","result":"gates/G2.json"}
+{"t":"2026-10-01T20:16:32.230011+02:00","seq":17,"kind":"gate","gate":"G2.5","verdict":"pass","result":"gates/G2.5.json"}
+{"t":"2026-10-01T20:16:32.286424+02:00","seq":18,"kind":"gate","gate":"G3","verdict":"fail","result":"gates/G3.json"}
+{"t":"2026-10-01T20:16:32.286446+02:00","seq":19,"kind":"run_end","verdict":"fail","duration_ms":124355}
+{"t":"2026-10-01T20:17:49.758156+02:00","seq":20,"kind":"human","stage":"review","decision":"approved","by":"Dane Balia"}
+{"t":"2026-10-01T20:17:53.825587+02:00","seq":21,"kind":"human","stage":"merge","decision":"approved","by":"Dane Balia"}
+{"t":"2026-10-01T20:18:02.537798+02:00","seq":22,"kind":"human","stage":"review","decision":"approved","by":"Dane Balia"}
+{"t":"2026-10-01T20:18:02.554075+02:00","seq":23,"kind":"human","stage":"merge","decision":"approved","by":"Dane Balia"}
+{"t":"2026-10-01T20:18:16.149760+02:00","seq":24,"kind":"human","stage":"plan","decision":"approved","by":"Dane Balia"}
