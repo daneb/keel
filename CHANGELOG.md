@@ -7,6 +7,26 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.11.1] - 2026-10-02
+
+### Added
+
+- **G2.5 test-movement counts only testable code.** A change that touches
+  source now triggers the moved-test check only when it moves *testable* code:
+  a docs-only change (comments, Markdown, strings) no longer blocks on a
+  missing test, and a source file that gains inline `#[test]` or `#[cfg(test)]`
+  functions counts as test movement in its own right, so a test co-located with
+  the code it covers is recognised rather than demanded elsewhere.
+- **The Copilot driver preflights its credential.** Before handing a task to
+  the agent, the driver checks that a usable Copilot credential is present and
+  fails fast with a clear message when it is not, instead of letting the run
+  reach the agent and die partway through.
+
+### Security
+
+- **`rustls` bumped to 0.23.45 for RUSTSEC-2026-0285.** A transitive advisory;
+  the lockfile now resolves the patched release.
+
 ## [0.11.0] - 2026-09-29
 
 ### Added
