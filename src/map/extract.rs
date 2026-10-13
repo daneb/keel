@@ -95,7 +95,7 @@ impl Extractor {
         while let Some(mat) = m.next() {
             let mut def = None;
             let mut name = None;
-            for cap in mat.captures {
+            for cap in mat.captures() {
                 match defs.capture_names()[cap.index as usize] {
                     "def" => def = Some(cap.node),
                     "name" => name = Some(cap.node),
@@ -139,7 +139,7 @@ impl Extractor {
         let mut cursor = QueryCursor::new();
         let mut m = cursor.matches(imports, root, source);
         while let Some(mat) = m.next() {
-            for cap in mat.captures {
+            for cap in mat.captures() {
                 if imports.capture_names()[cap.index as usize] != "path" { continue; }
                 let t = text(&cap.node, source);
                 let t = t.trim_matches(['"', '`', '\''].as_ref()).to_string();
@@ -160,7 +160,7 @@ impl Extractor {
         let mut seen: std::collections::HashMap<String, (usize, usize)> = Default::default();
         let mut m = cursor.matches(refs_q, root, source);
         while let Some(mat) = m.next() {
-            for cap in mat.captures {
+            for cap in mat.captures() {
                 if refs_q.capture_names()[cap.index as usize] != "ref" {
                     continue;
                 }
