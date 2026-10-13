@@ -39,6 +39,7 @@ what the code does, which the code already provides.
 | [ADR-0022](ADR-0022-no-driver-diffs-from-the-branch-point.md) | field | `--no-driver` diffs from where the branch left trunk, not from HEAD |
 | [ADR-0023](ADR-0023-drivers-ship-embedded-and-config-is-appended-not-rewritten.md) | field | Driver scripts ship embedded; `keel.toml` is edited by appending text, never rewritten |
 | [ADR-0024](ADR-0024-security-findings-are-graded-and-accepted-by-identity.md) | field | Security findings carry a grade beside severity; an acceptance binds to finding identity |
+| [ADR-0025](ADR-0025-skills-are-authoring-behaviour-not-a-keel-concept.md) | field | Agent "skills" are not a keel concept; a grilling step is set aside as premature on the run evidence |
 
 **Not recorded here.** Decisions the plan already fixes (EARS, the gate pipeline
 shape, the four attribution codes) are PLAN.md's, not keel's. An ADR that only
