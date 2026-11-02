@@ -19,6 +19,9 @@ use std::path::PathBuf;
 pub enum Decision {
     Approved,
     Rejected,
+    /// The spec was retired without shipping. Recorded in the same log as
+    /// approvals so the decision, its author and its reason are auditable.
+    Abandoned,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -83,6 +86,12 @@ pub fn review_flags_path(paths: &Paths, slug: &str) -> PathBuf {
 
 /// Stages a human can sign off on, in pipeline order.
 pub const STAGES: &[&str] = &["spec", "plan", "review", "security", "merge"];
+
+/// The stage string used for an abandonment record. A spec-level decision, so
+/// `artefact_names` hashes `spec.md` for it via the default arm. Not in
+/// `STAGES`: it is not a sign-off gate `keel approve` offers, it is the
+/// terminal decision `keel spec abandon` records.
+pub const ABANDON_STAGE: &str = "abandon";
 
 /// Hash of the artefact a stage signs off on. For the plan stage this covers
 /// `tasks.md` too — approving a plan whose task list can then change freely

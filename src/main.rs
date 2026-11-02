@@ -345,6 +345,17 @@ enum SpecCmd {
     },
     /// List specs with their gate verdicts
     List,
+    /// Retire a spec without shipping it, recording who and why
+    Abandon {
+        /// Spec slug; optional when there is only one spec
+        slug: Option<String>,
+        /// Why the spec is being abandoned (required, non-empty)
+        #[arg(long)]
+        reason: String,
+        /// Abandon even a completed (merge-approved) spec
+        #[arg(long)]
+        force: bool,
+    },
     /// Print the authoring prompt for an agent
     Prompt { slug: String },
 }
@@ -576,6 +587,9 @@ fn run() -> Result<i32> {
             cmd::spec::new(&slug, title, scope, force)
         }
         Command::Spec(SpecCmd::List) => cmd::spec::list(),
+        Command::Spec(SpecCmd::Abandon { slug, reason, force }) => {
+            cmd::spec::abandon(slug, reason, force)
+        }
         Command::Spec(SpecCmd::Prompt { slug }) => cmd::spec::print_prompt(&slug),
         Command::Plan { slug, depth } => cmd::plan::run(slug, depth),
         Command::Tasks { slug, json } => cmd::tasks::run(slug, json),

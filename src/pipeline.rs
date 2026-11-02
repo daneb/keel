@@ -43,6 +43,11 @@ pub enum Stage {
     MergeApproval,
     /// All done.
     Complete,
+    /// Retired without shipping: the operator decided this spec will not be
+    /// built. Terminal, and ranked after `Complete` so "furthest along"
+    /// comparisons never place an abandoned spec below an open one. Driven by
+    /// the spec's `status: abandoned`, not by gates or approvals.
+    Abandoned,
 }
 
 impl Stage {
@@ -56,6 +61,7 @@ impl Stage {
             Self::Run => "run",
             Self::MergeApproval => "approve merge",
             Self::Complete => "done",
+            Self::Abandoned => "abandoned",
         }
     }
 
@@ -73,6 +79,7 @@ impl Stage {
             Self::Run => "run",
             Self::MergeApproval => "merge_approval",
             Self::Complete => "complete",
+            Self::Abandoned => "abandoned",
         }
     }
 }
@@ -102,8 +109,39 @@ fn passed(g: &Option<GateResult>) -> bool {
     matches!(g, Some(r) if r.verdict == Verdict::Pass)
 }
 
+/// The `status` value that marks a spec abandoned. Shared with the command
+/// that writes it, so the reader and writer cannot drift.
+pub const ABANDONED_STATUS: &str = "abandoned";
+
+/// True when the spec's front matter marks it abandoned. An unreadable spec is
+/// not abandoned — it falls through to the ordinary derivation, which will
+/// surface the real problem rather than silently hiding the spec.
+fn is_abandoned(paths: &Paths, slug: &str) -> bool {
+    crate::spec::Spec::load(paths, slug)
+        .map(|s| s.front.status == ABANDONED_STATUS)
+        .unwrap_or(false)
+}
+
 /// Evaluate a spec's position once.
 pub fn position(paths: &Paths, slug: &str) -> Position {
+    // A spec the operator has abandoned is terminal regardless of its gates or
+    // approvals: the decision is "this will not be built", recorded as
+    // `status: abandoned` in the spec front matter. Read it first so no gate
+    // or approval evidence is consulted — which is also what makes
+    // abandonment reversible (clear the status and the derived stage returns).
+    if is_abandoned(paths, slug) {
+        return Position {
+            stage: Stage::Abandoned,
+            g0: None,
+            g1: None,
+            g1_stale: false,
+            spec_approval: Standing::Absent,
+            plan_approval: Standing::Absent,
+            merge_approval: Standing::Absent,
+            passing_run: None,
+        };
+    }
+
     let g0 = gate::previous(paths, slug, "G0");
     let spec_approval = standing_or_absent(paths, slug, "spec");
     let has_plan = Plan::load(paths, slug).is_ok();

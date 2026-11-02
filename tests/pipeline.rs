@@ -288,3 +288,154 @@ fn an_incomplete_spec_still_approves_normally() {
     assert_eq!(code, 0, "a spec that is not complete must approve as before");
     assert!(r.read(".keel/specs/demo/approvals.jsonl").contains("\"stage\":\"spec\""));
 }
+
+// --- spec abandonment (SPEC-0018) -------------------------------------------
+
+/// The `status:` value in a spec's front matter.
+fn spec_status(r: &Repo) -> String {
+    r.read(".keel/specs/demo/spec.md")
+        .lines()
+        .find_map(|l| l.trim().strip_prefix("status:").map(|s| s.trim().to_string()))
+        .expect("spec has a status field")
+}
+
+/// The compact stage label `keel next` prints for `demo` in the multi-spec
+/// listing, so a second spec exists to force the listing path.
+fn listed_stage(r: &Repo, slug: &str) -> String {
+    r.write(
+        ".keel/specs/other/spec.md",
+        "---\nid: SPEC-9999\nslug: other\nschema: keel.spec/1\nstatus: draft\n\
+         scope:\n  - \"src/**\"\nbudget:\n  criteria: 6\n  lines: 120\n---\n\n\
+         # Other\n\n## Acceptance criteria\n\n### AC-1 It holds\n\n\
+         THE SYSTEM SHALL hold.\n\noracle: cmd `true` exit 0\n",
+    );
+    let (_, out) = r.run(&["next"]);
+    out.lines()
+        .find(|l| l.trim_start().starts_with(slug))
+        .map(|l| l.trim().to_string())
+        .unwrap_or_default()
+}
+
+#[test]
+fn an_abandoned_status_is_a_terminal_stage() {
+    // AC-1: the status alone makes the stage terminal, over any gate state.
+    let r = Repo::ready("abandon-terminal"); // G0 + G1 passed, spec approved
+    r.ok(&["spec", "abandon", "demo", "--reason", "superseded by a neighbour"]);
+    assert!(
+        headline(&r, "demo").contains("abandoned"),
+        "an abandoned spec's stage should be terminal regardless of its gates"
+    );
+}
+
+#[test]
+fn keel_next_json_marks_an_abandoned_spec_complete() {
+    // AC-2: a consumer filtering on `!complete` must drop an abandoned spec.
+    let r = Repo::bare("abandon-json");
+    r.write_spec();
+    r.ok(&["gate", "g0", "demo"]);
+    r.ok(&["spec", "abandon", "demo", "--reason", "not pursuing this"]);
+
+    let out = r.ok(&["next", "--json"]);
+    let v: serde_json::Value = serde_json::from_str(&out).expect("valid JSON");
+    let demo = v["specs"].as_array().unwrap().iter()
+        .find(|s| s["slug"] == "demo").expect("demo is listed");
+    assert_eq!(demo["complete"], serde_json::Value::Bool(true), "abandoned ⇒ complete: {out}");
+    assert_eq!(demo["stage"], "abandoned");
+}
+
+#[test]
+fn abandon_sets_status_and_records_the_reason() {
+    // AC-3: status flips to abandoned, and the reason is logged with the actor.
+    let r = Repo::bare("abandon-record");
+    r.write_spec();
+    r.ok(&["gate", "g0", "demo"]);
+    r.ok(&["spec", "abandon", "demo", "--reason", "duplicate of SPEC-1"]);
+
+    assert_eq!(spec_status(&r), "abandoned");
+    let log = r.read(".keel/specs/demo/approvals.jsonl");
+    assert!(log.contains("\"decision\":\"abandoned\""), "decision recorded: {log}");
+    assert!(log.contains("duplicate of SPEC-1"), "reason recorded: {log}");
+    assert!(log.contains("\"by\":"), "actor recorded: {log}");
+}
+
+#[test]
+fn abandon_refuses_an_empty_reason() {
+    // AC-4: a blank reason is refused and nothing changes.
+    let r = Repo::bare("abandon-empty");
+    r.write_spec();
+    r.ok(&["gate", "g0", "demo"]);
+
+    let (code, _) = r.run(&["spec", "abandon", "demo", "--reason", "   "]);
+    assert_ne!(code, 0, "a whitespace-only reason must be refused");
+    assert_eq!(spec_status(&r), "draft", "status must be unchanged after a refusal");
+    assert!(!r.exists(".keel/specs/demo/approvals.jsonl"), "nothing should be recorded");
+}
+
+#[test]
+fn abandoning_a_complete_spec_needs_force() {
+    // AC-5: a merge-approved spec is refused unless --force.
+    let r = completed_repo("abandon-complete");
+
+    let (code, out) = r.run(&["spec", "abandon", "demo", "--reason", "retiring a shipped spec"]);
+    assert_ne!(code, 0, "abandoning a complete spec should fail without --force: {out}");
+    assert_ne!(spec_status(&r), "abandoned", "status must be unchanged on refusal");
+
+    r.ok(&["spec", "abandon", "demo", "--reason", "retiring a shipped spec", "--force"]);
+    assert_eq!(spec_status(&r), "abandoned", "--force should carry it through");
+}
+
+#[test]
+fn clearing_abandoned_status_restores_the_derived_stage() {
+    // AC-6: abandonment touches no gate/approval evidence, so reverting the
+    // status returns the spec to exactly the stage it had before.
+    let r = Repo::bare("abandon-reversible");
+    r.write_spec();
+    r.ok(&["gate", "g0", "demo"]);
+    let before = headline(&r, "demo"); // sitting at spec_approval
+
+    r.ok(&["spec", "abandon", "demo", "--reason", "changed my mind shortly"]);
+    assert!(headline(&r, "demo").contains("abandoned"));
+
+    // Clear the status by hand — the documented revive path.
+    let raw = r.read(".keel/specs/demo/spec.md").replace("status: abandoned", "status: draft");
+    r.write(".keel/specs/demo/spec.md", &raw);
+
+    assert_eq!(headline(&r, "demo"), before, "the derived stage should return unchanged");
+}
+
+#[test]
+fn abandoned_stage_has_a_stable_key_and_label() {
+    // AC-7: the wire key is `abandoned` and the human label is distinct.
+    let r = Repo::bare("abandon-key");
+    r.write_spec();
+    r.ok(&["gate", "g0", "demo"]);
+    r.ok(&["spec", "abandon", "demo", "--reason", "wire contract check"]);
+
+    let out = r.ok(&["next", "--json"]);
+    let v: serde_json::Value = serde_json::from_str(&out).unwrap();
+    let demo = v["specs"].as_array().unwrap().iter()
+        .find(|s| s["slug"] == "demo").unwrap();
+    assert_eq!(demo["stage"], "abandoned", "stable wire key");
+
+    assert_eq!(listed_stage(&r, "demo").split_whitespace().last(), Some("abandoned"),
+        "the human label is distinct and legible");
+}
+
+#[test]
+fn declaration_order_keeps_abandoned_terminal() {
+    // AC-8: an abandoned spec is not treated as open. With another spec still
+    // in progress, `keel next` guides to the open one and not the abandoned.
+    let r = Repo::bare("abandon-order");
+    r.write_spec();
+    r.ok(&["gate", "g0", "demo"]);
+    r.ok(&["spec", "abandon", "demo", "--reason", "retired while other work is open"]);
+
+    // `other` is a live spec that never passed G0.
+    let _ = listed_stage(&r, "other");
+    let (_, out) = r.run(&["next"]);
+    assert!(out.contains("other"), "the open spec should still be guided: {out}");
+    assert!(
+        !out.contains("[demo]") && !out.contains("fix `demo`"),
+        "the abandoned spec must not appear as work to do: {out}"
+    );
+}
