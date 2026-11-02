@@ -2,9 +2,9 @@
 id: SPEC-0018
 slug: rustls-advisories
 schema: keel.spec/1
-status: draft
+status: approved
 scope:
-  - "Cargo.lock"
+- Cargo.lock
 budget:
   criteria: 8
   lines: 120
@@ -82,7 +82,7 @@ oracle: cmd `cargo test --quiet` exit 0
 THE SYSTEM SHALL change only `Cargo.lock`, leaving every file under `src/` and
 `tests/` untouched, so the upgrade is auditable as a dependency bump alone.
 
-oracle: cmd `git diff --name-only HEAD -- src tests | wc -l | grep -qx 0` exit 0
+oracle: cmd `test -z "$(git diff --name-only HEAD -- src tests)"` exit 0
 
 ### AC-8 Lint stays clean
 

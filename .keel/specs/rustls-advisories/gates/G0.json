@@ -1,10 +1,10 @@
 {
   "schema": "keel.gate/1",
   "gate": "G0",
-  "run": "2026-11-02-001",
+  "run": "2026-11-02-002",
   "spec": "rustls-advisories",
   "verdict": "pass",
-  "generated_at": "2026-11-02T12:27:10.082303+02:00",
+  "generated_at": "2026-11-02T13:03:43.783252+02:00",
   "checks": [
     {
       "id": "schema",

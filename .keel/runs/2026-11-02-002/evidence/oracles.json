@@ -1,0 +1,71 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "cmd",
+      "oracle": "`cargo audit --quiet` exits 0",
+      "outcome": "fail",
+      "exit_code": 1,
+      "detail": "expected exit 0, got 1",
+      "output": "error: couldn't fetch advisory database: git operation failed: failed to prepare fetch\nCaused by:\n  -> An IO error occurred when talking to the server\n  -> error sending request for url (https://github.com/RustSec/advisory-db.git/info/refs?service=git-upload-pack)"
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "cmd",
+      "oracle": "`cargo tree -p rustls --depth 0 | grep -qE 'v0\\.(2[3-9]|[3-9][0-9])\\.(4[6-9]|[5-9][0-9])'` exits 0",
+      "outcome": "pass",
+      "exit_code": 0
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "cmd",
+      "oracle": "`cargo audit --quiet` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "Crate:     unsafe-libyaml\nVersion:   0.2.11\nWarning:   unmaintained\nTitle:     unsafe-libyaml is unmaintained\nDate:      2024-03-25\nID:        RUSTSEC-2024-0449\nURL:       https://rustsec.org/advisories/RUSTSEC-2024-0449\n\nCrate:     tokio\nVersion:   1.53.1\nWarning:   unsound\nTitle:     `AsyncFd::new` and related constructors violate I/O safety\nDate:      2026-10-13\nID:        RUSTSEC-2026-0386\nURL:       https://rustsec.org/advisories/RUSTSEC-2026-0386\n\nwarning: 2 allowed warnings found"
+    },
+    {
+      "criterion": "AC-4",
+      "kind": "cmd",
+      "oracle": "`cargo audit --quiet` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "Crate:     unsafe-libyaml\nVersion:   0.2.11\nWarning:   unmaintained\nTitle:     unsafe-libyaml is unmaintained\nDate:      2024-03-25\nID:        RUSTSEC-2024-0449\nURL:       https://rustsec.org/advisories/RUSTSEC-2024-0449\n\nCrate:     tokio\nVersion:   1.53.1\nWarning:   unsound\nTitle:     `AsyncFd::new` and related constructors violate I/O safety\nDate:      2026-10-13\nID:        RUSTSEC-2026-0386\nURL:       https://rustsec.org/advisories/RUSTSEC-2026-0386\n\nwarning: 2 allowed warnings found"
+    },
+    {
+      "criterion": "AC-5",
+      "kind": "cmd",
+      "oracle": "`cargo build --quiet` exits 0",
+      "outcome": "pass",
+      "exit_code": 0
+    },
+    {
+      "criterion": "AC-6",
+      "kind": "cmd",
+      "oracle": "`cargo test --quiet` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 296 tests\n....................................................................................... 87/296\n....................................................................................... 174/296\n....................................................................................... 261/296\n...................................\ntest result: ok. 296 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.26s\n\n\nrunning 8 tests\n........\ntest result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.81s\n\n\nrunning 9 tests\n.........\ntest result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.23s\n\n\nrunning 7 tests\n.......\ntest result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s\n\n\nrunning 9 tests\n.........\ntest result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.63s\n\n\nrunning 8 tests\n........\ntest result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.14s\n\n\nrunning 13 tests\n.............\ntest result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.73s\n\n\nrunning 6 tests\n......\ntest result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.68s\n\n\nrunning 6 tests\n......\ntest result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.82s\n\n\nrunning 9 tests\n.........\ntest result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.35s\n\n\nrunning 9 tests\n.........\ntest result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.62s\n\n\nrunning 4 tests\n....\ntest result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.31s\n\n\nrunning 25 tests\n.........................\ntest result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.15s\n\n\nrunning 14 tests\n..............\ntest result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.56s\n\n\nrunning 13 tests\n.............\ntest result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.14s\n\n\nrunning 15 tests\n...............\ntest result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.89s\n\n\nrunning 25 tests\n.........................\ntest result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.44s\n\n\nrunning 12 tests\n............\ntest result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.93s\n\n\nrunning 6 tests\n......\ntest result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.15s\n\n\nrunning 8 tests\n........\ntest result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.78s\n\n\nrunning 2 tests\n..\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.54s\n\n\nrunning 34 tests\n..................................\ntest result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.54s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n\nrunning 7 tests\n.......\ntest result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.92s\n\n\nrunning 5 tests\n.....\ntest result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.52s"
+    },
+    {
+      "criterion": "AC-7",
+      "kind": "cmd",
+      "oracle": "`test -z \"$(git diff --name-only HEAD -- src tests)\"` exits 0",
+      "outcome": "pass",
+      "exit_code": 0
+    },
+    {
+      "criterion": "AC-8",
+      "kind": "cmd",
+      "oracle": "`cargo clippy --all-targets --quiet` exits 0",
+      "outcome": "pass",
+      "exit_code": 0
+    }
+  ],
+  "criteria": 8,
+  "executed": 8,
+  "passed": 7,
+  "failed": 1,
+  "blocked": 0,
+  "human": 0
+}

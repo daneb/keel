@@ -1,0 +1,11 @@
+{
+  "schema": "keel.run/1",
+  "id": "2026-11-02-002",
+  "spec": "rustls-advisories",
+  "keel_version": "0.11.1",
+  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
+  "started_at": "2026-11-02T13:05:44.536755+02:00",
+  "finished_at": "2026-11-02T13:10:03.024643+02:00",
+  "verdict": "fail",
+  "base_commit": "d0cf8e258cacbeca38dc2fa719e79f76315666aa"
+}
