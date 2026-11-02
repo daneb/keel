@@ -135,6 +135,10 @@ fn transition_spec_status(paths: &Paths, slug: &str, decision: Decision) -> Resu
     let new_status = match decision {
         Decision::Approved => "approved",
         Decision::Rejected => "rejected",
+        // `keel approve` never records an abandonment — that is
+        // `keel spec abandon`, which writes `status: abandoned` itself. Leave
+        // the status untouched rather than inventing one here.
+        Decision::Abandoned => return Ok(()),
     };
 
     // Only rewrite if the status actually changes — avoids spurious diffs.

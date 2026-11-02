@@ -25,6 +25,7 @@ fn command_for(slug: &str, stage: Stage) -> String {
         Stage::Run => format!("keel run {slug}"),
         Stage::MergeApproval => format!("keel approve {slug} --stage merge"),
         Stage::Complete => "keel spec new <slug>".to_string(),
+        Stage::Abandoned => "keel spec new <slug>".to_string(),
     }
 }
 
@@ -106,7 +107,7 @@ fn run_json(slug: Option<String>) -> Result<i32> {
                 "slug": s,
                 "stage": stage.key(),
                 "command": command_for(&s, stage),
-                "complete": stage == Stage::Complete,
+                "complete": stage == Stage::Complete || stage == Stage::Abandoned,
             });
             if let Some(approval) = approval {
                 entry["approval"] = approval;
@@ -193,7 +194,7 @@ pub fn run(slug: Option<String>, json: bool) -> Result<i32> {
     println!();
 
     let incomplete: Vec<&str> = stages.iter()
-        .filter(|(_, s)| *s != Stage::Complete)
+        .filter(|(_, s)| !matches!(s, Stage::Complete | Stage::Abandoned))
         .map(|(slug, _)| *slug)
         .collect();
 
@@ -285,6 +286,10 @@ fn print_guidance(paths: &Paths, slug: &str) -> Result<()> {
             // Should not reach here in the incomplete list, but handle gracefully.
             step(&format!("[{slug}] complete"), "  Nothing to do.");
         }
+        Stage::Abandoned => {
+            // Filtered out of the incomplete list; handled for exhaustiveness.
+            step(&format!("[{slug}] abandoned"), "  Retired without shipping.");
+        }
     }
     Ok(())
 }
@@ -306,6 +311,7 @@ fn next_for_spec(paths: &Paths, slug: &str) -> Result<i32> {
         Stage::Run => run_guidance(paths, slug, &pos),
         Stage::MergeApproval => merge_approval_guidance(slug, &pos),
         Stage::Complete => complete_guidance(slug),
+        Stage::Abandoned => abandoned_guidance(slug),
     }
     Ok(0)
 }
@@ -494,6 +500,15 @@ fn complete_guidance(slug: &str) {
          \x20 keel export           # write an evidence bundle\n\
          \x20 keel learn            # extract failure episodes and propose lessons\n\
          \x20 keel spec new <slug>  # start the next change",
+    );
+}
+
+fn abandoned_guidance(slug: &str) {
+    step(
+        &format!("`{slug}` is abandoned"),
+        "Retired without shipping. Its evidence stays on disk. To revive it,\n\
+         clear `status: abandoned` from its spec front matter and re-gate.\n\n\
+         \x20 keel spec new <slug>  # or start a different change",
     );
 }
 

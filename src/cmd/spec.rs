@@ -63,6 +63,58 @@ pub fn list() -> Result<i32> {
     Ok(0)
 }
 
+/// `keel spec abandon <slug> --reason <why>` — retire a spec without shipping.
+///
+/// Sets `status: abandoned` in the spec front matter (which makes its pipeline
+/// stage terminal) and records the decision in the same append-only log as
+/// approvals, with the operator and the reason. A `Complete` spec is refused
+/// unless `--force`, mirroring the completed-spec lock on `keel approve`.
+pub fn abandon(slug: Option<String>, reason: String, force: bool) -> Result<i32> {
+    let paths = Paths::require_init()?;
+    let slug = crate::cmd::gate::resolve_slug(&paths, slug)?;
+
+    if reason.trim().is_empty() {
+        bail!("say why this spec is being abandoned: keel spec abandon {slug} --reason \"<why>\"");
+    }
+
+    // Load first, so a missing or unreadable spec fails before anything is
+    // written.
+    let spec = Spec::load(&paths, &slug)?;
+    if spec.front.status == crate::pipeline::ABANDONED_STATUS {
+        println!("  `{slug}` is already abandoned.");
+        return Ok(0);
+    }
+
+    if crate::pipeline::stage(&paths, &slug) == crate::pipeline::Stage::Complete && !force {
+        bail!(
+            "`{slug}` is complete (merge approved) — abandoning a shipped spec is unusual. \
+             Pass --force if you really mean to."
+        );
+    }
+
+    // Rewrite the front matter with the new status, preserving the body.
+    let path = Spec::path_for(&paths, &slug);
+    let raw = std::fs::read_to_string(&path)?;
+    let (mut front, body): (crate::spec::SpecFront, String) =
+        crate::store::frontmatter::split_typed(&raw)?;
+    front.status = crate::pipeline::ABANDONED_STATUS.to_string();
+    let rewritten = crate::store::frontmatter::join_typed(&front, &body)?;
+    std::fs::write(&path, rewritten)?;
+
+    // Record the decision beside approvals, with who and why.
+    crate::approval::record(
+        &paths,
+        &slug,
+        crate::approval::ABANDON_STAGE,
+        crate::approval::Decision::Abandoned,
+        None,
+        Some(reason.trim().to_string()),
+    )?;
+
+    println!("  abandoned `{slug}` — recorded with your reason.");
+    Ok(0)
+}
+
 /// Print the authoring prompt, for pasting into whichever agent you like.
 pub fn print_prompt(slug: &str) -> Result<i32> {
     let paths = Paths::require_init()?;
