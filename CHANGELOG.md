@@ -7,6 +7,30 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.12.0] - 2026-11-02
+
+### Added
+
+- **`keel spec abandon <slug> --reason <why>`.** Specs could only end at
+  Complete; everything else stayed open in `keel next` forever, and `--reject`
+  only sent a spec back for revision. A new terminal state, `Stage::Abandoned`
+  (ranked after Complete), retires a spec that will not be built. It is driven
+  off the existing `SpecFront.status`, so no new artefact is needed and clearing
+  the status restores the derived stage with no evidence loss. The command
+  refuses an empty reason, refuses a Complete spec without `--force`, and records
+  who abandoned it and why in the audited approval log. `keel next --json` marks
+  an abandoned spec complete, so consumers filtering on `!complete` drop it from
+  the open set.
+
+### Security
+
+- **TLS chain advisories cleared.** `rustls` 0.23.45 → 0.23.46
+  (RUSTSEC-2026-0346/0347/0348/0349), `rustls-webpki` 0.103.15 → 0.103.16
+  (RUSTSEC-2026-0382) and `webpki-root-certs` 1.0.9 → 1.0.11 (RUSTSEC-2026-0383).
+  A Cargo.lock-only upgrade; the existing version requirements already admit the
+  patched releases. `cargo audit` now reports no known advisories across the
+  dependency tree.
+
 ## [0.11.1] - 2026-10-02
 
 ### Added
