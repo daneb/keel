@@ -7,6 +7,20 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.13.0] - 2026-11-03
+
+### Added
+
+- **Homebrew cask and macOS binaries.** Each GitHub release now carries
+  `keel-<version>-aarch64-apple-darwin.tar.gz` and
+  `keel-<version>-x86_64-apple-darwin.tar.gz` (with checksums), and the cask in
+  `daneb/homebrew-tap` is updated automatically. Install with
+  `brew install --cask daneb/tap/keel`.
+
+### Changed
+
+- Patch and minor dependency updates (five crates).
+
 ## [0.12.0] - 2026-11-02
 
 ### Added
