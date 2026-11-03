@@ -1,0 +1,65 @@
+name: Release binaries
+
+# Attaches macOS binaries to a GitHub release (cut by ./release.sh publish)
+# so the Homebrew cask in packaging/homebrew has something to download, and
+# — when HOMEBREW_TAP_TOKEN is set — updates the cask in daneb/homebrew-tap.
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  binaries:
+    name: macOS ${{ matrix.target }}
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        target: [aarch64-apple-darwin, x86_64-apple-darwin]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+      - name: Package
+        run: packaging/homebrew/build-dist.sh "${{ matrix.target }}" dist
+      - name: Attach to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" dist/* --clobber
+
+  tap:
+    name: Update Homebrew tap
+    needs: binaries
+    runs-on: ubuntu-latest
+    env:
+      TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+    steps:
+      - name: Skip without a token
+        if: env.TAP_TOKEN == ''
+        run: echo "HOMEBREW_TAP_TOKEN not set; update the tap by hand with update-cask.sh"
+      - uses: actions/checkout@v5
+        if: env.TAP_TOKEN != ''
+      - uses: actions/checkout@v5
+        if: env.TAP_TOKEN != ''
+        with:
+          repository: daneb/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: tap
+      - name: Bump the cask
+        if: env.TAP_TOKEN != ''
+        run: |
+          version="${{ github.event.release.tag_name }}"
+          version="${version#v}"
+          mkdir -p tap/Casks
+          cp packaging/homebrew/Casks/keel.rb tap/Casks/keel.rb
+          packaging/homebrew/update-cask.sh "$version" tap/Casks/keel.rb keel
+          cd tap
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/keel.rb
+          git commit -m "keel $version"
+          git push
