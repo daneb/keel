@@ -1,0 +1,40 @@
+#!/bin/sh
+# keel mutation adapter — cargo-mutants over the lines this run changed.
+#
+# Prints keel.mutationresult/1 on stdout. Exit 3 means "could not look"
+# (cargo-mutants absent or its output unreadable), which keel reports as
+# blocked rather than as a pass. KEEL_BASE is the commit the run diffs against.
+set -u
+
+if ! command -v cargo-mutants >/dev/null 2>&1; then
+    printf '%s\n' '{"schema":"keel.mutationresult/1","killed":[],"survived":[],"summary":"cargo-mutants is not installed — no mutants were run"}'
+    exit 3
+fi
+
+diff_file=$(mktemp)
+trap 'rm -f "$diff_file"' EXIT
+git diff "${KEEL_BASE:-HEAD}" > "$diff_file"
+# A missed mutant makes cargo-mutants exit 2; the outcomes file is what counts.
+cargo mutants --in-diff "$diff_file" --output "${TMPDIR:-/tmp}/keel-mutants" >&2
+
+python3 -c '
+import json, sys
+path = sys.argv[1] + "/mutants.out/outcomes.json"
+try:
+    outcomes = json.load(open(path))["outcomes"]
+except (OSError, KeyError, ValueError) as e:
+    print(json.dumps({"schema": "keel.mutationresult/1", "killed": [], "survived": [], "summary": "cargo-mutants wrote no readable outcomes: %s" % e}))
+    sys.exit(3)
+out = {"schema": "keel.mutationresult/1", "killed": [], "survived": []}
+for o in outcomes:
+    m = (o.get("scenario") or {}).get("Mutant")
+    if not m:
+        continue
+    entry = {"file": m["file"], "line": m.get("span", {}).get("start", {}).get("line", 1),
+             "mutant": m.get("name", "")}
+    if o.get("summary") == "MissedMutant":
+        out["survived"].append(entry)
+    elif o.get("summary") == "CaughtMutant":
+        out["killed"].append(entry)
+print(json.dumps(out))
+' "${TMPDIR:-/tmp}/keel-mutants"

@@ -47,6 +47,21 @@ impl Worktree {
         })
     }
 
+    /// Copy one file from the main tree into this worktree, or delete it here
+    /// if the main tree no longer has it.
+    pub fn carry_over(&self, from: &Paths, rel: &str) -> Result<()> {
+        let (src, dst) = (from.repo.join(rel), self.paths.repo.join(rel));
+        if !src.exists() {
+            let _ = std::fs::remove_file(&dst);
+            return Ok(());
+        }
+        if let Some(dir) = dst.parent() {
+            std::fs::create_dir_all(dir)?;
+        }
+        std::fs::copy(&src, &dst).with_context(|| format!("copying {rel}"))?;
+        Ok(())
+    }
+
     /// Everything the driver changed here, as a patch against the base commit.
     ///
     /// Untracked files are staged first: a new file is a change, and

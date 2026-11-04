@@ -1,0 +1,5 @@
+{
+  "schema": "keel.mutationresult/1",
+  "killed": [{ "file": "src/api/mod.rs", "line": 3, "mutant": "replace serve -> bool with true" }],
+  "survived": [{ "file": "src/api/mod.rs", "line": 7, "mutant": "replace limit -> u32 with 0" }]
+}

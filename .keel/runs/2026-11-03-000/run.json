@@ -1,0 +1,12 @@
+{
+  "schema": "keel.run/1",
+  "id": "2026-11-03-000",
+  "spec": "oracle-sensitivity",
+  "driver": "claude-code",
+  "keel_version": "0.12.0",
+  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
+  "started_at": "2026-11-03T20:50:10.719493866+00:00",
+  "finished_at": "2026-11-03T20:57:03.947325234+00:00",
+  "verdict": "fail",
+  "base_commit": "3c45f6d39d60345fc4727646d7939bd33297c03e"
+}

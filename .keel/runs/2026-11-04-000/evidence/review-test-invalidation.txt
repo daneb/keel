@@ -1,0 +1,1 @@
+assets/mutation/cargo-mutants: sys.exit(3)

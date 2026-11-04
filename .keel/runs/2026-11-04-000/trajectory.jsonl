@@ -1,0 +1,26 @@
+{"t":"2026-11-04T05:40:00.266722976+00:00","seq":1,"kind":"run_start","spec":"oracle-sensitivity","driver":"claude-code","keel_version":"0.12.0","store_hash":"0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2"}
+{"t":"2026-11-04T05:40:00.268977280+00:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":424,"bytes":1693}
+{"t":"2026-11-04T05:40:00.268990405+00:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
+{"t":"2026-11-04T05:40:00.269013114+00:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6268,"bytes":25071}
+{"t":"2026-11-04T05:40:00.269068281+00:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
+{"t":"2026-11-04T05:40:00.269129281+00:00","seq":6,"kind":"inject","source":".keel/specs/oracle-sensitivity/spec.md","tokens":1513,"bytes":6050}
+{"t":"2026-11-04T05:40:00.269133989+00:00","seq":7,"kind":"driver_call","driver":"claude-code","prompt_tokens":8433}
+{"t":"2026-11-04T05:42:44.373474717+00:00","seq":8,"kind":"driver_result","driver":"claude-code","status":"ok","files_changed":17,"detail":"claude completed"}
+{"t":"2026-11-04T05:42:44.459295439+00:00","seq":9,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
+{"t":"2026-11-04T05:43:28.293448885+00:00","seq":10,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
+{"t":"2026-11-04T05:43:28.382810001+00:00","seq":11,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
+{"t":"2026-11-04T05:43:31.513898370+00:00","seq":12,"kind":"oracle","criterion":"AC-1","oracle":"`cargo test --test oracle_sensitivity executable_oracles_are_rerun_in_a_base_worktree_with_test_files_carried_over` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T05:43:31.513914828+00:00","seq":13,"kind":"oracle","criterion":"AC-2","oracle":"`cargo test --test oracle_sensitivity an_oracle_passing_without_the_change_fails_sensitivity` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T05:43:31.513916370+00:00","seq":14,"kind":"oracle","criterion":"AC-3","oracle":"`cargo test --test oracle_sensitivity a_guard_oracle_must_pass_at_the_base_and_on_the_change` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T05:43:31.513917328+00:00","seq":15,"kind":"oracle","criterion":"AC-4","oracle":"`cargo test --test oracle_sensitivity an_unbuildable_base_blocks_sensitivity_rather_than_passing_it` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T05:43:31.513918328+00:00","seq":16,"kind":"oracle","criterion":"AC-5","oracle":"`cargo test --test oracle_sensitivity oracles_keel_cannot_isolate_are_listed_as_not_assessed` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T05:43:31.513919412+00:00","seq":17,"kind":"oracle","criterion":"AC-6","oracle":"`cargo test --test oracle_sensitivity survived_mutants_in_scope_become_mutation_findings` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T05:43:31.513920287+00:00","seq":18,"kind":"oracle","criterion":"AC-6","oracle":"tests/fixtures/mutation/cargo-mutants-sample.json validates against schemas/mutationresult.json","verdict":"pass"}
+{"t":"2026-11-04T05:43:31.513921120+00:00","seq":19,"kind":"oracle","criterion":"AC-7","oracle":"`cargo test --test oracle_sensitivity mutation_is_advisory_by_default_and_blocks_only_when_configured` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T05:43:31.513921995+00:00","seq":20,"kind":"oracle","criterion":"AC-8","oracle":"`cargo test --test oracle_sensitivity the_cargo_mutants_adapter_emits_mutationresult_and_blocks_when_absent` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T05:44:53.457659443+00:00","seq":21,"kind":"gate","gate":"G2","verdict":"pass","result":"gates/G2.json"}
+{"t":"2026-11-04T05:44:53.505579998+00:00","seq":22,"kind":"gate","gate":"G2.5","verdict":"blocked","result":"gates/G2.5.json"}
+{"t":"2026-11-04T05:44:53.510031648+00:00","seq":23,"kind":"gate","gate":"G3","verdict":"fail","result":"gates/G3.json"}
+{"t":"2026-11-04T05:44:53.510043189+00:00","seq":24,"kind":"run_end","verdict":"fail","duration_ms":293244}
+{"t":"2026-11-04T05:45:46.167383994+00:00","seq":25,"kind":"human","stage":"review","decision":"approved","by":"Dane Balia"}
+{"t":"2026-11-04T05:45:46.736085909+00:00","seq":26,"kind":"human","stage":"merge","decision":"approved","by":"Dane Balia"}

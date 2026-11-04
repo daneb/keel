@@ -38,6 +38,8 @@ pub struct Config {
     #[serde(default)]
     pub oracle: OracleConfig,
     #[serde(default)]
+    pub mutation: MutationConfig,
+    #[serde(default)]
     pub learn: LearnConfig,
     #[serde(default)]
     pub retrieve: RetrieveConfig,
@@ -218,6 +220,9 @@ pub struct VerifyConfig {
 pub struct OracleConfig {
     pub test_cmd: String,
     pub doctest_cmd: String,
+    /// Files carried from the run's diff into the base worktree when checking
+    /// that an oracle fails without the change.
+    pub sensitivity_paths: Vec<String>,
 }
 
 impl Default for OracleConfig {
@@ -225,7 +230,23 @@ impl Default for OracleConfig {
         Self {
             test_cmd: "cargo test --quiet -- --exact {name}".into(),
             doctest_cmd: "cargo test --doc --quiet".into(),
+            sensitivity_paths: vec!["tests/**".into()],
         }
+    }
+}
+
+/// An external mutation tool printing `keel.mutationresult/1` on stdout.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
+pub struct MutationConfig {
+    pub cmd: Option<String>,
+    /// Survived mutants are reported, not failed, until this is `false`.
+    pub advisory: bool,
+}
+
+impl Default for MutationConfig {
+    fn default() -> Self {
+        Self { cmd: None, advisory: true }
     }
 }
 
@@ -377,6 +398,7 @@ impl Default for Config {
             drivers: default_drivers(),
             verify: VerifyConfig::default(),
             oracle: OracleConfig::default(),
+            mutation: MutationConfig::default(),
             learn: LearnConfig::default(),
             retrieve: RetrieveConfig::default(),
             reviewers: vec![],
