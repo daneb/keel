@@ -1,0 +1,67 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "cmd",
+      "oracle": "`grep -q \"never summed\" .keel/store/decisions/ADR-0026-spent-tokens-are-reported-injected-tokens-are-estimated.md` exits 0",
+      "outcome": "pass",
+      "exit_code": 0
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "cmd",
+      "oracle": "`grep -q \"advisory\" .keel/store/decisions/ADR-0027-an-oracle-must-fail-without-its-change.md` exits 0",
+      "outcome": "pass",
+      "exit_code": 0
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "cmd",
+      "oracle": "`grep -q \"per criterion\" .keel/store/decisions/ADR-0028-a-human-oracle-is-discharged-per-criterion-per-run.md` exits 0",
+      "outcome": "pass",
+      "exit_code": 0
+    },
+    {
+      "criterion": "AC-4",
+      "kind": "cmd",
+      "oracle": "`grep -q \"tests/driver_usage.rs\" .keel/store/decisions/ADR-0026-spent-tokens-are-reported-injected-tokens-are-estimated.md` exits 0",
+      "outcome": "pass",
+      "exit_code": 0
+    },
+    {
+      "criterion": "AC-4",
+      "kind": "cmd",
+      "oracle": "`grep -q \"tests/oracle_sensitivity.rs\" .keel/store/decisions/ADR-0027-an-oracle-must-fail-without-its-change.md` exits 0",
+      "outcome": "pass",
+      "exit_code": 0
+    },
+    {
+      "criterion": "AC-4",
+      "kind": "cmd",
+      "oracle": "`grep -q \"tests/g3_judgement.rs\" .keel/store/decisions/ADR-0028-a-human-oracle-is-discharged-per-criterion-per-run.md` exits 0",
+      "outcome": "pass",
+      "exit_code": 0
+    },
+    {
+      "criterion": "AC-5",
+      "kind": "cmd",
+      "oracle": "`keel store check` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "  ok       claude     CLAUDE.md [180/180]\n  ok       agents     AGENTS.md [180/180]\n  ok       kiro       .kiro/steering/keel.md [200/200]\n  ok       copilot    .github/copilot-instructions.md [120/120]"
+    },
+    {
+      "criterion": "AC-6",
+      "kind": "cmd",
+      "oracle": "`grep -c \"^| \\[ADR-00\\(26\\|27\\|28\\)\\]\" .keel/store/decisions/ADR-0000-index.md | grep -qx 3` exits 0",
+      "outcome": "pass",
+      "exit_code": 0
+    }
+  ],
+  "criteria": 6,
+  "executed": 8,
+  "passed": 8,
+  "failed": 0,
+  "blocked": 0,
+  "human": 0
+}

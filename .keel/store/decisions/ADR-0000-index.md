@@ -40,6 +40,9 @@ what the code does, which the code already provides.
 | [ADR-0023](ADR-0023-drivers-ship-embedded-and-config-is-appended-not-rewritten.md) | field | Driver scripts ship embedded; `keel.toml` is edited by appending text, never rewritten |
 | [ADR-0024](ADR-0024-security-findings-are-graded-and-accepted-by-identity.md) | field | Security findings carry a grade beside severity; an acceptance binds to finding identity |
 | [ADR-0025](ADR-0025-skills-are-authoring-behaviour-not-a-keel-concept.md) | field | Agent "skills" are not a keel concept; a grilling step is set aside as premature on the run evidence |
+| [ADR-0026](ADR-0026-spent-tokens-are-reported-injected-tokens-are-estimated.md) | field | Spent tokens are reported by the driver, injected tokens are estimated by keel, and the two are never summed |
+| [ADR-0027](ADR-0027-an-oracle-must-fail-without-its-change.md) | field | Oracle sensitivity is native and blocking; mutation is a plugin and advisory |
+| [ADR-0028](ADR-0028-a-human-oracle-is-discharged-per-criterion-per-run.md) | field | A human oracle is discharged per criterion and per run; one merge approval no longer stands in for every judgement |
 
 **Not recorded here.** Decisions the plan already fixes (EARS, the gate pipeline
 shape, the four attribution codes) are PLAN.md's, not keel's. An ADR that only

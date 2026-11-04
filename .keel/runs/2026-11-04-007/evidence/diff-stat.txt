@@ -1,0 +1,24 @@
+     2      0  .keel/runs/2026-11-04-007/evidence/build.txt
+    13      0  .keel/runs/2026-11-04-007/evidence/driver.json
+     2      0  .keel/runs/2026-11-04-007/evidence/lint.txt
+    60      0  .keel/runs/2026-11-04-007/evidence/oracles.json
+   150      0  .keel/runs/2026-11-04-007/evidence/test.txt
+    10      0  .keel/runs/2026-11-04-007/run.json
+    18      0  .keel/runs/2026-11-04-007/trajectory.jsonl
+     2      0  .keel/specs/adrs-for-recent-specs/approvals.jsonl
+    90      0  .keel/specs/adrs-for-recent-specs/gates/G0.json
+    95      0  .keel/specs/adrs-for-recent-specs/gates/G1.json
+    63      0  .keel/specs/adrs-for-recent-specs/plan.md
+    77      0  .keel/specs/adrs-for-recent-specs/spec.md
+    46      0  .keel/specs/adrs-for-recent-specs/tasks.md
+     1      0  .keel/specs/blast-radius/approvals.jsonl
+    90      0  .keel/specs/blast-radius/gates/G0.json
+    97      0  .keel/specs/blast-radius/gates/G1.json
+   164      0  .keel/specs/blast-radius/plan.md
+   112      0  .keel/specs/blast-radius/spec.md
+    63      0  .keel/specs/blast-radius/tasks.md
+    35      0  .keel/store/decisions/ADR-0026-spent-tokens-are-reported-injected-tokens-are-estimated.md
+    36      0  .keel/store/decisions/ADR-0027-an-oracle-must-fail-without-its-change.md
+    36      0  .keel/store/decisions/ADR-0028-a-human-oracle-is-discharged-per-criterion-per-run.md
+
+22 file(s), +1262 -0 (1262 lines of churn) against 171672319f84e989667ddfa85991590aeb9d9980
