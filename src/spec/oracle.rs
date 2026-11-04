@@ -24,6 +24,8 @@ pub enum Oracle {
     Doctest { path: String },
     /// `oracle: human a reviewer confirms the error message names the file`
     Human { judgement: String },
+    /// `oracle: guard <oracle>` — holds before the change and after it.
+    Guard { oracle: Box<Oracle> },
 }
 
 impl Oracle {
@@ -34,6 +36,7 @@ impl Oracle {
             Oracle::Schema { .. } => "schema",
             Oracle::Doctest { .. } => "doctest",
             Oracle::Human { .. } => "human",
+            Oracle::Guard { oracle } => oracle.kind(),
         }
     }
 
@@ -47,12 +50,28 @@ impl Oracle {
             Oracle::Schema { target, .. } => target,
             Oracle::Doctest { path } => path,
             Oracle::Human { judgement } => judgement,
+            Oracle::Guard { oracle } => oracle.payload(),
         }
     }
 
     /// Whether satisfying this oracle costs a person's attention.
     pub fn is_human(&self) -> bool {
-        matches!(self, Oracle::Human { .. })
+        match self {
+            Oracle::Guard { oracle } => oracle.is_human(),
+            _ => matches!(self, Oracle::Human { .. }),
+        }
+    }
+
+    /// The oracle to execute, with any `guard` wrapper removed.
+    pub fn inner(&self) -> &Oracle {
+        match self {
+            Oracle::Guard { oracle } => oracle.inner(),
+            o => o,
+        }
+    }
+
+    pub fn is_guard(&self) -> bool {
+        matches!(self, Oracle::Guard { .. })
     }
 
     /// A one-line rendering, for gate evidence and for the map of human cost.
@@ -63,6 +82,7 @@ impl Oracle {
             Oracle::Schema { schema, target } => format!("{target} validates against {schema}"),
             Oracle::Doctest { path } => format!("doctests in {path}"),
             Oracle::Human { judgement } => format!("human: {judgement}"),
+            Oracle::Guard { oracle } => format!("guard {}", oracle.summary()),
         }
     }
 }
@@ -141,6 +161,13 @@ pub fn parse(raw: &str) -> Result<Oracle> {
             reject_shell_metacharacters("doctest path", &path)?;
             Ok(Oracle::Doctest { path })
         }
+        "guard" => {
+            let inner = parse(rest)?;
+            if inner.is_guard() {
+                bail!("`guard` cannot wrap another `guard`");
+            }
+            Ok(Oracle::Guard { oracle: Box::new(inner) })
+        }
         "human" => {
             if rest.is_empty() {
                 bail!("`human` oracle must say what the reviewer is judging");
@@ -148,7 +175,7 @@ pub fn parse(raw: &str) -> Result<Oracle> {
             Ok(Oracle::Human { judgement: rest.to_string() })
         }
         other => bail!(
-            "unknown oracle kind `{other}` (expected one of: cmd, test, schema, doctest, human)"
+            "unknown oracle kind `{other}` (expected one of: cmd, test, schema, doctest, human, guard)"
         ),
     }
 }

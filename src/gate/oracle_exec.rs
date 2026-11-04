@@ -11,6 +11,8 @@ use crate::config::Config;
 use crate::paths::Paths;
 use crate::spec::oracle::Oracle;
 use crate::spec::{Criterion, Spec};
+use crate::worktree::Worktree;
+use globset::{Glob, GlobSet, GlobSetBuilder};
 use serde::Serialize;
 use std::path::Path;
 
@@ -102,6 +104,113 @@ pub fn run_all(paths: &Paths, cfg: &Config, spec: &Spec) -> Coverage {
     }
 }
 
+/// What re-running one oracle at the base commit showed.
+#[derive(Debug, Clone, Serialize)]
+pub struct SensitivityRun {
+    pub criterion: String,
+    pub oracle: String,
+    pub guard: bool,
+    /// `sensitive`, `insensitive`, `held`, `broken`, `not assessed` or `blocked`.
+    pub assessment: &'static str,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct Sensitivity {
+    pub base: String,
+    pub runs: Vec<SensitivityRun>,
+    /// Set when the base could not be built or entered; nothing was assessed.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocked: Option<String>,
+}
+
+impl Sensitivity {
+    pub fn with(&self, assessments: &[&str]) -> Vec<&SensitivityRun> {
+        self.runs.iter().filter(|r| assessments.contains(&r.assessment)).collect()
+    }
+}
+
+fn globs(patterns: &[String]) -> GlobSet {
+    let mut b = GlobSetBuilder::new();
+    for p in patterns {
+        if let Ok(g) = Glob::new(p) {
+            b.add(g);
+        }
+    }
+    b.build().unwrap_or_else(|_| GlobSet::empty())
+}
+
+/// Re-run every executable oracle at `base`, with only the run's test files
+/// (`changed` ∩ `[oracle] sensitivity_paths`) carried over. An oracle that
+/// still passes there was passing before the implementation existed.
+pub fn sensitivity(paths: &Paths, cfg: &Config, spec: &Spec, base: &str, changed: &[String]) -> Sensitivity {
+    let mut out = Sensitivity { base: base.into(), runs: vec![], blocked: None };
+    let tests = globs(&cfg.oracle.sensitivity_paths);
+    let mut wt = match Worktree::create(paths, "oracle-sensitivity", base) {
+        Ok(w) => w,
+        Err(e) => {
+            out.blocked = Some(format!("could not create a worktree at {base}: {e:#}"));
+            return out;
+        }
+    };
+    out.blocked = prepare_base(paths, cfg, &wt, &tests, changed);
+    if out.blocked.is_none() {
+        for c in &spec.criteria {
+            for o in &c.oracles {
+                out.runs.push(assess(&wt.paths, cfg, c, o, &tests, changed));
+            }
+        }
+    }
+    let _ = wt.remove();
+    out
+}
+
+/// Prove the base builds on its own, then carry the test files over.
+fn prepare_base(paths: &Paths, cfg: &Config, wt: &Worktree, tests: &GlobSet, changed: &[String]) -> Option<String> {
+    if let Some(build) = cfg.verify.build.as_ref().filter(|b| !b.trim().is_empty()) {
+        match shell(&wt.paths, build).0 {
+            Some(0) => {}
+            Some(n) => return Some(format!("`{build}` exited {n} at the base commit")),
+            None => return Some(format!("`{build}` could not be executed at the base commit")),
+        }
+    }
+    for f in changed.iter().filter(|f| tests.is_match(f.as_str())) {
+        if let Err(e) = wt.carry_over(paths, f) {
+            return Some(format!("could not carry {f} to the base: {e:#}"));
+        }
+    }
+    None
+}
+
+fn assess(root: &Paths, cfg: &Config, c: &Criterion, o: &Oracle, tests: &GlobSet, changed: &[String]) -> SensitivityRun {
+    let guard = o.is_guard();
+    let mut run = SensitivityRun {
+        criterion: c.id.clone(), oracle: o.summary(), guard, assessment: "not assessed", reason: String::new(),
+    };
+    let file = match o.inner() {
+        Oracle::Human { .. } | Oracle::Schema { .. } => {
+            run.reason = format!("a {} oracle cannot be re-run at the base", o.kind());
+            return run;
+        }
+        Oracle::Test { id } => id.split_once("::").map(|(p, _)| p),
+        Oracle::Doctest { path } => Some(path.as_str()),
+        _ => None,
+    };
+    if let Some(f) = file.filter(|f| !tests.is_match(*f) && changed.iter().any(|d| d == f)) {
+        run.reason = format!("{f} is changed by the diff but is outside sensitivity_paths");
+        return run;
+    }
+    let base = execute(root, cfg, c, o);
+    (run.assessment, run.reason) = match (base.outcome, guard) {
+        (Outcome::Blocked, _) => ("blocked", base.detail.unwrap_or_else(|| "could not execute at the base".into())),
+        (Outcome::Pass, true) => ("held", "passes at the base".into()),
+        (Outcome::Fail, true) => ("broken", "guard fails at the base".into()),
+        (Outcome::Pass, false) => ("insensitive", "passes at the base without the change".into()),
+        _ => ("sensitive", "fails at the base".into()),
+    };
+    run
+}
+
 /// Execute an oracle that belongs to a lesson rather than a criterion.
 pub fn execute_standalone(paths: &Paths, cfg: &Config, o: &Oracle) -> OracleRun {
     let synthetic = Criterion {
@@ -127,6 +236,7 @@ fn execute(paths: &Paths, cfg: &Config, c: &Criterion, o: &Oracle) -> OracleRun 
     };
 
     match o {
+        Oracle::Guard { oracle } => execute(paths, cfg, c, oracle),
         Oracle::Human { judgement } => OracleRun {
             outcome: Outcome::Human,
             detail: Some(judgement.clone()),

@@ -91,6 +91,18 @@ pub fn run(
             run.write_evidence("tree.txt", &format!("{}\n", crate::cover::tree_hash(paths, cfg)?))?;
             checks.push(blast_radius(cfg, spec, plan, &d, &stat));
             checks.push(line_budget(cfg, spec, &d, &stat));
+            let changed: Vec<String> = d.files.iter().map(|f| f.path.clone()).collect();
+            // With no real change there is nothing for an oracle to be sensitive to.
+            if coverage.failed == 0 && coverage.blocked == 0 && changed.iter().any(|f| !is_incidental_for(cfg, f)) {
+                let s = oracle_exec::sensitivity(paths, cfg, spec, &base, &changed);
+                let evidence = run.write_evidence("oracle-sensitivity.json", &serde_json::to_string_pretty(&s)?)?;
+                let check = sensitivity_check(&s, &evidence);
+                let passed = check.verdict == super::Verdict::Pass;
+                checks.push(check);
+                if passed {
+                    checks.extend(mutation_check(paths, cfg, spec, &base, run)?);
+                }
+            }
         }
         Err(e) => {
             checks.push(Check::blocked("blast-radius", format!("could not read the diff: {e}")));
@@ -181,6 +193,90 @@ fn oracle_coverage(coverage: &oracle_exec::Coverage, evidence: &str) -> Check {
     };
     check.evidence = Some(evidence.to_string());
     check
+}
+
+/// An oracle that passes without the change does not verify the change.
+fn sensitivity_check(s: &oracle_exec::Sensitivity, evidence: &str) -> Check {
+    let list = |runs: Vec<&oracle_exec::SensitivityRun>| -> Vec<String> {
+        runs.iter().map(|r| format!("{} {}", r.criterion, r.oracle)).collect()
+    };
+    let mut check = if let Some(why) = &s.blocked {
+        Check::blocked("oracle-sensitivity", why.clone())
+    } else if !s.with(&["blocked"]).is_empty() {
+        let r = s.with(&["blocked"]);
+        Check::blocked(
+            "oracle-sensitivity",
+            format!("{} oracle(s) could not execute at the base: {}", r.len(), list(r).join(", ")),
+        )
+    } else if !s.with(&["insensitive", "broken"]).is_empty() {
+        Check::fail(
+            "oracle-sensitivity",
+            "every oracle fails without the change (guards pass before and after)",
+            format!(
+                "passes at the base: {}; guards failing at the base: {}",
+                super::join_capped(&list(s.with(&["insensitive"])), 4),
+                super::join_capped(&list(s.with(&["broken"])), 4)
+            ),
+        )
+    } else {
+        let skipped = s.with(&["not assessed"]);
+        let mut detail = format!("{} oracle(s) fail at the base, {} guard(s) hold", s.with(&["sensitive"]).len(), s.with(&["held"]).len());
+        if !skipped.is_empty() {
+            let why: Vec<String> = skipped.iter().map(|r| format!("{} ({})", r.criterion, r.reason)).collect();
+            detail.push_str(&format!("; not assessed: {}", why.join(", ")));
+        }
+        Check::pass("oracle-sensitivity", detail)
+    };
+    check.evidence = Some(evidence.to_string());
+    check
+}
+
+/// Run the configured mutation tool; survived mutants inside the spec's scope
+/// are findings, which fail G2 only when `[mutation] advisory = false`.
+fn mutation_check(paths: &Paths, cfg: &Config, spec: &Spec, base: &str, run: &Run) -> Result<Option<Check>> {
+    let Some(cmd) = cfg.mutation.cmd.as_ref().filter(|c| !c.trim().is_empty()) else { return Ok(None) };
+    let out = std::process::Command::new("sh")
+        .args(["-c", cmd])
+        .current_dir(&paths.repo)
+        .env("KEEL_REPO", &paths.repo)
+        .env("KEEL_BASE", base)
+        .env("KEEL_SPEC", &spec.front.slug)
+        .output();
+    let out = match out {
+        Ok(o) => o,
+        Err(e) => return Ok(Some(Check::blocked("mutation", format!("could not run `{cmd}`: {e}")))),
+    };
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    let parsed = serde_json::from_str::<serde_json::Value>(stdout.trim()).ok()
+        .filter(|v| v["schema"] == "keel.mutationresult/1");
+    let Some(result) = parsed.filter(|_| out.status.code() != Some(3)) else {
+        let why = serde_json::from_str::<serde_json::Value>(stdout.trim()).ok()
+            .and_then(|v| v["summary"].as_str().map(String::from))
+            .unwrap_or_else(|| format!("did not print keel.mutationresult/1 (exit {:?})", out.status.code()));
+        return Ok(Some(Check::blocked("mutation", format!("`{cmd}`: {why}"))));
+    };
+    let mut scope = GlobSetBuilder::new();
+    for p in &spec.front.scope {
+        if let Ok(g) = Glob::new(p.trim()) {
+            scope.add(g);
+        }
+    }
+    let scope = scope.build()?;
+    let survived: Vec<String> = result["survived"].as_array().into_iter().flatten()
+        .filter(|m| m["file"].as_str().is_some_and(|f| scope.is_match(f)))
+        .map(|m| format!("{}:{} {}", m["file"].as_str().unwrap_or(""), m["line"], m["mutant"].as_str().unwrap_or("")))
+        .collect();
+    let killed = result["killed"].as_array().map_or(0, |k| k.len());
+    let evidence = run.write_evidence("mutation.json", &serde_json::to_string_pretty(&result)?)?;
+    let mut check = if survived.is_empty() {
+        Check::pass("mutation", format!("{killed} mutant(s) killed, none survived in scope"))
+    } else if cfg.mutation.advisory {
+        Check::pass("mutation", format!("advisory: {} survived mutant(s): {}", survived.len(), survived.join("; ")))
+    } else {
+        Check::fail("mutation", "no mutant survives in scope", survived.join("; "))
+    };
+    check.evidence = Some(evidence);
+    Ok(Some(check))
 }
 
 /// The diff must stay inside the declared blast radius.

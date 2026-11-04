@@ -1,0 +1,81 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "cmd",
+      "oracle": "`cargo test --test oracle_sensitivity executable_oracles_are_rerun_in_a_base_worktree_with_test_files_carried_over` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest executable_oracles_are_rerun_in_a_base_worktree_with_test_files_carried_over ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.28s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.05s\n     Running tests/oracle_sensitivity.rs (target/debug/deps/oracle_sensitivity-d39d0232d719edb1)"
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "cmd",
+      "oracle": "`cargo test --test oracle_sensitivity an_oracle_passing_without_the_change_fails_sensitivity` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest an_oracle_passing_without_the_change_fails_sensitivity ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.28s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/oracle_sensitivity.rs (target/debug/deps/oracle_sensitivity-d39d0232d719edb1)"
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "cmd",
+      "oracle": "`cargo test --test oracle_sensitivity a_guard_oracle_must_pass_at_the_base_and_on_the_change` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest a_guard_oracle_must_pass_at_the_base_and_on_the_change ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.55s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/oracle_sensitivity.rs (target/debug/deps/oracle_sensitivity-d39d0232d719edb1)"
+    },
+    {
+      "criterion": "AC-4",
+      "kind": "cmd",
+      "oracle": "`cargo test --test oracle_sensitivity an_unbuildable_base_blocks_sensitivity_rather_than_passing_it` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest an_unbuildable_base_blocks_sensitivity_rather_than_passing_it ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.28s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/oracle_sensitivity.rs (target/debug/deps/oracle_sensitivity-d39d0232d719edb1)"
+    },
+    {
+      "criterion": "AC-5",
+      "kind": "cmd",
+      "oracle": "`cargo test --test oracle_sensitivity oracles_keel_cannot_isolate_are_listed_as_not_assessed` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest oracles_keel_cannot_isolate_are_listed_as_not_assessed ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.28s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/oracle_sensitivity.rs (target/debug/deps/oracle_sensitivity-d39d0232d719edb1)"
+    },
+    {
+      "criterion": "AC-6",
+      "kind": "cmd",
+      "oracle": "`cargo test --test oracle_sensitivity survived_mutants_in_scope_become_mutation_findings` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest survived_mutants_in_scope_become_mutation_findings ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.28s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/oracle_sensitivity.rs (target/debug/deps/oracle_sensitivity-d39d0232d719edb1)"
+    },
+    {
+      "criterion": "AC-6",
+      "kind": "schema",
+      "oracle": "tests/fixtures/mutation/cargo-mutants-sample.json validates against schemas/mutationresult.json",
+      "outcome": "pass",
+      "detail": "tests/fixtures/mutation/cargo-mutants-sample.json validates"
+    },
+    {
+      "criterion": "AC-7",
+      "kind": "cmd",
+      "oracle": "`cargo test --test oracle_sensitivity mutation_is_advisory_by_default_and_blocks_only_when_configured` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest mutation_is_advisory_by_default_and_blocks_only_when_configured ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.55s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/oracle_sensitivity.rs (target/debug/deps/oracle_sensitivity-d39d0232d719edb1)"
+    },
+    {
+      "criterion": "AC-8",
+      "kind": "cmd",
+      "oracle": "`cargo test --test oracle_sensitivity the_cargo_mutants_adapter_emits_mutationresult_and_blocks_when_absent` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest the_cargo_mutants_adapter_emits_mutationresult_and_blocks_when_absent ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.21s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/oracle_sensitivity.rs (target/debug/deps/oracle_sensitivity-d39d0232d719edb1)"
+    }
+  ],
+  "criteria": 8,
+  "executed": 9,
+  "passed": 9,
+  "failed": 0,
+  "blocked": 0,
+  "human": 0
+}

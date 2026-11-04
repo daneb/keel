@@ -78,7 +78,13 @@ pub struct Asset {
     pub content: &'static str,
 }
 
-pub const ASSETS: &[Asset] = &[Asset {
-    rel: "sast/semgrep",
-    content: include_str!("../../assets/sast/semgrep"),
-}];
+pub const ASSETS: &[Asset] = &[
+    Asset {
+        rel: "sast/semgrep",
+        content: include_str!("../../assets/sast/semgrep"),
+    },
+    Asset {
+        rel: "mutation/cargo-mutants",
+        content: include_str!("../../assets/mutation/cargo-mutants"),
+    },
+];

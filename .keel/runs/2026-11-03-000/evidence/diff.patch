@@ -1,0 +1,2789 @@
+diff --git a/.keel/lesson-usage.json b/.keel/lesson-usage.json
+index 9b952b1..518efc0 100644
+--- a/.keel/lesson-usage.json
++++ b/.keel/lesson-usage.json
+@@ -1,6 +1,6 @@
+ {
+   "injected": {
+-    "L-0001": "2026-11-02",
++    "L-0001": "2026-11-03",
+     "L-0002": "2026-08-22",
+     "L-0003": "2026-08-22"
+   },
+diff --git a/src/config.rs b/src/config.rs
+index bbe9731..59e20bb 100644
+--- a/src/config.rs
++++ b/src/config.rs
+@@ -38,6 +38,8 @@ pub struct Config {
+     #[serde(default)]
+     pub oracle: OracleConfig,
+     #[serde(default)]
++    pub mutation: MutationConfig,
++    #[serde(default)]
+     pub learn: LearnConfig,
+     #[serde(default)]
+     pub retrieve: RetrieveConfig,
+@@ -218,6 +220,9 @@ pub struct VerifyConfig {
+ pub struct OracleConfig {
+     pub test_cmd: String,
+     pub doctest_cmd: String,
++    /// Files carried from the run's diff into the base worktree when checking
++    /// that an oracle fails without the change.
++    pub sensitivity_paths: Vec<String>,
+ }
+ 
+ impl Default for OracleConfig {
+@@ -225,10 +230,26 @@ impl Default for OracleConfig {
+         Self {
+             test_cmd: "cargo test --quiet -- --exact {name}".into(),
+             doctest_cmd: "cargo test --doc --quiet".into(),
++            sensitivity_paths: vec!["tests/**".into()],
+         }
+     }
+ }
+ 
++/// An external mutation tool printing `keel.mutationresult/1` on stdout.
++#[derive(Debug, Clone, Serialize, Deserialize)]
++#[serde(default)]
++pub struct MutationConfig {
++    pub cmd: Option<String>,
++    /// Survived mutants are reported, not failed, until this is `false`.
++    pub advisory: bool,
++}
++
++impl Default for MutationConfig {
++    fn default() -> Self {
++        Self { cmd: None, advisory: true }
++    }
++}
++
+ #[derive(Debug, Clone, Serialize, Deserialize)]
+ #[serde(default)]
+ pub struct SpecConfig {
+@@ -377,6 +398,7 @@ impl Default for Config {
+             drivers: default_drivers(),
+             verify: VerifyConfig::default(),
+             oracle: OracleConfig::default(),
++            mutation: MutationConfig::default(),
+             learn: LearnConfig::default(),
+             retrieve: RetrieveConfig::default(),
+             reviewers: vec![],
+diff --git a/src/driver/builtin.rs b/src/driver/builtin.rs
+index 61b6e50..70d38fe 100644
+--- a/src/driver/builtin.rs
++++ b/src/driver/builtin.rs
+@@ -78,7 +78,13 @@ pub struct Asset {
+     pub content: &'static str,
+ }
+ 
+-pub const ASSETS: &[Asset] = &[Asset {
+-    rel: "sast/semgrep",
+-    content: include_str!("../../assets/sast/semgrep"),
+-}];
++pub const ASSETS: &[Asset] = &[
++    Asset {
++        rel: "sast/semgrep",
++        content: include_str!("../../assets/sast/semgrep"),
++    },
++    Asset {
++        rel: "mutation/cargo-mutants",
++        content: include_str!("../../assets/mutation/cargo-mutants"),
++    },
++];
+diff --git a/src/gate/g2.rs b/src/gate/g2.rs
+index 38539da..096d1df 100644
+--- a/src/gate/g2.rs
++++ b/src/gate/g2.rs
+@@ -91,6 +91,17 @@ pub fn run(
+             run.write_evidence("tree.txt", &format!("{}\n", crate::cover::tree_hash(paths, cfg)?))?;
+             checks.push(blast_radius(cfg, spec, plan, &d, &stat));
+             checks.push(line_budget(cfg, spec, &d, &stat));
++            if coverage.failed == 0 && coverage.blocked == 0 {
++                let changed: Vec<String> = d.files.iter().map(|f| f.path.clone()).collect();
++                let s = oracle_exec::sensitivity(paths, cfg, spec, &base, &changed);
++                let evidence = run.write_evidence("oracle-sensitivity.json", &serde_json::to_string_pretty(&s)?)?;
++                let check = sensitivity_check(&s, &evidence);
++                let passed = check.verdict == super::Verdict::Pass;
++                checks.push(check);
++                if passed {
++                    checks.extend(mutation_check(paths, cfg, spec, &base, run)?);
++                }
++            }
+         }
+         Err(e) => {
+             checks.push(Check::blocked("blast-radius", format!("could not read the diff: {e}")));
+@@ -183,6 +194,90 @@ fn oracle_coverage(coverage: &oracle_exec::Coverage, evidence: &str) -> Check {
+     check
+ }
+ 
++/// An oracle that passes without the change does not verify the change.
++fn sensitivity_check(s: &oracle_exec::Sensitivity, evidence: &str) -> Check {
++    let list = |runs: Vec<&oracle_exec::SensitivityRun>| -> Vec<String> {
++        runs.iter().map(|r| format!("{} {}", r.criterion, r.oracle)).collect()
++    };
++    let mut check = if let Some(why) = &s.blocked {
++        Check::blocked("oracle-sensitivity", why.clone())
++    } else if !s.with(&["blocked"]).is_empty() {
++        let r = s.with(&["blocked"]);
++        Check::blocked(
++            "oracle-sensitivity",
++            format!("{} oracle(s) could not execute at the base: {}", r.len(), list(r).join(", ")),
++        )
++    } else if !s.with(&["insensitive", "broken"]).is_empty() {
++        Check::fail(
++            "oracle-sensitivity",
++            "every oracle fails without the change (guards pass before and after)",
++            format!(
++                "passes at the base: {}; guards failing at the base: {}",
++                super::join_capped(&list(s.with(&["insensitive"])), 4),
++                super::join_capped(&list(s.with(&["broken"])), 4)
++            ),
++        )
++    } else {
++        let skipped = s.with(&["not assessed"]);
++        let mut detail = format!("{} oracle(s) fail at the base, {} guard(s) hold", s.with(&["sensitive"]).len(), s.with(&["held"]).len());
++        if !skipped.is_empty() {
++            let why: Vec<String> = skipped.iter().map(|r| format!("{} ({})", r.criterion, r.reason)).collect();
++            detail.push_str(&format!("; not assessed: {}", why.join(", ")));
++        }
++        Check::pass("oracle-sensitivity", detail)
++    };
++    check.evidence = Some(evidence.to_string());
++    check
++}
++
++/// Run the configured mutation tool; survived mutants inside the spec's scope
++/// are findings, which fail G2 only when `[mutation] advisory = false`.
++fn mutation_check(paths: &Paths, cfg: &Config, spec: &Spec, base: &str, run: &Run) -> Result<Option<Check>> {
++    let Some(cmd) = cfg.mutation.cmd.as_ref().filter(|c| !c.trim().is_empty()) else { return Ok(None) };
++    let out = std::process::Command::new("sh")
++        .args(["-c", cmd])
++        .current_dir(&paths.repo)
++        .env("KEEL_REPO", &paths.repo)
++        .env("KEEL_BASE", base)
++        .env("KEEL_SPEC", &spec.front.slug)
++        .output();
++    let out = match out {
++        Ok(o) => o,
++        Err(e) => return Ok(Some(Check::blocked("mutation", format!("could not run `{cmd}`: {e}")))),
++    };
++    let stdout = String::from_utf8_lossy(&out.stdout);
++    let parsed = serde_json::from_str::<serde_json::Value>(stdout.trim()).ok()
++        .filter(|v| v["schema"] == "keel.mutationresult/1");
++    let Some(result) = parsed.filter(|_| out.status.code() != Some(3)) else {
++        let why = serde_json::from_str::<serde_json::Value>(stdout.trim()).ok()
++            .and_then(|v| v["summary"].as_str().map(String::from))
++            .unwrap_or_else(|| format!("did not print keel.mutationresult/1 (exit {:?})", out.status.code()));
++        return Ok(Some(Check::blocked("mutation", format!("`{cmd}`: {why}"))));
++    };
++    let mut scope = GlobSetBuilder::new();
++    for p in &spec.front.scope {
++        if let Ok(g) = Glob::new(p.trim()) {
++            scope.add(g);
++        }
++    }
++    let scope = scope.build()?;
++    let survived: Vec<String> = result["survived"].as_array().into_iter().flatten()
++        .filter(|m| m["file"].as_str().is_some_and(|f| scope.is_match(f)))
++        .map(|m| format!("{}:{} {}", m["file"].as_str().unwrap_or(""), m["line"], m["mutant"].as_str().unwrap_or("")))
++        .collect();
++    let killed = result["killed"].as_array().map_or(0, |k| k.len());
++    let evidence = run.write_evidence("mutation.json", &serde_json::to_string_pretty(&result)?)?;
++    let mut check = if survived.is_empty() {
++        Check::pass("mutation", format!("{killed} mutant(s) killed, none survived in scope"))
++    } else if cfg.mutation.advisory {
++        Check::pass("mutation", format!("advisory: {} survived mutant(s): {}", survived.len(), survived.join("; ")))
++    } else {
++        Check::fail("mutation", "no mutant survives in scope", survived.join("; "))
++    };
++    check.evidence = Some(evidence);
++    Ok(Some(check))
++}
++
+ /// The diff must stay inside the declared blast radius.
+ ///
+ /// The radius is the *computed* impact set when a plan exists, falling back to
+diff --git a/src/gate/oracle_exec.rs b/src/gate/oracle_exec.rs
+index 52cabbf..4d6ca03 100644
+--- a/src/gate/oracle_exec.rs
++++ b/src/gate/oracle_exec.rs
+@@ -11,6 +11,8 @@ use crate::config::Config;
+ use crate::paths::Paths;
+ use crate::spec::oracle::Oracle;
+ use crate::spec::{Criterion, Spec};
++use crate::worktree::Worktree;
++use globset::{Glob, GlobSet, GlobSetBuilder};
+ use serde::Serialize;
+ use std::path::Path;
+ 
+@@ -102,6 +104,113 @@ pub fn run_all(paths: &Paths, cfg: &Config, spec: &Spec) -> Coverage {
+     }
+ }
+ 
++/// What re-running one oracle at the base commit showed.
++#[derive(Debug, Clone, Serialize)]
++pub struct SensitivityRun {
++    pub criterion: String,
++    pub oracle: String,
++    pub guard: bool,
++    /// `sensitive`, `insensitive`, `held`, `broken`, `not assessed` or `blocked`.
++    pub assessment: &'static str,
++    pub reason: String,
++}
++
++#[derive(Debug, Clone, Serialize)]
++pub struct Sensitivity {
++    pub base: String,
++    pub runs: Vec<SensitivityRun>,
++    /// Set when the base could not be built or entered; nothing was assessed.
++    #[serde(skip_serializing_if = "Option::is_none")]
++    pub blocked: Option<String>,
++}
++
++impl Sensitivity {
++    pub fn with(&self, assessments: &[&str]) -> Vec<&SensitivityRun> {
++        self.runs.iter().filter(|r| assessments.contains(&r.assessment)).collect()
++    }
++}
++
++fn globs(patterns: &[String]) -> GlobSet {
++    let mut b = GlobSetBuilder::new();
++    for p in patterns {
++        if let Ok(g) = Glob::new(p) {
++            b.add(g);
++        }
++    }
++    b.build().unwrap_or_else(|_| GlobSet::empty())
++}
++
++/// Re-run every executable oracle at `base`, with only the run's test files
++/// (`changed` ∩ `[oracle] sensitivity_paths`) carried over. An oracle that
++/// still passes there was passing before the implementation existed.
++pub fn sensitivity(paths: &Paths, cfg: &Config, spec: &Spec, base: &str, changed: &[String]) -> Sensitivity {
++    let mut out = Sensitivity { base: base.into(), runs: vec![], blocked: None };
++    let tests = globs(&cfg.oracle.sensitivity_paths);
++    let mut wt = match Worktree::create(paths, "oracle-sensitivity", base) {
++        Ok(w) => w,
++        Err(e) => {
++            out.blocked = Some(format!("could not create a worktree at {base}: {e:#}"));
++            return out;
++        }
++    };
++    out.blocked = prepare_base(paths, cfg, &wt, &tests, changed);
++    if out.blocked.is_none() {
++        for c in &spec.criteria {
++            for o in &c.oracles {
++                out.runs.push(assess(&wt.paths, cfg, c, o, &tests, changed));
++            }
++        }
++    }
++    let _ = wt.remove();
++    out
++}
++
++/// Prove the base builds on its own, then carry the test files over.
++fn prepare_base(paths: &Paths, cfg: &Config, wt: &Worktree, tests: &GlobSet, changed: &[String]) -> Option<String> {
++    if let Some(build) = cfg.verify.build.as_ref().filter(|b| !b.trim().is_empty()) {
++        match shell(&wt.paths, build).0 {
++            Some(0) => {}
++            Some(n) => return Some(format!("`{build}` exited {n} at the base commit")),
++            None => return Some(format!("`{build}` could not be executed at the base commit")),
++        }
++    }
++    for f in changed.iter().filter(|f| tests.is_match(f.as_str())) {
++        if let Err(e) = wt.carry_over(paths, f) {
++            return Some(format!("could not carry {f} to the base: {e:#}"));
++        }
++    }
++    None
++}
++
++fn assess(root: &Paths, cfg: &Config, c: &Criterion, o: &Oracle, tests: &GlobSet, changed: &[String]) -> SensitivityRun {
++    let guard = o.is_guard();
++    let mut run = SensitivityRun {
++        criterion: c.id.clone(), oracle: o.summary(), guard, assessment: "not assessed", reason: String::new(),
++    };
++    let file = match o.inner() {
++        Oracle::Human { .. } | Oracle::Schema { .. } => {
++            run.reason = format!("a {} oracle cannot be re-run at the base", o.kind());
++            return run;
++        }
++        Oracle::Test { id } => id.split_once("::").map(|(p, _)| p),
++        Oracle::Doctest { path } => Some(path.as_str()),
++        _ => None,
++    };
++    if let Some(f) = file.filter(|f| !tests.is_match(*f) && changed.iter().any(|d| d == f)) {
++        run.reason = format!("{f} is changed by the diff but is outside sensitivity_paths");
++        return run;
++    }
++    let base = execute(root, cfg, c, o);
++    (run.assessment, run.reason) = match (base.outcome, guard) {
++        (Outcome::Blocked, _) => ("blocked", base.detail.unwrap_or_else(|| "could not execute at the base".into())),
++        (Outcome::Pass, true) => ("held", "passes at the base".into()),
++        (Outcome::Fail, true) => ("broken", "guard fails at the base".into()),
++        (Outcome::Pass, false) => ("insensitive", "passes at the base without the change".into()),
++        _ => ("sensitive", "fails at the base".into()),
++    };
++    run
++}
++
+ /// Execute an oracle that belongs to a lesson rather than a criterion.
+ pub fn execute_standalone(paths: &Paths, cfg: &Config, o: &Oracle) -> OracleRun {
+     let synthetic = Criterion {
+@@ -127,6 +236,7 @@ fn execute(paths: &Paths, cfg: &Config, c: &Criterion, o: &Oracle) -> OracleRun
+     };
+ 
+     match o {
++        Oracle::Guard { oracle } => execute(paths, cfg, c, oracle),
+         Oracle::Human { judgement } => OracleRun {
+             outcome: Outcome::Human,
+             detail: Some(judgement.clone()),
+diff --git a/src/spec/oracle.rs b/src/spec/oracle.rs
+index 51eadc3..98a7744 100644
+--- a/src/spec/oracle.rs
++++ b/src/spec/oracle.rs
+@@ -24,6 +24,8 @@ pub enum Oracle {
+     Doctest { path: String },
+     /// `oracle: human a reviewer confirms the error message names the file`
+     Human { judgement: String },
++    /// `oracle: guard <oracle>` — holds before the change and after it.
++    Guard { oracle: Box<Oracle> },
+ }
+ 
+ impl Oracle {
+@@ -34,6 +36,7 @@ impl Oracle {
+             Oracle::Schema { .. } => "schema",
+             Oracle::Doctest { .. } => "doctest",
+             Oracle::Human { .. } => "human",
++            Oracle::Guard { oracle } => oracle.kind(),
+         }
+     }
+ 
+@@ -47,12 +50,28 @@ impl Oracle {
+             Oracle::Schema { target, .. } => target,
+             Oracle::Doctest { path } => path,
+             Oracle::Human { judgement } => judgement,
++            Oracle::Guard { oracle } => oracle.payload(),
+         }
+     }
+ 
+     /// Whether satisfying this oracle costs a person's attention.
+     pub fn is_human(&self) -> bool {
+-        matches!(self, Oracle::Human { .. })
++        match self {
++            Oracle::Guard { oracle } => oracle.is_human(),
++            _ => matches!(self, Oracle::Human { .. }),
++        }
++    }
++
++    /// The oracle to execute, with any `guard` wrapper removed.
++    pub fn inner(&self) -> &Oracle {
++        match self {
++            Oracle::Guard { oracle } => oracle.inner(),
++            o => o,
++        }
++    }
++
++    pub fn is_guard(&self) -> bool {
++        matches!(self, Oracle::Guard { .. })
+     }
+ 
+     /// A one-line rendering, for gate evidence and for the map of human cost.
+@@ -63,6 +82,7 @@ impl Oracle {
+             Oracle::Schema { schema, target } => format!("{target} validates against {schema}"),
+             Oracle::Doctest { path } => format!("doctests in {path}"),
+             Oracle::Human { judgement } => format!("human: {judgement}"),
++            Oracle::Guard { oracle } => format!("guard {}", oracle.summary()),
+         }
+     }
+ }
+@@ -141,6 +161,13 @@ pub fn parse(raw: &str) -> Result<Oracle> {
+             reject_shell_metacharacters("doctest path", &path)?;
+             Ok(Oracle::Doctest { path })
+         }
++        "guard" => {
++            let inner = parse(rest)?;
++            if inner.is_guard() {
++                bail!("`guard` cannot wrap another `guard`");
++            }
++            Ok(Oracle::Guard { oracle: Box::new(inner) })
++        }
+         "human" => {
+             if rest.is_empty() {
+                 bail!("`human` oracle must say what the reviewer is judging");
+@@ -148,7 +175,7 @@ pub fn parse(raw: &str) -> Result<Oracle> {
+             Ok(Oracle::Human { judgement: rest.to_string() })
+         }
+         other => bail!(
+-            "unknown oracle kind `{other}` (expected one of: cmd, test, schema, doctest, human)"
++            "unknown oracle kind `{other}` (expected one of: cmd, test, schema, doctest, human, guard)"
+         ),
+     }
+ }
+diff --git a/src/worktree.rs b/src/worktree.rs
+index 0ce4081..2a6fdf2 100644
+--- a/src/worktree.rs
++++ b/src/worktree.rs
+@@ -47,6 +47,21 @@ impl Worktree {
+         })
+     }
+ 
++    /// Copy one file from the main tree into this worktree, or delete it here
++    /// if the main tree no longer has it.
++    pub fn carry_over(&self, from: &Paths, rel: &str) -> Result<()> {
++        let (src, dst) = (from.repo.join(rel), self.paths.repo.join(rel));
++        if !src.exists() {
++            let _ = std::fs::remove_file(&dst);
++            return Ok(());
++        }
++        if let Some(dir) = dst.parent() {
++            std::fs::create_dir_all(dir)?;
++        }
++        std::fs::copy(&src, &dst).with_context(|| format!("copying {rel}"))?;
++        Ok(())
++    }
++
+     /// Everything the driver changed here, as a patch against the base commit.
+     ///
+     /// Untracked files are staged first: a new file is a change, and
+diff --git a/.keel/runs/2026-11-03-000/evidence/build.txt b/.keel/runs/2026-11-03-000/evidence/build.txt
+new file mode 100644
+index 0000000..01700b6
+--- /dev/null
++++ b/.keel/runs/2026-11-03-000/evidence/build.txt
+@@ -0,0 +1,2 @@
++$ cargo build --quiet
++
+diff --git a/.keel/runs/2026-11-03-000/evidence/diff-stat.txt b/.keel/runs/2026-11-03-000/evidence/diff-stat.txt
+new file mode 100644
+index 0000000..f533bff
+--- /dev/null
++++ b/.keel/runs/2026-11-03-000/evidence/diff-stat.txt
+@@ -0,0 +1,38 @@
++     1      1  .keel/lesson-usage.json
++     2      0  .keel/runs/2026-11-03-000/evidence/build.txt
++    22      0  .keel/runs/2026-11-03-000/evidence/driver.json
++     2      0  .keel/runs/2026-11-03-000/evidence/lint.txt
++    81      0  .keel/runs/2026-11-03-000/evidence/oracles.json
++   188      0  .keel/runs/2026-11-03-000/evidence/test.txt
++    10      0  .keel/runs/2026-11-03-000/run.json
++    20      0  .keel/runs/2026-11-03-000/trajectory.jsonl
++     1      0  .keel/specs/blast-radius/approvals.jsonl
++    90      0  .keel/specs/blast-radius/gates/G0.json
++    97      0  .keel/specs/blast-radius/gates/G1.json
++   164      0  .keel/specs/blast-radius/plan.md
++   112      0  .keel/specs/blast-radius/spec.md
++    63      0  .keel/specs/blast-radius/tasks.md
++     3      0  .keel/specs/driver-usage/approvals.jsonl
++    90      0  .keel/specs/driver-usage/gates/G0.json
++    95      0  .keel/specs/driver-usage/gates/G1.json
++   143      0  .keel/specs/driver-usage/plan.md
++   127      0  .keel/specs/driver-usage/spec.md
++    63      0  .keel/specs/driver-usage/tasks.md
++     2      0  .keel/specs/oracle-sensitivity/approvals.jsonl
++    90      0  .keel/specs/oracle-sensitivity/gates/G0.json
++    95      0  .keel/specs/oracle-sensitivity/gates/G1.json
++   156      0  .keel/specs/oracle-sensitivity/plan.md
++   132      0  .keel/specs/oracle-sensitivity/spec.md
++    69      0  .keel/specs/oracle-sensitivity/tasks.md
++    40      0  assets/mutation/cargo-mutants
++    24      0  schemas/mutationresult.json
++    22      0  src/config.rs
++    10      4  src/driver/builtin.rs
++    95      0  src/gate/g2.rs
++   110      0  src/gate/oracle_exec.rs
++    29      2  src/spec/oracle.rs
++    15      0  src/worktree.rs
++     5      0  tests/fixtures/mutation/cargo-mutants-sample.json
++   135      0  tests/oracle_sensitivity.rs
++
++36 file(s), +2403 -7 (2410 lines of churn) against 3c45f6d39d60345fc4727646d7939bd33297c03e
+diff --git a/.keel/runs/2026-11-03-000/evidence/driver.json b/.keel/runs/2026-11-03-000/evidence/driver.json
+new file mode 100644
+index 0000000..91573a2
+--- /dev/null
++++ b/.keel/runs/2026-11-03-000/evidence/driver.json
+@@ -0,0 +1,22 @@
++{
++  "schema": "keel.driverresult/1",
++  "status": "ok",
++  "files_changed": [
++    ".keel/lesson-usage.json",
++    "src/config.rs",
++    "src/driver/builtin.rs",
++    "src/gate/g2.rs",
++    "src/gate/oracle_exec.rs",
++    "src/spec/oracle.rs",
++    "src/worktree.rs",
++    ".keel/runs/2026-11-03-000/",
++    ".keel/specs/blast-radius/",
++    ".keel/specs/driver-usage/",
++    ".keel/specs/oracle-sensitivity/",
++    "assets/mutation/",
++    "schemas/mutationresult.json",
++    "tests/fixtures/",
++    "tests/oracle_sensitivity.rs"
++  ],
++  "detail": "claude completed"
++}
+\ No newline at end of file
+diff --git a/.keel/runs/2026-11-03-000/evidence/lint.txt b/.keel/runs/2026-11-03-000/evidence/lint.txt
+new file mode 100644
+index 0000000..f68c665
+--- /dev/null
++++ b/.keel/runs/2026-11-03-000/evidence/lint.txt
+@@ -0,0 +1,2 @@
++$ cargo clippy --all-targets --quiet
++
+diff --git a/.keel/runs/2026-11-03-000/evidence/oracles.json b/.keel/runs/2026-11-03-000/evidence/oracles.json
+new file mode 100644
+index 0000000..02cedc5
+--- /dev/null
++++ b/.keel/runs/2026-11-03-000/evidence/oracles.json
+@@ -0,0 +1,81 @@
++{
++  "runs": [
++    {
++      "criterion": "AC-1",
++      "kind": "cmd",
++      "oracle": "`cargo test --test oracle_sensitivity executable_oracles_are_rerun_in_a_base_worktree_with_test_files_carried_over` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\ntest executable_oracles_are_rerun_in_a_base_worktree_with_test_files_carried_over ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.28s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.05s\n     Running tests/oracle_sensitivity.rs (target/debug/deps/oracle_sensitivity-d39d0232d719edb1)"
++    },
++    {
++      "criterion": "AC-2",
++      "kind": "cmd",
++      "oracle": "`cargo test --test oracle_sensitivity an_oracle_passing_without_the_change_fails_sensitivity` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\ntest an_oracle_passing_without_the_change_fails_sensitivity ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.28s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/oracle_sensitivity.rs (target/debug/deps/oracle_sensitivity-d39d0232d719edb1)"
++    },
++    {
++      "criterion": "AC-3",
++      "kind": "cmd",
++      "oracle": "`cargo test --test oracle_sensitivity a_guard_oracle_must_pass_at_the_base_and_on_the_change` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\ntest a_guard_oracle_must_pass_at_the_base_and_on_the_change ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.55s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/oracle_sensitivity.rs (target/debug/deps/oracle_sensitivity-d39d0232d719edb1)"
++    },
++    {
++      "criterion": "AC-4",
++      "kind": "cmd",
++      "oracle": "`cargo test --test oracle_sensitivity an_unbuildable_base_blocks_sensitivity_rather_than_passing_it` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\ntest an_unbuildable_base_blocks_sensitivity_rather_than_passing_it ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.27s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/oracle_sensitivity.rs (target/debug/deps/oracle_sensitivity-d39d0232d719edb1)"
++    },
++    {
++      "criterion": "AC-5",
++      "kind": "cmd",
++      "oracle": "`cargo test --test oracle_sensitivity oracles_keel_cannot_isolate_are_listed_as_not_assessed` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\ntest oracles_keel_cannot_isolate_are_listed_as_not_assessed ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.27s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/oracle_sensitivity.rs (target/debug/deps/oracle_sensitivity-d39d0232d719edb1)"
++    },
++    {
++      "criterion": "AC-6",
++      "kind": "cmd",
++      "oracle": "`cargo test --test oracle_sensitivity survived_mutants_in_scope_become_mutation_findings` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\ntest survived_mutants_in_scope_become_mutation_findings ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.28s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/oracle_sensitivity.rs (target/debug/deps/oracle_sensitivity-d39d0232d719edb1)"
++    },
++    {
++      "criterion": "AC-6",
++      "kind": "schema",
++      "oracle": "tests/fixtures/mutation/cargo-mutants-sample.json validates against schemas/mutationresult.json",
++      "outcome": "pass",
++      "detail": "tests/fixtures/mutation/cargo-mutants-sample.json validates"
++    },
++    {
++      "criterion": "AC-7",
++      "kind": "cmd",
++      "oracle": "`cargo test --test oracle_sensitivity mutation_is_advisory_by_default_and_blocks_only_when_configured` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\ntest mutation_is_advisory_by_default_and_blocks_only_when_configured ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.55s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/oracle_sensitivity.rs (target/debug/deps/oracle_sensitivity-d39d0232d719edb1)"
++    },
++    {
++      "criterion": "AC-8",
++      "kind": "cmd",
++      "oracle": "`cargo test --test oracle_sensitivity the_cargo_mutants_adapter_emits_mutationresult_and_blocks_when_absent` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\ntest the_cargo_mutants_adapter_emits_mutationresult_and_blocks_when_absent ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.21s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/oracle_sensitivity.rs (target/debug/deps/oracle_sensitivity-d39d0232d719edb1)"
++    }
++  ],
++  "criteria": 8,
++  "executed": 9,
++  "passed": 9,
++  "failed": 0,
++  "blocked": 0,
++  "human": 0
++}
+\ No newline at end of file
+diff --git a/.keel/runs/2026-11-03-000/evidence/test.txt b/.keel/runs/2026-11-03-000/evidence/test.txt
+new file mode 100644
+index 0000000..f1ccb06
+--- /dev/null
++++ b/.keel/runs/2026-11-03-000/evidence/test.txt
+@@ -0,0 +1,188 @@
++$ cargo test --quiet
++
++
++running 296 tests
++....................................................................................... 87/296
++....................................................................................... 174/296
++....................................................................................... 261/296
++...................................
++test result: ok. 296 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.24s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.75s
++
++
++running 7 tests
++.......
++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.43s
++
++
++running 8 tests
++a_verified_bundle_of_this_tree_covers_it --- FAILED
++an_edit_after_the_run_is_not_covered --- FAILED
++. 3/8
++an_uncovered_change_names_each_reason --- FAILED
++... 7/8
++json_report_validates_against_the_published_schema --- FAILED
++
++failures:
++
++---- a_verified_bundle_of_this_tree_covers_it stdout ----
++
++thread 'a_verified_bundle_of_this_tree_covers_it' (31174) panicked at tests/cover.rs:30:5:
++assertion `left == right` failed: the run did not pass:
++run 2026-11-03-000
++
++  driver noop …
++  driver ok in 0.0s
++
++G2 — demo
++  pass     build — `true` exited 0
++  pass     test — `true` exited 0
++  pass     lint — `true` exited 0
++  pass     oracle-coverage — 2/2 oracles pass (0 awaiting human judgement)
++  pass     blast-radius — 0 changed file(s) inside scope, 3 file(s) downstream
++  pass     line-budget — 0/120 lines of churn
++  FAIL     oracle-sensitivity
++           expected: every oracle fails without the change (guards pass before and after)
++           actual:   passes at the base: AC-1 `true` exits 0, AC-2 test tests/limit.rs::respects_config; guards failing at the base: 
++  pass     baseline-ratchet — 1 metric(s) held
++  pass     store-drift — 4 projections current
++  pass     shared-stores — none configured
++G2 FAIL — 9 passed, 1 failed, 0 blocked
++
++stopping: G2 failed, so later gates would be judging work that is not ready
++
++run 2026-11-03-000 — FAIL
++recorded: 14 events in .keel/runs/2026-11-03-000/trajectory.jsonl
++evidence: .keel/runs/2026-11-03-000
++bundle:   keel export 2026-11-03-000
++
++  left: 1
++ right: 0
++note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
++
++---- an_edit_after_the_run_is_not_covered stdout ----
++
++thread 'an_edit_after_the_run_is_not_covered' (31175) panicked at tests/cover.rs:30:5:
++assertion `left == right` failed: the run did not pass:
++run 2026-11-03-000
++
++  driver noop …
++  driver ok in 0.0s
++
++G2 — demo
++  pass     build — `true` exited 0
++  pass     test — `true` exited 0
++  pass     lint — `true` exited 0
++  pass     oracle-coverage — 2/2 oracles pass (0 awaiting human judgement)
++  pass     blast-radius — 0 changed file(s) inside scope, 3 file(s) downstream
++  pass     line-budget — 0/120 lines of churn
++  FAIL     oracle-sensitivity
++           expected: every oracle fails without the change (guards pass before and after)
++           actual:   passes at the base: AC-1 `true` exits 0, AC-2 test tests/limit.rs::respects_config; guards failing at the base: 
++  pass     baseline-ratchet — 1 metric(s) held
++  pass     store-drift — 4 projections current
++  pass     shared-stores — none configured
++G2 FAIL — 9 passed, 1 failed, 0 blocked
++
++stopping: G2 failed, so later gates would be judging work that is not ready
++
++run 2026-11-03-000 — FAIL
++recorded: 14 events in .keel/runs/2026-11-03-000/trajectory.jsonl
++evidence: .keel/runs/2026-11-03-000
++bundle:   keel export 2026-11-03-000
++
++  left: 1
++ right: 0
++
++---- an_uncovered_change_names_each_reason stdout ----
++
++thread 'an_uncovered_change_names_each_reason' (31317) panicked at tests/cover.rs:30:5:
++assertion `left == right` failed: the run did not pass:
++run 2026-11-03-001
++
++  driver noop …
++  driver ok in 0.0s
++
++G2 — demo
++  pass     build — `true` exited 0
++  pass     test — `true` exited 0
++  pass     lint — `true` exited 0
++  pass     oracle-coverage — 2/2 oracles pass (0 awaiting human judgement)
++  pass     blast-radius — 0 changed file(s) inside scope, 3 file(s) downstream
++  pass     line-budget — 0/120 lines of churn
++  FAIL     oracle-sensitivity
++           expected: every oracle fails without the change (guards pass before and after)
++           actual:   passes at the base: AC-1 `true` exits 0, AC-2 test tests/limit.rs::respects_config; guards failing at the base: 
++  pass     baseline-ratchet — 1 metric(s) held
++  pass     store-drift — 4 projections current
++  pass     shared-stores — none configured
++G2 FAIL — 9 passed, 1 failed, 0 blocked
++
++stopping: G2 failed, so later gates would be judging work that is not ready
++
++run 2026-11-03-001 — FAIL
++recorded: 14 events in .keel/runs/2026-11-03-001/trajectory.jsonl
++evidence: .keel/runs/2026-11-03-001
++bundle:   keel export 2026-11-03-001
++
++  left: 1
++ right: 0
++
++---- json_report_validates_against_the_published_schema stdout ----
++
++thread 'json_report_validates_against_the_published_schema' (31504) panicked at tests/cover.rs:30:5:
++assertion `left == right` failed: the run did not pass:
++run 2026-11-03-000
++
++  driver noop …
++  driver ok in 0.0s
++
++G2 — demo
++  pass     build — `true` exited 0
++  pass     test — `true` exited 0
++  pass     lint — `true` exited 0
++  pass     oracle-coverage — 2/2 oracles pass (0 awaiting human judgement)
++  pass     blast-radius — 0 changed file(s) inside scope, 3 file(s) downstream
++  pass     line-budget — 0/120 lines of churn
++  FAIL     oracle-sensitivity
++           expected: every oracle fails without the change (guards pass before and after)
++           actual:   passes at the base: AC-1 `true` exits 0, AC-2 test tests/limit.rs::respects_config; guards failing at the base: 
++  pass     baseline-ratchet — 1 metric(s) held
++  pass     store-drift — 4 projections current
++  pass     shared-stores — none configured
++G2 FAIL — 9 passed, 1 failed, 0 blocked
++
++stopping: G2 failed, so later gates would be judging work that is not ready
++
++run 2026-11-03-000 — FAIL
++recorded: 14 events in .keel/runs/2026-11-03-000/trajectory.jsonl
++evidence: .keel/runs/2026-11-03-000
++bundle:   keel export 2026-11-03-000
++
++  left: 1
++ right: 0
++
++
++failures:
++    a_verified_bundle_of_this_tree_covers_it
++    an_edit_after_the_run_is_not_covered
++    an_uncovered_change_names_each_reason
++    json_report_validates_against_the_published_schema
++
++test result: FAILED. 4 passed; 4 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.07s
++
++error: test failed, to rerun pass `--test cover`
+diff --git a/.keel/runs/2026-11-03-000/run.json b/.keel/runs/2026-11-03-000/run.json
+new file mode 100644
+index 0000000..1183209
+--- /dev/null
++++ b/.keel/runs/2026-11-03-000/run.json
+@@ -0,0 +1,10 @@
++{
++  "schema": "keel.run/1",
++  "id": "2026-11-03-000",
++  "spec": "oracle-sensitivity",
++  "driver": "claude-code",
++  "keel_version": "0.12.0",
++  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
++  "started_at": "2026-11-03T20:50:10.719493866+00:00",
++  "base_commit": "3c45f6d39d60345fc4727646d7939bd33297c03e"
++}
+diff --git a/.keel/runs/2026-11-03-000/trajectory.jsonl b/.keel/runs/2026-11-03-000/trajectory.jsonl
+new file mode 100644
+index 0000000..3711f89
+--- /dev/null
++++ b/.keel/runs/2026-11-03-000/trajectory.jsonl
+@@ -0,0 +1,20 @@
++{"t":"2026-11-03T20:50:10.719565575+00:00","seq":1,"kind":"run_start","spec":"oracle-sensitivity","driver":"claude-code","keel_version":"0.12.0","store_hash":"0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2"}
++{"t":"2026-11-03T20:50:10.721497752+00:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":424,"bytes":1693}
++{"t":"2026-11-03T20:50:10.721514794+00:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
++{"t":"2026-11-03T20:50:10.721545336+00:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6268,"bytes":25071}
++{"t":"2026-11-03T20:50:10.721629628+00:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
++{"t":"2026-11-03T20:50:10.721675628+00:00","seq":6,"kind":"inject","source":".keel/specs/oracle-sensitivity/spec.md","tokens":1427,"bytes":5708}
++{"t":"2026-11-03T20:50:10.721681128+00:00","seq":7,"kind":"driver_call","driver":"claude-code","prompt_tokens":8348}
++{"t":"2026-11-03T20:56:06.204090011+00:00","seq":8,"kind":"driver_result","driver":"claude-code","status":"ok","files_changed":15,"detail":"claude completed"}
++{"t":"2026-11-03T20:56:06.266208600+00:00","seq":9,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
++{"t":"2026-11-03T20:56:15.702324684+00:00","seq":10,"kind":"command","cmd":"cargo test --quiet","exit_code":101,"evidence":"evidence/test.txt"}
++{"t":"2026-11-03T20:56:15.781839011+00:00","seq":11,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
++{"t":"2026-11-03T20:56:18.875413415+00:00","seq":12,"kind":"oracle","criterion":"AC-1","oracle":"`cargo test --test oracle_sensitivity executable_oracles_are_rerun_in_a_base_worktree_with_test_files_carried_over` exits 0","verdict":"pass","exit_code":0}
++{"t":"2026-11-03T20:56:18.875431791+00:00","seq":13,"kind":"oracle","criterion":"AC-2","oracle":"`cargo test --test oracle_sensitivity an_oracle_passing_without_the_change_fails_sensitivity` exits 0","verdict":"pass","exit_code":0}
++{"t":"2026-11-03T20:56:18.875434082+00:00","seq":14,"kind":"oracle","criterion":"AC-3","oracle":"`cargo test --test oracle_sensitivity a_guard_oracle_must_pass_at_the_base_and_on_the_change` exits 0","verdict":"pass","exit_code":0}
++{"t":"2026-11-03T20:56:18.875435166+00:00","seq":15,"kind":"oracle","criterion":"AC-4","oracle":"`cargo test --test oracle_sensitivity an_unbuildable_base_blocks_sensitivity_rather_than_passing_it` exits 0","verdict":"pass","exit_code":0}
++{"t":"2026-11-03T20:56:18.875436207+00:00","seq":16,"kind":"oracle","criterion":"AC-5","oracle":"`cargo test --test oracle_sensitivity oracles_keel_cannot_isolate_are_listed_as_not_assessed` exits 0","verdict":"pass","exit_code":0}
++{"t":"2026-11-03T20:56:18.875437207+00:00","seq":17,"kind":"oracle","criterion":"AC-6","oracle":"`cargo test --test oracle_sensitivity survived_mutants_in_scope_become_mutation_findings` exits 0","verdict":"pass","exit_code":0}
++{"t":"2026-11-03T20:56:18.875438124+00:00","seq":18,"kind":"oracle","criterion":"AC-6","oracle":"tests/fixtures/mutation/cargo-mutants-sample.json validates against schemas/mutationresult.json","verdict":"pass"}
++{"t":"2026-11-03T20:56:18.875439207+00:00","seq":19,"kind":"oracle","criterion":"AC-7","oracle":"`cargo test --test oracle_sensitivity mutation_is_advisory_by_default_and_blocks_only_when_configured` exits 0","verdict":"pass","exit_code":0}
++{"t":"2026-11-03T20:56:18.875440082+00:00","seq":20,"kind":"oracle","criterion":"AC-8","oracle":"`cargo test --test oracle_sensitivity the_cargo_mutants_adapter_emits_mutationresult_and_blocks_when_absent` exits 0","verdict":"pass","exit_code":0}
+diff --git a/.keel/specs/blast-radius/approvals.jsonl b/.keel/specs/blast-radius/approvals.jsonl
+new file mode 100644
+index 0000000..6da4644
+--- /dev/null
++++ b/.keel/specs/blast-radius/approvals.jsonl
+@@ -0,0 +1 @@
++{"schema":"keel.approval/1","stage":"spec","decision":"approved","artefact_hash":"8fd333590157941a615947aafab8b9f6f2be1557e244e403189d654ec8ec4772","gate_verdict":"pass","by":"unknown","at":"2026-09-14T03:51:56.310102344+00:00"}
+diff --git a/.keel/specs/blast-radius/gates/G0.json b/.keel/specs/blast-radius/gates/G0.json
+new file mode 100644
+index 0000000..f82fc09
+--- /dev/null
++++ b/.keel/specs/blast-radius/gates/G0.json
+@@ -0,0 +1,90 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G0",
++  "run": "2026-09-13-000",
++  "spec": "blast-radius",
++  "verdict": "pass",
++  "generated_at": "2026-09-13T17:25:39.092778685+00:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "SPEC-0009 (keel.spec/1)"
++    },
++    {
++      "id": "criteria-present",
++      "verdict": "pass",
++      "detail": "8 criteria"
++    },
++    {
++      "id": "criterion-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate ids"
++    },
++    {
++      "id": "no-placeholders",
++      "verdict": "pass",
++      "detail": "no unfilled scaffold text"
++    },
++    {
++      "id": "ears-conformance",
++      "verdict": "pass",
++      "detail": "8/8 conform (event-driven, ubiquitous, unwanted-behaviour)"
++    },
++    {
++      "id": "oracle-presence",
++      "verdict": "pass",
++      "detail": "8 oracles across 8 criteria"
++    },
++    {
++      "id": "oracle-wellformed",
++      "verdict": "pass",
++      "detail": "all oracles parse"
++    },
++    {
++      "id": "ambiguity",
++      "verdict": "pass",
++      "detail": "no ambiguous phrasing in criteria"
++    },
++    {
++      "id": "criterion-budget",
++      "verdict": "pass",
++      "detail": "8/8 criteria"
++    },
++    {
++      "id": "spec-length",
++      "verdict": "pass",
++      "detail": "112/250 lines"
++    },
++    {
++      "id": "scope-declared",
++      "verdict": "pass",
++      "detail": "2 glob(s): src/**, test/**"
++    },
++    {
++      "id": "change-budget",
++      "verdict": "pass",
++      "detail": "200 lines of diff budgeted"
++    },
++    {
++      "id": "oracle-mix",
++      "verdict": "pass",
++      "detail": "8/8 runnable (8 cmd)"
++    },
++    {
++      "id": "human-cost",
++      "verdict": "pass",
++      "detail": "0 human oracle(s), none load-bearing"
++    },
++    {
++      "id": "store-drift",
++      "verdict": "pass",
++      "detail": "4 projections current"
++    },
++    {
++      "id": "shared-stores",
++      "verdict": "pass",
++      "detail": "none configured"
++    }
++  ]
++}
+diff --git a/.keel/specs/blast-radius/gates/G1.json b/.keel/specs/blast-radius/gates/G1.json
+new file mode 100644
+index 0000000..db33ee5
+--- /dev/null
++++ b/.keel/specs/blast-radius/gates/G1.json
+@@ -0,0 +1,97 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G1",
++  "run": "2026-09-14-000",
++  "spec": "blast-radius",
++  "verdict": "fail",
++  "generated_at": "2026-09-14T04:35:08.315837437+00:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "PLAN-0009 + TASKS-0009"
++    },
++    {
++      "id": "g0-passed",
++      "verdict": "pass",
++      "detail": "G0 passed in run 2026-09-13-000"
++    },
++    {
++      "id": "spec-approved",
++      "verdict": "pass",
++      "detail": "approved by unknown"
++    },
++    {
++      "id": "tasks-present",
++      "verdict": "pass",
++      "detail": "8/15 tasks"
++    },
++    {
++      "id": "task-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate task ids"
++    },
++    {
++      "id": "task-fields",
++      "verdict": "pass",
++      "detail": "all task fields recognised"
++    },
++    {
++      "id": "task-criterion-traceability",
++      "verdict": "pass",
++      "detail": "8 tasks all traced"
++    },
++    {
++      "id": "criteria-covered",
++      "verdict": "pass",
++      "detail": "8/8 criteria have a task"
++    },
++    {
++      "id": "task-budgets",
++      "verdict": "pass",
++      "detail": "all 8 tasks budgeted, total 200 lines"
++    },
++    {
++      "id": "total-budget",
++      "verdict": "pass",
++      "detail": "200/200 lines"
++    },
++    {
++      "id": "task-exit-conditions",
++      "verdict": "pass",
++      "detail": "every task states when it is done"
++    },
++    {
++      "id": "task-dependencies",
++      "verdict": "pass",
++      "detail": "1 wave(s), widths 8"
++    },
++    {
++      "id": "wave-isolation",
++      "verdict": "pass",
++      "detail": "1 wave(s), no file claimed twice within one"
++    },
++    {
++      "id": "task-files-in-scope",
++      "verdict": "fail",
++      "expected": "every task names the files it touches",
++      "actual": "no files on: T-1 (line 16), T-2 (line 22), T-3 (line 28), T-4 (line 34), T-5 (line 40), … and 3 more"
++    },
++    {
++      "id": "rollback-stated",
++      "verdict": "fail",
++      "expected": "front matter `rollback:` or a ## Rollback section states the rollback",
++      "actual": "both are empty — \"git revert\" is a legitimate answer, silence is not"
++    },
++    {
++      "id": "blast-radius-declared",
++      "verdict": "pass",
++      "detail": "85 file(s) at depth 2, 22732 lines"
++    },
++    {
++      "id": "blast-radius-current",
++      "verdict": "pass",
++      "detail": "85 files, 22732 lines — matches a fresh computation — no indexed file matches test/** (new files, or a typo)"
++    }
++  ]
++}
+diff --git a/.keel/specs/blast-radius/plan.md b/.keel/specs/blast-radius/plan.md
+new file mode 100644
+index 0000000..649ebba
+--- /dev/null
++++ b/.keel/specs/blast-radius/plan.md
+@@ -0,0 +1,164 @@
++---
++id: PLAN-0009
++slug: blast-radius
++schema: keel.plan/1
++blast:
++  depth: 2
++  declared:
++  - src/**
++  - test/**
++  computed:
++  - src/paths.rs
++  - src/config.rs
++  - src/map/lang.rs
++  - src/gate/mod.rs
++  - src/spec/mod.rs
++  - src/trajectory/event.rs
++  - src/map/extract.rs
++  - src/trajectory/mod.rs
++  - src/run.rs
++  - src/hashing.rs
++  - src/store/mod.rs
++  - src/lesson/mod.rs
++  - src/failure/mod.rs
++  - src/plan.rs
++  - src/store/frontmatter.rs
++  - src/approval.rs
++  - src/map/blast.rs
++  - src/map/db.rs
++  - src/spec/oracle.rs
++  - src/retrieve/mod.rs
++  - src/spec/ears.rs
++  - src/spec/placeholder.rs
++  - src/report/mod.rs
++  - src/main.rs
++  - src/http.rs
++  - src/review/mod.rs
++  - src/driver/mod.rs
++  - src/pipeline.rs
++  - src/serve/mod.rs
++  - src/projection/drift.rs
++  - src/driver/contract.rs
++  - src/map/mod.rs
++  - src/gate/ratchet.rs
++  - src/gate/g1.rs
++  - src/cmd/mod.rs
++  - src/gate/g25.rs
++  - src/mcp/mod.rs
++  - src/gate/oracle_exec.rs
++  - src/projection/mod.rs
++  - src/gate/g0.rs
++  - src/evidence/mod.rs
++  - src/driver/conform.rs
++  - src/failure/taxonomy.rs
++  - src/gate/diff.rs
++  - src/worktree.rs
++  - src/projection/sections.rs
++  - src/map/render.rs
++  - src/lesson/usage.rs
++  - src/gate/g2.rs
++  - src/report/insights.rs
++  - src/retrieve/fallback.rs
++  - src/gate/g4.rs
++  - src/map/resolve.rs
++  - src/metrics.rs
++  - src/retrieve/budget.rs
++  - src/gate/g3.rs
++  - src/evidence/manifest.rs
++  - src/map/rank.rs
++  - src/cmd/next.rs
++  - src/ui.rs
++  - src/cmd/run.rs
++  - src/cmd/learn.rs
++  - src/cmd/init.rs
++  - src/driver/builtin.rs
++  - src/cmd/doctor.rs
++  - src/cmd/spec.rs
++  - src/cmd/bench.rs
++  - src/cmd/hook.rs
++  - src/cmd/retrieve.rs
++  - src/atomic.rs
++  - src/cmd/approve.rs
++  - src/cmd/driver.rs
++  - src/map/walk.rs
++  - src/cmd/report.rs
++  - src/cmd/store.rs
++  - src/cmd/gate.rs
++  - src/cmd/status.rs
++  - src/cmd/metrics.rs
++  - src/cmd/map.rs
++  - src/cmd/prune.rs
++  - src/cmd/plan.rs
++  - src/cmd/tasks.rs
++  - src/cmd/ratchet.rs
++  - src/cmd/blast.rs
++  - src/cmd/serve.rs
++  computed_lines: 22732
++rollback: ''
++verified_at: 2026-09-14
++---
++
++# Design — blast-radius
++
++## Approach
++
++_How the change is made. Name the seam you are cutting at._
++
++## Blast radius
++
++<!-- generated by `keel plan`; edits here are overwritten -->
++
++Computed from the import graph at depth 2: **85 files, 22732 lines**.
++
++| depth | file | lines |
++| --- | --- | --- |
++| scope | `src/paths.rs` | 82 |
++| scope | `src/config.rs` | 504 |
++| scope | `src/map/lang.rs` | 355 |
++| scope | `src/gate/mod.rs` | 416 |
++| scope | `src/spec/mod.rs` | 353 |
++| scope | `src/trajectory/event.rs` | 228 |
++| scope | `src/map/extract.rs` | 468 |
++| scope | `src/trajectory/mod.rs` | 370 |
++| scope | `src/run.rs` | 273 |
++| scope | `src/hashing.rs` | 49 |
++| scope | `src/store/mod.rs` | 177 |
++| scope | `src/lesson/mod.rs` | 719 |
++| scope | `src/failure/mod.rs` | 573 |
++| scope | `src/plan.rs` | 604 |
++| scope | `src/store/frontmatter.rs` | 137 |
++| scope | `src/approval.rs` | 340 |
++| scope | `src/map/blast.rs` | 268 |
++| scope | `src/map/db.rs` | 265 |
++| scope | `src/spec/oracle.rs` | 327 |
++| scope | `src/retrieve/mod.rs` | 479 |
++| scope | `src/spec/ears.rs` | 362 |
++| scope | `src/spec/placeholder.rs` | 233 |
++| scope | `src/report/mod.rs` | 156 |
++| scope | `src/main.rs` | 566 |
++| scope | `src/http.rs` | 426 |
++| scope | `src/review/mod.rs` | 545 |
++| scope | `src/driver/mod.rs` | 595 |
++| scope | `src/pipeline.rs` | 284 |
++| scope | `src/serve/mod.rs` | 455 |
++| scope | `src/projection/drift.rs` | 210 |
++| scope | `src/driver/contract.rs` | 263 |
++| scope | `src/map/mod.rs` | 203 |
++| scope | `src/gate/ratchet.rs` | 197 |
++| scope | `src/gate/g1.rs` | 526 |
++| scope | `src/cmd/mod.rs` | 23 |
++| scope | `src/gate/g25.rs` | 546 |
++| scope | `src/mcp/mod.rs` | 271 |
++| scope | `src/gate/oracle_exec.rs` | 308 |
++| scope | `src/projection/mod.rs` | 116 |
++| scope | `src/gate/g0.rs` | 341 |
++
++_… 45 more, see `keel blast`._
++
++_Scope globs matching no indexed file (new files, or a typo): test/**_
++
++
++## Rollback
++
++_Fill in `rollback:` in the front matter above. "git revert" is a
++legitimate answer; "we would not need to" is not._
+diff --git a/.keel/specs/blast-radius/spec.md b/.keel/specs/blast-radius/spec.md
+new file mode 100644
+index 0000000..672e9dd
+--- /dev/null
++++ b/.keel/specs/blast-radius/spec.md
+@@ -0,0 +1,112 @@
++---
++id: SPEC-0009
++slug: blast-radius
++schema: keel.spec/1
++status: approved
++scope:
++- src/**
++- test/**
++budget:
++  criteria: 8
++  lines: 200
++---
++
++# blast radius
++
++## Context
++
++`keel serve`'s dashboard fetches `/api/overview` once and polls it, and
++renders a per-feature "Summary" panel from `state.specs` when an operator
++selects a feature in the rail (`assets/ui/app.js`, `renderSpecSummary`). That
++panel shows tiles for runs, tokens, events and open fails, but nothing about
++how much of the codebase the feature's declared scope reaches — the one number
++`src/map/blast.rs` already computes and `keel blast` / `keel plan` already
++print. An operator landing on a feature has no way to see its blast radius
++without leaving the browser for a terminal.
++
++`/api/spec/<slug>` already exists and already narrows `Report::build` to one
++spec, but the JS never calls it — `state.selected` only filters the specs
++already fetched by `/api/overview`. Computing the blast radius inside every
++`SpecReport` built by the unnarrowed `/api/overview` call would recompute the
++whole reverse-import graph, from scratch, for every spec, every 2-second poll
++— the smallest surface is to compute it only for the one spec `/api/spec/<slug>`
++already narrows to, and have the dashboard fetch that route when a feature is
++selected.
++
++## Acceptance criteria
++
++### AC-1 A narrowed report carries the spec's blast radius
++
++WHEN `Report::build` is called with `only` set to one spec's slug and a
++symbol index exists THE SYSTEM SHALL set that spec's `blast` field to an
++object with integer `files`, `lines` and `depth` keys computed by
++`map::blast::compute` over the spec's declared `scope` globs.
++
++oracle: cmd `cargo test --test report the_narrowed_report_carries_the_blast_radius` exit 0
++
++### AC-2 The unnarrowed report stays free of it
++
++WHEN `Report::build` is called with `only` set to `None` THE SYSTEM SHALL
++leave every spec's `blast` field absent, so `/api/overview` does not recompute
++the reverse-import graph once per spec on every poll.
++
++oracle: cmd `cargo test --test report blast_radius_is_absent_from_the_unnarrowed_report` exit 0
++
++### AC-3 A missing symbol index degrades to null
++
++IF the symbol index database does not exist THEN THE SYSTEM SHALL set the
++narrowed spec's `blast` field to `null` rather than making `keel report
++<slug> --json` exit non-zero.
++
++oracle: cmd `cargo test --test report blast_radius_is_null_without_a_symbol_index` exit 0
++
++### AC-4 The depth matches the configured default
++
++THE SYSTEM SHALL compute the narrowed spec's blast radius at
++`cfg.plan.blast_depth`, the same depth `keel blast` and `keel plan` use by
++default, so the number shown on a feature's landing panel and the number
++`keel blast` prints for the same scope agree.
++
++oracle: cmd `cargo test --test report blast_radius_depth_matches_plan_blast_depth` exit 0
++
++### AC-5 `/api/spec/<slug>` serves the field
++
++WHEN a `GET` request reaches `/api/spec/<slug>` for a spec whose scope
++matches at least one indexed file THE SYSTEM SHALL respond with JSON whose
++`specs[0].blast.files` count equals the number of paths `keel blast` reports
++for that spec's scope at the same depth.
++
++oracle: cmd `cargo test --test serve blast_radius_route_matches_keel_blast_output` exit 0
++
++### AC-6 Selecting a feature fetches its blast radius
++
++WHEN the operator selects a feature in the dashboard rail THE SYSTEM SHALL
++fetch `/api/spec/<slug>` for that feature's slug and store the response's
++`blast` field on that feature's state before the Summary panel next renders.
++
++oracle: cmd `cargo test --test serve app_js_fetches_the_spec_route_on_selection` exit 0
++
++### AC-7 The Summary panel shows a blast-radius tile
++
++WHEN the Summary panel renders for a feature whose stored `blast` field is
++not `null` THE SYSTEM SHALL display a tile labelled `blast radius` whose
++value is that field's `files` count.
++
++oracle: cmd `cargo test --test serve app_js_summary_panel_has_a_blast_radius_tile` exit 0
++
++### AC-8 A null blast radius omits the tile
++
++IF a feature's stored `blast` field is `null` THEN THE SYSTEM SHALL omit the
++blast-radius tile from the Summary panel rather than rendering a tile showing
++`0`.
++
++oracle: cmd `cargo test --test serve app_js_omits_the_blast_radius_tile_when_null` exit 0
++
++## Out of scope
++
++- Adding a blast-radius column or tile to the Overview landing view (the
++  `state.selected === null` case) — only a selected feature's own panel.
++- Changing what `map::blast::compute`, `keel blast` or `keel plan` compute;
++  this only surfaces the existing number in `keel serve`.
++- Polling `/api/spec/<slug>` on the same 2-second interval as `/api/overview`;
++  one fetch per selection is all AC-6 requires.
+diff --git a/.keel/specs/blast-radius/tasks.md b/.keel/specs/blast-radius/tasks.md
+new file mode 100644
+index 0000000..ee93630
+--- /dev/null
++++ b/.keel/specs/blast-radius/tasks.md
+@@ -0,0 +1,63 @@
++---
++id: TASKS-0009
++slug: blast-radius
++schema: keel.tasks/1
++---
++
++# Tasks
++
++Each task must name the criteria it satisfies, the files it touches, a line
++budget and an exit condition. G1 checks all four, and checks that every
++criterion in the spec is covered by at least one task.
++
++Add `- depends_on: T-1` where order matters. Tasks with no dependency on
++each other form a wave; `keel tasks` shows them.
++
++### T-1 A narrowed report carries the spec's blast radius
++- criteria: AC-1
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test report the_narrowed_report_carries_the_blast_radius` exits 0
++
++### T-2 The unnarrowed report stays free of it
++- criteria: AC-2
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test report blast_radius_is_absent_from_the_unnarrowed_report` exits 0
++
++### T-3 A missing symbol index degrades to null
++- criteria: AC-3
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test report blast_radius_is_null_without_a_symbol_index` exits 0
++
++### T-4 The depth matches the configured default
++- criteria: AC-4
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test report blast_radius_depth_matches_plan_blast_depth` exits 0
++
++### T-5 `/api/spec/<slug>` serves the field
++- criteria: AC-5
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test serve blast_radius_route_matches_keel_blast_output` exits 0
++
++### T-6 Selecting a feature fetches its blast radius
++- criteria: AC-6
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test serve app_js_fetches_the_spec_route_on_selection` exits 0
++
++### T-7 The Summary panel shows a blast-radius tile
++- criteria: AC-7
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test serve app_js_summary_panel_has_a_blast_radius_tile` exits 0
++
++### T-8 A null blast radius omits the tile
++- criteria: AC-8
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test serve app_js_omits_the_blast_radius_tile_when_null` exits 0
++
+diff --git a/.keel/specs/driver-usage/approvals.jsonl b/.keel/specs/driver-usage/approvals.jsonl
+new file mode 100644
+index 0000000..23fc5f4
+--- /dev/null
++++ b/.keel/specs/driver-usage/approvals.jsonl
+@@ -0,0 +1,3 @@
++{"schema":"keel.approval/1","stage":"spec","decision":"approved","artefact_hash":"a8f5f1ab7d7b21d5e086a4c89d745f8c0ac4f924f12ffc973cc4944198215803","gate_verdict":"pass","by":"Dane Balia","at":"2026-11-03T20:31:10.208906551+00:00"}
++{"schema":"keel.approval/1","stage":"plan","decision":"rejected","artefact_hash":"b4a03f305f7dca75c2e85351114ed999a3f63010077a15c53b3472cd5daf76e1","gate_verdict":"pass","by":"Dane Balia","at":"2026-11-03T20:32:10.474168685+00:00","note":"Fill in Approach. Give tasks real file lists and depends_on: T-1 gets the usage type first; T-2 to T-8 depend on it; split by file so no two tasks in a wave share one."}
++{"schema":"keel.approval/1","stage":"abandon","decision":"abandoned","artefact_hash":"2a160e2c20e56654f4eebf032c5ae6d22a46a2deba85b174afa8fddb1bdd0683","by":"Dane Balia","at":"2026-11-03T20:39:23.858508508+00:00","note":"Abandoned by the user after the drafted plan came back as an unfilled scaffold; not pursuing driver-usage."}
+diff --git a/.keel/specs/driver-usage/gates/G0.json b/.keel/specs/driver-usage/gates/G0.json
+new file mode 100644
+index 0000000..e2b5040
+--- /dev/null
++++ b/.keel/specs/driver-usage/gates/G0.json
+@@ -0,0 +1,90 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G0",
++  "run": "2026-11-03-000",
++  "spec": "driver-usage",
++  "verdict": "pass",
++  "generated_at": "2026-11-03T20:30:19.119974624+00:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "SPEC-0019 (keel.spec/1)"
++    },
++    {
++      "id": "criteria-present",
++      "verdict": "pass",
++      "detail": "8 criteria"
++    },
++    {
++      "id": "criterion-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate ids"
++    },
++    {
++      "id": "no-placeholders",
++      "verdict": "pass",
++      "detail": "no unfilled scaffold text"
++    },
++    {
++      "id": "ears-conformance",
++      "verdict": "pass",
++      "detail": "8/8 conform (event-driven, optional-feature, unwanted-behaviour)"
++    },
++    {
++      "id": "oracle-presence",
++      "verdict": "pass",
++      "detail": "8 oracles across 8 criteria"
++    },
++    {
++      "id": "oracle-wellformed",
++      "verdict": "pass",
++      "detail": "all oracles parse"
++    },
++    {
++      "id": "ambiguity",
++      "verdict": "pass",
++      "detail": "no ambiguous phrasing in criteria"
++    },
++    {
++      "id": "criterion-budget",
++      "verdict": "pass",
++      "detail": "8/8 criteria"
++    },
++    {
++      "id": "spec-length",
++      "verdict": "pass",
++      "detail": "127/250 lines"
++    },
++    {
++      "id": "scope-declared",
++      "verdict": "pass",
++      "detail": "12 glob(s): src/driver/contract.rs, src/driver/conform.rs, assets/drivers/**, src/trajectory/event.rs, src/trajectory/mod.rs, src/cmd/run.rs, src/review/**, src/config.rs, src/metrics.rs, src/cmd/metrics.rs, src/report/insights.rs, tests/driver_usage.rs"
++    },
++    {
++      "id": "change-budget",
++      "verdict": "pass",
++      "detail": "420 lines of diff budgeted"
++    },
++    {
++      "id": "oracle-mix",
++      "verdict": "pass",
++      "detail": "8/8 runnable (8 cmd)"
++    },
++    {
++      "id": "human-cost",
++      "verdict": "pass",
++      "detail": "0 human oracle(s), none load-bearing"
++    },
++    {
++      "id": "store-drift",
++      "verdict": "pass",
++      "detail": "4 projections current"
++    },
++    {
++      "id": "shared-stores",
++      "verdict": "pass",
++      "detail": "none configured"
++    }
++  ]
++}
+diff --git a/.keel/specs/driver-usage/gates/G1.json b/.keel/specs/driver-usage/gates/G1.json
+new file mode 100644
+index 0000000..43e06e5
+--- /dev/null
++++ b/.keel/specs/driver-usage/gates/G1.json
+@@ -0,0 +1,95 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G1",
++  "run": "2026-11-03-000",
++  "spec": "driver-usage",
++  "verdict": "pass",
++  "generated_at": "2026-11-03T20:31:24.839498625+00:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "PLAN-0019 + TASKS-0019"
++    },
++    {
++      "id": "g0-passed",
++      "verdict": "pass",
++      "detail": "G0 passed in run 2026-11-03-000"
++    },
++    {
++      "id": "spec-approved",
++      "verdict": "pass",
++      "detail": "approved by Dane Balia"
++    },
++    {
++      "id": "tasks-present",
++      "verdict": "pass",
++      "detail": "8/15 tasks"
++    },
++    {
++      "id": "task-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate task ids"
++    },
++    {
++      "id": "task-fields",
++      "verdict": "pass",
++      "detail": "all task fields recognised"
++    },
++    {
++      "id": "task-criterion-traceability",
++      "verdict": "pass",
++      "detail": "8 tasks all traced"
++    },
++    {
++      "id": "criteria-covered",
++      "verdict": "pass",
++      "detail": "8/8 criteria have a task"
++    },
++    {
++      "id": "task-budgets",
++      "verdict": "pass",
++      "detail": "all 8 tasks budgeted, total 416 lines"
++    },
++    {
++      "id": "total-budget",
++      "verdict": "pass",
++      "detail": "416/420 lines"
++    },
++    {
++      "id": "task-exit-conditions",
++      "verdict": "pass",
++      "detail": "every task states when it is done"
++    },
++    {
++      "id": "task-dependencies",
++      "verdict": "pass",
++      "detail": "1 wave(s), widths 8"
++    },
++    {
++      "id": "wave-isolation",
++      "verdict": "pass",
++      "detail": "1 wave(s), no file claimed twice within one"
++    },
++    {
++      "id": "task-files-in-scope",
++      "verdict": "pass",
++      "detail": "all task files inside the declared scope"
++    },
++    {
++      "id": "rollback-stated",
++      "verdict": "pass",
++      "detail": "git revert"
++    },
++    {
++      "id": "blast-radius-declared",
++      "verdict": "pass",
++      "detail": "55 file(s) at depth 2, 15929 lines"
++    },
++    {
++      "id": "blast-radius-current",
++      "verdict": "pass",
++      "detail": "55 files, 15929 lines — matches a fresh computation — no indexed file matches assets/drivers/**, tests/driver_usage.rs (new files, or a typo)"
++    }
++  ]
++}
+diff --git a/.keel/specs/driver-usage/plan.md b/.keel/specs/driver-usage/plan.md
+new file mode 100644
+index 0000000..3458f2b
+--- /dev/null
++++ b/.keel/specs/driver-usage/plan.md
+@@ -0,0 +1,143 @@
++---
++id: PLAN-0019
++slug: driver-usage
++schema: keel.plan/1
++blast:
++  depth: 2
++  declared:
++  - src/driver/contract.rs
++  - src/driver/conform.rs
++  - assets/drivers/**
++  - src/trajectory/event.rs
++  - src/trajectory/mod.rs
++  - src/cmd/run.rs
++  - src/review/**
++  - src/config.rs
++  - src/metrics.rs
++  - src/cmd/metrics.rs
++  - src/report/insights.rs
++  - tests/driver_usage.rs
++  computed:
++  - src/config.rs
++  - src/trajectory/event.rs
++  - src/trajectory/mod.rs
++  - src/review/mod.rs
++  - src/driver/contract.rs
++  - src/driver/conform.rs
++  - src/report/insights.rs
++  - src/metrics.rs
++  - src/cmd/run.rs
++  - src/cmd/metrics.rs
++  - src/gate/mod.rs
++  - src/run.rs
++  - src/failure/mod.rs
++  - src/report/mod.rs
++  - src/main.rs
++  - src/driver/mod.rs
++  - src/projection/drift.rs
++  - src/map/mod.rs
++  - src/gate/ratchet.rs
++  - src/gate/g1.rs
++  - src/cmd/mod.rs
++  - src/gate/g25.rs
++  - src/mcp/mod.rs
++  - src/gate/oracle_exec.rs
++  - src/projection/mod.rs
++  - src/gate/g0.rs
++  - src/projection/sections.rs
++  - src/map/render.rs
++  - src/gate/g2.rs
++  - src/gate/g4.rs
++  - src/retrieve/budget.rs
++  - src/gate/g3.rs
++  - src/cmd/next.rs
++  - src/cmd/learn.rs
++  - src/cmd/init.rs
++  - src/cmd/doctor.rs
++  - src/cmd/spec.rs
++  - src/cmd/bench.rs
++  - src/cmd/retrieve.rs
++  - src/cmd/driver.rs
++  - src/map/walk.rs
++  - src/cmd/report.rs
++  - src/cmd/store.rs
++  - src/cmd/gate.rs
++  - src/cmd/status.rs
++  - src/cmd/map.rs
++  - src/cmd/plan.rs
++  - src/cmd/ratchet.rs
++  - src/cmd/blast.rs
++  - src/lesson/mod.rs
++  - src/retrieve/mod.rs
++  - src/pipeline.rs
++  - src/serve/mod.rs
++  - src/evidence/mod.rs
++  - src/cmd/approve.rs
++  computed_lines: 15929
++rollback: git revert
++verified_at: 2026-11-03
++---
++
++# Design — driver-usage
++
++## Approach
++
++_How the change is made. Name the seam you are cutting at._
++
++## Blast radius
++
++<!-- generated by `keel plan`; edits here are overwritten -->
++
++Computed from the import graph at depth 2: **55 files, 15929 lines**.
++
++| depth | file | lines |
++| --- | --- | --- |
++| scope | `src/config.rs` | 504 |
++| scope | `src/trajectory/event.rs` | 228 |
++| scope | `src/trajectory/mod.rs` | 370 |
++| scope | `src/review/mod.rs` | 545 |
++| scope | `src/driver/contract.rs` | 263 |
++| scope | `src/driver/conform.rs` | 260 |
++| scope | `src/report/insights.rs` | 266 |
++| scope | `src/metrics.rs` | 164 |
++| scope | `src/cmd/run.rs` | 688 |
++| scope | `src/cmd/metrics.rs` | 103 |
++| +1 | `src/gate/mod.rs` | 416 |
++| +1 | `src/run.rs` | 273 |
++| +1 | `src/failure/mod.rs` | 573 |
++| +1 | `src/report/mod.rs` | 156 |
++| +1 | `src/main.rs` | 566 |
++| +1 | `src/driver/mod.rs` | 595 |
++| +1 | `src/projection/drift.rs` | 210 |
++| +1 | `src/map/mod.rs` | 203 |
++| +1 | `src/gate/ratchet.rs` | 197 |
++| +1 | `src/gate/g1.rs` | 526 |
++| +1 | `src/cmd/mod.rs` | 23 |
++| +1 | `src/gate/g25.rs` | 546 |
++| +1 | `src/mcp/mod.rs` | 271 |
++| +1 | `src/gate/oracle_exec.rs` | 308 |
++| +1 | `src/projection/mod.rs` | 116 |
++| +1 | `src/gate/g0.rs` | 341 |
++| +1 | `src/projection/sections.rs` | 400 |
++| +1 | `src/map/render.rs` | 473 |
++| +1 | `src/gate/g2.rs` | 382 |
++| +1 | `src/gate/g4.rs` | 225 |
++| +1 | `src/retrieve/budget.rs` | 102 |
++| +1 | `src/gate/g3.rs` | 127 |
++| +1 | `src/cmd/next.rs` | 475 |
++| +1 | `src/cmd/learn.rs` | 371 |
++| +1 | `src/cmd/init.rs` | 332 |
++| +1 | `src/cmd/doctor.rs` | 296 |
++| +1 | `src/cmd/spec.rs` | 208 |
++| +1 | `src/cmd/bench.rs` | 270 |
++| +1 | `src/cmd/retrieve.rs` | 69 |
++| +1 | `src/cmd/driver.rs` | 108 |
++
++_… 15 more, see `keel blast`._
++
++_Scope globs matching no indexed file (new files, or a typo): assets/drivers/**, tests/driver_usage.rs_
++
++
++## Rollback
++
++`git revert` — replace this if the change needs a different rollback.
+diff --git a/.keel/specs/driver-usage/spec.md b/.keel/specs/driver-usage/spec.md
+new file mode 100644
+index 0000000..fe95557
+--- /dev/null
++++ b/.keel/specs/driver-usage/spec.md
+@@ -0,0 +1,127 @@
++---
++id: SPEC-0019
++slug: driver-usage
++schema: keel.spec/1
++status: abandoned
++scope:
++- src/driver/contract.rs
++- src/driver/conform.rs
++- assets/drivers/**
++- src/trajectory/event.rs
++- src/trajectory/mod.rs
++- src/cmd/run.rs
++- src/review/**
++- src/config.rs
++- src/metrics.rs
++- src/cmd/metrics.rs
++- src/report/insights.rs
++- tests/driver_usage.rs
++budget:
++  criteria: 8
++  lines: 420
++verified_at: 2026-11-03
++---
++
++# Record what the agent actually spent, not only what keel injected
++
++## Context
++
++`keel metrics` reports `tokens_total` and `tokens_per_run`, but every number
++behind them comes from `estimate_tokens()` over what keel itself put in front
++of the model: `Inject` events and the `DriverCall` prompt. That is the
++smallest part of a run's cost. A headless agent reads files, calls tools,
++retries and writes output, and none of that is visible to keel.
++
++`keel.driverresult/1` already carries an optional `tokens` field, and
++`contract.rs` parses it, but nothing records it. The `claude-code` driver
++runs `claude --print`, which returns plain text, so even the tool's own usage
++report is discarded.
++
++This spec makes cost a measured number in the same spirit as ADR-0012 and
++ADR-0020: what is reported is labelled reported, what is estimated is
++labelled estimated, and the two are never added together.
++
++## Acceptance criteria
++
++### AC-1 The driver result accepts a usage object
++
++WHEN a driver emits a `keel.driverresult/1` document with a `usage` object
++holding `input_tokens`, `output_tokens`, `cache_read_tokens`,
++`cache_write_tokens` and `cost_usd` THE SYSTEM SHALL parse it, and a driver
++result without `usage` SHALL still pass `keel driver check`.
++
++oracle: cmd `cargo test --test driver_usage driver_result_parses_a_usage_object_and_stays_backward_compatible` exit 0
++
++### AC-2 The claude-code driver reports the CLI's own usage
++
++WHEN the `claude-code` driver runs a task THE SYSTEM SHALL invoke
++`claude --print --output-format json` and copy the CLI's reported token
++counts and `total_cost_usd` into `usage`, while the agent's text output is
++still written to the run record as before.
++
++oracle: cmd `cargo test --test driver_usage claude_code_driver_maps_cli_json_usage_into_the_result` exit 0
++
++### AC-3 Every driver call records a usage event
++
++WHEN a driver result arrives during `keel run` THE SYSTEM SHALL append a
++`driver_usage` event to `trajectory.jsonl` carrying the driver id, the task
++id, the reported counts and `source: reported`.
++
++oracle: cmd `cargo test --test driver_usage each_driver_call_appends_a_driver_usage_event` exit 0
++
++### AC-4 Missing usage is unreported, never zero
++
++IF a driver result carries no `usage` THEN THE SYSTEM SHALL record the call
++with `source: unreported` and exclude it from spent-token totals, and
++`keel metrics` SHALL print the count of unreported calls next to the total.
++
++oracle: cmd `cargo test --test driver_usage a_driver_that_reports_nothing_is_counted_as_unreported_not_as_zero` exit 0
++
++### AC-5 Injected and spent are reported apart
++
++WHEN `keel metrics` or `keel report` prints token figures THE SYSTEM SHALL
++print `injected (estimated by keel)` and `spent (reported by the driver)` as
++two separate lines and SHALL never print their sum.
++
++oracle: cmd `cargo test --test driver_usage metrics_prints_injected_and_spent_as_separate_never_summed_figures` exit 0
++
++### AC-6 A spec's cost includes the runs that failed
++
++WHEN `keel report` summarises a spec THE SYSTEM SHALL total spent tokens and
++cost across every run of that spec, and SHALL show the share spent on runs
++whose final G2 verdict was `fail` or `blocked`.
++
++oracle: cmd `cargo test --test driver_usage spec_cost_totals_every_run_and_shows_the_share_spent_on_red_runs` exit 0
++
++### AC-7 A price table fills in cost only as an estimate
++
++WHERE `[[price]]` entries map a driver to per-million-token rates and a
++driver reports tokens without `cost_usd` THE SYSTEM SHALL compute the cost,
++label it `estimated from price table dated <date>` using the entry's
++`as_of` field, and keep driver-reported costs unchanged.
++
++oracle: cmd `cargo test --test driver_usage price_table_cost_is_labelled_estimated_and_never_overrides_a_reported_cost` exit 0
++
++### AC-8 Reviewer spend is recorded against G2.5
++
++WHEN a reviewer's `keel.reviewresult/1` carries a `usage` object THE SYSTEM
++SHALL record it as a `driver_usage` event attributed to gate `G2.5`, so a
++model-backed reviewer's cost appears beside the agent's.
++
++oracle: cmd `cargo test --test driver_usage reviewer_usage_is_recorded_against_g2_5` exit 0
++
++## Out of scope
++
++- A token or cost budget that blocks a run. Measure first; a ceiling under
++  ADR-0004 is a separate spec once there is data to set it from.
++- Usage for `copilot` and `kiro`. Their drivers emit no `usage` until their
++  CLIs expose one, which AC-4 makes visible rather than silent.
++- `codex` usage. Its JSON event stream is the obvious source, but the field
++  names have to be confirmed against the real CLI under `keel driver check`
++  before a criterion can name them.
++- Changing `keel bench`, which measures retrieval cost by design (ADR-0012).
++
++## Decision to record
++
++An ADR, "Spent tokens are reported, injected tokens are estimated, and the two
++are never summed", alongside ADR-0012 and ADR-0020.
+diff --git a/.keel/specs/driver-usage/tasks.md b/.keel/specs/driver-usage/tasks.md
+new file mode 100644
+index 0000000..a36ac1e
+--- /dev/null
++++ b/.keel/specs/driver-usage/tasks.md
+@@ -0,0 +1,63 @@
++---
++id: TASKS-0019
++slug: driver-usage
++schema: keel.tasks/1
++---
++
++# Tasks
++
++Each task must name the criteria it satisfies, the files it touches, a line
++budget and an exit condition. G1 checks all four, and checks that every
++criterion in the spec is covered by at least one task.
++
++Add `- depends_on: T-1` where order matters. Tasks with no dependency on
++each other form a wave; `keel tasks` shows them.
++
++### T-1 The driver result accepts a usage object
++- criteria: AC-1
++- files: scope
++- budget: 52
++- exit: `cargo test --test driver_usage driver_result_parses_a_usage_object_and_stays_backward_compatible` exits 0
++
++### T-2 The claude-code driver reports the CLI's own usage
++- criteria: AC-2
++- files: scope
++- budget: 52
++- exit: `cargo test --test driver_usage claude_code_driver_maps_cli_json_usage_into_the_result` exits 0
++
++### T-3 Every driver call records a usage event
++- criteria: AC-3
++- files: scope
++- budget: 52
++- exit: `cargo test --test driver_usage each_driver_call_appends_a_driver_usage_event` exits 0
++
++### T-4 Missing usage is unreported, never zero
++- criteria: AC-4
++- files: scope
++- budget: 52
++- exit: `cargo test --test driver_usage a_driver_that_reports_nothing_is_counted_as_unreported_not_as_zero` exits 0
++
++### T-5 Injected and spent are reported apart
++- criteria: AC-5
++- files: scope
++- budget: 52
++- exit: `cargo test --test driver_usage metrics_prints_injected_and_spent_as_separate_never_summed_figures` exits 0
++
++### T-6 A spec's cost includes the runs that failed
++- criteria: AC-6
++- files: scope
++- budget: 52
++- exit: `cargo test --test driver_usage spec_cost_totals_every_run_and_shows_the_share_spent_on_red_runs` exits 0
++
++### T-7 A price table fills in cost only as an estimate
++- criteria: AC-7
++- files: scope
++- budget: 52
++- exit: `cargo test --test driver_usage price_table_cost_is_labelled_estimated_and_never_overrides_a_reported_cost` exits 0
++
++### T-8 Reviewer spend is recorded against G2.5
++- criteria: AC-8
++- files: scope
++- budget: 52
++- exit: `cargo test --test driver_usage reviewer_usage_is_recorded_against_g2_5` exits 0
++
+diff --git a/.keel/specs/oracle-sensitivity/approvals.jsonl b/.keel/specs/oracle-sensitivity/approvals.jsonl
+new file mode 100644
+index 0000000..ff6c5c3
+--- /dev/null
++++ b/.keel/specs/oracle-sensitivity/approvals.jsonl
+@@ -0,0 +1,2 @@
++{"schema":"keel.approval/1","stage":"spec","decision":"approved","artefact_hash":"a3aa7203c83c29135077a1132638fd174d5ea274480f99a9ed43e6289105660e","gate_verdict":"pass","by":"Dane Balia","at":"2026-11-03T20:48:51.464434118+00:00"}
++{"schema":"keel.approval/1","stage":"plan","decision":"approved","artefact_hash":"e3cb38df5eaa7c228e52b221196f3e3758e654e28ff58a4be103a1ea8aa844c4","gate_verdict":"pass","by":"Dane Balia","at":"2026-11-03T20:50:10.380898873+00:00"}
+diff --git a/.keel/specs/oracle-sensitivity/gates/G0.json b/.keel/specs/oracle-sensitivity/gates/G0.json
+new file mode 100644
+index 0000000..1c03c0f
+--- /dev/null
++++ b/.keel/specs/oracle-sensitivity/gates/G0.json
+@@ -0,0 +1,90 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G0",
++  "run": "2026-11-03-000",
++  "spec": "oracle-sensitivity",
++  "verdict": "pass",
++  "generated_at": "2026-11-03T20:48:19.321091279+00:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "SPEC-0020 (keel.spec/1)"
++    },
++    {
++      "id": "criteria-present",
++      "verdict": "pass",
++      "detail": "8 criteria"
++    },
++    {
++      "id": "criterion-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate ids"
++    },
++    {
++      "id": "no-placeholders",
++      "verdict": "pass",
++      "detail": "no unfilled scaffold text"
++    },
++    {
++      "id": "ears-conformance",
++      "verdict": "pass",
++      "detail": "8/8 conform (event-driven, optional-feature, state-driven, unwanted-behaviour)"
++    },
++    {
++      "id": "oracle-presence",
++      "verdict": "pass",
++      "detail": "9 oracles across 8 criteria"
++    },
++    {
++      "id": "oracle-wellformed",
++      "verdict": "pass",
++      "detail": "all oracles parse"
++    },
++    {
++      "id": "ambiguity",
++      "verdict": "pass",
++      "detail": "no ambiguous phrasing in criteria"
++    },
++    {
++      "id": "criterion-budget",
++      "verdict": "pass",
++      "detail": "8/8 criteria"
++    },
++    {
++      "id": "spec-length",
++      "verdict": "pass",
++      "detail": "132/250 lines"
++    },
++    {
++      "id": "scope-declared",
++      "verdict": "pass",
++      "detail": "10 glob(s): src/gate/g2.rs, src/gate/oracle_exec.rs, src/spec/oracle.rs, src/worktree.rs, src/config.rs, schemas/mutationresult.json, assets/mutation/cargo-mutants, src/driver/builtin.rs, tests/fixtures/mutation/**, tests/oracle_sensitivity.rs"
++    },
++    {
++      "id": "change-budget",
++      "verdict": "pass",
++      "detail": "480 lines of diff budgeted"
++    },
++    {
++      "id": "oracle-mix",
++      "verdict": "pass",
++      "detail": "9/9 runnable (8 cmd, 1 schema)"
++    },
++    {
++      "id": "human-cost",
++      "verdict": "pass",
++      "detail": "0 human oracle(s), none load-bearing"
++    },
++    {
++      "id": "store-drift",
++      "verdict": "pass",
++      "detail": "4 projections current"
++    },
++    {
++      "id": "shared-stores",
++      "verdict": "pass",
++      "detail": "none configured"
++    }
++  ]
++}
+diff --git a/.keel/specs/oracle-sensitivity/gates/G1.json b/.keel/specs/oracle-sensitivity/gates/G1.json
+new file mode 100644
+index 0000000..a863295
+--- /dev/null
++++ b/.keel/specs/oracle-sensitivity/gates/G1.json
+@@ -0,0 +1,95 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G1",
++  "run": "2026-11-03-000",
++  "spec": "oracle-sensitivity",
++  "verdict": "pass",
++  "generated_at": "2026-11-03T20:49:30.045534716+00:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "PLAN-0020 + TASKS-0020"
++    },
++    {
++      "id": "g0-passed",
++      "verdict": "pass",
++      "detail": "G0 passed in run 2026-11-03-000"
++    },
++    {
++      "id": "spec-approved",
++      "verdict": "pass",
++      "detail": "approved by Dane Balia"
++    },
++    {
++      "id": "tasks-present",
++      "verdict": "pass",
++      "detail": "8/15 tasks"
++    },
++    {
++      "id": "task-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate task ids"
++    },
++    {
++      "id": "task-fields",
++      "verdict": "pass",
++      "detail": "all task fields recognised"
++    },
++    {
++      "id": "task-criterion-traceability",
++      "verdict": "pass",
++      "detail": "8 tasks all traced"
++    },
++    {
++      "id": "criteria-covered",
++      "verdict": "pass",
++      "detail": "8/8 criteria have a task"
++    },
++    {
++      "id": "task-budgets",
++      "verdict": "pass",
++      "detail": "all 8 tasks budgeted, total 480 lines"
++    },
++    {
++      "id": "total-budget",
++      "verdict": "pass",
++      "detail": "480/480 lines"
++    },
++    {
++      "id": "task-exit-conditions",
++      "verdict": "pass",
++      "detail": "every task states when it is done"
++    },
++    {
++      "id": "task-dependencies",
++      "verdict": "pass",
++      "detail": "8 wave(s), widths 1/1/1/1/1/1/1/1"
++    },
++    {
++      "id": "wave-isolation",
++      "verdict": "pass",
++      "detail": "8 wave(s), no file claimed twice within one"
++    },
++    {
++      "id": "task-files-in-scope",
++      "verdict": "pass",
++      "detail": "all task files inside the declared scope"
++    },
++    {
++      "id": "rollback-stated",
++      "verdict": "pass",
++      "detail": "git revert"
++    },
++    {
++      "id": "blast-radius-declared",
++      "verdict": "pass",
++      "detail": "55 file(s) at depth 2, 16278 lines"
++    },
++    {
++      "id": "blast-radius-current",
++      "verdict": "pass",
++      "detail": "55 files, 16278 lines — matches a fresh computation — no indexed file matches schemas/mutationresult.json, assets/mutation/cargo-mutants, tests/fixtures/mutation/**, tests/oracle_sensitivity.rs (new files, or a typo)"
++    }
++  ]
++}
+diff --git a/.keel/specs/oracle-sensitivity/plan.md b/.keel/specs/oracle-sensitivity/plan.md
+new file mode 100644
+index 0000000..12728e6
+--- /dev/null
++++ b/.keel/specs/oracle-sensitivity/plan.md
+@@ -0,0 +1,156 @@
++---
++id: PLAN-0020
++slug: oracle-sensitivity
++schema: keel.plan/1
++blast:
++  depth: 2
++  declared:
++  - src/gate/g2.rs
++  - src/gate/oracle_exec.rs
++  - src/spec/oracle.rs
++  - src/worktree.rs
++  - src/config.rs
++  - schemas/mutationresult.json
++  - assets/mutation/cargo-mutants
++  - src/driver/builtin.rs
++  - tests/fixtures/mutation/**
++  - tests/oracle_sensitivity.rs
++  computed:
++  - src/config.rs
++  - src/spec/oracle.rs
++  - src/gate/oracle_exec.rs
++  - src/worktree.rs
++  - src/gate/g2.rs
++  - src/driver/builtin.rs
++  - src/gate/mod.rs
++  - src/spec/mod.rs
++  - src/main.rs
++  - src/review/mod.rs
++  - src/driver/mod.rs
++  - src/projection/drift.rs
++  - src/map/mod.rs
++  - src/gate/ratchet.rs
++  - src/gate/g1.rs
++  - src/gate/g25.rs
++  - src/mcp/mod.rs
++  - src/projection/mod.rs
++  - src/gate/g0.rs
++  - src/driver/conform.rs
++  - src/projection/sections.rs
++  - src/map/render.rs
++  - src/gate/g4.rs
++  - src/retrieve/budget.rs
++  - src/gate/g3.rs
++  - src/cmd/next.rs
++  - src/cmd/run.rs
++  - src/cmd/learn.rs
++  - src/cmd/init.rs
++  - src/cmd/doctor.rs
++  - src/cmd/spec.rs
++  - src/cmd/bench.rs
++  - src/cmd/retrieve.rs
++  - src/cmd/driver.rs
++  - src/map/walk.rs
++  - src/cmd/store.rs
++  - src/cmd/gate.rs
++  - src/cmd/status.rs
++  - src/cmd/metrics.rs
++  - src/cmd/map.rs
++  - src/cmd/plan.rs
++  - src/cmd/ratchet.rs
++  - src/cmd/blast.rs
++  - src/run.rs
++  - src/lesson/mod.rs
++  - src/failure/mod.rs
++  - src/plan.rs
++  - src/approval.rs
++  - src/retrieve/mod.rs
++  - src/report/mod.rs
++  - src/pipeline.rs
++  - src/cmd/mod.rs
++  - src/metrics.rs
++  - src/cmd/approve.rs
++  - src/cmd/report.rs
++  computed_lines: 16278
++rollback: git revert
++verified_at: 2026-11-03
++---
++
++# Design — oracle-sensitivity
++
++## Approach
++
++The seam is the oracle executor in `src/gate/oracle_exec.rs`, which G2
++already calls to run one oracle against one tree. Sensitivity reuses it
++unchanged against a second tree: `src/worktree.rs` creates a worktree at the
++run's base commit and carries over the diff files matching
++`[oracle] sensitivity_paths`, then `src/gate/g2.rs` calls the executor there
++after the normal pass and compares outcomes. `src/spec/oracle.rs` gains the
++`guard` prefix so the comparison knows which oracles are expected to pass at
++the base. Mutation is a second, later call from `g2.rs` to an external command
++(`[mutation] cmd`) whose stdout is validated against
++`schemas/mutationresult.json`; keel never links a mutation tool, so the
++`keel.mutationresult/1` contract is the only coupling. The cargo-mutants
++adapter is an embedded asset written by `src/driver/builtin.rs` at `keel init`.
++
++Sensitivity results go to `oracle-sensitivity.json` in the run's evidence and
++into the `G2/oracle-sensitivity` check; an incomplete run reports `blocked`,
++never `pass`.
++
++## Blast radius
++
++<!-- generated by `keel plan`; edits here are overwritten -->
++
++Computed from the import graph at depth 2: **55 files, 16278 lines**.
++
++| depth | file | lines |
++| --- | --- | --- |
++| scope | `src/config.rs` | 504 |
++| scope | `src/spec/oracle.rs` | 327 |
++| scope | `src/gate/oracle_exec.rs` | 308 |
++| scope | `src/worktree.rs` | 508 |
++| scope | `src/gate/g2.rs` | 382 |
++| scope | `src/driver/builtin.rs` | 84 |
++| +1 | `src/gate/mod.rs` | 416 |
++| +1 | `src/spec/mod.rs` | 353 |
++| +1 | `src/main.rs` | 566 |
++| +1 | `src/review/mod.rs` | 545 |
++| +1 | `src/driver/mod.rs` | 595 |
++| +1 | `src/projection/drift.rs` | 210 |
++| +1 | `src/map/mod.rs` | 203 |
++| +1 | `src/gate/ratchet.rs` | 197 |
++| +1 | `src/gate/g1.rs` | 526 |
++| +1 | `src/gate/g25.rs` | 546 |
++| +1 | `src/mcp/mod.rs` | 271 |
++| +1 | `src/projection/mod.rs` | 116 |
++| +1 | `src/gate/g0.rs` | 341 |
++| +1 | `src/driver/conform.rs` | 260 |
++| +1 | `src/projection/sections.rs` | 400 |
++| +1 | `src/map/render.rs` | 473 |
++| +1 | `src/gate/g4.rs` | 225 |
++| +1 | `src/retrieve/budget.rs` | 102 |
++| +1 | `src/gate/g3.rs` | 127 |
++| +1 | `src/cmd/next.rs` | 475 |
++| +1 | `src/cmd/run.rs` | 688 |
++| +1 | `src/cmd/learn.rs` | 371 |
++| +1 | `src/cmd/init.rs` | 332 |
++| +1 | `src/cmd/doctor.rs` | 296 |
++| +1 | `src/cmd/spec.rs` | 208 |
++| +1 | `src/cmd/bench.rs` | 270 |
++| +1 | `src/cmd/retrieve.rs` | 69 |
++| +1 | `src/cmd/driver.rs` | 108 |
++| +1 | `src/map/walk.rs` | 69 |
++| +1 | `src/cmd/store.rs` | 187 |
++| +1 | `src/cmd/gate.rs` | 74 |
++| +1 | `src/cmd/status.rs` | 128 |
++| +1 | `src/cmd/metrics.rs` | 103 |
++| +1 | `src/cmd/map.rs` | 65 |
++
++_… 15 more, see `keel blast`._
++
++_Scope globs matching no indexed file (new files, or a typo): schemas/mutationresult.json, assets/mutation/cargo-mutants, tests/fixtures/mutation/**, tests/oracle_sensitivity.rs_
++
++
++## Rollback
++
++`git revert` — replace this if the change needs a different rollback.
+diff --git a/.keel/specs/oracle-sensitivity/spec.md b/.keel/specs/oracle-sensitivity/spec.md
+new file mode 100644
+index 0000000..02356ee
+--- /dev/null
++++ b/.keel/specs/oracle-sensitivity/spec.md
+@@ -0,0 +1,132 @@
++---
++id: SPEC-0020
++slug: oracle-sensitivity
++schema: keel.spec/1
++status: approved
++scope:
++- src/gate/g2.rs
++- src/gate/oracle_exec.rs
++- src/spec/oracle.rs
++- src/worktree.rs
++- src/config.rs
++- schemas/mutationresult.json
++- assets/mutation/cargo-mutants
++- src/driver/builtin.rs
++- tests/fixtures/mutation/**
++- tests/oracle_sensitivity.rs
++budget:
++  criteria: 8
++  lines: 480
++verified_at: 2026-11-03
++---
++
++# An oracle must fail without the change it claims to verify
++
++## Context
++
++G0 proves every criterion has an oracle and that the oracle parses. G2 proves
++the oracle passes. Neither proves the oracle tests anything: `assert!(true)`,
++a test that checks the wrong function, or a `cmd` oracle whose command
++succeeds on any tree all pass both gates. An agent that writes both the code
++and its tests has every incentive to write oracles like that, and G2.5's
++mock and test-movement heuristics do not look for them.
++
++Two mechanisms, in order of cost:
++
++1. **Sensitivity**, native to keel and language-agnostic. Re-run each
++   executable oracle against the base commit with only the run's test files
++   carried over. An oracle that still passes there was passing before the
++   implementation existed, so it does not verify the implementation. This is
++   TDD's red step, checked after the fact instead of trusted.
++2. **Mutation**, through a plugin. Mutate the changed lines and report which
++   mutants no oracle kills. Advisory by default, following ADR-0017: an
++   uncalibrated check that blocks gets routed around.
++
++Some criteria are guards: "the tabs remain where they are" holds before the
++change and must still hold after. Those are declared, not failed.
++
++## Acceptance criteria
++
++### AC-1 Executable oracles are re-run at the base commit
++
++WHEN every executable oracle passes in G2 THE SYSTEM SHALL create a worktree
++at the run's base commit, copy in the files from the run's diff that match
++`[oracle] sensitivity_paths` (default `tests/**`), run each `cmd`, `test` and
++`doctest` oracle there, and write the outcomes to `oracle-sensitivity.json`
++in the run's evidence.
++
++oracle: cmd `cargo test --test oracle_sensitivity executable_oracles_are_rerun_in_a_base_worktree_with_test_files_carried_over` exit 0
++
++### AC-2 An oracle that passes at the base fails the check
++
++IF an oracle not marked as a guard passes at the base commit THEN THE SYSTEM
++SHALL fail `G2/oracle-sensitivity` and name each such criterion and its
++oracle.
++
++oracle: cmd `cargo test --test oracle_sensitivity an_oracle_passing_without_the_change_fails_sensitivity` exit 0
++
++### AC-3 Guard criteria must hold before and after
++
++WHERE a criterion's oracle is written `oracle: guard <oracle>` THE SYSTEM
++SHALL require that oracle to pass both at the base commit and on the change,
++and SHALL fail `G2/oracle-sensitivity` when it fails at the base.
++
++oracle: cmd `cargo test --test oracle_sensitivity a_guard_oracle_must_pass_at_the_base_and_on_the_change` exit 0
++
++### AC-4 A sensitivity run that cannot complete is blocked
++
++IF the base worktree cannot be created, the build fails there, or an oracle
++cannot execute there THEN THE SYSTEM SHALL report `G2/oracle-sensitivity` as
++`blocked` with the reason, and never as `pass`.
++
++oracle: cmd `cargo test --test oracle_sensitivity an_unbuildable_base_blocks_sensitivity_rather_than_passing_it` exit 0
++
++### AC-5 Oracles keel cannot isolate are counted, not passed
++
++WHEN an oracle is `human` or `schema`, or its test lives in a file outside
++`sensitivity_paths` that the diff also changes, THE SYSTEM SHALL list it as
++`not assessed` with the reason in the check's detail and in
++`oracle-sensitivity.json`, and SHALL not count it as sensitive.
++
++oracle: cmd `cargo test --test oracle_sensitivity oracles_keel_cannot_isolate_are_listed_as_not_assessed` exit 0
++
++### AC-6 A configured mutation tool reports surviving mutants
++
++WHERE `[mutation] cmd` is configured THE SYSTEM SHALL run it after
++sensitivity passes, read its stdout as `keel.mutationresult/1` (killed and
++survived mutants, each with file and line), and add one finding per survived
++mutant inside the spec's scope to `G2/mutation`.
++
++oracle: cmd `cargo test --test oracle_sensitivity survived_mutants_in_scope_become_mutation_findings` exit 0
++oracle: schema schemas/mutationresult.json validates tests/fixtures/mutation/cargo-mutants-sample.json
++
++### AC-7 Mutation findings are advisory until configured to block
++
++WHILE `[mutation] advisory` is unset or `true` THE SYSTEM SHALL report
++`G2/mutation` findings without failing G2, and WHERE it is `false` a
++survived mutant SHALL fail G2.
++
++oracle: cmd `cargo test --test oracle_sensitivity mutation_is_advisory_by_default_and_blocks_only_when_configured` exit 0
++
++### AC-8 A cargo-mutants adapter ships with keel
++
++WHEN `keel init` runs in a Cargo repository THE SYSTEM SHALL write the
++embedded `.keel/mutation/cargo-mutants` adapter, which runs `cargo mutants --in-diff` on the
++run's diff and prints `keel.mutationresult/1`, and SHALL report `blocked` if
++`cargo-mutants` is absent.
++
++oracle: cmd `cargo test --test oracle_sensitivity the_cargo_mutants_adapter_emits_mutationresult_and_blocks_when_absent` exit 0
++
++## Out of scope
++
++- Adapters for mutmut, Stryker or PIT. The `keel.mutationresult/1` contract
++  is the extension point; each adapter is written when a repository needs it.
++- Making mutation blocking by default. That is a decision for after
++  `keel metrics` shows its false-positive rate across real runs.
++- Inline `#[cfg(test)]` modules in changed `src/` files. AC-5 reports them as
++  not assessed; isolating them needs a language-aware splitter.
++
++## Decision to record
++
++An ADR, "An oracle must fail without its change", recording why sensitivity is
++native and blocking while mutation is a plugin and advisory.
+diff --git a/.keel/specs/oracle-sensitivity/tasks.md b/.keel/specs/oracle-sensitivity/tasks.md
+new file mode 100644
+index 0000000..416c17a
+--- /dev/null
++++ b/.keel/specs/oracle-sensitivity/tasks.md
+@@ -0,0 +1,69 @@
++---
++id: TASKS-0020
++slug: oracle-sensitivity
++schema: keel.tasks/1
++---
++
++# Tasks
++
++Each task must name the criteria it satisfies, the files it touches, a line
++budget and an exit condition. G1 checks all four, and checks that every
++criterion in the spec is covered by at least one task.
++
++Add `- depends_on: T-1` where order matters. Tasks with no dependency on
++each other form a wave; `keel tasks` shows them.
++
++### T-1 Executable oracles are re-run at the base commit
++- criteria: AC-1
++- files: src/config.rs, src/worktree.rs, src/gate/oracle_exec.rs, src/gate/g2.rs, tests/oracle_sensitivity.rs
++- budget: 60
++- exit: `cargo test --test oracle_sensitivity executable_oracles_are_rerun_in_a_base_worktree_with_test_files_carried_over` exits 0
++
++### T-2 An oracle that passes at the base fails the check
++- criteria: AC-2
++- files: src/gate/g2.rs, tests/oracle_sensitivity.rs
++- depends_on: T-1
++- budget: 60
++- exit: `cargo test --test oracle_sensitivity an_oracle_passing_without_the_change_fails_sensitivity` exits 0
++
++### T-3 Guard criteria must hold before and after
++- criteria: AC-3
++- files: src/spec/oracle.rs, src/gate/g2.rs, tests/oracle_sensitivity.rs
++- depends_on: T-2
++- budget: 60
++- exit: `cargo test --test oracle_sensitivity a_guard_oracle_must_pass_at_the_base_and_on_the_change` exits 0
++
++### T-4 A sensitivity run that cannot complete is blocked
++- criteria: AC-4
++- files: src/worktree.rs, src/gate/oracle_exec.rs, src/gate/g2.rs, tests/oracle_sensitivity.rs
++- depends_on: T-3
++- budget: 60
++- exit: `cargo test --test oracle_sensitivity an_unbuildable_base_blocks_sensitivity_rather_than_passing_it` exits 0
++
++### T-5 Oracles keel cannot isolate are counted, not passed
++- criteria: AC-5
++- files: src/gate/oracle_exec.rs, src/gate/g2.rs, tests/oracle_sensitivity.rs
++- depends_on: T-4
++- budget: 60
++- exit: `cargo test --test oracle_sensitivity oracles_keel_cannot_isolate_are_listed_as_not_assessed` exits 0
++
++### T-6 A configured mutation tool reports surviving mutants
++- criteria: AC-6
++- files: src/config.rs, src/gate/g2.rs, schemas/mutationresult.json, tests/fixtures/mutation/**, tests/oracle_sensitivity.rs
++- depends_on: T-5
++- budget: 60
++- exit: both `cargo test --test oracle_sensitivity survived_mutants_in_scope_become_mutation_findings` exits 0 and the schema oracle (`schemas/mutationresult.json` validates `tests/fixtures/mutation/cargo-mutants-sample.json`) passes
++
++### T-7 Mutation findings are advisory until configured to block
++- criteria: AC-7
++- files: src/config.rs, src/gate/g2.rs, tests/oracle_sensitivity.rs
++- depends_on: T-6
++- budget: 60
++- exit: `cargo test --test oracle_sensitivity mutation_is_advisory_by_default_and_blocks_only_when_configured` exits 0
++
++### T-8 A cargo-mutants adapter ships with keel
++- criteria: AC-8
++- files: assets/mutation/cargo-mutants, src/driver/builtin.rs, tests/oracle_sensitivity.rs
++- depends_on: T-7
++- budget: 60
++- exit: `cargo test --test oracle_sensitivity the_cargo_mutants_adapter_emits_mutationresult_and_blocks_when_absent` exits 0
+diff --git a/assets/mutation/cargo-mutants b/assets/mutation/cargo-mutants
+new file mode 100755
+index 0000000..e4b8c90
+--- /dev/null
++++ b/assets/mutation/cargo-mutants
+@@ -0,0 +1,40 @@
++#!/bin/sh
++# keel mutation adapter — cargo-mutants over the lines this run changed.
++#
++# Prints keel.mutationresult/1 on stdout. Exit 3 means "could not look"
++# (cargo-mutants absent or its output unreadable), which keel reports as
++# blocked rather than as a pass. KEEL_BASE is the commit the run diffs against.
++set -u
++
++if ! command -v cargo-mutants >/dev/null 2>&1; then
++    printf '%s\n' '{"schema":"keel.mutationresult/1","killed":[],"survived":[],"summary":"cargo-mutants is not installed — no mutants were run"}'
++    exit 3
++fi
++
++diff_file=$(mktemp)
++trap 'rm -f "$diff_file"' EXIT
++git diff "${KEEL_BASE:-HEAD}" > "$diff_file"
++# A missed mutant makes cargo-mutants exit 2; the outcomes file is what counts.
++cargo mutants --in-diff "$diff_file" --output "${TMPDIR:-/tmp}/keel-mutants" >&2
++
++python3 -c '
++import json, sys
++path = sys.argv[1] + "/mutants.out/outcomes.json"
++try:
++    outcomes = json.load(open(path))["outcomes"]
++except (OSError, KeyError, ValueError) as e:
++    print(json.dumps({"schema": "keel.mutationresult/1", "killed": [], "survived": [], "summary": "cargo-mutants wrote no readable outcomes: %s" % e}))
++    sys.exit(3)
++out = {"schema": "keel.mutationresult/1", "killed": [], "survived": []}
++for o in outcomes:
++    m = (o.get("scenario") or {}).get("Mutant")
++    if not m:
++        continue
++    entry = {"file": m["file"], "line": m.get("span", {}).get("start", {}).get("line", 1),
++             "mutant": m.get("name", "")}
++    if o.get("summary") == "MissedMutant":
++        out["survived"].append(entry)
++    elif o.get("summary") == "CaughtMutant":
++        out["killed"].append(entry)
++print(json.dumps(out))
++' "${TMPDIR:-/tmp}/keel-mutants"
+diff --git a/schemas/mutationresult.json b/schemas/mutationresult.json
+new file mode 100644
+index 0000000..4873641
+--- /dev/null
++++ b/schemas/mutationresult.json
+@@ -0,0 +1,24 @@
++{
++  "$schema": "https://json-schema.org/draft/2020-12/schema",
++  "title": "keel.mutationresult/1",
++  "description": "What a mutation tool prints on stdout: mutants no oracle caught (survived) and mutants one did (killed), each at a file and line.",
++  "type": "object",
++  "required": ["schema", "killed", "survived"],
++  "properties": {
++    "schema": { "const": "keel.mutationresult/1" },
++    "summary": { "type": "string" },
++    "killed": { "type": "array", "items": { "$ref": "#/$defs/mutant" } },
++    "survived": { "type": "array", "items": { "$ref": "#/$defs/mutant" } }
++  },
++  "$defs": {
++    "mutant": {
++      "type": "object",
++      "required": ["file", "line"],
++      "properties": {
++        "file": { "type": "string", "minLength": 1 },
++        "line": { "type": "integer", "minimum": 1 },
++        "mutant": { "type": "string" }
++      }
++    }
++  }
++}
+diff --git a/tests/fixtures/mutation/cargo-mutants-sample.json b/tests/fixtures/mutation/cargo-mutants-sample.json
+new file mode 100644
+index 0000000..f0b3ae1
+--- /dev/null
++++ b/tests/fixtures/mutation/cargo-mutants-sample.json
+@@ -0,0 +1,5 @@
++{
++  "schema": "keel.mutationresult/1",
++  "killed": [{ "file": "src/api/mod.rs", "line": 3, "mutant": "replace serve -> bool with true" }],
++  "survived": [{ "file": "src/api/mod.rs", "line": 7, "mutant": "replace limit -> u32 with 0" }]
++}
+diff --git a/tests/oracle_sensitivity.rs b/tests/oracle_sensitivity.rs
+new file mode 100644
+index 0000000..b3716c3
+--- /dev/null
++++ b/tests/oracle_sensitivity.rs
+@@ -0,0 +1,135 @@
++//! SPEC-0020: an oracle must fail without the change it claims to verify.
++
++mod support;
++
++use support::Repo;
++
++/// A driver that creates `src/api/done` and a test script that checks for it.
++fn driver() -> String {
++    "#!/bin/sh\ncat > /dev/null\n\
++     echo done > \"$KEEL_REPO/src/api/done\"\n\
++     mkdir -p \"$KEEL_REPO/tests\"\n\
++     echo 'test -f src/api/done' > \"$KEEL_REPO/tests/check.sh\"\n\
++     echo '{\"schema\":\"keel.driverresult/1\",\"status\":\"ok\",\"files_changed\":[\"src/api/done\",\"tests/check.sh\"]}'\n"
++        .to_string()
++}
++
++/// A repo whose single criterion carries `oracles`, run with `driver()`.
++fn run_with(name: &str, oracles: &str, tweak: impl FnOnce(&Repo)) -> (Repo, String) {
++    let r = Repo::bare(name);
++    r.write_spec_with_oracle(oracles);
++    let tasks = r.read(".keel/specs/demo/tasks.md");
++    r.ok(&["gate", "g0", "demo"]);
++    r.ok(&["approve", "demo", "--stage", "spec"]);
++    r.ok(&["plan", "demo"]);
++    r.set_rollback("git revert the merge");
++    r.write(".keel/specs/demo/tasks.md", &tasks);
++    r.ok(&["gate", "g1", "demo"]);
++    r.install_driver("worker", &driver());
++    tweak(&r);
++    let (_, out) = r.run(&["run", "demo"]);
++    (r, out)
++}
++
++fn report(r: &Repo) -> String {
++    r.read(&format!(".keel/runs/{}/evidence/oracle-sensitivity.json", r.latest_run()))
++}
++
++const SENSITIVE: &str = "oracle: cmd `sh tests/check.sh` exit 0";
++
++#[test]
++fn executable_oracles_are_rerun_in_a_base_worktree_with_test_files_carried_over() {
++    let (r, out) = run_with("rerun", SENSITIVE, |_| {});
++    // check.sh exists only because it was carried over; the change itself
++    // (src/api/done) is absent at the base, so the oracle fails there.
++    assert!(out.contains("oracle-sensitivity"), "{out}");
++    assert!(out.contains("1 oracle(s) fail at the base"), "{out}");
++    assert!(report(&r).contains("\"assessment\": \"sensitive\""));
++}
++
++#[test]
++fn an_oracle_passing_without_the_change_fails_sensitivity() {
++    let (r, out) = run_with("insensitive", "oracle: cmd `true` exit 0", |_| {});
++    assert!(out.contains("FAIL") && out.contains("oracle-sensitivity"), "{out}");
++    assert!(out.contains("AC-1"), "the criterion is not named:\n{out}");
++    assert!(report(&r).contains("\"insensitive\""));
++}
++
++#[test]
++fn a_guard_oracle_must_pass_at_the_base_and_on_the_change() {
++    let (r, out) = run_with("guard-ok", "oracle: guard cmd `true` exit 0", |_| {});
++    assert!(!out.contains("FAIL  oracle-sensitivity"), "{out}");
++    assert!(report(&r).contains("\"held\""));
++
++    let (r, out) = run_with("guard-bad", "oracle: guard cmd `sh tests/check.sh` exit 0", |_| {});
++    assert!(out.contains("FAIL") && out.contains("oracle-sensitivity"), "{out}");
++    assert!(report(&r).contains("\"broken\""));
++}
++
++#[test]
++fn an_unbuildable_base_blocks_sensitivity_rather_than_passing_it() {
++    // The build passes on the change (done exists) and fails at the base.
++    let (_r, out) = run_with("unbuildable", SENSITIVE, |r| {
++        r.edit_config(|cfg| {
++            cfg["verify"]["build"] = toml::Value::String("test -f src/api/done".into());
++        });
++    });
++    assert!(out.contains("BLOCKED  oracle-sensitivity"), "{out}");
++    assert!(out.contains("at the base commit"), "{out}");
++}
++
++#[test]
++fn oracles_keel_cannot_isolate_are_listed_as_not_assessed() {
++    let oracles = format!("{SENSITIVE}\noracle: human a reviewer reads the output");
++    let (r, out) = run_with("not-assessed", &oracles, |_| {});
++    assert!(out.contains("not assessed"), "{out}");
++    assert!(report(&r).contains("\"assessment\": \"not assessed\""));
++}
++
++fn mutation_tool(r: &Repo, advisory: Option<bool>) {
++    r.write("mutate.sh", "#!/bin/sh\ncat tests/fixtures/mutation.json\n");
++    r.write(
++        "tests/fixtures/mutation.json",
++        include_str!("fixtures/mutation/cargo-mutants-sample.json"),
++    );
++    r.edit_config(|cfg| {
++        let mut m = toml::value::Table::new();
++        m.insert("cmd".into(), toml::Value::String("sh mutate.sh".into()));
++        if let Some(a) = advisory {
++            m.insert("advisory".into(), toml::Value::Boolean(a));
++        }
++        cfg.as_table_mut().unwrap().insert("mutation".into(), toml::Value::Table(m));
++    });
++}
++
++#[test]
++fn survived_mutants_in_scope_become_mutation_findings() {
++    let (_r, out) = run_with("mutants", SENSITIVE, |r| mutation_tool(r, None));
++    assert!(out.contains("mutation"), "{out}");
++    assert!(out.contains("src/api/mod.rs:7"), "survived mutant not reported:\n{out}");
++    assert!(!out.contains("src/api/mod.rs:3"), "a killed mutant was reported:\n{out}");
++}
++
++#[test]
++fn mutation_is_advisory_by_default_and_blocks_only_when_configured() {
++    let (_r, out) = run_with("advisory", SENSITIVE, |r| mutation_tool(r, None));
++    assert!(!out.contains("FAIL    mutation") && !out.contains("FAIL  mutation"), "{out}");
++    let (_r, out) = run_with("blocking", SENSITIVE, |r| mutation_tool(r, Some(false)));
++    assert!(out.contains("mutation") && out.contains("FAIL"), "{out}");
++    assert!(out.contains("src/api/mod.rs:7"), "{out}");
++}
++
++#[test]
++fn the_cargo_mutants_adapter_emits_mutationresult_and_blocks_when_absent() {
++    let r = Repo::bare("adapter");
++    assert!(r.exists(".keel/mutation/cargo-mutants"), "keel init did not write the adapter");
++    // An empty PATH-less environment has no cargo-mutants to find.
++    let out = std::process::Command::new("/bin/sh")
++        .arg(r.dir.join(".keel/mutation/cargo-mutants"))
++        .env("PATH", "/nonexistent")
++        .output()
++        .unwrap();
++    assert_eq!(out.status.code(), Some(3));
++    let v: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
++    assert_eq!(v["schema"], "keel.mutationresult/1");
++}

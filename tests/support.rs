@@ -169,10 +169,10 @@ impl Repo {
              ## Acceptance criteria\n\n\
              ### AC-1 Requests over the limit are rejected\n\n\
              WHEN a client exceeds 100 requests per minute THE SYSTEM SHALL respond with HTTP 429.\n\n\
-             oracle: cmd `true` exit 0\n\n\
+             oracle: guard cmd `true` exit 0\n\n\
              ### AC-2 The limit is configurable\n\n\
              WHERE `rate_limit.rpm` is set THE SYSTEM SHALL use that value.\n\n\
-             oracle: test tests/limit.rs::respects_config\n",
+             oracle: guard test tests/limit.rs::respects_config\n",
         );
     }
 

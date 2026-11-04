@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "keel.mutationresult/1",
+  "description": "What a mutation tool prints on stdout: mutants no oracle caught (survived) and mutants one did (killed), each at a file and line.",
+  "type": "object",
+  "required": ["schema", "killed", "survived"],
+  "properties": {
+    "schema": { "const": "keel.mutationresult/1" },
+    "summary": { "type": "string" },
+    "killed": { "type": "array", "items": { "$ref": "#/$defs/mutant" } },
+    "survived": { "type": "array", "items": { "$ref": "#/$defs/mutant" } }
+  },
+  "$defs": {
+    "mutant": {
+      "type": "object",
+      "required": ["file", "line"],
+      "properties": {
+        "file": { "type": "string", "minLength": 1 },
+        "line": { "type": "integer", "minimum": 1 },
+        "mutant": { "type": "string" }
+      }
+    }
+  }
+}
