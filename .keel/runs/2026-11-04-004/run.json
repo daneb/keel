@@ -1,0 +1,11 @@
+{
+  "schema": "keel.run/1",
+  "id": "2026-11-04-004",
+  "spec": "g3-human-judgement",
+  "keel_version": "0.12.0",
+  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
+  "started_at": "2026-11-04T09:26:56.531839080+00:00",
+  "finished_at": "2026-11-04T09:29:21.056219662+00:00",
+  "verdict": "fail",
+  "base_commit": "81830ba26397093451a5858e84a22f741334a5a2"
+}

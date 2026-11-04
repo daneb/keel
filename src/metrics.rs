@@ -42,8 +42,63 @@ impl CheckStats {
     }
 }
 
+/// One merge approval and how long the reviewer had the brief.
+#[derive(Debug, Clone, Serialize)]
+pub struct ApprovalSpeed {
+    pub spec: String,
+    pub seconds: i64,
+    pub reviewable_lines: usize,
+    pub fast: bool,
+}
+
+/// Read from the file, not `Config`: `review` is also the `[[review]]` array.
+fn min_seconds_per_100_lines(paths: &Paths) -> u64 {
+    std::fs::read_to_string(paths.config())
+        .ok()
+        .and_then(|raw| raw.parse::<toml::Table>().ok())
+        .and_then(|t| t.get("review")?.as_table()?.get("min_seconds_per_100_lines")?.as_integer())
+        .and_then(|n| u64::try_from(n).ok())
+        .unwrap_or(30)
+}
+
+/// Merge approvals made against a brief; one with no brief has no start time.
+fn approval_speeds(paths: &Paths) -> Result<Vec<ApprovalSpeed>> {
+    let min = min_seconds_per_100_lines(paths) as f64;
+    let mut out = Vec::new();
+    for slug in crate::spec::list(paths)? {
+        for a in crate::approval::history(paths, &slug)?.into_iter().filter(|a| a.stage == "merge") {
+            let (Some(from), Some(lines)) = (&a.brief_at, a.reviewable_lines) else { continue };
+            let parse = chrono::DateTime::parse_from_rfc3339;
+            let (Ok(from), Ok(to)) = (parse(from), parse(&a.at)) else { continue };
+            let seconds = (to - from).num_seconds();
+            out.push(ApprovalSpeed {
+                spec: slug.clone(),
+                seconds,
+                reviewable_lines: lines,
+                fast: (seconds as f64) < min * lines as f64 / 100.0,
+            });
+        }
+    }
+    Ok(out)
+}
+
+pub fn print_approval_speed() -> Result<()> {
+    let paths = Paths::require_init()?;
+    println!("\nmerge approvals (brief to approval)");
+    for a in approval_speeds(&paths)? {
+        let flag = if a.fast { "  fast" } else { "" };
+        println!("  {:<24} {:>5}s for {:>4} line(s){flag}", a.spec, a.seconds, a.reviewable_lines);
+    }
+    println!(
+        "  fast = under {}s per 100 reviewable lines. This measures elapsed time, not attention.",
+        min_seconds_per_100_lines(&paths)
+    );
+    Ok(())
+}
+
 #[derive(Debug, Default, Serialize)]
 pub struct Metrics {
+    pub merge_approvals: Vec<ApprovalSpeed>,
     pub runs: usize,
     pub gate_verdicts: BTreeMap<String, BTreeMap<String, usize>>,
     pub checks: Vec<CheckStats>,
@@ -142,6 +197,7 @@ pub fn compute(paths: &Paths, threshold: usize) -> Result<Metrics> {
         episodes.extend(failure::extract(paths, &run)?);
     }
 
+    m.merge_approvals = approval_speeds(paths)?;
     m.tokens_per_run = if m.runs == 0 { 0.0 } else { m.tokens_total as f64 / m.runs as f64 };
     m.human_minutes_per_run = if m.runs == 0 { 0.0 } else { m.human_minutes_total / m.runs as f64 };
 

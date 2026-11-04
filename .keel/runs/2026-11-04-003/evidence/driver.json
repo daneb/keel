@@ -1,0 +1,19 @@
+{
+  "schema": "keel.driverresult/1",
+  "status": "ok",
+  "files_changed": [
+    "src/approval.rs",
+    "src/cmd/approve.rs",
+    "src/cmd/mod.rs",
+    "src/evidence/verify.rs",
+    "src/gate/g3.rs",
+    "src/main.rs",
+    "src/metrics.rs",
+    ".keel/runs/2026-11-04-003/",
+    ".keel/specs/blast-radius/",
+    ".keel/specs/g3-human-judgement/",
+    "src/cmd/review.rs",
+    "tests/g3_judgement.rs"
+  ],
+  "detail": "claude completed"
+}

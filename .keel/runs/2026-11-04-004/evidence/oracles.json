@@ -1,0 +1,66 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "cmd",
+      "oracle": "`cargo test --test g3_judgement g3_fails_while_any_human_oracle_lacks_a_judgement` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest g3_fails_while_any_human_oracle_lacks_a_judgement ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.39s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s\n     Running tests/g3_judgement.rs (target/debug/deps/g3_judgement-f96923882c3b6a9d)"
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "cmd",
+      "oracle": "`cargo test --test g3_judgement keel_judge_records_a_hash_bound_judgement_in_the_chain` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest keel_judge_records_a_hash_bound_judgement_in_the_chain ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.40s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/g3_judgement.rs (target/debug/deps/g3_judgement-f96923882c3b6a9d)"
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "cmd",
+      "oracle": "`cargo test --test g3_judgement a_judgement_is_superseded_when_the_evidence_changes` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest a_judgement_is_superseded_when_the_evidence_changes ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.40s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/g3_judgement.rs (target/debug/deps/g3_judgement-f96923882c3b6a9d)"
+    },
+    {
+      "criterion": "AC-4",
+      "kind": "cmd",
+      "oracle": "`cargo test --test g3_judgement a_failed_judgement_fails_g3_and_records_a_failure_episode` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest a_failed_judgement_fails_g3_and_records_a_failure_episode ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.41s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s\n     Running tests/g3_judgement.rs (target/debug/deps/g3_judgement-f96923882c3b6a9d)"
+    },
+    {
+      "criterion": "AC-5",
+      "kind": "cmd",
+      "oracle": "`cargo test --test g3_judgement keel_review_writes_a_brief_and_the_merge_approval_records_its_hash` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest keel_review_writes_a_brief_and_the_merge_approval_records_its_hash ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.32s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/g3_judgement.rs (target/debug/deps/g3_judgement-f96923882c3b6a9d)"
+    },
+    {
+      "criterion": "AC-6",
+      "kind": "cmd",
+      "oracle": "`cargo test --test g3_judgement metrics_flags_fast_approvals_and_states_it_measures_elapsed_time` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest metrics_flags_fast_approvals_and_states_it_measures_elapsed_time ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.34s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/g3_judgement.rs (target/debug/deps/g3_judgement-f96923882c3b6a9d)"
+    },
+    {
+      "criterion": "AC-7",
+      "kind": "cmd",
+      "oracle": "`cargo test --test g3_judgement bundle_verify_rejects_judgements_that_do_not_match_the_evidence` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest bundle_verify_rejects_judgements_that_do_not_match_the_evidence ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.32s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/g3_judgement.rs (target/debug/deps/g3_judgement-f96923882c3b6a9d)"
+    }
+  ],
+  "criteria": 7,
+  "executed": 7,
+  "passed": 7,
+  "failed": 0,
+  "blocked": 0,
+  "human": 0
+}

@@ -21,6 +21,7 @@ pub mod report;
 pub mod serve;
 pub mod ratchet;
 pub mod retrieve;
+pub mod review;
 pub mod run;
 pub mod runtime;
 pub mod spec;

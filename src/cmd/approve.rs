@@ -231,3 +231,28 @@ pub fn show(slug: Option<String>, json: bool) -> Result<i32> {
     }
     Ok(0)
 }
+
+/// `keel judge <slug> <criterion> --pass|--fail` — one person's judgement of
+/// one `human` oracle, bound to the latest run's diff and `oracles.json`.
+pub fn judge(slug: String, criterion: String, pass: bool, fail: bool, note: Option<String>) -> Result<i32> {
+    if pass == fail {
+        bail!("say which: --pass or --fail");
+    }
+    let paths = Paths::require_init()?;
+    let id = approval::latest_run_for(&paths, &slug)
+        .with_context(|| format!("no run for `{slug}` — `keel run` first, so there is evidence to judge"))?;
+    let run = crate::run::Run::load(&paths, &id)?;
+    if !crate::spec::Spec::load(&paths, &slug)?.criteria.iter().any(|c| c.id == criterion) {
+        bail!("`{slug}` has no criterion {criterion}");
+    }
+    let a = approval::judge(&paths, &run, &criterion, pass, note)?;
+    // A human event: allowed after `run_end`, and G4's signal for a failed judgement.
+    run.open_trajectory()?.append(crate::trajectory::Payload::Human {
+        stage: a.stage.clone(),
+        decision: if pass { "approved" } else { "rejected" }.into(),
+        by: a.by.clone(),
+        note: a.note.clone(),
+    })?;
+    println!("  judged {criterion} of `{slug}` {} by {} against run {id}", if pass { "pass" } else { "FAIL" }, a.by);
+    Ok(0)
+}

@@ -1,0 +1,21 @@
+{"t":"2026-11-04T08:45:35.490605144+00:00","seq":1,"kind":"run_start","spec":"g3-human-judgement","driver":"claude-code","keel_version":"0.12.0","store_hash":"0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2"}
+{"t":"2026-11-04T08:45:35.492215236+00:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":424,"bytes":1693}
+{"t":"2026-11-04T08:45:35.492226361+00:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
+{"t":"2026-11-04T08:45:35.492244903+00:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6268,"bytes":25071}
+{"t":"2026-11-04T08:45:35.492292903+00:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
+{"t":"2026-11-04T08:45:35.492324987+00:00","seq":6,"kind":"inject","source":".keel/specs/g3-human-judgement/spec.md","tokens":1223,"bytes":4889}
+{"t":"2026-11-04T08:45:35.492328695+00:00","seq":7,"kind":"driver_call","driver":"claude-code","prompt_tokens":8143}
+{"t":"2026-11-04T08:56:58.052306205+00:00","seq":8,"kind":"driver_result","driver":"claude-code","status":"ok","files_changed":12,"detail":"claude completed"}
+{"t":"2026-11-04T08:56:58.329973330+00:00","seq":9,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
+{"t":"2026-11-04T08:57:45.241444628+00:00","seq":10,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
+{"t":"2026-11-04T08:57:45.482191524+00:00","seq":11,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
+{"t":"2026-11-04T08:57:48.405614719+00:00","seq":12,"kind":"oracle","criterion":"AC-1","oracle":"`cargo test --test g3_judgement g3_fails_while_any_human_oracle_lacks_a_judgement` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T08:57:48.405631428+00:00","seq":13,"kind":"oracle","criterion":"AC-2","oracle":"`cargo test --test g3_judgement keel_judge_records_a_hash_bound_judgement_in_the_chain` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T08:57:48.405633053+00:00","seq":14,"kind":"oracle","criterion":"AC-3","oracle":"`cargo test --test g3_judgement a_judgement_is_superseded_when_the_evidence_changes` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T08:57:48.405634136+00:00","seq":15,"kind":"oracle","criterion":"AC-4","oracle":"`cargo test --test g3_judgement a_failed_judgement_fails_g3_and_records_a_failure_episode` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T08:57:48.405635136+00:00","seq":16,"kind":"oracle","criterion":"AC-5","oracle":"`cargo test --test g3_judgement keel_review_writes_a_brief_and_the_merge_approval_records_its_hash` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T08:57:48.405636178+00:00","seq":17,"kind":"oracle","criterion":"AC-6","oracle":"`cargo test --test g3_judgement metrics_flags_fast_approvals_and_states_it_measures_elapsed_time` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T08:57:48.405637219+00:00","seq":18,"kind":"oracle","criterion":"AC-7","oracle":"`cargo test --test g3_judgement bundle_verify_rejects_judgements_that_do_not_match_the_evidence` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T08:59:14.469364457+00:00","seq":19,"kind":"gate","gate":"G2","verdict":"fail","result":"gates/G2.json"}
+{"t":"2026-11-04T08:59:14.469564874+00:00","seq":20,"kind":"run_end","verdict":"fail","duration_ms":818980}
+{"t":"2026-11-04T09:26:56.043068702+00:00","seq":21,"kind":"human","stage":"spec","decision":"approved","by":"Dane Balia"}

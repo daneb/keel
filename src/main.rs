@@ -156,6 +156,17 @@ enum Command {
         #[arg(long)]
         force: bool,
     },
+    /// Record a person's judgement of one `human` oracle against the latest run's evidence
+    Judge {
+        slug: String,
+        /// The criterion, e.g. AC-6
+        criterion: String,
+        #[arg(long)] pass: bool,
+        #[arg(long)] fail: bool,
+        #[arg(long)] note: Option<String>,
+    },
+    /// Print the brief a reviewer decides from, and record it in the run's evidence
+    Review { slug: Option<String> },
     /// Show the approval history and current standing
     Approvals {
         slug: Option<String>,
@@ -574,7 +585,13 @@ fn run() -> Result<i32> {
         Command::Status => cmd::status::run(),
         Command::Next { slug, json } => cmd::next::run(slug, json),
         Command::Doctor { json } => cmd::doctor::run(json),
-        Command::Metrics { threshold, json } => cmd::metrics::run(threshold, json),
+        Command::Metrics { threshold, json } => {
+            let code = cmd::metrics::run(threshold, json)?;
+            if !json {
+                metrics::print_approval_speed()?;
+            }
+            Ok(code)
+        }
         Command::Hook(HookCmd::Install) => {
             cmd::hook::install()?;
             Ok(0)
@@ -621,6 +638,10 @@ fn run() -> Result<i32> {
         Command::Approve { slug, stage, reject, note, force } => {
             cmd::approve::run(slug, stage, reject, note, force)
         }
+        Command::Judge { slug, criterion, pass, fail, note } => {
+            cmd::approve::judge(slug, criterion, pass, fail, note)
+        }
+        Command::Review { slug } => cmd::review::run(slug),
         Command::Approvals { slug, json } => cmd::approve::show(slug, json),
         Command::Outline { path, json } => cmd::retrieve::outline(path, json),
         Command::Symbol { name, json } => cmd::retrieve::symbol(name, json),
