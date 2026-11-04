@@ -1,0 +1,57 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "cmd",
+      "oracle": "`cargo test --test comparison_doc the_table_has_the_fixed_columns_and_rows` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest the_table_has_the_fixed_columns_and_rows ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.07s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "cmd",
+      "oracle": "`cargo test --test comparison_doc every_other_tool_cell_footnotes_a_dated_https_source` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest every_other_tool_cell_footnotes_a_dated_https_source ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "cmd",
+      "oracle": "`cargo test --test comparison_doc every_keel_claim_links_to_an_existing_adr_or_test` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest every_keel_claim_links_to_an_existing_adr_or_test ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
+    },
+    {
+      "criterion": "AC-4",
+      "kind": "cmd",
+      "oracle": "`cargo test --test comparison_doc the_weaker_section_names_every_compared_tool` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest the_weaker_section_names_every_compared_tool ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
+    },
+    {
+      "criterion": "AC-5",
+      "kind": "cmd",
+      "oracle": "`cargo test --test comparison_doc readme_links_the_comparison_before_the_first_diagram` exits 0",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\ntest readme_links_the_comparison_before_the_first_diagram ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
+    },
+    {
+      "criterion": "AC-6",
+      "kind": "human",
+      "oracle": "human: a reader new to keel, reading only docs/comparison.md, names three properties specific to keel and each matches a row where keel is the only tool marked",
+      "outcome": "human",
+      "detail": "a reader new to keel, reading only docs/comparison.md, names three properties specific to keel and each matches a row where keel is the only tool marked"
+    }
+  ],
+  "criteria": 6,
+  "executed": 5,
+  "passed": 5,
+  "failed": 0,
+  "blocked": 0,
+  "human": 1
+}

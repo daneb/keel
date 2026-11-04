@@ -1,0 +1,12 @@
+{
+  "schema": "keel.run/1",
+  "id": "2026-11-04-005",
+  "spec": "comparison-doc",
+  "driver": "claude-code",
+  "keel_version": "0.12.0",
+  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
+  "started_at": "2026-11-04T10:49:43.511804882+00:00",
+  "finished_at": "2026-11-04T10:53:09.231108883+00:00",
+  "verdict": "fail",
+  "base_commit": "a7facc1103834895c3be4ab65d3b53da3d4baf66"
+}

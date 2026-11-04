@@ -5,7 +5,8 @@
 You say what "done" means. An agent (Claude Code, Codex, Copilot, Kiro) does
 the work. keel checks it, stops the line when a check fails or you haven't
 signed off, and keeps a tamper-evident record anyone can verify, even without
-the repo.
+the repo. How it differs from similar tools, and where they are the better
+choice: [docs/comparison.md](docs/comparison.md).
 
 ```sh
 cargo install keel-harness   # installs a binary called `keel`
