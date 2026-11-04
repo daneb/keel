@@ -1,0 +1,21 @@
+{"t":"2026-11-04T11:34:32.956819824+00:00","seq":1,"kind":"run_start","spec":"comparison-doc","keel_version":"0.12.0","store_hash":"0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2"}
+{"t":"2026-11-04T11:34:32.958828334+00:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":424,"bytes":1693}
+{"t":"2026-11-04T11:34:32.958856084+00:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
+{"t":"2026-11-04T11:34:32.958889792+00:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6268,"bytes":25071}
+{"t":"2026-11-04T11:34:32.958976585+00:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
+{"t":"2026-11-04T11:34:32.959023668+00:00","seq":6,"kind":"inject","source":".keel/specs/comparison-doc/spec.md","tokens":887,"bytes":3547}
+{"t":"2026-11-04T11:34:33.031058695+00:00","seq":7,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
+{"t":"2026-11-04T11:35:20.957374319+00:00","seq":8,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
+{"t":"2026-11-04T11:35:24.939900005+00:00","seq":9,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
+{"t":"2026-11-04T11:35:25.216221133+00:00","seq":10,"kind":"oracle","criterion":"AC-1","oracle":"`cargo test --test comparison_doc the_table_has_the_fixed_columns_and_rows` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T11:35:25.216238883+00:00","seq":11,"kind":"oracle","criterion":"AC-2","oracle":"`cargo test --test comparison_doc every_other_tool_cell_footnotes_a_dated_https_source` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T11:35:25.216240925+00:00","seq":12,"kind":"oracle","criterion":"AC-3","oracle":"`cargo test --test comparison_doc every_keel_claim_links_to_an_existing_adr_or_test` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T11:35:25.216241925+00:00","seq":13,"kind":"oracle","criterion":"AC-4","oracle":"`cargo test --test comparison_doc the_weaker_section_names_every_compared_tool` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T11:35:25.216242925+00:00","seq":14,"kind":"oracle","criterion":"AC-5","oracle":"`cargo test --test comparison_doc readme_links_the_comparison_before_the_first_diagram` exits 0","verdict":"pass","exit_code":0}
+{"t":"2026-11-04T11:35:25.216243883+00:00","seq":15,"kind":"oracle","criterion":"AC-6","oracle":"human: a reader new to keel, reading only docs/comparison.md, names three properties specific to keel and each matches a row where keel is the only tool marked","verdict":"human"}
+{"t":"2026-11-04T11:36:50.850930964+00:00","seq":16,"kind":"gate","gate":"G2","verdict":"pass","result":"gates/G2.json"}
+{"t":"2026-11-04T11:36:50.900818672+00:00","seq":17,"kind":"gate","gate":"G2.5","verdict":"blocked","result":"gates/G2.5.json"}
+{"t":"2026-11-04T11:36:50.905057443+00:00","seq":18,"kind":"gate","gate":"G3","verdict":"fail","result":"gates/G3.json"}
+{"t":"2026-11-04T11:36:50.905067985+00:00","seq":19,"kind":"run_end","verdict":"fail","duration_ms":137953}
+{"t":"2026-11-04T11:41:17.741767887+00:00","seq":20,"kind":"human","stage":"review","decision":"approved","by":"Dane Balia"}
+{"t":"2026-11-04T11:41:18.251851149+00:00","seq":21,"kind":"human","stage":"merge","decision":"approved","by":"Dane Balia"}

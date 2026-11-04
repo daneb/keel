@@ -1,0 +1,13 @@
+{
+  "schema": "keel.driverresult/1",
+  "status": "ok",
+  "files_changed": [
+    "README.md",
+    ".keel/runs/2026-11-04-005/",
+    ".keel/specs/blast-radius/",
+    ".keel/specs/comparison-doc/",
+    "docs/comparison.md",
+    "tests/comparison_doc.rs"
+  ],
+  "detail": "claude completed"
+}

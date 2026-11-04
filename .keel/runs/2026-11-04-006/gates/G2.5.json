@@ -1,0 +1,37 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G2.5",
+  "run": "2026-11-04-007",
+  "spec": "comparison-doc",
+  "verdict": "blocked",
+  "generated_at": "2026-11-04T11:36:50.900700546+00:00",
+  "checks": [
+    {
+      "id": "test-invalidation",
+      "verdict": "blocked",
+      "detail": "1 added line(s) mock or weaken behaviour — confirm the test still tests, then `keel approve --stage review comparison-doc`: docs/comparison.md: | test-tampering review | Yes: added mocks and weakened assertions are flagged …",
+      "evidence": "evidence/review-test-invalidation.txt"
+    },
+    {
+      "id": "test-movement",
+      "verdict": "pass",
+      "detail": "0 code file(s), 1 test file(s)"
+    },
+    {
+      "id": "conventions",
+      "verdict": "pass",
+      "detail": "4 house rule(s) in force"
+    },
+    {
+      "id": "lessons",
+      "verdict": "pass",
+      "detail": "3 lesson(s) in force"
+    },
+    {
+      "id": "review",
+      "verdict": "pass",
+      "detail": "0 finding(s) (0.0s)",
+      "evidence": "evidence/review.json"
+    }
+  ]
+}

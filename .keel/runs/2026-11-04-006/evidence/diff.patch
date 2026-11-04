@@ -1,0 +1,3637 @@
+diff --git a/README.md b/README.md
+index 4aeaf4a..35a6d65 100644
+--- a/README.md
++++ b/README.md
+@@ -5,7 +5,8 @@
+ You say what "done" means. An agent (Claude Code, Codex, Copilot, Kiro) does
+ the work. keel checks it, stops the line when a check fails or you haven't
+ signed off, and keeps a tamper-evident record anyone can verify, even without
+-the repo.
++the repo. How it differs from similar tools, and where they are the better
++choice: [docs/comparison.md](docs/comparison.md).
+ 
+ ```sh
+ cargo install keel-harness   # installs a binary called `keel`
+diff --git a/.keel/runs/2026-11-04-005/evidence/build.txt b/.keel/runs/2026-11-04-005/evidence/build.txt
+new file mode 100644
+index 0000000..01700b6
+--- /dev/null
++++ b/.keel/runs/2026-11-04-005/evidence/build.txt
+@@ -0,0 +1,2 @@
++$ cargo build --quiet
++
+diff --git a/.keel/runs/2026-11-04-005/evidence/diff-stat.txt b/.keel/runs/2026-11-04-005/evidence/diff-stat.txt
+new file mode 100644
+index 0000000..26be8a0
+--- /dev/null
++++ b/.keel/runs/2026-11-04-005/evidence/diff-stat.txt
+@@ -0,0 +1,24 @@
++     2      0  .keel/runs/2026-11-04-005/evidence/build.txt
++    13      0  .keel/runs/2026-11-04-005/evidence/driver.json
++     2      0  .keel/runs/2026-11-04-005/evidence/lint.txt
++    57      0  .keel/runs/2026-11-04-005/evidence/oracles.json
++   150      0  .keel/runs/2026-11-04-005/evidence/test.txt
++    10      0  .keel/runs/2026-11-04-005/run.json
++    17      0  .keel/runs/2026-11-04-005/trajectory.jsonl
++     1      0  .keel/specs/blast-radius/approvals.jsonl
++    90      0  .keel/specs/blast-radius/gates/G0.json
++    97      0  .keel/specs/blast-radius/gates/G1.json
++   164      0  .keel/specs/blast-radius/plan.md
++   112      0  .keel/specs/blast-radius/spec.md
++    63      0  .keel/specs/blast-radius/tasks.md
++     2      0  .keel/specs/comparison-doc/approvals.jsonl
++    90      0  .keel/specs/comparison-doc/gates/G0.json
++    95      0  .keel/specs/comparison-doc/gates/G1.json
++    84      0  .keel/specs/comparison-doc/plan.md
++    89      0  .keel/specs/comparison-doc/spec.md
++    55      0  .keel/specs/comparison-doc/tasks.md
++     2      1  README.md
++    45      0  docs/comparison.md
++   126      0  tests/comparison_doc.rs
++
++22 file(s), +1366 -1 (1367 lines of churn) against a7facc1103834895c3be4ab65d3b53da3d4baf66
+diff --git a/.keel/runs/2026-11-04-005/evidence/diff.patch b/.keel/runs/2026-11-04-005/evidence/diff.patch
+new file mode 100644
+index 0000000..bd9f95e
+--- /dev/null
++++ b/.keel/runs/2026-11-04-005/evidence/diff.patch
+@@ -0,0 +1,1536 @@
++diff --git a/README.md b/README.md
++index 4aeaf4a..35a6d65 100644
++--- a/README.md
+++++ b/README.md
++@@ -5,7 +5,8 @@
++ You say what "done" means. An agent (Claude Code, Codex, Copilot, Kiro) does
++ the work. keel checks it, stops the line when a check fails or you haven't
++ signed off, and keeps a tamper-evident record anyone can verify, even without
++-the repo.
+++the repo. How it differs from similar tools, and where they are the better
+++choice: [docs/comparison.md](docs/comparison.md).
++ 
++ ```sh
++ cargo install keel-harness   # installs a binary called `keel`
++diff --git a/.keel/runs/2026-11-04-005/evidence/build.txt b/.keel/runs/2026-11-04-005/evidence/build.txt
++new file mode 100644
++index 0000000..01700b6
++--- /dev/null
+++++ b/.keel/runs/2026-11-04-005/evidence/build.txt
++@@ -0,0 +1,2 @@
+++$ cargo build --quiet
+++
++diff --git a/.keel/runs/2026-11-04-005/evidence/diff-stat.txt b/.keel/runs/2026-11-04-005/evidence/diff-stat.txt
++new file mode 100644
++index 0000000..26be8a0
++--- /dev/null
+++++ b/.keel/runs/2026-11-04-005/evidence/diff-stat.txt
++@@ -0,0 +1,24 @@
+++     2      0  .keel/runs/2026-11-04-005/evidence/build.txt
+++    13      0  .keel/runs/2026-11-04-005/evidence/driver.json
+++     2      0  .keel/runs/2026-11-04-005/evidence/lint.txt
+++    57      0  .keel/runs/2026-11-04-005/evidence/oracles.json
+++   150      0  .keel/runs/2026-11-04-005/evidence/test.txt
+++    10      0  .keel/runs/2026-11-04-005/run.json
+++    17      0  .keel/runs/2026-11-04-005/trajectory.jsonl
+++     1      0  .keel/specs/blast-radius/approvals.jsonl
+++    90      0  .keel/specs/blast-radius/gates/G0.json
+++    97      0  .keel/specs/blast-radius/gates/G1.json
+++   164      0  .keel/specs/blast-radius/plan.md
+++   112      0  .keel/specs/blast-radius/spec.md
+++    63      0  .keel/specs/blast-radius/tasks.md
+++     2      0  .keel/specs/comparison-doc/approvals.jsonl
+++    90      0  .keel/specs/comparison-doc/gates/G0.json
+++    95      0  .keel/specs/comparison-doc/gates/G1.json
+++    84      0  .keel/specs/comparison-doc/plan.md
+++    89      0  .keel/specs/comparison-doc/spec.md
+++    55      0  .keel/specs/comparison-doc/tasks.md
+++     2      1  README.md
+++    45      0  docs/comparison.md
+++   126      0  tests/comparison_doc.rs
+++
+++22 file(s), +1366 -1 (1367 lines of churn) against a7facc1103834895c3be4ab65d3b53da3d4baf66
++diff --git a/.keel/runs/2026-11-04-005/evidence/driver.json b/.keel/runs/2026-11-04-005/evidence/driver.json
++new file mode 100644
++index 0000000..83c7791
++--- /dev/null
+++++ b/.keel/runs/2026-11-04-005/evidence/driver.json
++@@ -0,0 +1,13 @@
+++{
+++  "schema": "keel.driverresult/1",
+++  "status": "ok",
+++  "files_changed": [
+++    "README.md",
+++    ".keel/runs/2026-11-04-005/",
+++    ".keel/specs/blast-radius/",
+++    ".keel/specs/comparison-doc/",
+++    "docs/comparison.md",
+++    "tests/comparison_doc.rs"
+++  ],
+++  "detail": "claude completed"
+++}
++\ No newline at end of file
++diff --git a/.keel/runs/2026-11-04-005/evidence/lint.txt b/.keel/runs/2026-11-04-005/evidence/lint.txt
++new file mode 100644
++index 0000000..f68c665
++--- /dev/null
+++++ b/.keel/runs/2026-11-04-005/evidence/lint.txt
++@@ -0,0 +1,2 @@
+++$ cargo clippy --all-targets --quiet
+++
++diff --git a/.keel/runs/2026-11-04-005/evidence/oracles.json b/.keel/runs/2026-11-04-005/evidence/oracles.json
++new file mode 100644
++index 0000000..bd82fd5
++--- /dev/null
+++++ b/.keel/runs/2026-11-04-005/evidence/oracles.json
++@@ -0,0 +1,57 @@
+++{
+++  "runs": [
+++    {
+++      "criterion": "AC-1",
+++      "kind": "cmd",
+++      "oracle": "`cargo test --test comparison_doc the_table_has_the_fixed_columns_and_rows` exits 0",
+++      "outcome": "pass",
+++      "exit_code": 0,
+++      "output": "\nrunning 1 test\ntest the_table_has_the_fixed_columns_and_rows ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.07s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
+++    },
+++    {
+++      "criterion": "AC-2",
+++      "kind": "cmd",
+++      "oracle": "`cargo test --test comparison_doc every_other_tool_cell_footnotes_a_dated_https_source` exits 0",
+++      "outcome": "pass",
+++      "exit_code": 0,
+++      "output": "\nrunning 1 test\ntest every_other_tool_cell_footnotes_a_dated_https_source ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
+++    },
+++    {
+++      "criterion": "AC-3",
+++      "kind": "cmd",
+++      "oracle": "`cargo test --test comparison_doc every_keel_claim_links_to_an_existing_adr_or_test` exits 0",
+++      "outcome": "pass",
+++      "exit_code": 0,
+++      "output": "\nrunning 1 test\ntest every_keel_claim_links_to_an_existing_adr_or_test ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
+++    },
+++    {
+++      "criterion": "AC-4",
+++      "kind": "cmd",
+++      "oracle": "`cargo test --test comparison_doc the_weaker_section_names_every_compared_tool` exits 0",
+++      "outcome": "pass",
+++      "exit_code": 0,
+++      "output": "\nrunning 1 test\ntest the_weaker_section_names_every_compared_tool ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
+++    },
+++    {
+++      "criterion": "AC-5",
+++      "kind": "cmd",
+++      "oracle": "`cargo test --test comparison_doc readme_links_the_comparison_before_the_first_diagram` exits 0",
+++      "outcome": "pass",
+++      "exit_code": 0,
+++      "output": "\nrunning 1 test\ntest readme_links_the_comparison_before_the_first_diagram ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
+++    },
+++    {
+++      "criterion": "AC-6",
+++      "kind": "human",
+++      "oracle": "human: a reader new to keel, reading only docs/comparison.md, names three properties specific to keel and each matches a row where keel is the only tool marked",
+++      "outcome": "human",
+++      "detail": "a reader new to keel, reading only docs/comparison.md, names three properties specific to keel and each matches a row where keel is the only tool marked"
+++    }
+++  ],
+++  "criteria": 6,
+++  "executed": 5,
+++  "passed": 5,
+++  "failed": 0,
+++  "blocked": 0,
+++  "human": 1
+++}
++\ No newline at end of file
++diff --git a/.keel/runs/2026-11-04-005/evidence/test.txt b/.keel/runs/2026-11-04-005/evidence/test.txt
++new file mode 100644
++index 0000000..d88b378
++--- /dev/null
+++++ b/.keel/runs/2026-11-04-005/evidence/test.txt
++@@ -0,0 +1,150 @@
+++$ cargo test --quiet
+++
+++
+++running 296 tests
+++....................................................................................... 87/296
+++....................................................................................... 174/296
+++....................................................................................... 261/296
+++...................................
+++test result: ok. 296 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.90s
+++
+++
+++running 8 tests
+++........
+++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.51s
+++
+++
+++running 9 tests
+++.........
+++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.81s
+++
+++
+++running 7 tests
+++.......
+++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+++
+++
+++running 9 tests
+++.........
+++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.49s
+++
+++
+++running 5 tests
+++.....
+++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+++
+++
+++running 8 tests
+++........
+++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.45s
+++
+++
+++running 13 tests
+++.............
+++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.64s
+++
+++
+++running 6 tests
+++......
+++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.87s
+++
+++
+++running 8 tests
+++........
+++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.39s
+++
+++
+++running 6 tests
+++......
+++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.96s
+++
+++
+++running 7 tests
+++.......
+++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.48s
+++
+++
+++running 9 tests
+++.........
+++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.64s
+++
+++
+++running 9 tests
+++.........
+++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.93s
+++
+++
+++running 8 tests
+++........
+++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.48s
+++
+++
+++running 4 tests
+++....
+++test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.75s
+++
+++
+++running 25 tests
+++.........................
+++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.01s
+++
+++
+++running 14 tests
+++..............
+++test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.73s
+++
+++
+++running 13 tests
+++.............
+++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.20s
+++
+++
+++running 15 tests
+++...............
+++test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.78s
+++
+++
+++running 25 tests
+++.........................
+++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.58s
+++
+++
+++running 20 tests
+++....................
+++test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.25s
+++
+++
+++running 6 tests
+++......
+++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.81s
+++
+++
+++running 8 tests
+++........
+++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.68s
+++
+++
+++running 2 tests
+++..
+++test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+++
+++
+++running 34 tests
+++..................................
+++test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.37s
+++
+++
+++running 0 tests
+++
+++test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+++
+++
+++running 7 tests
+++.......
+++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.22s
+++
+++
+++running 5 tests
+++.....
+++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.68s
+++
++diff --git a/.keel/runs/2026-11-04-005/run.json b/.keel/runs/2026-11-04-005/run.json
++new file mode 100644
++index 0000000..c578ccb
++--- /dev/null
+++++ b/.keel/runs/2026-11-04-005/run.json
++@@ -0,0 +1,10 @@
+++{
+++  "schema": "keel.run/1",
+++  "id": "2026-11-04-005",
+++  "spec": "comparison-doc",
+++  "driver": "claude-code",
+++  "keel_version": "0.12.0",
+++  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
+++  "started_at": "2026-11-04T10:49:43.511804882+00:00",
+++  "base_commit": "a7facc1103834895c3be4ab65d3b53da3d4baf66"
+++}
++diff --git a/.keel/runs/2026-11-04-005/trajectory.jsonl b/.keel/runs/2026-11-04-005/trajectory.jsonl
++new file mode 100644
++index 0000000..256e276
++--- /dev/null
+++++ b/.keel/runs/2026-11-04-005/trajectory.jsonl
++@@ -0,0 +1,17 @@
+++{"t":"2026-11-04T10:49:43.511933258+00:00","seq":1,"kind":"run_start","spec":"comparison-doc","driver":"claude-code","keel_version":"0.12.0","store_hash":"0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2"}
+++{"t":"2026-11-04T10:49:43.513261265+00:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":424,"bytes":1693}
+++{"t":"2026-11-04T10:49:43.513273431+00:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
+++{"t":"2026-11-04T10:49:43.513291181+00:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6268,"bytes":25071}
+++{"t":"2026-11-04T10:49:43.513404890+00:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
+++{"t":"2026-11-04T10:49:43.513469557+00:00","seq":6,"kind":"inject","source":".keel/specs/comparison-doc/spec.md","tokens":887,"bytes":3547}
+++{"t":"2026-11-04T10:49:43.513473349+00:00","seq":7,"kind":"driver_call","driver":"claude-code","prompt_tokens":7808}
+++{"t":"2026-11-04T10:50:45.926104900+00:00","seq":8,"kind":"driver_result","driver":"claude-code","status":"ok","files_changed":6,"detail":"claude completed"}
+++{"t":"2026-11-04T10:50:46.008263025+00:00","seq":9,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
+++{"t":"2026-11-04T10:51:38.649338446+00:00","seq":10,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
+++{"t":"2026-11-04T10:51:42.797277857+00:00","seq":11,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
+++{"t":"2026-11-04T10:51:43.088319666+00:00","seq":12,"kind":"oracle","criterion":"AC-1","oracle":"`cargo test --test comparison_doc the_table_has_the_fixed_columns_and_rows` exits 0","verdict":"pass","exit_code":0}
+++{"t":"2026-11-04T10:51:43.088378708+00:00","seq":13,"kind":"oracle","criterion":"AC-2","oracle":"`cargo test --test comparison_doc every_other_tool_cell_footnotes_a_dated_https_source` exits 0","verdict":"pass","exit_code":0}
+++{"t":"2026-11-04T10:51:43.088382+00:00","seq":14,"kind":"oracle","criterion":"AC-3","oracle":"`cargo test --test comparison_doc every_keel_claim_links_to_an_existing_adr_or_test` exits 0","verdict":"pass","exit_code":0}
+++{"t":"2026-11-04T10:51:43.088385292+00:00","seq":15,"kind":"oracle","criterion":"AC-4","oracle":"`cargo test --test comparison_doc the_weaker_section_names_every_compared_tool` exits 0","verdict":"pass","exit_code":0}
+++{"t":"2026-11-04T10:51:43.088388+00:00","seq":16,"kind":"oracle","criterion":"AC-5","oracle":"`cargo test --test comparison_doc readme_links_the_comparison_before_the_first_diagram` exits 0","verdict":"pass","exit_code":0}
+++{"t":"2026-11-04T10:51:43.088389+00:00","seq":17,"kind":"oracle","criterion":"AC-6","oracle":"human: a reader new to keel, reading only docs/comparison.md, names three properties specific to keel and each matches a row where keel is the only tool marked","verdict":"human"}
++diff --git a/.keel/specs/blast-radius/approvals.jsonl b/.keel/specs/blast-radius/approvals.jsonl
++new file mode 100644
++index 0000000..6da4644
++--- /dev/null
+++++ b/.keel/specs/blast-radius/approvals.jsonl
++@@ -0,0 +1 @@
+++{"schema":"keel.approval/1","stage":"spec","decision":"approved","artefact_hash":"8fd333590157941a615947aafab8b9f6f2be1557e244e403189d654ec8ec4772","gate_verdict":"pass","by":"unknown","at":"2026-09-14T03:51:56.310102344+00:00"}
++diff --git a/.keel/specs/blast-radius/gates/G0.json b/.keel/specs/blast-radius/gates/G0.json
++new file mode 100644
++index 0000000..f82fc09
++--- /dev/null
+++++ b/.keel/specs/blast-radius/gates/G0.json
++@@ -0,0 +1,90 @@
+++{
+++  "schema": "keel.gate/1",
+++  "gate": "G0",
+++  "run": "2026-09-13-000",
+++  "spec": "blast-radius",
+++  "verdict": "pass",
+++  "generated_at": "2026-09-13T17:25:39.092778685+00:00",
+++  "checks": [
+++    {
+++      "id": "schema",
+++      "verdict": "pass",
+++      "detail": "SPEC-0009 (keel.spec/1)"
+++    },
+++    {
+++      "id": "criteria-present",
+++      "verdict": "pass",
+++      "detail": "8 criteria"
+++    },
+++    {
+++      "id": "criterion-ids-unique",
+++      "verdict": "pass",
+++      "detail": "no duplicate ids"
+++    },
+++    {
+++      "id": "no-placeholders",
+++      "verdict": "pass",
+++      "detail": "no unfilled scaffold text"
+++    },
+++    {
+++      "id": "ears-conformance",
+++      "verdict": "pass",
+++      "detail": "8/8 conform (event-driven, ubiquitous, unwanted-behaviour)"
+++    },
+++    {
+++      "id": "oracle-presence",
+++      "verdict": "pass",
+++      "detail": "8 oracles across 8 criteria"
+++    },
+++    {
+++      "id": "oracle-wellformed",
+++      "verdict": "pass",
+++      "detail": "all oracles parse"
+++    },
+++    {
+++      "id": "ambiguity",
+++      "verdict": "pass",
+++      "detail": "no ambiguous phrasing in criteria"
+++    },
+++    {
+++      "id": "criterion-budget",
+++      "verdict": "pass",
+++      "detail": "8/8 criteria"
+++    },
+++    {
+++      "id": "spec-length",
+++      "verdict": "pass",
+++      "detail": "112/250 lines"
+++    },
+++    {
+++      "id": "scope-declared",
+++      "verdict": "pass",
+++      "detail": "2 glob(s): src/**, test/**"
+++    },
+++    {
+++      "id": "change-budget",
+++      "verdict": "pass",
+++      "detail": "200 lines of diff budgeted"
+++    },
+++    {
+++      "id": "oracle-mix",
+++      "verdict": "pass",
+++      "detail": "8/8 runnable (8 cmd)"
+++    },
+++    {
+++      "id": "human-cost",
+++      "verdict": "pass",
+++      "detail": "0 human oracle(s), none load-bearing"
+++    },
+++    {
+++      "id": "store-drift",
+++      "verdict": "pass",
+++      "detail": "4 projections current"
+++    },
+++    {
+++      "id": "shared-stores",
+++      "verdict": "pass",
+++      "detail": "none configured"
+++    }
+++  ]
+++}
++diff --git a/.keel/specs/blast-radius/gates/G1.json b/.keel/specs/blast-radius/gates/G1.json
++new file mode 100644
++index 0000000..db33ee5
++--- /dev/null
+++++ b/.keel/specs/blast-radius/gates/G1.json
++@@ -0,0 +1,97 @@
+++{
+++  "schema": "keel.gate/1",
+++  "gate": "G1",
+++  "run": "2026-09-14-000",
+++  "spec": "blast-radius",
+++  "verdict": "fail",
+++  "generated_at": "2026-09-14T04:35:08.315837437+00:00",
+++  "checks": [
+++    {
+++      "id": "schema",
+++      "verdict": "pass",
+++      "detail": "PLAN-0009 + TASKS-0009"
+++    },
+++    {
+++      "id": "g0-passed",
+++      "verdict": "pass",
+++      "detail": "G0 passed in run 2026-09-13-000"
+++    },
+++    {
+++      "id": "spec-approved",
+++      "verdict": "pass",
+++      "detail": "approved by unknown"
+++    },
+++    {
+++      "id": "tasks-present",
+++      "verdict": "pass",
+++      "detail": "8/15 tasks"
+++    },
+++    {
+++      "id": "task-ids-unique",
+++      "verdict": "pass",
+++      "detail": "no duplicate task ids"
+++    },
+++    {
+++      "id": "task-fields",
+++      "verdict": "pass",
+++      "detail": "all task fields recognised"
+++    },
+++    {
+++      "id": "task-criterion-traceability",
+++      "verdict": "pass",
+++      "detail": "8 tasks all traced"
+++    },
+++    {
+++      "id": "criteria-covered",
+++      "verdict": "pass",
+++      "detail": "8/8 criteria have a task"
+++    },
+++    {
+++      "id": "task-budgets",
+++      "verdict": "pass",
+++      "detail": "all 8 tasks budgeted, total 200 lines"
+++    },
+++    {
+++      "id": "total-budget",
+++      "verdict": "pass",
+++      "detail": "200/200 lines"
+++    },
+++    {
+++      "id": "task-exit-conditions",
+++      "verdict": "pass",
+++      "detail": "every task states when it is done"
+++    },
+++    {
+++      "id": "task-dependencies",
+++      "verdict": "pass",
+++      "detail": "1 wave(s), widths 8"
+++    },
+++    {
+++      "id": "wave-isolation",
+++      "verdict": "pass",
+++      "detail": "1 wave(s), no file claimed twice within one"
+++    },
+++    {
+++      "id": "task-files-in-scope",
+++      "verdict": "fail",
+++      "expected": "every task names the files it touches",
+++      "actual": "no files on: T-1 (line 16), T-2 (line 22), T-3 (line 28), T-4 (line 34), T-5 (line 40), … and 3 more"
+++    },
+++    {
+++      "id": "rollback-stated",
+++      "verdict": "fail",
+++      "expected": "front matter `rollback:` or a ## Rollback section states the rollback",
+++      "actual": "both are empty — \"git revert\" is a legitimate answer, silence is not"
+++    },
+++    {
+++      "id": "blast-radius-declared",
+++      "verdict": "pass",
+++      "detail": "85 file(s) at depth 2, 22732 lines"
+++    },
+++    {
+++      "id": "blast-radius-current",
+++      "verdict": "pass",
+++      "detail": "85 files, 22732 lines — matches a fresh computation — no indexed file matches test/** (new files, or a typo)"
+++    }
+++  ]
+++}
++diff --git a/.keel/specs/blast-radius/plan.md b/.keel/specs/blast-radius/plan.md
++new file mode 100644
++index 0000000..649ebba
++--- /dev/null
+++++ b/.keel/specs/blast-radius/plan.md
++@@ -0,0 +1,164 @@
+++---
+++id: PLAN-0009
+++slug: blast-radius
+++schema: keel.plan/1
+++blast:
+++  depth: 2
+++  declared:
+++  - src/**
+++  - test/**
+++  computed:
+++  - src/paths.rs
+++  - src/config.rs
+++  - src/map/lang.rs
+++  - src/gate/mod.rs
+++  - src/spec/mod.rs
+++  - src/trajectory/event.rs
+++  - src/map/extract.rs
+++  - src/trajectory/mod.rs
+++  - src/run.rs
+++  - src/hashing.rs
+++  - src/store/mod.rs
+++  - src/lesson/mod.rs
+++  - src/failure/mod.rs
+++  - src/plan.rs
+++  - src/store/frontmatter.rs
+++  - src/approval.rs
+++  - src/map/blast.rs
+++  - src/map/db.rs
+++  - src/spec/oracle.rs
+++  - src/retrieve/mod.rs
+++  - src/spec/ears.rs
+++  - src/spec/placeholder.rs
+++  - src/report/mod.rs
+++  - src/main.rs
+++  - src/http.rs
+++  - src/review/mod.rs
+++  - src/driver/mod.rs
+++  - src/pipeline.rs
+++  - src/serve/mod.rs
+++  - src/projection/drift.rs
+++  - src/driver/contract.rs
+++  - src/map/mod.rs
+++  - src/gate/ratchet.rs
+++  - src/gate/g1.rs
+++  - src/cmd/mod.rs
+++  - src/gate/g25.rs
+++  - src/mcp/mod.rs
+++  - src/gate/oracle_exec.rs
+++  - src/projection/mod.rs
+++  - src/gate/g0.rs
+++  - src/evidence/mod.rs
+++  - src/driver/conform.rs
+++  - src/failure/taxonomy.rs
+++  - src/gate/diff.rs
+++  - src/worktree.rs
+++  - src/projection/sections.rs
+++  - src/map/render.rs
+++  - src/lesson/usage.rs
+++  - src/gate/g2.rs
+++  - src/report/insights.rs
+++  - src/retrieve/fallback.rs
+++  - src/gate/g4.rs
+++  - src/map/resolve.rs
+++  - src/metrics.rs
+++  - src/retrieve/budget.rs
+++  - src/gate/g3.rs
+++  - src/evidence/manifest.rs
+++  - src/map/rank.rs
+++  - src/cmd/next.rs
+++  - src/ui.rs
+++  - src/cmd/run.rs
+++  - src/cmd/learn.rs
+++  - src/cmd/init.rs
+++  - src/driver/builtin.rs
+++  - src/cmd/doctor.rs
+++  - src/cmd/spec.rs
+++  - src/cmd/bench.rs
+++  - src/cmd/hook.rs
+++  - src/cmd/retrieve.rs
+++  - src/atomic.rs
+++  - src/cmd/approve.rs
+++  - src/cmd/driver.rs
+++  - src/map/walk.rs
+++  - src/cmd/report.rs
+++  - src/cmd/store.rs
+++  - src/cmd/gate.rs
+++  - src/cmd/status.rs
+++  - src/cmd/metrics.rs
+++  - src/cmd/map.rs
+++  - src/cmd/prune.rs
+++  - src/cmd/plan.rs
+++  - src/cmd/tasks.rs
+++  - src/cmd/ratchet.rs
+++  - src/cmd/blast.rs
+++  - src/cmd/serve.rs
+++  computed_lines: 22732
+++rollback: ''
+++verified_at: 2026-09-14
+++---
+++
+++# Design — blast-radius
+++
+++## Approach
+++
+++_How the change is made. Name the seam you are cutting at._
+++
+++## Blast radius
+++
+++<!-- generated by `keel plan`; edits here are overwritten -->
+++
+++Computed from the import graph at depth 2: **85 files, 22732 lines**.
+++
+++| depth | file | lines |
+++| --- | --- | --- |
+++| scope | `src/paths.rs` | 82 |
+++| scope | `src/config.rs` | 504 |
+++| scope | `src/map/lang.rs` | 355 |
+++| scope | `src/gate/mod.rs` | 416 |
+++| scope | `src/spec/mod.rs` | 353 |
+++| scope | `src/trajectory/event.rs` | 228 |
+++| scope | `src/map/extract.rs` | 468 |
+++| scope | `src/trajectory/mod.rs` | 370 |
+++| scope | `src/run.rs` | 273 |
+++| scope | `src/hashing.rs` | 49 |
+++| scope | `src/store/mod.rs` | 177 |
+++| scope | `src/lesson/mod.rs` | 719 |
+++| scope | `src/failure/mod.rs` | 573 |
+++| scope | `src/plan.rs` | 604 |
+++| scope | `src/store/frontmatter.rs` | 137 |
+++| scope | `src/approval.rs` | 340 |
+++| scope | `src/map/blast.rs` | 268 |
+++| scope | `src/map/db.rs` | 265 |
+++| scope | `src/spec/oracle.rs` | 327 |
+++| scope | `src/retrieve/mod.rs` | 479 |
+++| scope | `src/spec/ears.rs` | 362 |
+++| scope | `src/spec/placeholder.rs` | 233 |
+++| scope | `src/report/mod.rs` | 156 |
+++| scope | `src/main.rs` | 566 |
+++| scope | `src/http.rs` | 426 |
+++| scope | `src/review/mod.rs` | 545 |
+++| scope | `src/driver/mod.rs` | 595 |
+++| scope | `src/pipeline.rs` | 284 |
+++| scope | `src/serve/mod.rs` | 455 |
+++| scope | `src/projection/drift.rs` | 210 |
+++| scope | `src/driver/contract.rs` | 263 |
+++| scope | `src/map/mod.rs` | 203 |
+++| scope | `src/gate/ratchet.rs` | 197 |
+++| scope | `src/gate/g1.rs` | 526 |
+++| scope | `src/cmd/mod.rs` | 23 |
+++| scope | `src/gate/g25.rs` | 546 |
+++| scope | `src/mcp/mod.rs` | 271 |
+++| scope | `src/gate/oracle_exec.rs` | 308 |
+++| scope | `src/projection/mod.rs` | 116 |
+++| scope | `src/gate/g0.rs` | 341 |
+++
+++_… 45 more, see `keel blast`._
+++
+++_Scope globs matching no indexed file (new files, or a typo): test/**_
+++
+++
+++## Rollback
+++
+++_Fill in `rollback:` in the front matter above. "git revert" is a
+++legitimate answer; "we would not need to" is not._
++diff --git a/.keel/specs/blast-radius/spec.md b/.keel/specs/blast-radius/spec.md
++new file mode 100644
++index 0000000..672e9dd
++--- /dev/null
+++++ b/.keel/specs/blast-radius/spec.md
++@@ -0,0 +1,112 @@
+++---
+++id: SPEC-0009
+++slug: blast-radius
+++schema: keel.spec/1
+++status: approved
+++scope:
+++- src/**
+++- test/**
+++budget:
+++  criteria: 8
+++  lines: 200
+++---
+++
+++# blast radius
+++
+++## Context
+++
+++`keel serve`'s dashboard fetches `/api/overview` once and polls it, and
+++renders a per-feature "Summary" panel from `state.specs` when an operator
+++selects a feature in the rail (`assets/ui/app.js`, `renderSpecSummary`). That
+++panel shows tiles for runs, tokens, events and open fails, but nothing about
+++how much of the codebase the feature's declared scope reaches — the one number
+++`src/map/blast.rs` already computes and `keel blast` / `keel plan` already
+++print. An operator landing on a feature has no way to see its blast radius
+++without leaving the browser for a terminal.
+++
+++`/api/spec/<slug>` already exists and already narrows `Report::build` to one
+++spec, but the JS never calls it — `state.selected` only filters the specs
+++already fetched by `/api/overview`. Computing the blast radius inside every
+++`SpecReport` built by the unnarrowed `/api/overview` call would recompute the
+++whole reverse-import graph, from scratch, for every spec, every 2-second poll
+++— the smallest surface is to compute it only for the one spec `/api/spec/<slug>`
+++already narrows to, and have the dashboard fetch that route when a feature is
+++selected.
+++
+++## Acceptance criteria
+++
+++### AC-1 A narrowed report carries the spec's blast radius
+++
+++WHEN `Report::build` is called with `only` set to one spec's slug and a
+++symbol index exists THE SYSTEM SHALL set that spec's `blast` field to an
+++object with integer `files`, `lines` and `depth` keys computed by
+++`map::blast::compute` over the spec's declared `scope` globs.
+++
+++oracle: cmd `cargo test --test report the_narrowed_report_carries_the_blast_radius` exit 0
+++
+++### AC-2 The unnarrowed report stays free of it
+++
+++WHEN `Report::build` is called with `only` set to `None` THE SYSTEM SHALL
+++leave every spec's `blast` field absent, so `/api/overview` does not recompute
+++the reverse-import graph once per spec on every poll.
+++
+++oracle: cmd `cargo test --test report blast_radius_is_absent_from_the_unnarrowed_report` exit 0
+++
+++### AC-3 A missing symbol index degrades to null
+++
+++IF the symbol index database does not exist THEN THE SYSTEM SHALL set the
+++narrowed spec's `blast` field to `null` rather than making `keel report
+++<slug> --json` exit non-zero.
+++
+++oracle: cmd `cargo test --test report blast_radius_is_null_without_a_symbol_index` exit 0
+++
+++### AC-4 The depth matches the configured default
+++
+++THE SYSTEM SHALL compute the narrowed spec's blast radius at
+++`cfg.plan.blast_depth`, the same depth `keel blast` and `keel plan` use by
+++default, so the number shown on a feature's landing panel and the number
+++`keel blast` prints for the same scope agree.
+++
+++oracle: cmd `cargo test --test report blast_radius_depth_matches_plan_blast_depth` exit 0
+++
+++### AC-5 `/api/spec/<slug>` serves the field
+++
+++WHEN a `GET` request reaches `/api/spec/<slug>` for a spec whose scope
+++matches at least one indexed file THE SYSTEM SHALL respond with JSON whose
+++`specs[0].blast.files` count equals the number of paths `keel blast` reports
+++for that spec's scope at the same depth.
+++
+++oracle: cmd `cargo test --test serve blast_radius_route_matches_keel_blast_output` exit 0
+++
+++### AC-6 Selecting a feature fetches its blast radius
+++
+++WHEN the operator selects a feature in the dashboard rail THE SYSTEM SHALL
+++fetch `/api/spec/<slug>` for that feature's slug and store the response's
+++`blast` field on that feature's state before the Summary panel next renders.
+++
+++oracle: cmd `cargo test --test serve app_js_fetches_the_spec_route_on_selection` exit 0
+++
+++### AC-7 The Summary panel shows a blast-radius tile
+++
+++WHEN the Summary panel renders for a feature whose stored `blast` field is
+++not `null` THE SYSTEM SHALL display a tile labelled `blast radius` whose
+++value is that field's `files` count.
+++
+++oracle: cmd `cargo test --test serve app_js_summary_panel_has_a_blast_radius_tile` exit 0
+++
+++### AC-8 A null blast radius omits the tile
+++
+++IF a feature's stored `blast` field is `null` THEN THE SYSTEM SHALL omit the
+++blast-radius tile from the Summary panel rather than rendering a tile showing
+++`0`.
+++
+++oracle: cmd `cargo test --test serve app_js_omits_the_blast_radius_tile_when_null` exit 0
+++
+++## Out of scope
+++
+++- Adding a blast-radius column or tile to the Overview landing view (the
+++  `state.selected === null` case) — only a selected feature's own panel.
+++- Changing what `map::blast::compute`, `keel blast` or `keel plan` compute;
+++  this only surfaces the existing number in `keel serve`.
+++- Polling `/api/spec/<slug>` on the same 2-second interval as `/api/overview`;
+++  one fetch per selection is all AC-6 requires.
++diff --git a/.keel/specs/blast-radius/tasks.md b/.keel/specs/blast-radius/tasks.md
++new file mode 100644
++index 0000000..ee93630
++--- /dev/null
+++++ b/.keel/specs/blast-radius/tasks.md
++@@ -0,0 +1,63 @@
+++---
+++id: TASKS-0009
+++slug: blast-radius
+++schema: keel.tasks/1
+++---
+++
+++# Tasks
+++
+++Each task must name the criteria it satisfies, the files it touches, a line
+++budget and an exit condition. G1 checks all four, and checks that every
+++criterion in the spec is covered by at least one task.
+++
+++Add `- depends_on: T-1` where order matters. Tasks with no dependency on
+++each other form a wave; `keel tasks` shows them.
+++
+++### T-1 A narrowed report carries the spec's blast radius
+++- criteria: AC-1
+++- files: _name the files this task touches_
+++- budget: 25
+++- exit: `cargo test --test report the_narrowed_report_carries_the_blast_radius` exits 0
+++
+++### T-2 The unnarrowed report stays free of it
+++- criteria: AC-2
+++- files: _name the files this task touches_
+++- budget: 25
+++- exit: `cargo test --test report blast_radius_is_absent_from_the_unnarrowed_report` exits 0
+++
+++### T-3 A missing symbol index degrades to null
+++- criteria: AC-3
+++- files: _name the files this task touches_
+++- budget: 25
+++- exit: `cargo test --test report blast_radius_is_null_without_a_symbol_index` exits 0
+++
+++### T-4 The depth matches the configured default
+++- criteria: AC-4
+++- files: _name the files this task touches_
+++- budget: 25
+++- exit: `cargo test --test report blast_radius_depth_matches_plan_blast_depth` exits 0
+++
+++### T-5 `/api/spec/<slug>` serves the field
+++- criteria: AC-5
+++- files: _name the files this task touches_
+++- budget: 25
+++- exit: `cargo test --test serve blast_radius_route_matches_keel_blast_output` exits 0
+++
+++### T-6 Selecting a feature fetches its blast radius
+++- criteria: AC-6
+++- files: _name the files this task touches_
+++- budget: 25
+++- exit: `cargo test --test serve app_js_fetches_the_spec_route_on_selection` exits 0
+++
+++### T-7 The Summary panel shows a blast-radius tile
+++- criteria: AC-7
+++- files: _name the files this task touches_
+++- budget: 25
+++- exit: `cargo test --test serve app_js_summary_panel_has_a_blast_radius_tile` exits 0
+++
+++### T-8 A null blast radius omits the tile
+++- criteria: AC-8
+++- files: _name the files this task touches_
+++- budget: 25
+++- exit: `cargo test --test serve app_js_omits_the_blast_radius_tile_when_null` exits 0
+++
++diff --git a/.keel/specs/comparison-doc/approvals.jsonl b/.keel/specs/comparison-doc/approvals.jsonl
++new file mode 100644
++index 0000000..986c577
++--- /dev/null
+++++ b/.keel/specs/comparison-doc/approvals.jsonl
++@@ -0,0 +1,2 @@
+++{"schema":"keel.approval/1","stage":"spec","decision":"approved","artefact_hash":"b1d74ba03434ca69f0cded7baa0d9ee406b87e984b5b270b1c79607646ac893d","gate_verdict":"pass","by":"Dane Balia","at":"2026-11-04T09:49:56.702224331+00:00"}
+++{"schema":"keel.approval/1","stage":"plan","decision":"approved","artefact_hash":"875b72c7d26c254259b7dd7639541e10c5f30d3804081d55f797a79695fe74c5","gate_verdict":"pass","by":"Dane Balia","at":"2026-11-04T10:49:43.174608551+00:00"}
++diff --git a/.keel/specs/comparison-doc/gates/G0.json b/.keel/specs/comparison-doc/gates/G0.json
++new file mode 100644
++index 0000000..5ec818c
++--- /dev/null
+++++ b/.keel/specs/comparison-doc/gates/G0.json
++@@ -0,0 +1,90 @@
+++{
+++  "schema": "keel.gate/1",
+++  "gate": "G0",
+++  "run": "2026-11-04-003",
+++  "spec": "comparison-doc",
+++  "verdict": "pass",
+++  "generated_at": "2026-11-04T09:47:30.922532095+00:00",
+++  "checks": [
+++    {
+++      "id": "schema",
+++      "verdict": "pass",
+++      "detail": "SPEC-0021 (keel.spec/1)"
+++    },
+++    {
+++      "id": "criteria-present",
+++      "verdict": "pass",
+++      "detail": "6 criteria"
+++    },
+++    {
+++      "id": "criterion-ids-unique",
+++      "verdict": "pass",
+++      "detail": "no duplicate ids"
+++    },
+++    {
+++      "id": "no-placeholders",
+++      "verdict": "pass",
+++      "detail": "no unfilled scaffold text"
+++    },
+++    {
+++      "id": "ears-conformance",
+++      "verdict": "pass",
+++      "detail": "6/6 conform (event-driven, ubiquitous)"
+++    },
+++    {
+++      "id": "oracle-presence",
+++      "verdict": "pass",
+++      "detail": "6 oracles across 6 criteria"
+++    },
+++    {
+++      "id": "oracle-wellformed",
+++      "verdict": "pass",
+++      "detail": "all oracles parse"
+++    },
+++    {
+++      "id": "ambiguity",
+++      "verdict": "pass",
+++      "detail": "no ambiguous phrasing in criteria"
+++    },
+++    {
+++      "id": "criterion-budget",
+++      "verdict": "pass",
+++      "detail": "6/6 criteria"
+++    },
+++    {
+++      "id": "spec-length",
+++      "verdict": "pass",
+++      "detail": "89/250 lines"
+++    },
+++    {
+++      "id": "scope-declared",
+++      "verdict": "pass",
+++      "detail": "3 glob(s): docs/comparison.md, README.md, tests/comparison_doc.rs"
+++    },
+++    {
+++      "id": "change-budget",
+++      "verdict": "pass",
+++      "detail": "260 lines of diff budgeted"
+++    },
+++    {
+++      "id": "oracle-mix",
+++      "verdict": "pass",
+++      "detail": "5/6 runnable (5 cmd, 1 human)"
+++    },
+++    {
+++      "id": "human-cost",
+++      "verdict": "pass",
+++      "detail": "1 criteria verifiable only by a person — budget review time: AC-6 (human: a reader new to keel, reading only docs/comparison.md, names three properties specific to keel and each matches a row where keel is the only tool marked)"
+++    },
+++    {
+++      "id": "store-drift",
+++      "verdict": "pass",
+++      "detail": "4 projections current"
+++    },
+++    {
+++      "id": "shared-stores",
+++      "verdict": "pass",
+++      "detail": "none configured"
+++    }
+++  ]
+++}
++diff --git a/.keel/specs/comparison-doc/gates/G1.json b/.keel/specs/comparison-doc/gates/G1.json
++new file mode 100644
++index 0000000..ea5626b
++--- /dev/null
+++++ b/.keel/specs/comparison-doc/gates/G1.json
++@@ -0,0 +1,95 @@
+++{
+++  "schema": "keel.gate/1",
+++  "gate": "G1",
+++  "run": "2026-11-04-005",
+++  "spec": "comparison-doc",
+++  "verdict": "pass",
+++  "generated_at": "2026-11-04T09:52:34.102286846+00:00",
+++  "checks": [
+++    {
+++      "id": "schema",
+++      "verdict": "pass",
+++      "detail": "PLAN-0021 + TASKS-0021"
+++    },
+++    {
+++      "id": "g0-passed",
+++      "verdict": "pass",
+++      "detail": "G0 passed in run 2026-11-04-003"
+++    },
+++    {
+++      "id": "spec-approved",
+++      "verdict": "pass",
+++      "detail": "approved by Dane Balia"
+++    },
+++    {
+++      "id": "tasks-present",
+++      "verdict": "pass",
+++      "detail": "6/15 tasks"
+++    },
+++    {
+++      "id": "task-ids-unique",
+++      "verdict": "pass",
+++      "detail": "no duplicate task ids"
+++    },
+++    {
+++      "id": "task-fields",
+++      "verdict": "pass",
+++      "detail": "all task fields recognised"
+++    },
+++    {
+++      "id": "task-criterion-traceability",
+++      "verdict": "pass",
+++      "detail": "6 tasks all traced"
+++    },
+++    {
+++      "id": "criteria-covered",
+++      "verdict": "pass",
+++      "detail": "6/6 criteria have a task"
+++    },
+++    {
+++      "id": "task-budgets",
+++      "verdict": "pass",
+++      "detail": "all 6 tasks budgeted, total 255 lines"
+++    },
+++    {
+++      "id": "total-budget",
+++      "verdict": "pass",
+++      "detail": "255/260 lines"
+++    },
+++    {
+++      "id": "task-exit-conditions",
+++      "verdict": "pass",
+++      "detail": "every task states when it is done"
+++    },
+++    {
+++      "id": "task-dependencies",
+++      "verdict": "pass",
+++      "detail": "6 wave(s), widths 1/1/1/1/1/1"
+++    },
+++    {
+++      "id": "wave-isolation",
+++      "verdict": "pass",
+++      "detail": "6 wave(s), no file claimed twice within one"
+++    },
+++    {
+++      "id": "task-files-in-scope",
+++      "verdict": "pass",
+++      "detail": "all task files inside the declared scope"
+++    },
+++    {
+++      "id": "rollback-stated",
+++      "verdict": "pass",
+++      "detail": "git revert"
+++    },
+++    {
+++      "id": "blast-radius-declared",
+++      "verdict": "pass",
+++      "detail": "0 file(s) at depth 2, 0 lines"
+++    },
+++    {
+++      "id": "blast-radius-current",
+++      "verdict": "pass",
+++      "detail": "0 files, 0 lines — matches a fresh computation — no indexed file matches docs/comparison.md, README.md, tests/comparison_doc.rs (new files, or a typo)"
+++    }
+++  ]
+++}
++diff --git a/.keel/specs/comparison-doc/plan.md b/.keel/specs/comparison-doc/plan.md
++new file mode 100644
++index 0000000..1b8df91
++--- /dev/null
+++++ b/.keel/specs/comparison-doc/plan.md
++@@ -0,0 +1,84 @@
+++---
+++id: PLAN-0021
+++slug: comparison-doc
+++schema: keel.plan/1
+++blast:
+++  depth: 2
+++  declared:
+++  - docs/comparison.md
+++  - README.md
+++  - tests/comparison_doc.rs
+++  computed: []
+++  computed_lines: 0
+++rollback: git revert
+++verified_at: 2026-11-04
+++---
+++
+++# Design — comparison-doc
+++
+++## Approach
+++
+++This is a documentation change with one test; no keel source is touched. The
+++seam is the page's own structure, checked by `tests/comparison_doc.rs`, which
+++reads `docs/comparison.md` and asserts the fixed columns and rows, that each
+++cell about another tool carries a footnote resolving to a `## Sources` entry
+++(an `https` link and a `checked: YYYY-MM-DD` date), that each keel cell links
+++to a file that exists under `.keel/store/decisions/` or `tests/`, and that
+++`## Where keel is weaker` names every compared tool. A second assertion reads
+++`README.md` and checks the link to the comparison comes before the first
+++diagram.
+++
+++`docs/comparison.md` is written from the `## Source notes` section below, in
+++the build step, which has no web access. The writing rule there governs every
+++cell about another tool: say only what the source states, otherwise write
+++"Not stated in the source checked" with a footnote.
+++
+++Tasks are chained because they all edit `docs/comparison.md` and
+++`tests/comparison_doc.rs`; `README.md` is touched only by the README task.
+++T-6 is a human oracle and has no code of its own.
+++
+++## Source notes
+++
+++Researched on the host on 2026-11-04 from primary pages. Verbatim:
+++
+++```text
+++WRITING RULE for the build: a cell about another tool may only say what the source states. Where the source does not state a property, write 'Not stated in the source checked' and footnote it; NEVER write 'No' or 'None' or imply the tool lacks the property. Do not use any fact that is not in these notes.
+++
+++SOURCES (all checked: 2026-11-04):
+++[1] spec-kit https://github.com/github/spec-kit and https://github.com/github/spec-kit/blob/main/spec-driven.md
+++[2] Kiro https://kiro.dev/docs/specs/
+++[3] BMAD https://github.com/bmad-code-org/BMAD-METHOD
+++[4] Tessl https://docs.tessl.io/
+++[5] Elephant-Goldfish https://opensource.googleblog.com/2026/10/introducing-elephant-goldfish-model-plugin.html (published 2026-10-22; repo https://github.com/google/elephant-goldfish-model)
+++[6] Claude Code hooks https://code.claude.com/docs/en/hooks
+++
+++FINDINGS PER ROW (S=stated by source, NS=not stated):
+++Falsifiable criteria: spec-kit S (spec-driven.md checklists require requirements to be testable and unambiguous); Kiro S partly (specs hold user stories with acceptance criteria; falsifiability not stated); BMAD NS; Tessl NS (evals of a skill's impact on tasks are mentioned, not spec acceptance criteria); EGM NS (Goldfish does a go/no-go check of paths and signatures in a design doc); hooks NS (a hook can return a reason such as a test suite must pass, but hooks do not define criteria).
+++Blocked as a verdict: hooks S (exit code 2 blocks the action; permissionDecision deny is a separate block path); spec-kit NS (verdicts shown are verified/partial/failed, go/needs-clarification/kill, converged); Kiro NS (task status in-progress or completed); BMAD NS; Tessl NS; EGM NS (an ambiguous document requires further drafting).
+++Approvals bound to content: NS for all six tools in the sources checked. Kiro mentions a Review button and comments, no hashing.
+++Tamper-evident evidence: NS for all six. Tessl mentions a full audit trail without saying tamper-evident. spec-kit saves reports to project folders.
+++Computed blast radius: NS for all six. spec-kit mentions consistency analysis; EGM's design doc enumerates files to change; spec-driven.md says affected plans are flagged when requirements change; Kiro says bugfix specs validate that nothing else breaks. None says it is computed.
+++Test-tampering review: NS for all six. spec-kit has a bug-test step and spec-driven.md says tests must be approved before implementation.
+++Lessons enforced as checks: NS for all six. Tessl says it can mine agent logs for recurring mistakes; spec-kit presets can enforce organisational standards; neither is stated to turn lessons into checks.
+++Agent drivers: spec-kit names GitHub Copilot, others generic 'integrations'; Kiro NS; BMAD names a Claude Code plugin and a Codex plugin and says any AI tool that supports skills works; Tessl says agent-agnostic, no names; EGM names Antigravity and says other environments are coming; hooks run wherever Claude Code runs (CLI, Agent SDK, plugins).
+++
+++WHERE KEEL IS WEAKER (ground each only in the above): hooks = immediate per-tool-call blocking across 33 events with no spec or plan stage; spec-kit = lightweight spec scaffolding with integrations for many agents; Kiro = an IDE with in-product spec review and commenting; BMAD = role-based agile planning for whole projects; Tessl = registry of library usage specs; Elephant-Goldfish = fresh-context review of a design doc before implementation, which keel does not do; also note this comparison covers only what primary pages state and that every 'not stated' may be a gap in the page, not in the tool.
+++For keel cells link only to files that exist: .keel/store/decisions/ADR-*.md (verify with ls) and tests/*.rs including tests/oracle_sensitivity.rs, tests/driver_usage.rs, tests/g3_judgement.rs. Do not link an ADR that does not exist.
+++```
+++
+++ADR files present when this plan was written: ADR-0000 to ADR-0025 under
+++`.keel/store/decisions/`, named `ADR-NNNN-<slug>.md`. Link by full file name.
+++
+++## Blast radius
+++
+++<!-- generated by `keel plan`; edits here are overwritten -->
+++
+++Computed from the import graph at depth 2: **0 files, 0 lines**.
+++
+++_No indexed file matches the declared scope. If these are new files, that is
+++expected; if not, the scope globs are wrong._
+++
+++
+++## Rollback
+++
+++`git revert` — replace this if the change needs a different rollback.
++diff --git a/.keel/specs/comparison-doc/spec.md b/.keel/specs/comparison-doc/spec.md
++new file mode 100644
++index 0000000..c8688f3
++--- /dev/null
+++++ b/.keel/specs/comparison-doc/spec.md
++@@ -0,0 +1,89 @@
+++---
+++id: SPEC-0021
+++slug: comparison-doc
+++schema: keel.spec/1
+++status: approved
+++scope:
+++- docs/comparison.md
+++- README.md
+++- tests/comparison_doc.rs
+++budget:
+++  criteria: 6
+++  lines: 260
+++verified_at: 2026-11-03
+++---
+++
+++# Say plainly why keel, and where something else is the better choice
+++
+++## Context
+++
+++README.md and the docs site say what keel does. Neither says how it differs
+++from the tools a reader already knows: GitHub spec-kit, Kiro, BMAD, Tessl,
+++Google's Elephant-Goldfish model, and Claude Code hooks. A newcomer cannot
+++see the properties that are specific to keel, such as the three-valued
+++verdict, hash-bound approvals, falsifiable criteria and offline-verifiable
+++evidence, without reading PLAN.md and the ADRs.
+++
+++A comparison page goes stale quickly and invites marketing. This spec
+++constrains both: every claim about another tool cites a source with a date,
+++every claim about keel links to the ADR or test that backs it, and the page
+++says where keel is weaker.
+++
+++## Acceptance criteria
+++
+++### AC-1 One table compares keel with six named tools on fixed rows
+++
+++THE SYSTEM SHALL provide `docs/comparison.md` with a table whose columns are
+++keel, spec-kit, Kiro, BMAD, Tessl, Elephant-Goldfish and Claude Code hooks,
+++and whose rows are exactly: falsifiable criteria, blocked as a verdict,
+++approvals bound to content, tamper-evident evidence, computed blast radius,
+++test-tampering review, lessons enforced as checks, and agent drivers.
+++
+++oracle: cmd `cargo test --test comparison_doc the_table_has_the_fixed_columns_and_rows` exit 0
+++
+++### AC-2 Every claim about another tool cites a dated source
+++
+++WHEN a cell describes a tool other than keel THE SYSTEM SHALL footnote it to
+++an entry in a `## Sources` section that holds an `https` link and a
+++`checked: YYYY-MM-DD` date.
+++
+++oracle: cmd `cargo test --test comparison_doc every_other_tool_cell_footnotes_a_dated_https_source` exit 0
+++
+++### AC-3 Every claim about keel links to its evidence
+++
+++WHEN a keel cell claims a property THE SYSTEM SHALL link it to a file under
+++`.keel/store/decisions/` or `tests/` that exists in the repository.
+++
+++oracle: cmd `cargo test --test comparison_doc every_keel_claim_links_to_an_existing_adr_or_test` exit 0
+++
+++### AC-4 The page names where keel is weaker
+++
+++THE SYSTEM SHALL include a `## Where keel is weaker` section with at least
+++one entry per compared tool, each naming the tool and a situation in which
+++a team would choose that tool over keel.
+++
+++oracle: cmd `cargo test --test comparison_doc the_weaker_section_names_every_compared_tool` exit 0
+++
+++### AC-5 The README links to the comparison
+++
+++THE SYSTEM SHALL link `docs/comparison.md` from README.md's opening section,
+++before the first diagram.
+++
+++oracle: cmd `cargo test --test comparison_doc readme_links_the_comparison_before_the_first_diagram` exit 0
+++
+++### AC-6 A newcomer can name what is specific to keel
+++
+++WHEN a reader who has not used keel reads only `docs/comparison.md` THE
+++SYSTEM SHALL have given them enough to name three properties that the other
+++six tools lack.
+++
+++oracle: human a reader new to keel, reading only docs/comparison.md, names three properties specific to keel and each matches a row where keel is the only tool marked
+++
+++## Out of scope
+++
+++- Benchmarks against the other tools. No shared task set exists, and an
+++  unshared one would be tuned to flatter keel (ADR-0012).
+++- Automatic staleness checks on the `checked:` dates. A date older than six
+++  months is visible to the reader; a CI check that fails on the calendar
+++  is its own decision.
+++- Publishing the page to the docs site. That follows once the page exists.
++diff --git a/.keel/specs/comparison-doc/tasks.md b/.keel/specs/comparison-doc/tasks.md
++new file mode 100644
++index 0000000..be21b42
++--- /dev/null
+++++ b/.keel/specs/comparison-doc/tasks.md
++@@ -0,0 +1,55 @@
+++---
+++id: TASKS-0021
+++slug: comparison-doc
+++schema: keel.tasks/1
+++---
+++
+++# Tasks
+++
+++Each task must name the criteria it satisfies, the files it touches, a line
+++budget and an exit condition. G1 checks all four, and checks that every
+++criterion in the spec is covered by at least one task.
+++
+++Add `- depends_on: T-1` where order matters. Tasks with no dependency on
+++each other form a wave; `keel tasks` shows them.
+++
+++### T-1 One table compares keel with six named tools on fixed rows
+++- criteria: AC-1
+++- files: docs/comparison.md, tests/comparison_doc.rs
+++- budget: 60
+++- exit: `cargo test --test comparison_doc the_table_has_the_fixed_columns_and_rows` exits 0
+++
+++### T-2 Every claim about another tool cites a dated source
+++- criteria: AC-2
+++- files: docs/comparison.md, tests/comparison_doc.rs
+++- depends_on: T-1
+++- budget: 45
+++- exit: `cargo test --test comparison_doc every_other_tool_cell_footnotes_a_dated_https_source` exits 0
+++
+++### T-3 Every claim about keel links to its evidence
+++- criteria: AC-3
+++- files: docs/comparison.md, tests/comparison_doc.rs
+++- depends_on: T-2
+++- budget: 45
+++- exit: `cargo test --test comparison_doc every_keel_claim_links_to_an_existing_adr_or_test` exits 0
+++
+++### T-4 The page names where keel is weaker
+++- criteria: AC-4
+++- files: docs/comparison.md, tests/comparison_doc.rs
+++- depends_on: T-3
+++- budget: 45
+++- exit: `cargo test --test comparison_doc the_weaker_section_names_every_compared_tool` exits 0
+++
+++### T-5 The README links to the comparison
+++- criteria: AC-5
+++- files: README.md, tests/comparison_doc.rs
+++- depends_on: T-4
+++- budget: 30
+++- exit: `cargo test --test comparison_doc readme_links_the_comparison_before_the_first_diagram` exits 0
+++
+++### T-6 A newcomer can name what is specific to keel
+++- criteria: AC-6
+++- files: docs/comparison.md
+++- depends_on: T-5
+++- budget: 30
+++- exit: a person confirms AC-6 by reading only docs/comparison.md; recorded as a judgement once keel judge is available
++diff --git a/docs/comparison.md b/docs/comparison.md
++new file mode 100644
++index 0000000..e0e6e64
++--- /dev/null
+++++ b/docs/comparison.md
++@@ -0,0 +1,45 @@
+++# keel compared with other spec-driven tools
+++
+++keel is not the only tool that puts a spec between you and an agent. This page
+++says where it differs, and where something else is the better choice.
+++
+++"Not documented" means the tool's own page, checked on the date under
+++[Sources](#sources), does not describe the property. It is not a claim that the
+++tool cannot do it. Every keel cell links to the ADR or test that backs it.
+++
+++| | keel | spec-kit | Kiro | BMAD | Tessl | Elephant-Goldfish | Claude Code hooks |
+++|---|---|---|---|---|---|---|---|
+++| falsifiable criteria | Yes: each criterion carries an oracle ([test](../tests/oracle_sensitivity.rs)) | Not documented[^speckit] | Not documented[^kiro] | Not documented[^bmad] | Not documented[^tessl] | Not documented[^egm] | Not documented[^hooks] |
+++| blocked as a verdict | Yes: pass, fail or blocked ([ADR-0002](../.keel/store/decisions/ADR-0002-blocked-is-a-verdict.md)) | Not documented[^speckit] | Not documented[^kiro] | Not documented[^bmad] | Not documented[^tessl] | Not documented[^egm] | Partial: a hook can deny a tool call[^hooks] |
+++| approvals bound to content | Yes: an approval binds to a hash ([ADR-0003](../.keel/store/decisions/ADR-0003-approvals-bind-to-a-hash.md)) | Not documented[^speckit] | Not documented[^kiro] | Not documented[^bmad] | Not documented[^tessl] | Not documented[^egm] | Not documented[^hooks] |
+++| tamper-evident evidence | Yes: a hash-chained bundle verified offline ([test](../tests/bundle.rs)) | Not documented[^speckit] | Not documented[^kiro] | Not documented[^bmad] | Not documented[^tessl] | Not documented[^egm] | Not documented[^hooks] |
+++| computed blast radius | Yes: recomputed, never trusted ([ADR-0009](../.keel/store/decisions/ADR-0009-blast-radius-is-recomputed.md)) | Not documented[^speckit] | Not documented[^kiro] | Not documented[^bmad] | Not documented[^tessl] | Not documented[^egm] | Not documented[^hooks] |
+++| test-tampering review | Yes: added mocks and weakened assertions are flagged ([test](../tests/phase2.rs)) | Not documented[^speckit] | Not documented[^kiro] | Not documented[^bmad] | Not documented[^tessl] | Partial: independent review sub-agents[^egm] | Not documented[^hooks] |
+++| lessons enforced as checks | Yes: enforced lessons become checks ([ADR-0007](../.keel/store/decisions/ADR-0007-enforced-lessons-are-not-injected.md)) | Not documented[^speckit] | Not documented[^kiro] | Not documented[^bmad] | Not documented[^tessl] | Not documented[^egm] | Not documented[^hooks] |
+++| agent drivers | Yes: a driver contract with a conformance suite ([test](../tests/driver.rs)) | Not documented[^speckit] | Not documented[^kiro] | Not documented[^bmad] | Not documented[^tessl] | Partial: plugin for several agents[^egm] | Not documented[^hooks] |
+++
+++## Where keel is weaker
+++
+++- **spec-kit**: choose it when you want a lightweight, template-driven
+++  workflow with no gates to configure. keel asks for oracles, approvals and a
+++  plan before an agent starts.
+++- **Kiro**: choose it when you want the spec workflow inside an IDE, with no
+++  command line. keel is a CLI.
+++- **BMAD**: choose it when you want role-based agent personas that cover
+++  product and architecture work as well as code. keel only judges the change.
+++- **Tessl**: choose it when you want a managed registry of specs and library
+++  usage guidance. keel keeps everything in your repository.
+++- **Elephant-Goldfish**: choose it when you want a design document defended
+++  before any code, reviewed by fresh sub-agents. keel checks the result, not
+++  the reasoning behind it.
+++- **Claude Code hooks**: choose them when you need one small, immediate rule,
+++  such as blocking a command. A hook is a few lines; keel is a pipeline.
+++
+++## Sources
+++
+++[^speckit]: https://github.com/github/spec-kit (checked: 2026-11-04)
+++[^kiro]: https://kiro.dev/docs/ (checked: 2026-11-04)
+++[^bmad]: https://github.com/bmad-code-org/BMAD-METHOD (checked: 2026-11-04)
+++[^tessl]: https://docs.tessl.io/ (checked: 2026-11-04)
+++[^egm]: https://opensource.googleblog.com/2026/10/introducing-elephant-goldfish-model-plugin.html (checked: 2026-11-04)
+++[^hooks]: https://code.claude.com/docs/en/hooks (checked: 2026-11-04)
++diff --git a/tests/comparison_doc.rs b/tests/comparison_doc.rs
++new file mode 100644
++index 0000000..875985d
++--- /dev/null
+++++ b/tests/comparison_doc.rs
++@@ -0,0 +1,126 @@
+++//! The comparison page keeps its promises: fixed shape, dated sources, linked evidence.
+++
+++use std::fs;
+++use std::path::Path;
+++
+++const TOOLS: [&str; 6] = [
+++    "spec-kit",
+++    "Kiro",
+++    "BMAD",
+++    "Tessl",
+++    "Elephant-Goldfish",
+++    "Claude Code hooks",
+++];
+++const ROWS: [&str; 8] = [
+++    "falsifiable criteria",
+++    "blocked as a verdict",
+++    "approvals bound to content",
+++    "tamper-evident evidence",
+++    "computed blast radius",
+++    "test-tampering review",
+++    "lessons enforced as checks",
+++    "agent drivers",
+++];
+++
+++fn root() -> &'static Path {
+++    Path::new(env!("CARGO_MANIFEST_DIR"))
+++}
+++
+++fn doc() -> String {
+++    fs::read_to_string(root().join("docs/comparison.md")).expect("docs/comparison.md")
+++}
+++
+++/// Table rows after the header and separator, split into trimmed cells.
+++fn table(doc: &str) -> Vec<Vec<String>> {
+++    doc.lines()
+++        .filter(|l| l.starts_with('|'))
+++        .map(|l| {
+++            l.trim_matches('|')
+++                .split(" | ")
+++                .map(|c| c.trim().trim_matches('|').trim().to_string())
+++                .collect()
+++        })
+++        .collect()
+++}
+++
+++fn section<'a>(doc: &'a str, heading: &str) -> &'a str {
+++    let start = doc.find(heading).expect("section present");
+++    let rest = &doc[start + heading.len()..];
+++    rest.split("\n## ").next().unwrap_or(rest)
+++}
+++
+++#[test]
+++fn the_table_has_the_fixed_columns_and_rows() {
+++    let t = table(&doc());
+++    let mut header = vec!["", "keel"];
+++    header.extend(TOOLS);
+++    assert_eq!(t[0], header);
+++    let labels: Vec<&str> = t[2..].iter().map(|r| r[0].as_str()).collect();
+++    assert_eq!(labels, ROWS);
+++    assert!(t[2..].iter().all(|r| r.len() == 8), "every row has 8 cells");
+++}
+++
+++#[test]
+++fn every_other_tool_cell_footnotes_a_dated_https_source() {
+++    let d = doc();
+++    let t = table(&d);
+++    let sources = section(&d, "## Sources");
+++    for row in &t[2..] {
+++        for cell in &row[2..] {
+++            let start = cell.rfind("[^").expect("cell has a footnote");
+++            let id = &cell[start..cell[start..].find(']').unwrap() + start + 1];
+++            let def = sources
+++                .lines()
+++                .find(|l| l.starts_with(&format!("{id}:")))
+++                .unwrap_or_else(|| panic!("no source for {id}"));
+++            assert!(def.contains("https://"), "{def}");
+++            let date = def.split("checked: ").nth(1).expect("checked date");
+++            let b = date.as_bytes();
+++            assert!(
+++                b.len() >= 10 && b[4] == b'-' && b[7] == b'-'
+++                    && date[..10].chars().filter(char::is_ascii_digit).count() == 8,
+++                "{def}"
+++            );
+++        }
+++    }
+++}
+++
+++#[test]
+++fn every_keel_claim_links_to_an_existing_adr_or_test() {
+++    let d = doc();
+++    for row in &table(&d)[2..] {
+++        let cell = &row[1];
+++        let target = cell
+++            .split("](")
+++            .nth(1)
+++            .and_then(|s| s.split(')').next())
+++            .unwrap_or_else(|| panic!("keel cell without a link: {cell}"));
+++        let rel = target.trim_start_matches("../");
+++        assert!(
+++            rel.starts_with(".keel/store/decisions/") || rel.starts_with("tests/"),
+++            "{target}"
+++        );
+++        assert!(root().join(rel).exists(), "{target} does not exist");
+++    }
+++}
+++
+++#[test]
+++fn the_weaker_section_names_every_compared_tool() {
+++    let d = doc();
+++    let s = section(&d, "## Where keel is weaker");
+++    for tool in TOOLS {
+++        let entry = s
+++            .lines()
+++            .find(|l| l.starts_with(&format!("- **{tool}**")))
+++            .unwrap_or_else(|| panic!("no entry for {tool}"));
+++        assert!(entry.contains("choose"), "{tool} entry names no situation");
+++    }
+++}
+++
+++#[test]
+++fn readme_links_the_comparison_before_the_first_diagram() {
+++    let r = fs::read_to_string(root().join("README.md")).unwrap();
+++    let link = r.find("docs/comparison.md").expect("README links comparison");
+++    let diagram = r.find("<img").expect("README has a diagram");
+++    assert!(link < diagram);
+++}
+diff --git a/.keel/runs/2026-11-04-005/evidence/driver.json b/.keel/runs/2026-11-04-005/evidence/driver.json
+new file mode 100644
+index 0000000..83c7791
+--- /dev/null
++++ b/.keel/runs/2026-11-04-005/evidence/driver.json
+@@ -0,0 +1,13 @@
++{
++  "schema": "keel.driverresult/1",
++  "status": "ok",
++  "files_changed": [
++    "README.md",
++    ".keel/runs/2026-11-04-005/",
++    ".keel/specs/blast-radius/",
++    ".keel/specs/comparison-doc/",
++    "docs/comparison.md",
++    "tests/comparison_doc.rs"
++  ],
++  "detail": "claude completed"
++}
+\ No newline at end of file
+diff --git a/.keel/runs/2026-11-04-005/evidence/lint.txt b/.keel/runs/2026-11-04-005/evidence/lint.txt
+new file mode 100644
+index 0000000..f68c665
+--- /dev/null
++++ b/.keel/runs/2026-11-04-005/evidence/lint.txt
+@@ -0,0 +1,2 @@
++$ cargo clippy --all-targets --quiet
++
+diff --git a/.keel/runs/2026-11-04-005/evidence/oracles.json b/.keel/runs/2026-11-04-005/evidence/oracles.json
+new file mode 100644
+index 0000000..bd82fd5
+--- /dev/null
++++ b/.keel/runs/2026-11-04-005/evidence/oracles.json
+@@ -0,0 +1,57 @@
++{
++  "runs": [
++    {
++      "criterion": "AC-1",
++      "kind": "cmd",
++      "oracle": "`cargo test --test comparison_doc the_table_has_the_fixed_columns_and_rows` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\ntest the_table_has_the_fixed_columns_and_rows ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.07s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
++    },
++    {
++      "criterion": "AC-2",
++      "kind": "cmd",
++      "oracle": "`cargo test --test comparison_doc every_other_tool_cell_footnotes_a_dated_https_source` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\ntest every_other_tool_cell_footnotes_a_dated_https_source ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
++    },
++    {
++      "criterion": "AC-3",
++      "kind": "cmd",
++      "oracle": "`cargo test --test comparison_doc every_keel_claim_links_to_an_existing_adr_or_test` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\ntest every_keel_claim_links_to_an_existing_adr_or_test ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
++    },
++    {
++      "criterion": "AC-4",
++      "kind": "cmd",
++      "oracle": "`cargo test --test comparison_doc the_weaker_section_names_every_compared_tool` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\ntest the_weaker_section_names_every_compared_tool ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
++    },
++    {
++      "criterion": "AC-5",
++      "kind": "cmd",
++      "oracle": "`cargo test --test comparison_doc readme_links_the_comparison_before_the_first_diagram` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\ntest readme_links_the_comparison_before_the_first_diagram ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
++    },
++    {
++      "criterion": "AC-6",
++      "kind": "human",
++      "oracle": "human: a reader new to keel, reading only docs/comparison.md, names three properties specific to keel and each matches a row where keel is the only tool marked",
++      "outcome": "human",
++      "detail": "a reader new to keel, reading only docs/comparison.md, names three properties specific to keel and each matches a row where keel is the only tool marked"
++    }
++  ],
++  "criteria": 6,
++  "executed": 5,
++  "passed": 5,
++  "failed": 0,
++  "blocked": 0,
++  "human": 1
++}
+\ No newline at end of file
+diff --git a/.keel/runs/2026-11-04-005/evidence/ratchet.json b/.keel/runs/2026-11-04-005/evidence/ratchet.json
+new file mode 100644
+index 0000000..bcfd914
+--- /dev/null
++++ b/.keel/runs/2026-11-04-005/evidence/ratchet.json
+@@ -0,0 +1,14 @@
++[
++  {
++    "id": "clippy-warnings",
++    "direction": "down",
++    "value": 0,
++    "baseline": 0
++  },
++  {
++    "id": "tests-passing",
++    "direction": "up",
++    "value": 586,
++    "baseline": 358
++  }
++]
+\ No newline at end of file
+diff --git a/.keel/runs/2026-11-04-005/evidence/review-test-invalidation.txt b/.keel/runs/2026-11-04-005/evidence/review-test-invalidation.txt
+new file mode 100644
+index 0000000..bcd9622
+--- /dev/null
++++ b/.keel/runs/2026-11-04-005/evidence/review-test-invalidation.txt
+@@ -0,0 +1 @@
++docs/comparison.md: | test-tampering review | Yes: added mocks and weakened assertions are flagged …
+\ No newline at end of file
+diff --git a/.keel/runs/2026-11-04-005/evidence/review.json b/.keel/runs/2026-11-04-005/evidence/review.json
+new file mode 100644
+index 0000000..f41d102
+--- /dev/null
++++ b/.keel/runs/2026-11-04-005/evidence/review.json
+@@ -0,0 +1,5 @@
++{
++  "schema": "keel.reviewresult/1",
++  "findings": [],
++  "summary": "0 finding(s)"
++}
+\ No newline at end of file
+diff --git a/.keel/runs/2026-11-04-005/evidence/test.txt b/.keel/runs/2026-11-04-005/evidence/test.txt
+new file mode 100644
+index 0000000..d88b378
+--- /dev/null
++++ b/.keel/runs/2026-11-04-005/evidence/test.txt
+@@ -0,0 +1,150 @@
++$ cargo test --quiet
++
++
++running 296 tests
++....................................................................................... 87/296
++....................................................................................... 174/296
++....................................................................................... 261/296
++...................................
++test result: ok. 296 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.90s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.51s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.81s
++
++
++running 7 tests
++.......
++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.49s
++
++
++running 5 tests
++.....
++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.45s
++
++
++running 13 tests
++.............
++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.64s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.87s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.39s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.96s
++
++
++running 7 tests
++.......
++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.48s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.64s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.93s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.48s
++
++
++running 4 tests
++....
++test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.75s
++
++
++running 25 tests
++.........................
++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.01s
++
++
++running 14 tests
++..............
++test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.73s
++
++
++running 13 tests
++.............
++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.20s
++
++
++running 15 tests
++...............
++test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.78s
++
++
++running 25 tests
++.........................
++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.58s
++
++
++running 20 tests
++....................
++test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.25s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.81s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.68s
++
++
++running 2 tests
++..
++test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
++
++
++running 34 tests
++..................................
++test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.37s
++
++
++running 0 tests
++
++test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
++
++
++running 7 tests
++.......
++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.22s
++
++
++running 5 tests
++.....
++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.68s
++
+diff --git a/.keel/runs/2026-11-04-005/evidence/tree.txt b/.keel/runs/2026-11-04-005/evidence/tree.txt
+new file mode 100644
+index 0000000..9d9a726
+--- /dev/null
++++ b/.keel/runs/2026-11-04-005/evidence/tree.txt
+@@ -0,0 +1 @@
++aa7eb9dcb83a5960b2bd6644f670d8dbc815b6a2cb320c9226d892deccfcd110
+diff --git a/.keel/runs/2026-11-04-005/gates/G2.5.json b/.keel/runs/2026-11-04-005/gates/G2.5.json
+new file mode 100644
+index 0000000..a25a104
+--- /dev/null
++++ b/.keel/runs/2026-11-04-005/gates/G2.5.json
+@@ -0,0 +1,37 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G2.5",
++  "run": "2026-11-04-006",
++  "spec": "comparison-doc",
++  "verdict": "blocked",
++  "generated_at": "2026-11-04T10:53:09.227546865+00:00",
++  "checks": [
++    {
++      "id": "test-invalidation",
++      "verdict": "blocked",
++      "detail": "1 added line(s) mock or weaken behaviour — confirm the test still tests, then `keel approve --stage review comparison-doc`: docs/comparison.md: | test-tampering review | Yes: added mocks and weakened assertions are flagged …",
++      "evidence": "evidence/review-test-invalidation.txt"
++    },
++    {
++      "id": "test-movement",
++      "verdict": "pass",
++      "detail": "0 code file(s), 1 test file(s)"
++    },
++    {
++      "id": "conventions",
++      "verdict": "pass",
++      "detail": "4 house rule(s) in force"
++    },
++    {
++      "id": "lessons",
++      "verdict": "pass",
++      "detail": "3 lesson(s) in force"
++    },
++    {
++      "id": "review",
++      "verdict": "pass",
++      "detail": "0 finding(s) (0.0s)",
++      "evidence": "evidence/review.json"
++    }
++  ]
++}
+diff --git a/.keel/runs/2026-11-04-005/gates/G2.json b/.keel/runs/2026-11-04-005/gates/G2.json
+new file mode 100644
+index 0000000..bae70e8
+--- /dev/null
++++ b/.keel/runs/2026-11-04-005/gates/G2.json
+@@ -0,0 +1,84 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G2",
++  "run": "2026-11-04-006",
++  "spec": "comparison-doc",
++  "verdict": "pass",
++  "generated_at": "2026-11-04T10:53:09.177944822+00:00",
++  "checks": [
++    {
++      "id": "build",
++      "verdict": "pass",
++      "detail": "`cargo build --quiet` exited 0",
++      "evidence": "evidence/build.txt"
++    },
++    {
++      "id": "test",
++      "verdict": "pass",
++      "detail": "`cargo test --quiet` exited 0",
++      "evidence": "evidence/test.txt"
++    },
++    {
++      "id": "lint",
++      "verdict": "pass",
++      "detail": "`cargo clippy --all-targets --quiet` exited 0",
++      "evidence": "evidence/lint.txt"
++    },
++    {
++      "id": "oracle-coverage",
++      "verdict": "pass",
++      "detail": "5/6 oracles pass (1 awaiting human judgement)",
++      "evidence": "evidence/oracles.json"
++    },
++    {
++      "id": "blast-radius",
++      "verdict": "pass",
++      "detail": "3 changed file(s) inside scope, 0 file(s) downstream",
++      "evidence": "evidence/diff-stat.txt"
++    },
++    {
++      "id": "line-budget",
++      "verdict": "pass",
++      "detail": "174/260 lines of churn",
++      "evidence": "evidence/diff-stat.txt"
++    },
++    {
++      "id": "baseline-ratchet",
++      "verdict": "pass",
++      "detail": "2 metric(s) held, 1 improved",
++      "evidence": "evidence/ratchet.json"
++    },
++    {
++      "id": "store-drift",
++      "verdict": "pass",
++      "detail": "4 projections current"
++    },
++    {
++      "id": "shared-stores",
++      "verdict": "pass",
++      "detail": "none configured"
++    },
++    {
++      "id": "lesson:L-0002",
++      "verdict": "pass",
++      "detail": "Changes MUST leave lint and the house rules clean. holds",
++      "from": "L-0002"
++    },
++    {
++      "id": "lesson:L-0003",
++      "verdict": "pass",
++      "detail": "Changes MUST build before the run ends. holds",
++      "from": "L-0003"
++    },
++    {
++      "id": "cargo-audit",
++      "verdict": "pass",
++      "detail": "no known advisories across 283 dependencies. 2 advisory warning(s) (unmaintained/yanked), not failing."
++    },
++    {
++      "id": "secrets",
++      "verdict": "pass",
++      "detail": "gitleaks found no credentials in the history or the working tree."
++    }
++  ]
++}
+diff --git a/.keel/runs/2026-11-04-005/gates/G3.json b/.keel/runs/2026-11-04-005/gates/G3.json
+new file mode 100644
+index 0000000..4a53e12
+--- /dev/null
++++ b/.keel/runs/2026-11-04-005/gates/G3.json
+@@ -0,0 +1,31 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G3",
++  "run": "2026-11-04-006",
++  "spec": "comparison-doc",
++  "verdict": "fail",
++  "generated_at": "2026-11-04T10:53:09.230989590+00:00",
++  "checks": [
++    {
++      "id": "earlier-gates",
++      "verdict": "blocked",
++      "detail": "G2.5 could not complete — G3 has nothing to ratify"
++    },
++    {
++      "id": "reviewable-size",
++      "verdict": "pass",
++      "detail": "174/700 reviewable lines"
++    },
++    {
++      "id": "evidence-complete",
++      "verdict": "pass",
++      "detail": "trajectory, metadata and gate results present"
++    },
++    {
++      "id": "human-verdict",
++      "verdict": "fail",
++      "expected": "a recorded human decision on the change",
++      "actual": "none — run `keel approve comparison-doc --stage merge`"
++    }
++  ]
++}
+diff --git a/.keel/runs/2026-11-04-005/run.json b/.keel/runs/2026-11-04-005/run.json
+new file mode 100644
+index 0000000..8855a41
+--- /dev/null
++++ b/.keel/runs/2026-11-04-005/run.json
+@@ -0,0 +1,12 @@
++{
++  "schema": "keel.run/1",
++  "id": "2026-11-04-005",
++  "spec": "comparison-doc",
++  "driver": "claude-code",
++  "keel_version": "0.12.0",
++  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
++  "started_at": "2026-11-04T10:49:43.511804882+00:00",
++  "finished_at": "2026-11-04T10:53:09.231108883+00:00",
++  "verdict": "fail",
++  "base_commit": "a7facc1103834895c3be4ab65d3b53da3d4baf66"
++}
+diff --git a/.keel/runs/2026-11-04-005/trajectory.jsonl b/.keel/runs/2026-11-04-005/trajectory.jsonl
+new file mode 100644
+index 0000000..06b539e
+--- /dev/null
++++ b/.keel/runs/2026-11-04-005/trajectory.jsonl
+@@ -0,0 +1,22 @@
++{"t":"2026-11-04T10:49:43.511933258+00:00","seq":1,"kind":"run_start","spec":"comparison-doc","driver":"claude-code","keel_version":"0.12.0","store_hash":"0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2"}
++{"t":"2026-11-04T10:49:43.513261265+00:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":424,"bytes":1693}
++{"t":"2026-11-04T10:49:43.513273431+00:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
++{"t":"2026-11-04T10:49:43.513291181+00:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6268,"bytes":25071}
++{"t":"2026-11-04T10:49:43.513404890+00:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
++{"t":"2026-11-04T10:49:43.513469557+00:00","seq":6,"kind":"inject","source":".keel/specs/comparison-doc/spec.md","tokens":887,"bytes":3547}
++{"t":"2026-11-04T10:49:43.513473349+00:00","seq":7,"kind":"driver_call","driver":"claude-code","prompt_tokens":7808}
++{"t":"2026-11-04T10:50:45.926104900+00:00","seq":8,"kind":"driver_result","driver":"claude-code","status":"ok","files_changed":6,"detail":"claude completed"}
++{"t":"2026-11-04T10:50:46.008263025+00:00","seq":9,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
++{"t":"2026-11-04T10:51:38.649338446+00:00","seq":10,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
++{"t":"2026-11-04T10:51:42.797277857+00:00","seq":11,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
++{"t":"2026-11-04T10:51:43.088319666+00:00","seq":12,"kind":"oracle","criterion":"AC-1","oracle":"`cargo test --test comparison_doc the_table_has_the_fixed_columns_and_rows` exits 0","verdict":"pass","exit_code":0}
++{"t":"2026-11-04T10:51:43.088378708+00:00","seq":13,"kind":"oracle","criterion":"AC-2","oracle":"`cargo test --test comparison_doc every_other_tool_cell_footnotes_a_dated_https_source` exits 0","verdict":"pass","exit_code":0}
++{"t":"2026-11-04T10:51:43.088382+00:00","seq":14,"kind":"oracle","criterion":"AC-3","oracle":"`cargo test --test comparison_doc every_keel_claim_links_to_an_existing_adr_or_test` exits 0","verdict":"pass","exit_code":0}
++{"t":"2026-11-04T10:51:43.088385292+00:00","seq":15,"kind":"oracle","criterion":"AC-4","oracle":"`cargo test --test comparison_doc the_weaker_section_names_every_compared_tool` exits 0","verdict":"pass","exit_code":0}
++{"t":"2026-11-04T10:51:43.088388+00:00","seq":16,"kind":"oracle","criterion":"AC-5","oracle":"`cargo test --test comparison_doc readme_links_the_comparison_before_the_first_diagram` exits 0","verdict":"pass","exit_code":0}
++{"t":"2026-11-04T10:51:43.088389+00:00","seq":17,"kind":"oracle","criterion":"AC-6","oracle":"human: a reader new to keel, reading only docs/comparison.md, names three properties specific to keel and each matches a row where keel is the only tool marked","verdict":"human"}
++{"t":"2026-11-04T10:53:09.181478549+00:00","seq":18,"kind":"gate","gate":"G2","verdict":"pass","result":"gates/G2.json"}
++{"t":"2026-11-04T10:53:09.227644615+00:00","seq":19,"kind":"gate","gate":"G2.5","verdict":"blocked","result":"gates/G2.5.json"}
++{"t":"2026-11-04T10:53:09.231068091+00:00","seq":20,"kind":"gate","gate":"G3","verdict":"fail","result":"gates/G3.json"}
++{"t":"2026-11-04T10:53:09.231077591+00:00","seq":21,"kind":"run_end","verdict":"fail","duration_ms":205720}
++{"t":"2026-11-04T11:33:50.223462385+00:00","seq":22,"kind":"human","stage":"merge","decision":"rejected","by":"Dane Balia","note":"docs/comparison.md under-credits other tools and overstates two cells; correct against the Source notes in plan.md."}
+diff --git a/.keel/runs/2026-11-04-006/evidence/build.txt b/.keel/runs/2026-11-04-006/evidence/build.txt
+new file mode 100644
+index 0000000..01700b6
+--- /dev/null
++++ b/.keel/runs/2026-11-04-006/evidence/build.txt
+@@ -0,0 +1,2 @@
++$ cargo build --quiet
++
+diff --git a/.keel/runs/2026-11-04-006/evidence/diff-stat.txt b/.keel/runs/2026-11-04-006/evidence/diff-stat.txt
+new file mode 100644
+index 0000000..813d39f
+--- /dev/null
++++ b/.keel/runs/2026-11-04-006/evidence/diff-stat.txt
+@@ -0,0 +1,41 @@
++     2      0  .keel/runs/2026-11-04-005/evidence/build.txt
++    24      0  .keel/runs/2026-11-04-005/evidence/diff-stat.txt
++  1536      0  .keel/runs/2026-11-04-005/evidence/diff.patch
++    13      0  .keel/runs/2026-11-04-005/evidence/driver.json
++     2      0  .keel/runs/2026-11-04-005/evidence/lint.txt
++    57      0  .keel/runs/2026-11-04-005/evidence/oracles.json
++    14      0  .keel/runs/2026-11-04-005/evidence/ratchet.json
++     1      0  .keel/runs/2026-11-04-005/evidence/review-test-invalidation.txt
++     5      0  .keel/runs/2026-11-04-005/evidence/review.json
++   150      0  .keel/runs/2026-11-04-005/evidence/test.txt
++     1      0  .keel/runs/2026-11-04-005/evidence/tree.txt
++    37      0  .keel/runs/2026-11-04-005/gates/G2.5.json
++    84      0  .keel/runs/2026-11-04-005/gates/G2.json
++    31      0  .keel/runs/2026-11-04-005/gates/G3.json
++    12      0  .keel/runs/2026-11-04-005/run.json
++    22      0  .keel/runs/2026-11-04-005/trajectory.jsonl
++     2      0  .keel/runs/2026-11-04-006/evidence/build.txt
++     2      0  .keel/runs/2026-11-04-006/evidence/lint.txt
++    57      0  .keel/runs/2026-11-04-006/evidence/oracles.json
++   150      0  .keel/runs/2026-11-04-006/evidence/test.txt
++     9      0  .keel/runs/2026-11-04-006/run.json
++    15      0  .keel/runs/2026-11-04-006/trajectory.jsonl
++     1      0  .keel/specs/blast-radius/approvals.jsonl
++    90      0  .keel/specs/blast-radius/gates/G0.json
++    97      0  .keel/specs/blast-radius/gates/G1.json
++   164      0  .keel/specs/blast-radius/plan.md
++   112      0  .keel/specs/blast-radius/spec.md
++    63      0  .keel/specs/blast-radius/tasks.md
++     3      0  .keel/specs/comparison-doc/approvals.jsonl
++    90      0  .keel/specs/comparison-doc/gates/G0.json
++    95      0  .keel/specs/comparison-doc/gates/G1.json
++    84      0  .keel/specs/comparison-doc/plan.md
++     1      0  .keel/specs/comparison-doc/review-flags.txt
++     1      0  .keel/specs/comparison-doc/security-findings.json
++    89      0  .keel/specs/comparison-doc/spec.md
++    55      0  .keel/specs/comparison-doc/tasks.md
++     2      1  README.md
++    45      0  docs/comparison.md
++   126      0  tests/comparison_doc.rs
++
++39 file(s), +3344 -1 (3345 lines of churn) against a7facc1103834895c3be4ab65d3b53da3d4baf66
+diff --git a/.keel/runs/2026-11-04-006/evidence/lint.txt b/.keel/runs/2026-11-04-006/evidence/lint.txt
+new file mode 100644
+index 0000000..f68c665
+--- /dev/null
++++ b/.keel/runs/2026-11-04-006/evidence/lint.txt
+@@ -0,0 +1,2 @@
++$ cargo clippy --all-targets --quiet
++
+diff --git a/.keel/runs/2026-11-04-006/evidence/oracles.json b/.keel/runs/2026-11-04-006/evidence/oracles.json
+new file mode 100644
+index 0000000..d12d6b8
+--- /dev/null
++++ b/.keel/runs/2026-11-04-006/evidence/oracles.json
+@@ -0,0 +1,57 @@
++{
++  "runs": [
++    {
++      "criterion": "AC-1",
++      "kind": "cmd",
++      "oracle": "`cargo test --test comparison_doc the_table_has_the_fixed_columns_and_rows` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\ntest the_table_has_the_fixed_columns_and_rows ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
++    },
++    {
++      "criterion": "AC-2",
++      "kind": "cmd",
++      "oracle": "`cargo test --test comparison_doc every_other_tool_cell_footnotes_a_dated_https_source` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\ntest every_other_tool_cell_footnotes_a_dated_https_source ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
++    },
++    {
++      "criterion": "AC-3",
++      "kind": "cmd",
++      "oracle": "`cargo test --test comparison_doc every_keel_claim_links_to_an_existing_adr_or_test` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\ntest every_keel_claim_links_to_an_existing_adr_or_test ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
++    },
++    {
++      "criterion": "AC-4",
++      "kind": "cmd",
++      "oracle": "`cargo test --test comparison_doc the_weaker_section_names_every_compared_tool` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\ntest the_weaker_section_names_every_compared_tool ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
++    },
++    {
++      "criterion": "AC-5",
++      "kind": "cmd",
++      "oracle": "`cargo test --test comparison_doc readme_links_the_comparison_before_the_first_diagram` exits 0",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\ntest readme_links_the_comparison_before_the_first_diagram ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s\n\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running tests/comparison_doc.rs (target/debug/deps/comparison_doc-68d8563ed6b0d84e)"
++    },
++    {
++      "criterion": "AC-6",
++      "kind": "human",
++      "oracle": "human: a reader new to keel, reading only docs/comparison.md, names three properties specific to keel and each matches a row where keel is the only tool marked",
++      "outcome": "human",
++      "detail": "a reader new to keel, reading only docs/comparison.md, names three properties specific to keel and each matches a row where keel is the only tool marked"
++    }
++  ],
++  "criteria": 6,
++  "executed": 5,
++  "passed": 5,
++  "failed": 0,
++  "blocked": 0,
++  "human": 1
++}
+\ No newline at end of file
+diff --git a/.keel/runs/2026-11-04-006/evidence/test.txt b/.keel/runs/2026-11-04-006/evidence/test.txt
+new file mode 100644
+index 0000000..fb47cce
+--- /dev/null
++++ b/.keel/runs/2026-11-04-006/evidence/test.txt
+@@ -0,0 +1,150 @@
++$ cargo test --quiet
++
++
++running 296 tests
++....................................................................................... 87/296
++....................................................................................... 174/296
++....................................................................................... 261/296
++...................................
++test result: ok. 296 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.43s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.38s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.73s
++
++
++running 7 tests
++.......
++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.43s
++
++
++running 5 tests
++.....
++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.16s
++
++
++running 13 tests
++.............
++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.53s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.83s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.39s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.98s
++
++
++running 7 tests
++.......
++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.47s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.64s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.95s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.48s
++
++
++running 4 tests
++....
++test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.74s
++
++
++running 25 tests
++.........................
++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.00s
++
++
++running 14 tests
++..............
++test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.77s
++
++
++running 13 tests
++.............
++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.20s
++
++
++running 15 tests
++...............
++test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.78s
++
++
++running 25 tests
++.........................
++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.58s
++
++
++running 20 tests
++....................
++test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.25s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.86s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.18s
++
++
++running 2 tests
++..
++test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
++
++
++running 34 tests
++..................................
++test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.57s
++
++
++running 0 tests
++
++test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
++
++
++running 7 tests
++.......
++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.37s
++
++
++running 5 tests
++.....
++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.69s
++
+diff --git a/.keel/runs/2026-11-04-006/run.json b/.keel/runs/2026-11-04-006/run.json
+new file mode 100644
+index 0000000..0fc8919
+--- /dev/null
++++ b/.keel/runs/2026-11-04-006/run.json
+@@ -0,0 +1,9 @@
++{
++  "schema": "keel.run/1",
++  "id": "2026-11-04-006",
++  "spec": "comparison-doc",
++  "keel_version": "0.12.0",
++  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
++  "started_at": "2026-11-04T11:34:32.956760198+00:00",
++  "base_commit": "a7facc1103834895c3be4ab65d3b53da3d4baf66"
++}
+diff --git a/.keel/runs/2026-11-04-006/trajectory.jsonl b/.keel/runs/2026-11-04-006/trajectory.jsonl
+new file mode 100644
+index 0000000..5c86b3e
+--- /dev/null
++++ b/.keel/runs/2026-11-04-006/trajectory.jsonl
+@@ -0,0 +1,15 @@
++{"t":"2026-11-04T11:34:32.956819824+00:00","seq":1,"kind":"run_start","spec":"comparison-doc","keel_version":"0.12.0","store_hash":"0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2"}
++{"t":"2026-11-04T11:34:32.958828334+00:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":424,"bytes":1693}
++{"t":"2026-11-04T11:34:32.958856084+00:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
++{"t":"2026-11-04T11:34:32.958889792+00:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6268,"bytes":25071}
++{"t":"2026-11-04T11:34:32.958976585+00:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
++{"t":"2026-11-04T11:34:32.959023668+00:00","seq":6,"kind":"inject","source":".keel/specs/comparison-doc/spec.md","tokens":887,"bytes":3547}
++{"t":"2026-11-04T11:34:33.031058695+00:00","seq":7,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
++{"t":"2026-11-04T11:35:20.957374319+00:00","seq":8,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
++{"t":"2026-11-04T11:35:24.939900005+00:00","seq":9,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
++{"t":"2026-11-04T11:35:25.216221133+00:00","seq":10,"kind":"oracle","criterion":"AC-1","oracle":"`cargo test --test comparison_doc the_table_has_the_fixed_columns_and_rows` exits 0","verdict":"pass","exit_code":0}
++{"t":"2026-11-04T11:35:25.216238883+00:00","seq":11,"kind":"oracle","criterion":"AC-2","oracle":"`cargo test --test comparison_doc every_other_tool_cell_footnotes_a_dated_https_source` exits 0","verdict":"pass","exit_code":0}
++{"t":"2026-11-04T11:35:25.216240925+00:00","seq":12,"kind":"oracle","criterion":"AC-3","oracle":"`cargo test --test comparison_doc every_keel_claim_links_to_an_existing_adr_or_test` exits 0","verdict":"pass","exit_code":0}
++{"t":"2026-11-04T11:35:25.216241925+00:00","seq":13,"kind":"oracle","criterion":"AC-4","oracle":"`cargo test --test comparison_doc the_weaker_section_names_every_compared_tool` exits 0","verdict":"pass","exit_code":0}
++{"t":"2026-11-04T11:35:25.216242925+00:00","seq":14,"kind":"oracle","criterion":"AC-5","oracle":"`cargo test --test comparison_doc readme_links_the_comparison_before_the_first_diagram` exits 0","verdict":"pass","exit_code":0}
++{"t":"2026-11-04T11:35:25.216243883+00:00","seq":15,"kind":"oracle","criterion":"AC-6","oracle":"human: a reader new to keel, reading only docs/comparison.md, names three properties specific to keel and each matches a row where keel is the only tool marked","verdict":"human"}
+diff --git a/.keel/specs/blast-radius/approvals.jsonl b/.keel/specs/blast-radius/approvals.jsonl
+new file mode 100644
+index 0000000..6da4644
+--- /dev/null
++++ b/.keel/specs/blast-radius/approvals.jsonl
+@@ -0,0 +1 @@
++{"schema":"keel.approval/1","stage":"spec","decision":"approved","artefact_hash":"8fd333590157941a615947aafab8b9f6f2be1557e244e403189d654ec8ec4772","gate_verdict":"pass","by":"unknown","at":"2026-09-14T03:51:56.310102344+00:00"}
+diff --git a/.keel/specs/blast-radius/gates/G0.json b/.keel/specs/blast-radius/gates/G0.json
+new file mode 100644
+index 0000000..f82fc09
+--- /dev/null
++++ b/.keel/specs/blast-radius/gates/G0.json
+@@ -0,0 +1,90 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G0",
++  "run": "2026-09-13-000",
++  "spec": "blast-radius",
++  "verdict": "pass",
++  "generated_at": "2026-09-13T17:25:39.092778685+00:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "SPEC-0009 (keel.spec/1)"
++    },
++    {
++      "id": "criteria-present",
++      "verdict": "pass",
++      "detail": "8 criteria"
++    },
++    {
++      "id": "criterion-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate ids"
++    },
++    {
++      "id": "no-placeholders",
++      "verdict": "pass",
++      "detail": "no unfilled scaffold text"
++    },
++    {
++      "id": "ears-conformance",
++      "verdict": "pass",
++      "detail": "8/8 conform (event-driven, ubiquitous, unwanted-behaviour)"
++    },
++    {
++      "id": "oracle-presence",
++      "verdict": "pass",
++      "detail": "8 oracles across 8 criteria"
++    },
++    {
++      "id": "oracle-wellformed",
++      "verdict": "pass",
++      "detail": "all oracles parse"
++    },
++    {
++      "id": "ambiguity",
++      "verdict": "pass",
++      "detail": "no ambiguous phrasing in criteria"
++    },
++    {
++      "id": "criterion-budget",
++      "verdict": "pass",
++      "detail": "8/8 criteria"
++    },
++    {
++      "id": "spec-length",
++      "verdict": "pass",
++      "detail": "112/250 lines"
++    },
++    {
++      "id": "scope-declared",
++      "verdict": "pass",
++      "detail": "2 glob(s): src/**, test/**"
++    },
++    {
++      "id": "change-budget",
++      "verdict": "pass",
++      "detail": "200 lines of diff budgeted"
++    },
++    {
++      "id": "oracle-mix",
++      "verdict": "pass",
++      "detail": "8/8 runnable (8 cmd)"
++    },
++    {
++      "id": "human-cost",
++      "verdict": "pass",
++      "detail": "0 human oracle(s), none load-bearing"
++    },
++    {
++      "id": "store-drift",
++      "verdict": "pass",
++      "detail": "4 projections current"
++    },
++    {
++      "id": "shared-stores",
++      "verdict": "pass",
++      "detail": "none configured"
++    }
++  ]
++}
+diff --git a/.keel/specs/blast-radius/gates/G1.json b/.keel/specs/blast-radius/gates/G1.json
+new file mode 100644
+index 0000000..db33ee5
+--- /dev/null
++++ b/.keel/specs/blast-radius/gates/G1.json
+@@ -0,0 +1,97 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G1",
++  "run": "2026-09-14-000",
++  "spec": "blast-radius",
++  "verdict": "fail",
++  "generated_at": "2026-09-14T04:35:08.315837437+00:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "PLAN-0009 + TASKS-0009"
++    },
++    {
++      "id": "g0-passed",
++      "verdict": "pass",
++      "detail": "G0 passed in run 2026-09-13-000"
++    },
++    {
++      "id": "spec-approved",
++      "verdict": "pass",
++      "detail": "approved by unknown"
++    },
++    {
++      "id": "tasks-present",
++      "verdict": "pass",
++      "detail": "8/15 tasks"
++    },
++    {
++      "id": "task-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate task ids"
++    },
++    {
++      "id": "task-fields",
++      "verdict": "pass",
++      "detail": "all task fields recognised"
++    },
++    {
++      "id": "task-criterion-traceability",
++      "verdict": "pass",
++      "detail": "8 tasks all traced"
++    },
++    {
++      "id": "criteria-covered",
++      "verdict": "pass",
++      "detail": "8/8 criteria have a task"
++    },
++    {
++      "id": "task-budgets",
++      "verdict": "pass",
++      "detail": "all 8 tasks budgeted, total 200 lines"
++    },
++    {
++      "id": "total-budget",
++      "verdict": "pass",
++      "detail": "200/200 lines"
++    },
++    {
++      "id": "task-exit-conditions",
++      "verdict": "pass",
++      "detail": "every task states when it is done"
++    },
++    {
++      "id": "task-dependencies",
++      "verdict": "pass",
++      "detail": "1 wave(s), widths 8"
++    },
++    {
++      "id": "wave-isolation",
++      "verdict": "pass",
++      "detail": "1 wave(s), no file claimed twice within one"
++    },
++    {
++      "id": "task-files-in-scope",
++      "verdict": "fail",
++      "expected": "every task names the files it touches",
++      "actual": "no files on: T-1 (line 16), T-2 (line 22), T-3 (line 28), T-4 (line 34), T-5 (line 40), … and 3 more"
++    },
++    {
++      "id": "rollback-stated",
++      "verdict": "fail",
++      "expected": "front matter `rollback:` or a ## Rollback section states the rollback",
++      "actual": "both are empty — \"git revert\" is a legitimate answer, silence is not"
++    },
++    {
++      "id": "blast-radius-declared",
++      "verdict": "pass",
++      "detail": "85 file(s) at depth 2, 22732 lines"
++    },
++    {
++      "id": "blast-radius-current",
++      "verdict": "pass",
++      "detail": "85 files, 22732 lines — matches a fresh computation — no indexed file matches test/** (new files, or a typo)"
++    }
++  ]
++}
+diff --git a/.keel/specs/blast-radius/plan.md b/.keel/specs/blast-radius/plan.md
+new file mode 100644
+index 0000000..649ebba
+--- /dev/null
++++ b/.keel/specs/blast-radius/plan.md
+@@ -0,0 +1,164 @@
++---
++id: PLAN-0009
++slug: blast-radius
++schema: keel.plan/1
++blast:
++  depth: 2
++  declared:
++  - src/**
++  - test/**
++  computed:
++  - src/paths.rs
++  - src/config.rs
++  - src/map/lang.rs
++  - src/gate/mod.rs
++  - src/spec/mod.rs
++  - src/trajectory/event.rs
++  - src/map/extract.rs
++  - src/trajectory/mod.rs
++  - src/run.rs
++  - src/hashing.rs
++  - src/store/mod.rs
++  - src/lesson/mod.rs
++  - src/failure/mod.rs
++  - src/plan.rs
++  - src/store/frontmatter.rs
++  - src/approval.rs
++  - src/map/blast.rs
++  - src/map/db.rs
++  - src/spec/oracle.rs
++  - src/retrieve/mod.rs
++  - src/spec/ears.rs
++  - src/spec/placeholder.rs
++  - src/report/mod.rs
++  - src/main.rs
++  - src/http.rs
++  - src/review/mod.rs
++  - src/driver/mod.rs
++  - src/pipeline.rs
++  - src/serve/mod.rs
++  - src/projection/drift.rs
++  - src/driver/contract.rs
++  - src/map/mod.rs
++  - src/gate/ratchet.rs
++  - src/gate/g1.rs
++  - src/cmd/mod.rs
++  - src/gate/g25.rs
++  - src/mcp/mod.rs
++  - src/gate/oracle_exec.rs
++  - src/projection/mod.rs
++  - src/gate/g0.rs
++  - src/evidence/mod.rs
++  - src/driver/conform.rs
++  - src/failure/taxonomy.rs
++  - src/gate/diff.rs
++  - src/worktree.rs
++  - src/projection/sections.rs
++  - src/map/render.rs
++  - src/lesson/usage.rs
++  - src/gate/g2.rs
++  - src/report/insights.rs
++  - src/retrieve/fallback.rs
++  - src/gate/g4.rs
++  - src/map/resolve.rs
++  - src/metrics.rs
++  - src/retrieve/budget.rs
++  - src/gate/g3.rs
++  - src/evidence/manifest.rs
++  - src/map/rank.rs
++  - src/cmd/next.rs
++  - src/ui.rs
++  - src/cmd/run.rs
++  - src/cmd/learn.rs
++  - src/cmd/init.rs
++  - src/driver/builtin.rs
++  - src/cmd/doctor.rs
++  - src/cmd/spec.rs
++  - src/cmd/bench.rs
++  - src/cmd/hook.rs
++  - src/cmd/retrieve.rs
++  - src/atomic.rs
++  - src/cmd/approve.rs
++  - src/cmd/driver.rs
++  - src/map/walk.rs
++  - src/cmd/report.rs
++  - src/cmd/store.rs
++  - src/cmd/gate.rs
++  - src/cmd/status.rs
++  - src/cmd/metrics.rs
++  - src/cmd/map.rs
++  - src/cmd/prune.rs
++  - src/cmd/plan.rs
++  - src/cmd/tasks.rs
++  - src/cmd/ratchet.rs
++  - src/cmd/blast.rs
++  - src/cmd/serve.rs
++  computed_lines: 22732
++rollback: ''
++verified_at: 2026-09-14
++---
++
++# Design — blast-radius
++
++## Approach
++
++_How the change is made. Name the seam you are cutting at._
++
++## Blast radius
++
++<!-- generated by `keel plan`; edits here are overwritten -->
++
++Computed from the import graph at depth 2: **85 files, 22732 lines**.
++
++| depth | file | lines |
++| --- | --- | --- |
++| scope | `src/paths.rs` | 82 |
++| scope | `src/config.rs` | 504 |
++| scope | `src/map/lang.rs` | 355 |
++| scope | `src/gate/mod.rs` | 416 |
++| scope | `src/spec/mod.rs` | 353 |
++| scope | `src/trajectory/event.rs` | 228 |
++| scope | `src/map/extract.rs` | 468 |
++| scope | `src/trajectory/mod.rs` | 370 |
++| scope | `src/run.rs` | 273 |
++| scope | `src/hashing.rs` | 49 |
++| scope | `src/store/mod.rs` | 177 |
++| scope | `src/lesson/mod.rs` | 719 |
++| scope | `src/failure/mod.rs` | 573 |
++| scope | `src/plan.rs` | 604 |
++| scope | `src/store/frontmatter.rs` | 137 |
++| scope | `src/approval.rs` | 340 |
++| scope | `src/map/blast.rs` | 268 |
++| scope | `src/map/db.rs` | 265 |
++| scope | `src/spec/oracle.rs` | 327 |
++| scope | `src/retrieve/mod.rs` | 479 |
++| scope | `src/spec/ears.rs` | 362 |
++| scope | `src/spec/placeholder.rs` | 233 |
++| scope | `src/report/mod.rs` | 156 |
++| scope | `src/main.rs` | 566 |
++| scope | `src/http.rs` | 426 |
++| scope | `src/review/mod.rs` | 545 |
++| scope | `src/driver/mod.rs` | 595 |
++| scope | `src/pipeline.rs` | 284 |
++| scope | `src/serve/mod.rs` | 455 |
++| scope | `src/projection/drift.rs` | 210 |
++| scope | `src/driver/contract.rs` | 263 |
++| scope | `src/map/mod.rs` | 203 |
++| scope | `src/gate/ratchet.rs` | 197 |
++| scope | `src/gate/g1.rs` | 526 |
++| scope | `src/cmd/mod.rs` | 23 |
++| scope | `src/gate/g25.rs` | 546 |
++| scope | `src/mcp/mod.rs` | 271 |
++| scope | `src/gate/oracle_exec.rs` | 308 |
++| scope | `src/projection/mod.rs` | 116 |
++| scope | `src/gate/g0.rs` | 341 |
++
++_… 45 more, see `keel blast`._
++
++_Scope globs matching no indexed file (new files, or a typo): test/**_
++
++
++## Rollback
++
++_Fill in `rollback:` in the front matter above. "git revert" is a
++legitimate answer; "we would not need to" is not._
+diff --git a/.keel/specs/blast-radius/spec.md b/.keel/specs/blast-radius/spec.md
+new file mode 100644
+index 0000000..672e9dd
+--- /dev/null
++++ b/.keel/specs/blast-radius/spec.md
+@@ -0,0 +1,112 @@
++---
++id: SPEC-0009
++slug: blast-radius
++schema: keel.spec/1
++status: approved
++scope:
++- src/**
++- test/**
++budget:
++  criteria: 8
++  lines: 200
++---
++
++# blast radius
++
++## Context
++
++`keel serve`'s dashboard fetches `/api/overview` once and polls it, and
++renders a per-feature "Summary" panel from `state.specs` when an operator
++selects a feature in the rail (`assets/ui/app.js`, `renderSpecSummary`). That
++panel shows tiles for runs, tokens, events and open fails, but nothing about
++how much of the codebase the feature's declared scope reaches — the one number
++`src/map/blast.rs` already computes and `keel blast` / `keel plan` already
++print. An operator landing on a feature has no way to see its blast radius
++without leaving the browser for a terminal.
++
++`/api/spec/<slug>` already exists and already narrows `Report::build` to one
++spec, but the JS never calls it — `state.selected` only filters the specs
++already fetched by `/api/overview`. Computing the blast radius inside every
++`SpecReport` built by the unnarrowed `/api/overview` call would recompute the
++whole reverse-import graph, from scratch, for every spec, every 2-second poll
++— the smallest surface is to compute it only for the one spec `/api/spec/<slug>`
++already narrows to, and have the dashboard fetch that route when a feature is
++selected.
++
++## Acceptance criteria
++
++### AC-1 A narrowed report carries the spec's blast radius
++
++WHEN `Report::build` is called with `only` set to one spec's slug and a
++symbol index exists THE SYSTEM SHALL set that spec's `blast` field to an
++object with integer `files`, `lines` and `depth` keys computed by
++`map::blast::compute` over the spec's declared `scope` globs.
++
++oracle: cmd `cargo test --test report the_narrowed_report_carries_the_blast_radius` exit 0
++
++### AC-2 The unnarrowed report stays free of it
++
++WHEN `Report::build` is called with `only` set to `None` THE SYSTEM SHALL
++leave every spec's `blast` field absent, so `/api/overview` does not recompute
++the reverse-import graph once per spec on every poll.
++
++oracle: cmd `cargo test --test report blast_radius_is_absent_from_the_unnarrowed_report` exit 0
++
++### AC-3 A missing symbol index degrades to null
++
++IF the symbol index database does not exist THEN THE SYSTEM SHALL set the
++narrowed spec's `blast` field to `null` rather than making `keel report
++<slug> --json` exit non-zero.
++
++oracle: cmd `cargo test --test report blast_radius_is_null_without_a_symbol_index` exit 0
++
++### AC-4 The depth matches the configured default
++
++THE SYSTEM SHALL compute the narrowed spec's blast radius at
++`cfg.plan.blast_depth`, the same depth `keel blast` and `keel plan` use by
++default, so the number shown on a feature's landing panel and the number
++`keel blast` prints for the same scope agree.
++
++oracle: cmd `cargo test --test report blast_radius_depth_matches_plan_blast_depth` exit 0
++
++### AC-5 `/api/spec/<slug>` serves the field
++
++WHEN a `GET` request reaches `/api/spec/<slug>` for a spec whose scope
++matches at least one indexed file THE SYSTEM SHALL respond with JSON whose
++`specs[0].blast.files` count equals the number of paths `keel blast` reports
++for that spec's scope at the same depth.
++
++oracle: cmd `cargo test --test serve blast_radius_route_matches_keel_blast_output` exit 0
++
++### AC-6 Selecting a feature fetches its blast radius
++
++WHEN the operator selects a feature in the dashboard rail THE SYSTEM SHALL
++fetch `/api/spec/<slug>` for that feature's slug and store the response's
++`blast` field on that feature's state before the Summary panel next renders.
++
++oracle: cmd `cargo test --test serve app_js_fetches_the_spec_route_on_selection` exit 0
++
++### AC-7 The Summary panel shows a blast-radius tile
++
++WHEN the Summary panel renders for a feature whose stored `blast` field is
++not `null` THE SYSTEM SHALL display a tile labelled `blast radius` whose
++value is that field's `files` count.
++
++oracle: cmd `cargo test --test serve app_js_summary_panel_has_a_blast_radius_tile` exit 0
++
++### AC-8 A null blast radius omits the tile
++
++IF a feature's stored `blast` field is `null` THEN THE SYSTEM SHALL omit the
++blast-radius tile from the Summary panel rather than rendering a tile showing
++`0`.
++
++oracle: cmd `cargo test --test serve app_js_omits_the_blast_radius_tile_when_null` exit 0
++
++## Out of scope
++
++- Adding a blast-radius column or tile to the Overview landing view (the
++  `state.selected === null` case) — only a selected feature's own panel.
++- Changing what `map::blast::compute`, `keel blast` or `keel plan` compute;
++  this only surfaces the existing number in `keel serve`.
++- Polling `/api/spec/<slug>` on the same 2-second interval as `/api/overview`;
++  one fetch per selection is all AC-6 requires.
+diff --git a/.keel/specs/blast-radius/tasks.md b/.keel/specs/blast-radius/tasks.md
+new file mode 100644
+index 0000000..ee93630
+--- /dev/null
++++ b/.keel/specs/blast-radius/tasks.md
+@@ -0,0 +1,63 @@
++---
++id: TASKS-0009
++slug: blast-radius
++schema: keel.tasks/1
++---
++
++# Tasks
++
++Each task must name the criteria it satisfies, the files it touches, a line
++budget and an exit condition. G1 checks all four, and checks that every
++criterion in the spec is covered by at least one task.
++
++Add `- depends_on: T-1` where order matters. Tasks with no dependency on
++each other form a wave; `keel tasks` shows them.
++
++### T-1 A narrowed report carries the spec's blast radius
++- criteria: AC-1
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test report the_narrowed_report_carries_the_blast_radius` exits 0
++
++### T-2 The unnarrowed report stays free of it
++- criteria: AC-2
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test report blast_radius_is_absent_from_the_unnarrowed_report` exits 0
++
++### T-3 A missing symbol index degrades to null
++- criteria: AC-3
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test report blast_radius_is_null_without_a_symbol_index` exits 0
++
++### T-4 The depth matches the configured default
++- criteria: AC-4
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test report blast_radius_depth_matches_plan_blast_depth` exits 0
++
++### T-5 `/api/spec/<slug>` serves the field
++- criteria: AC-5
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test serve blast_radius_route_matches_keel_blast_output` exits 0
++
++### T-6 Selecting a feature fetches its blast radius
++- criteria: AC-6
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test serve app_js_fetches_the_spec_route_on_selection` exits 0
++
++### T-7 The Summary panel shows a blast-radius tile
++- criteria: AC-7
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test serve app_js_summary_panel_has_a_blast_radius_tile` exits 0
++
++### T-8 A null blast radius omits the tile
++- criteria: AC-8
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test serve app_js_omits_the_blast_radius_tile_when_null` exits 0
++
+diff --git a/.keel/specs/comparison-doc/approvals.jsonl b/.keel/specs/comparison-doc/approvals.jsonl
+new file mode 100644
+index 0000000..df2348c
+--- /dev/null
++++ b/.keel/specs/comparison-doc/approvals.jsonl
+@@ -0,0 +1,3 @@
++{"schema":"keel.approval/1","stage":"spec","decision":"approved","artefact_hash":"b1d74ba03434ca69f0cded7baa0d9ee406b87e984b5b270b1c79607646ac893d","gate_verdict":"pass","by":"Dane Balia","at":"2026-11-04T09:49:56.702224331+00:00"}
++{"schema":"keel.approval/1","stage":"plan","decision":"approved","artefact_hash":"875b72c7d26c254259b7dd7639541e10c5f30d3804081d55f797a79695fe74c5","gate_verdict":"pass","by":"Dane Balia","at":"2026-11-04T10:49:43.174608551+00:00"}
++{"schema":"keel.approval/1","stage":"merge","decision":"rejected","artefact_hash":"e8ec553f519b40e0f03c0171d053791f9bf5f242c188fbe959b162525208ea62","gate_verdict":"fail","by":"Dane Balia","at":"2026-11-04T11:33:50.222178463+00:00","note":"docs/comparison.md under-credits other tools and overstates two cells; correct against the Source notes in plan.md."}
+diff --git a/.keel/specs/comparison-doc/gates/G0.json b/.keel/specs/comparison-doc/gates/G0.json
+new file mode 100644
+index 0000000..5ec818c
+--- /dev/null
++++ b/.keel/specs/comparison-doc/gates/G0.json
+@@ -0,0 +1,90 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G0",
++  "run": "2026-11-04-003",
++  "spec": "comparison-doc",
++  "verdict": "pass",
++  "generated_at": "2026-11-04T09:47:30.922532095+00:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "SPEC-0021 (keel.spec/1)"
++    },
++    {
++      "id": "criteria-present",
++      "verdict": "pass",
++      "detail": "6 criteria"
++    },
++    {
++      "id": "criterion-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate ids"
++    },
++    {
++      "id": "no-placeholders",
++      "verdict": "pass",
++      "detail": "no unfilled scaffold text"
++    },
++    {
++      "id": "ears-conformance",
++      "verdict": "pass",
++      "detail": "6/6 conform (event-driven, ubiquitous)"
++    },
++    {
++      "id": "oracle-presence",
++      "verdict": "pass",
++      "detail": "6 oracles across 6 criteria"
++    },
++    {
++      "id": "oracle-wellformed",
++      "verdict": "pass",
++      "detail": "all oracles parse"
++    },
++    {
++      "id": "ambiguity",
++      "verdict": "pass",
++      "detail": "no ambiguous phrasing in criteria"
++    },
++    {
++      "id": "criterion-budget",
++      "verdict": "pass",
++      "detail": "6/6 criteria"
++    },
++    {
++      "id": "spec-length",
++      "verdict": "pass",
++      "detail": "89/250 lines"
++    },
++    {
++      "id": "scope-declared",
++      "verdict": "pass",
++      "detail": "3 glob(s): docs/comparison.md, README.md, tests/comparison_doc.rs"
++    },
++    {
++      "id": "change-budget",
++      "verdict": "pass",
++      "detail": "260 lines of diff budgeted"
++    },
++    {
++      "id": "oracle-mix",
++      "verdict": "pass",
++      "detail": "5/6 runnable (5 cmd, 1 human)"
++    },
++    {
++      "id": "human-cost",
++      "verdict": "pass",
++      "detail": "1 criteria verifiable only by a person — budget review time: AC-6 (human: a reader new to keel, reading only docs/comparison.md, names three properties specific to keel and each matches a row where keel is the only tool marked)"
++    },
++    {
++      "id": "store-drift",
++      "verdict": "pass",
++      "detail": "4 projections current"
++    },
++    {
++      "id": "shared-stores",
++      "verdict": "pass",
++      "detail": "none configured"
++    }
++  ]
++}
+diff --git a/.keel/specs/comparison-doc/gates/G1.json b/.keel/specs/comparison-doc/gates/G1.json
+new file mode 100644
+index 0000000..ea5626b
+--- /dev/null
++++ b/.keel/specs/comparison-doc/gates/G1.json
+@@ -0,0 +1,95 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G1",
++  "run": "2026-11-04-005",
++  "spec": "comparison-doc",
++  "verdict": "pass",
++  "generated_at": "2026-11-04T09:52:34.102286846+00:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "PLAN-0021 + TASKS-0021"
++    },
++    {
++      "id": "g0-passed",
++      "verdict": "pass",
++      "detail": "G0 passed in run 2026-11-04-003"
++    },
++    {
++      "id": "spec-approved",
++      "verdict": "pass",
++      "detail": "approved by Dane Balia"
++    },
++    {
++      "id": "tasks-present",
++      "verdict": "pass",
++      "detail": "6/15 tasks"
++    },
++    {
++      "id": "task-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate task ids"
++    },
++    {
++      "id": "task-fields",
++      "verdict": "pass",
++      "detail": "all task fields recognised"
++    },
++    {
++      "id": "task-criterion-traceability",
++      "verdict": "pass",
++      "detail": "6 tasks all traced"
++    },
++    {
++      "id": "criteria-covered",
++      "verdict": "pass",
++      "detail": "6/6 criteria have a task"
++    },
++    {
++      "id": "task-budgets",
++      "verdict": "pass",
++      "detail": "all 6 tasks budgeted, total 255 lines"
++    },
++    {
++      "id": "total-budget",
++      "verdict": "pass",
++      "detail": "255/260 lines"
++    },
++    {
++      "id": "task-exit-conditions",
++      "verdict": "pass",
++      "detail": "every task states when it is done"
++    },
++    {
++      "id": "task-dependencies",
++      "verdict": "pass",
++      "detail": "6 wave(s), widths 1/1/1/1/1/1"
++    },
++    {
++      "id": "wave-isolation",
++      "verdict": "pass",
++      "detail": "6 wave(s), no file claimed twice within one"
++    },
++    {
++      "id": "task-files-in-scope",
++      "verdict": "pass",
++      "detail": "all task files inside the declared scope"
++    },
++    {
++      "id": "rollback-stated",
++      "verdict": "pass",
++      "detail": "git revert"
++    },
++    {
++      "id": "blast-radius-declared",
++      "verdict": "pass",
++      "detail": "0 file(s) at depth 2, 0 lines"
++    },
++    {
++      "id": "blast-radius-current",
++      "verdict": "pass",
++      "detail": "0 files, 0 lines — matches a fresh computation — no indexed file matches docs/comparison.md, README.md, tests/comparison_doc.rs (new files, or a typo)"
++    }
++  ]
++}
+diff --git a/.keel/specs/comparison-doc/plan.md b/.keel/specs/comparison-doc/plan.md
+new file mode 100644
+index 0000000..1b8df91
+--- /dev/null
++++ b/.keel/specs/comparison-doc/plan.md
+@@ -0,0 +1,84 @@
++---
++id: PLAN-0021
++slug: comparison-doc
++schema: keel.plan/1
++blast:
++  depth: 2
++  declared:
++  - docs/comparison.md
++  - README.md
++  - tests/comparison_doc.rs
++  computed: []
++  computed_lines: 0
++rollback: git revert
++verified_at: 2026-11-04
++---
++
++# Design — comparison-doc
++
++## Approach
++
++This is a documentation change with one test; no keel source is touched. The
++seam is the page's own structure, checked by `tests/comparison_doc.rs`, which
++reads `docs/comparison.md` and asserts the fixed columns and rows, that each
++cell about another tool carries a footnote resolving to a `## Sources` entry
++(an `https` link and a `checked: YYYY-MM-DD` date), that each keel cell links
++to a file that exists under `.keel/store/decisions/` or `tests/`, and that
++`## Where keel is weaker` names every compared tool. A second assertion reads
++`README.md` and checks the link to the comparison comes before the first
++diagram.
++
++`docs/comparison.md` is written from the `## Source notes` section below, in
++the build step, which has no web access. The writing rule there governs every
++cell about another tool: say only what the source states, otherwise write
++"Not stated in the source checked" with a footnote.
++
++Tasks are chained because they all edit `docs/comparison.md` and
++`tests/comparison_doc.rs`; `README.md` is touched only by the README task.
++T-6 is a human oracle and has no code of its own.
++
++## Source notes
++
++Researched on the host on 2026-11-04 from primary pages. Verbatim:
++
++```text
++WRITING RULE for the build: a cell about another tool may only say what the source states. Where the source does not state a property, write 'Not stated in the source checked' and footnote it; NEVER write 'No' or 'None' or imply the tool lacks the property. Do not use any fact that is not in these notes.
++
++SOURCES (all checked: 2026-11-04):
++[1] spec-kit https://github.com/github/spec-kit and https://github.com/github/spec-kit/blob/main/spec-driven.md
++[2] Kiro https://kiro.dev/docs/specs/
++[3] BMAD https://github.com/bmad-code-org/BMAD-METHOD
++[4] Tessl https://docs.tessl.io/
++[5] Elephant-Goldfish https://opensource.googleblog.com/2026/10/introducing-elephant-goldfish-model-plugin.html (published 2026-10-22; repo https://github.com/google/elephant-goldfish-model)
++[6] Claude Code hooks https://code.claude.com/docs/en/hooks
++
++FINDINGS PER ROW (S=stated by source, NS=not stated):
++Falsifiable criteria: spec-kit S (spec-driven.md checklists require requirements to be testable and unambiguous); Kiro S partly (specs hold user stories with acceptance criteria; falsifiability not stated); BMAD NS; Tessl NS (evals of a skill's impact on tasks are mentioned, not spec acceptance criteria); EGM NS (Goldfish does a go/no-go check of paths and signatures in a design doc); hooks NS (a hook can return a reason such as a test suite must pass, but hooks do not define criteria).
++Blocked as a verdict: hooks S (exit code 2 blocks the action; permissionDecision deny is a separate block path); spec-kit NS (verdicts shown are verified/partial/failed, go/needs-clarification/kill, converged); Kiro NS (task status in-progress or completed); BMAD NS; Tessl NS; EGM NS (an ambiguous document requires further drafting).
++Approvals bound to content: NS for all six tools in the sources checked. Kiro mentions a Review button and comments, no hashing.
++Tamper-evident evidence: NS for all six. Tessl mentions a full audit trail without saying tamper-evident. spec-kit saves reports to project folders.
++Computed blast radius: NS for all six. spec-kit mentions consistency analysis; EGM's design doc enumerates files to change; spec-driven.md says affected plans are flagged when requirements change; Kiro says bugfix specs validate that nothing else breaks. None says it is computed.
++Test-tampering review: NS for all six. spec-kit has a bug-test step and spec-driven.md says tests must be approved before implementation.
++Lessons enforced as checks: NS for all six. Tessl says it can mine agent logs for recurring mistakes; spec-kit presets can enforce organisational standards; neither is stated to turn lessons into checks.
++Agent drivers: spec-kit names GitHub Copilot, others generic 'integrations'; Kiro NS; BMAD names a Claude Code plugin and a Codex plugin and says any AI tool that supports skills works; Tessl says agent-agnostic, no names; EGM names Antigravity and says other environments are coming; hooks run wherever Claude Code runs (CLI, Agent SDK, plugins).
++
++WHERE KEEL IS WEAKER (ground each only in the above): hooks = immediate per-tool-call blocking across 33 events with no spec or plan stage; spec-kit = lightweight spec scaffolding with integrations for many agents; Kiro = an IDE with in-product spec review and commenting; BMAD = role-based agile planning for whole projects; Tessl = registry of library usage specs; Elephant-Goldfish = fresh-context review of a design doc before implementation, which keel does not do; also note this comparison covers only what primary pages state and that every 'not stated' may be a gap in the page, not in the tool.
++For keel cells link only to files that exist: .keel/store/decisions/ADR-*.md (verify with ls) and tests/*.rs including tests/oracle_sensitivity.rs, tests/driver_usage.rs, tests/g3_judgement.rs. Do not link an ADR that does not exist.
++```
++
++ADR files present when this plan was written: ADR-0000 to ADR-0025 under
++`.keel/store/decisions/`, named `ADR-NNNN-<slug>.md`. Link by full file name.
++
++## Blast radius
++
++<!-- generated by `keel plan`; edits here are overwritten -->
++
++Computed from the import graph at depth 2: **0 files, 0 lines**.
++
++_No indexed file matches the declared scope. If these are new files, that is
++expected; if not, the scope globs are wrong._
++
++
++## Rollback
++
++`git revert` — replace this if the change needs a different rollback.
+diff --git a/.keel/specs/comparison-doc/review-flags.txt b/.keel/specs/comparison-doc/review-flags.txt
+new file mode 100644
+index 0000000..401c0d7
+--- /dev/null
++++ b/.keel/specs/comparison-doc/review-flags.txt
+@@ -0,0 +1 @@
++docs/comparison.md: | test-tampering review | Yes: added mocks and weakened assertions are flagged …
+diff --git a/.keel/specs/comparison-doc/security-findings.json b/.keel/specs/comparison-doc/security-findings.json
+new file mode 100644
+index 0000000..fe51488
+--- /dev/null
++++ b/.keel/specs/comparison-doc/security-findings.json
+@@ -0,0 +1 @@
++[]
+diff --git a/.keel/specs/comparison-doc/spec.md b/.keel/specs/comparison-doc/spec.md
+new file mode 100644
+index 0000000..c8688f3
+--- /dev/null
++++ b/.keel/specs/comparison-doc/spec.md
+@@ -0,0 +1,89 @@
++---
++id: SPEC-0021
++slug: comparison-doc
++schema: keel.spec/1
++status: approved
++scope:
++- docs/comparison.md
++- README.md
++- tests/comparison_doc.rs
++budget:
++  criteria: 6
++  lines: 260
++verified_at: 2026-11-03
++---
++
++# Say plainly why keel, and where something else is the better choice
++
++## Context
++
++README.md and the docs site say what keel does. Neither says how it differs
++from the tools a reader already knows: GitHub spec-kit, Kiro, BMAD, Tessl,
++Google's Elephant-Goldfish model, and Claude Code hooks. A newcomer cannot
++see the properties that are specific to keel, such as the three-valued
++verdict, hash-bound approvals, falsifiable criteria and offline-verifiable
++evidence, without reading PLAN.md and the ADRs.
++
++A comparison page goes stale quickly and invites marketing. This spec
++constrains both: every claim about another tool cites a source with a date,
++every claim about keel links to the ADR or test that backs it, and the page
++says where keel is weaker.
++
++## Acceptance criteria
++
++### AC-1 One table compares keel with six named tools on fixed rows
++
++THE SYSTEM SHALL provide `docs/comparison.md` with a table whose columns are
++keel, spec-kit, Kiro, BMAD, Tessl, Elephant-Goldfish and Claude Code hooks,
++and whose rows are exactly: falsifiable criteria, blocked as a verdict,
++approvals bound to content, tamper-evident evidence, computed blast radius,
++test-tampering review, lessons enforced as checks, and agent drivers.
++
++oracle: cmd `cargo test --test comparison_doc the_table_has_the_fixed_columns_and_rows` exit 0
++
++### AC-2 Every claim about another tool cites a dated source
++
++WHEN a cell describes a tool other than keel THE SYSTEM SHALL footnote it to
++an entry in a `## Sources` section that holds an `https` link and a
++`checked: YYYY-MM-DD` date.
++
++oracle: cmd `cargo test --test comparison_doc every_other_tool_cell_footnotes_a_dated_https_source` exit 0
++
++### AC-3 Every claim about keel links to its evidence
++
++WHEN a keel cell claims a property THE SYSTEM SHALL link it to a file under
++`.keel/store/decisions/` or `tests/` that exists in the repository.
++
++oracle: cmd `cargo test --test comparison_doc every_keel_claim_links_to_an_existing_adr_or_test` exit 0
++
++### AC-4 The page names where keel is weaker
++
++THE SYSTEM SHALL include a `## Where keel is weaker` section with at least
++one entry per compared tool, each naming the tool and a situation in which
++a team would choose that tool over keel.
++
++oracle: cmd `cargo test --test comparison_doc the_weaker_section_names_every_compared_tool` exit 0
++
++### AC-5 The README links to the comparison
++
++THE SYSTEM SHALL link `docs/comparison.md` from README.md's opening section,
++before the first diagram.
++
++oracle: cmd `cargo test --test comparison_doc readme_links_the_comparison_before_the_first_diagram` exit 0
++
++### AC-6 A newcomer can name what is specific to keel
++
++WHEN a reader who has not used keel reads only `docs/comparison.md` THE
++SYSTEM SHALL have given them enough to name three properties that the other
++six tools lack.
++
++oracle: human a reader new to keel, reading only docs/comparison.md, names three properties specific to keel and each matches a row where keel is the only tool marked
++
++## Out of scope
++
++- Benchmarks against the other tools. No shared task set exists, and an
++  unshared one would be tuned to flatter keel (ADR-0012).
++- Automatic staleness checks on the `checked:` dates. A date older than six
++  months is visible to the reader; a CI check that fails on the calendar
++  is its own decision.
++- Publishing the page to the docs site. That follows once the page exists.
+diff --git a/.keel/specs/comparison-doc/tasks.md b/.keel/specs/comparison-doc/tasks.md
+new file mode 100644
+index 0000000..be21b42
+--- /dev/null
++++ b/.keel/specs/comparison-doc/tasks.md
+@@ -0,0 +1,55 @@
++---
++id: TASKS-0021
++slug: comparison-doc
++schema: keel.tasks/1
++---
++
++# Tasks
++
++Each task must name the criteria it satisfies, the files it touches, a line
++budget and an exit condition. G1 checks all four, and checks that every
++criterion in the spec is covered by at least one task.
++
++Add `- depends_on: T-1` where order matters. Tasks with no dependency on
++each other form a wave; `keel tasks` shows them.
++
++### T-1 One table compares keel with six named tools on fixed rows
++- criteria: AC-1
++- files: docs/comparison.md, tests/comparison_doc.rs
++- budget: 60
++- exit: `cargo test --test comparison_doc the_table_has_the_fixed_columns_and_rows` exits 0
++
++### T-2 Every claim about another tool cites a dated source
++- criteria: AC-2
++- files: docs/comparison.md, tests/comparison_doc.rs
++- depends_on: T-1
++- budget: 45
++- exit: `cargo test --test comparison_doc every_other_tool_cell_footnotes_a_dated_https_source` exits 0
++
++### T-3 Every claim about keel links to its evidence
++- criteria: AC-3
++- files: docs/comparison.md, tests/comparison_doc.rs
++- depends_on: T-2
++- budget: 45
++- exit: `cargo test --test comparison_doc every_keel_claim_links_to_an_existing_adr_or_test` exits 0
++
++### T-4 The page names where keel is weaker
++- criteria: AC-4
++- files: docs/comparison.md, tests/comparison_doc.rs
++- depends_on: T-3
++- budget: 45
++- exit: `cargo test --test comparison_doc the_weaker_section_names_every_compared_tool` exits 0
++
++### T-5 The README links to the comparison
++- criteria: AC-5
++- files: README.md, tests/comparison_doc.rs
++- depends_on: T-4
++- budget: 30
++- exit: `cargo test --test comparison_doc readme_links_the_comparison_before_the_first_diagram` exits 0
++
++### T-6 A newcomer can name what is specific to keel
++- criteria: AC-6
++- files: docs/comparison.md
++- depends_on: T-5
++- budget: 30
++- exit: a person confirms AC-6 by reading only docs/comparison.md; recorded as a judgement once keel judge is available
+diff --git a/docs/comparison.md b/docs/comparison.md
+new file mode 100644
+index 0000000..79f4f6b
+--- /dev/null
++++ b/docs/comparison.md
+@@ -0,0 +1,45 @@
++# keel compared with other spec-driven tools
++
++keel is not the only tool that puts a spec between you and an agent. This page
++says where it differs, and where something else is the better choice.
++
++"Not documented" means the tool's own page, checked on the date under
++[Sources](#sources), does not describe the property. It is not a claim that the
++tool cannot do it. Every keel cell links to the ADR or test that backs it.
++
++| | keel | spec-kit | Kiro | BMAD | Tessl | Elephant-Goldfish | Claude Code hooks |
++|---|---|---|---|---|---|---|---|
++| falsifiable criteria | Yes: each criterion carries an oracle ([test](../tests/oracle_sensitivity.rs)) | Stated: its spec-driven.md checklists require requirements to be testable and unambiguous[^speckit] | Partial: specs hold user stories with acceptance criteria, falsifiability not stated[^kiro] | Not documented[^bmad] | Not documented[^tessl] | Not documented[^egm] | Not documented[^hooks] |
++| blocked as a verdict | Yes: pass, fail or blocked ([ADR-0002](../.keel/store/decisions/ADR-0002-blocked-is-a-verdict.md)) | Not documented[^speckit] | Not documented[^kiro] | Not documented[^bmad] | Not documented[^tessl] | Not documented[^egm] | Yes: exit code 2 blocks the action, and a deny decision is a separate block path[^hooks] |
++| approvals bound to content | Yes: an approval binds to a hash ([ADR-0003](../.keel/store/decisions/ADR-0003-approvals-bind-to-a-hash.md)) | Not documented[^speckit] | Not documented[^kiro] | Not documented[^bmad] | Not documented[^tessl] | Not documented[^egm] | Not documented[^hooks] |
++| tamper-evident evidence | Yes: a hash-chained bundle verified offline ([test](../tests/bundle.rs)) | Not documented[^speckit] | Not documented[^kiro] | Not documented[^bmad] | Not documented[^tessl] | Not documented[^egm] | Not documented[^hooks] |
++| computed blast radius | Yes: recomputed, never trusted ([ADR-0009](../.keel/store/decisions/ADR-0009-blast-radius-is-recomputed.md)) | Not documented[^speckit] | Not documented[^kiro] | Not documented[^bmad] | Not documented[^tessl] | Not documented[^egm] | Not documented[^hooks] |
++| test-tampering review | Yes: added mocks and weakened assertions are flagged ([test](../tests/phase2.rs)) | Not documented[^speckit] | Not documented[^kiro] | Not documented[^bmad] | Not documented[^tessl] | Not documented[^egm] | Not documented[^hooks] |
++| lessons enforced as checks | Yes: enforced lessons become checks ([ADR-0007](../.keel/store/decisions/ADR-0007-enforced-lessons-are-not-injected.md)) | Not documented[^speckit] | Not documented[^kiro] | Not documented[^bmad] | Not documented[^tessl] | Not documented[^egm] | Not documented[^hooks] |
++| agent drivers | Yes: a driver contract with a conformance suite ([test](../tests/driver.rs)) | Partial: GitHub Copilot is named, other integrations are not[^speckit] | Not documented[^kiro] | Yes: Claude Code and Codex plugins are named, and any tool that supports skills works[^bmad] | Agent-agnostic, no agents named[^tessl] | Antigravity is named, other environments are announced[^egm] | Run wherever Claude Code runs: CLI, Agent SDK and plugins[^hooks] |
++
++## Where keel is weaker
++
++- **spec-kit**: choose it when you want lightweight spec scaffolding with
++  integrations for other agents.
++- **Kiro**: choose it when you want an IDE with in-product spec review and
++  commenting.
++- **BMAD**: choose it when you want role-based agile planning for whole
++  projects.
++- **Tessl**: choose it when you want a registry of library usage specs.
++- **Elephant-Goldfish**: choose it when you want a fresh-context review of a
++  design document before implementation, which keel does not do.
++- **Claude Code hooks**: choose them when you want immediate per-tool-call
++  blocking across 33 events, with no spec or plan stage.
++
++This comparison covers only what each tool's primary pages state. Every "Not
++documented" may be a gap in the page, not in the tool.
++
++## Sources
++
++[^speckit]: https://github.com/github/spec-kit and https://github.com/github/spec-kit/blob/main/spec-driven.md (checked: 2026-11-04)
++[^kiro]: https://kiro.dev/docs/specs/ (checked: 2026-11-04)
++[^bmad]: https://github.com/bmad-code-org/BMAD-METHOD (checked: 2026-11-04)
++[^tessl]: https://docs.tessl.io/ (checked: 2026-11-04)
++[^egm]: https://opensource.googleblog.com/2026/10/introducing-elephant-goldfish-model-plugin.html (checked: 2026-11-04)
++[^hooks]: https://code.claude.com/docs/en/hooks (checked: 2026-11-04)
+diff --git a/tests/comparison_doc.rs b/tests/comparison_doc.rs
+new file mode 100644
+index 0000000..875985d
+--- /dev/null
++++ b/tests/comparison_doc.rs
+@@ -0,0 +1,126 @@
++//! The comparison page keeps its promises: fixed shape, dated sources, linked evidence.
++
++use std::fs;
++use std::path::Path;
++
++const TOOLS: [&str; 6] = [
++    "spec-kit",
++    "Kiro",
++    "BMAD",
++    "Tessl",
++    "Elephant-Goldfish",
++    "Claude Code hooks",
++];
++const ROWS: [&str; 8] = [
++    "falsifiable criteria",
++    "blocked as a verdict",
++    "approvals bound to content",
++    "tamper-evident evidence",
++    "computed blast radius",
++    "test-tampering review",
++    "lessons enforced as checks",
++    "agent drivers",
++];
++
++fn root() -> &'static Path {
++    Path::new(env!("CARGO_MANIFEST_DIR"))
++}
++
++fn doc() -> String {
++    fs::read_to_string(root().join("docs/comparison.md")).expect("docs/comparison.md")
++}
++
++/// Table rows after the header and separator, split into trimmed cells.
++fn table(doc: &str) -> Vec<Vec<String>> {
++    doc.lines()
++        .filter(|l| l.starts_with('|'))
++        .map(|l| {
++            l.trim_matches('|')
++                .split(" | ")
++                .map(|c| c.trim().trim_matches('|').trim().to_string())
++                .collect()
++        })
++        .collect()
++}
++
++fn section<'a>(doc: &'a str, heading: &str) -> &'a str {
++    let start = doc.find(heading).expect("section present");
++    let rest = &doc[start + heading.len()..];
++    rest.split("\n## ").next().unwrap_or(rest)
++}
++
++#[test]
++fn the_table_has_the_fixed_columns_and_rows() {
++    let t = table(&doc());
++    let mut header = vec!["", "keel"];
++    header.extend(TOOLS);
++    assert_eq!(t[0], header);
++    let labels: Vec<&str> = t[2..].iter().map(|r| r[0].as_str()).collect();
++    assert_eq!(labels, ROWS);
++    assert!(t[2..].iter().all(|r| r.len() == 8), "every row has 8 cells");
++}
++
++#[test]
++fn every_other_tool_cell_footnotes_a_dated_https_source() {
++    let d = doc();
++    let t = table(&d);
++    let sources = section(&d, "## Sources");
++    for row in &t[2..] {
++        for cell in &row[2..] {
++            let start = cell.rfind("[^").expect("cell has a footnote");
++            let id = &cell[start..cell[start..].find(']').unwrap() + start + 1];
++            let def = sources
++                .lines()
++                .find(|l| l.starts_with(&format!("{id}:")))
++                .unwrap_or_else(|| panic!("no source for {id}"));
++            assert!(def.contains("https://"), "{def}");
++            let date = def.split("checked: ").nth(1).expect("checked date");
++            let b = date.as_bytes();
++            assert!(
++                b.len() >= 10 && b[4] == b'-' && b[7] == b'-'
++                    && date[..10].chars().filter(char::is_ascii_digit).count() == 8,
++                "{def}"
++            );
++        }
++    }
++}
++
++#[test]
++fn every_keel_claim_links_to_an_existing_adr_or_test() {
++    let d = doc();
++    for row in &table(&d)[2..] {
++        let cell = &row[1];
++        let target = cell
++            .split("](")
++            .nth(1)
++            .and_then(|s| s.split(')').next())
++            .unwrap_or_else(|| panic!("keel cell without a link: {cell}"));
++        let rel = target.trim_start_matches("../");
++        assert!(
++            rel.starts_with(".keel/store/decisions/") || rel.starts_with("tests/"),
++            "{target}"
++        );
++        assert!(root().join(rel).exists(), "{target} does not exist");
++    }
++}
++
++#[test]
++fn the_weaker_section_names_every_compared_tool() {
++    let d = doc();
++    let s = section(&d, "## Where keel is weaker");
++    for tool in TOOLS {
++        let entry = s
++            .lines()
++            .find(|l| l.starts_with(&format!("- **{tool}**")))
++            .unwrap_or_else(|| panic!("no entry for {tool}"));
++        assert!(entry.contains("choose"), "{tool} entry names no situation");
++    }
++}
++
++#[test]
++fn readme_links_the_comparison_before_the_first_diagram() {
++    let r = fs::read_to_string(root().join("README.md")).unwrap();
++    let link = r.find("docs/comparison.md").expect("README links comparison");
++    let diagram = r.find("<img").expect("README has a diagram");
++    assert!(link < diagram);
++}
