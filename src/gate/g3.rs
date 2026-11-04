@@ -21,6 +21,7 @@ pub fn run(paths: &Paths, cfg: &Config, spec: &Spec, run: &Run) -> Result<GateRe
         earlier_gates(run)?,
         reviewable_size(paths, cfg, run),
         evidence_complete(run),
+        human_oracles(paths, run),
         human_verdict(paths, &spec.front.slug)?,
     ];
     checks.extend(run_plugins(paths, cfg, "G3", Some(&spec.front.slug)));
@@ -64,13 +65,17 @@ fn earlier_gates(run: &Run) -> Result<Check> {
     ))
 }
 
-fn reviewable_size(paths: &Paths, cfg: &Config, run: &Run) -> Check {
+pub fn reviewable(paths: &Paths, cfg: &Config, run: &Run) -> Option<(usize, usize)> {
     let base = run.meta.base_commit.clone().unwrap_or_else(|| diff::default_base(paths));
-    let Ok(d) = diff::against(paths, &base) else {
+    let d = diff::against(paths, &base).ok()?;
+    let files: Vec<_> = d.files.iter().filter(|f| !super::g2::is_incidental_for(cfg, &f.path)).collect();
+    Some((files.len(), files.iter().map(|f| f.churn()).sum()))
+}
+
+fn reviewable_size(paths: &Paths, cfg: &Config, run: &Run) -> Check {
+    let Some((files, churn)) = reviewable(paths, cfg, run) else {
         return Check::blocked("reviewable-size", "could not read the diff");
     };
-    let reviewable: Vec<_> = d.files.iter().filter(|f| !super::g2::is_incidental_for(cfg, &f.path)).collect();
-    let churn: usize = reviewable.iter().map(|f| f.churn()).sum();
     let max = cfg.plan.max_reviewable_lines;
     if churn > max {
         return Check::fail(
@@ -80,7 +85,7 @@ fn reviewable_size(paths: &Paths, cfg: &Config, run: &Run) -> Check {
             // created by the very act of gating) is untracked until committed,
             // and counting it here would tell a reviewer their diff touches
             // dozens of files it does not.
-            format!("{churn} lines across {} files — split it, or raise the limit knowing what you are buying", reviewable.len()),
+            format!("{churn} lines across {files} files — split it, or raise the limit knowing what you are buying"),
         );
     }
     Check::pass("reviewable-size", format!("{churn}/{max} reviewable lines"))
@@ -101,6 +106,40 @@ fn evidence_complete(run: &Run) -> Check {
     } else {
         Check::fail("evidence-complete", "a complete run record", format!("missing: {}", missing.join(", ")))
     }
+}
+
+/// Each `human` oracle is its own judgement, bound to this run's evidence. One
+/// merge approval proves a person said yes to a hash; it does not say they
+/// looked at the criteria only a person can judge.
+fn human_oracles(paths: &Paths, run: &Run) -> Check {
+    let Ok(raw) = std::fs::read_to_string(run.evidence_dir().join("oracles.json")) else {
+        return Check::blocked("human-oracles", "evidence/oracles.json is missing — G2 has not recorded the oracles");
+    };
+    let Ok(v) = serde_json::from_str::<serde_json::Value>(&raw) else {
+        return Check::blocked("human-oracles", "evidence/oracles.json is unreadable");
+    };
+    let mut open = Vec::new();
+    let mut total = 0;
+    for r in v["runs"].as_array().into_iter().flatten().filter(|r| r["outcome"] == "human") {
+        let id = r["criterion"].as_str().unwrap_or("?");
+        total += 1;
+        let state = match approval::judgement_standing(paths, run, id) {
+            Ok(Standing::Current { .. }) => continue,
+            Ok(Standing::Absent) => "unjudged".to_string(),
+            Ok(Standing::Rejected { by, note }) => {
+                format!("judged FAIL by {by}{}", note.map(|n| format!(": {n}")).unwrap_or_default())
+            }
+            Ok(Standing::Superseded { approved_hash: a, current_hash: c }) => {
+                format!("judgement superseded, evidence changed ({a} → {c})")
+            }
+            Err(e) => format!("could not read the judgement: {e:#}"),
+        };
+        open.push(format!("{id} {state} — {}", r["oracle"].as_str().unwrap_or("")));
+    }
+    if open.is_empty() {
+        return Check::pass("human-oracles", format!("{total} human oracle(s) judged against this evidence"));
+    }
+    Check::fail("human-oracles", "every human oracle judged pass against the current evidence", open.join("; "))
 }
 
 fn human_verdict(paths: &Paths, slug: &str) -> Result<Check> {

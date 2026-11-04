@@ -9,6 +9,7 @@
 
 use crate::hashing::short;
 use crate::paths::Paths;
+use crate::run::Run;
 use crate::spec::Spec;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
@@ -39,6 +40,11 @@ pub struct Approval {
     pub at: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub note: Option<String>,
+    /// A judgement: the run judged. A merge: the brief shown, when, and its size.
+    #[serde(default, skip_serializing_if = "Option::is_none")] pub run: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")] pub brief_hash: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")] pub brief_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")] pub reviewable_lines: Option<usize>,
 }
 
 pub const APPROVAL_SCHEMA: &str = "keel.approval/1";
@@ -139,16 +145,41 @@ pub fn record(
     gate_verdict: Option<String>,
     note: Option<String>,
 ) -> Result<Approval> {
-    let approval = Approval {
+    record_with(paths, slug, stage, decision, artefact_hash(paths, slug, stage)?, gate_verdict, note, None)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn record_with(
+    paths: &Paths,
+    slug: &str,
+    stage: &str,
+    decision: Decision,
+    artefact_hash: String,
+    gate_verdict: Option<String>,
+    note: Option<String>,
+    run: Option<String>,
+) -> Result<Approval> {
+    let mut approval = Approval {
         schema: APPROVAL_SCHEMA.to_string(),
         stage: stage.to_string(),
         decision,
-        artefact_hash: artefact_hash(paths, slug, stage)?,
+        artefact_hash,
         gate_verdict,
         by: current_user(paths),
         at: chrono::Local::now().to_rfc3339(),
         note,
+        run,
+        brief_hash: None,
+        brief_at: None,
+        reviewable_lines: None,
     };
+    if stage == "merge"
+        && let Some(id) = latest_run_for(paths, slug)
+        && let Ok(run) = Run::load(paths, &id)
+        && let Some((hash, at, lines)) = brief(&run)
+    {
+        (approval.brief_hash, approval.brief_at, approval.reviewable_lines) = (Some(hash), at, lines);
+    }
     let path = log_path(paths, slug);
     std::fs::create_dir_all(path.parent().unwrap())?;
     let line = serde_json::to_string(&approval)?;
@@ -157,14 +188,74 @@ pub fn record(
     let mut f = std::fs::OpenOptions::new().create(true).append(true).open(&path)
         .with_context(|| format!("appending to {}", path.display()))?;
     writeln!(f, "{line}")?;
-    crate::chain::record(&path, "approval", serde_json::json!({
+    let judged = approval.stage.starts_with("judge:");
+    crate::chain::record(&path, if judged { "judgement" } else { "approval" }, serde_json::json!({
         "spec": slug,
         "stage": approval.stage,
         "decision": approval.decision,
         "artefact_hash": approval.artefact_hash,
         "by": approval.by,
+        "run": approval.run,
+        "brief_hash": approval.brief_hash,
     }))?;
     Ok(approval)
+}
+
+pub fn latest_run_for(paths: &Paths, slug: &str) -> Option<String> {
+    crate::run::list(paths).ok()?.into_iter().rfind(|id| Run::load(paths, id).is_ok_and(|r| r.meta.spec == slug))
+}
+
+pub const BRIEF: &str = "review-brief.md";
+
+/// `(hash, generated, reviewable_lines)` of a run's review brief. The two
+/// header lines are read back from the file, so it alone says what was shown.
+pub fn brief(run: &Run) -> Option<(String, Option<String>, Option<usize>)> {
+    let text = std::fs::read_to_string(run.evidence_dir().join(BRIEF)).ok()?;
+    let field = |k: &str| text.lines().find_map(|l| l.strip_prefix(k)).map(|v| v.trim().to_string());
+    Some((crate::hashing::sha256_hex(text.as_bytes()), field("generated:"), field("reviewable_lines:")?.parse().ok()))
+}
+
+/// Hash of what a judgement is bound to: the run's diff and `oracles.json`.
+pub fn evidence_hash(run: &Run) -> Result<String> {
+    let read = |name: &str| {
+        let p = run.evidence_dir().join(name);
+        std::fs::read(&p).with_context(|| format!("reading {} to bind a judgement", p.display()))
+    };
+    Ok(judged_hash(&read("diff.patch")?, &read("oracles.json")?))
+}
+
+/// Shared with the bundle verifier. Diff sections under `.keel/` are keel's own
+/// untracked run evidence, different every run; hashing them would supersede a
+/// judgement just because the gates ran again.
+pub fn judged_hash(diff: &[u8], oracles: &[u8]) -> String {
+    let text = String::from_utf8_lossy(diff);
+    let kept: String = text
+        .split_inclusive("\ndiff --git ")
+        .enumerate()
+        .map(|(i, sec)| if i == 0 { sec.to_string() } else { format!("diff --git {sec}") })
+        .filter(|sec| !sec.lines().next().is_some_and(|h| h.contains(" b/.keel/")))
+        .collect();
+    hash_named([("diff.patch", kept.as_bytes()), ("oracles.json", oracles)])
+}
+
+/// Record one person's judgement of one criterion against a run's evidence.
+pub fn judge(paths: &Paths, run: &Run, criterion: &str, pass: bool, note: Option<String>) -> Result<Approval> {
+    let decision = if pass { Decision::Approved } else { Decision::Rejected };
+    let stage = format!("judge:{criterion}");
+    record_with(paths, &run.meta.spec, &stage, decision, evidence_hash(run)?, None, note, Some(run.meta.id.clone()))
+}
+
+/// A judgement's standing against the evidence as it is now.
+pub fn judgement_standing(paths: &Paths, run: &Run, criterion: &str) -> Result<Standing> {
+    let Some(a) = latest(paths, &run.meta.spec, &format!("judge:{criterion}"))? else { return Ok(Standing::Absent) };
+    let current = evidence_hash(run)?;
+    Ok(if a.artefact_hash != current {
+        Standing::Superseded { approved_hash: short(&a.artefact_hash).into(), current_hash: short(&current).into() }
+    } else if a.decision == Decision::Rejected {
+        Standing::Rejected { by: a.by, note: a.note }
+    } else {
+        Standing::Current { by: a.by, at: a.at }
+    })
 }
 
 pub fn history(paths: &Paths, slug: &str) -> Result<Vec<Approval>> {

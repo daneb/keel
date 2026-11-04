@@ -72,6 +72,14 @@ pub fn check(archive: &Path) -> Result<Report> {
         }
     }
 
+    // From the shipped approval log: a judgement follows `run_end`, so it lies
+    // beyond the chain slice. Absent when nobody judged — nothing to check.
+    if let Some(spec) = &spec
+        && let Some(check) = judgements_check(spec, &members)
+    {
+        checks.push(check);
+    }
+
     Ok(Report {
         schema: REPORT_SCHEMA.to_string(),
         archive: archive.display().to_string(),
@@ -175,6 +183,31 @@ fn gate_verdicts_check(entries: &[Value], spec: &str, members: &BTreeMap<String,
             format!("{} — not recorded up to this run (re-run since?)", unrecorded.join(", ")),
         )
     }
+}
+
+/// Each criterion's latest judgement must be bound to the diff and
+/// `oracles.json` this bundle ships; otherwise it judged something else.
+fn judgements_check(spec: &str, members: &BTreeMap<String, Vec<u8>>) -> Option<Check> {
+    let log = String::from_utf8_lossy(members.get(&format!("{spec}/approvals.jsonl"))?).to_string();
+    let mut latest: BTreeMap<String, String> = BTreeMap::new();
+    for a in log.lines().filter_map(|l| serde_json::from_str::<Value>(l).ok()) {
+        if let (Some(c), Some(h)) = (a["stage"].as_str().and_then(|s| s.strip_prefix("judge:")), a["artefact_hash"].as_str()) {
+            latest.insert(c.to_string(), h.to_string());
+        }
+    }
+    if latest.is_empty() {
+        return None;
+    }
+    let (Some(diff), Some(oracles)) = (members.get("evidence/diff.patch"), members.get("evidence/oracles.json")) else {
+        return Some(Check::fail("judgements", "the judged diff and oracles.json in the bundle", "missing"));
+    };
+    let current = approval::judged_hash(diff, oracles);
+    let stale: Vec<&str> = latest.iter().filter(|(_, h)| **h != current).map(|(c, _)| c.as_str()).collect();
+    Some(if stale.is_empty() {
+        Check::pass("judgements", format!("{} judgement(s) match the shipped diff and oracles.json", latest.len()))
+    } else {
+        Check::fail("judgements", "each judgement is bound to the shipped diff and oracles.json", format!("{} judged other evidence", stale.join(", ")))
+    })
 }
 
 /// `run_end` commits to the trajectory as it stood when the run ended. A
