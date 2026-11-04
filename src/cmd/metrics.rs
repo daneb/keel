@@ -62,8 +62,16 @@ fn report(m: &Metrics, cfg: &Config) {
     }
 
     println!("\ncontext");
-    println!("  {:>8} tokens total", m.tokens_total);
-    println!("  {:>8.0} tokens per run", m.tokens_per_run);
+    println!("  {:>8} tokens injected (estimated by keel)", m.tokens_total);
+    println!("  {:>8.0} tokens per run injected", m.tokens_per_run);
+    println!(
+        "  {:>8} tokens spent (reported by the driver), {} call(s) unreported",
+        m.spent.tokens, m.spent.calls_unreported
+    );
+    if m.spent.cost_reported_usd + m.spent.cost_estimated_usd > 0.0 {
+        let basis = m.spent.estimate_basis.as_deref().unwrap_or("no estimate");
+        println!("  {:>8.4} USD reported, {:.4} USD {basis}", m.spent.cost_reported_usd, m.spent.cost_estimated_usd);
+    }
     println!("  {:>8} human decision(s) recorded", m.human_decisions);
     println!(
         "  {:>8.0} minutes elapsed to a human decision, {:.0} per run",

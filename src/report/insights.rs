@@ -18,9 +18,12 @@
 
 use crate::lesson;
 use crate::metrics::{self, CheckStats};
+use crate::gate::Verdict;
 use crate::paths::Paths;
 use crate::pipeline::Stage;
 use crate::report::Report;
+use crate::run::Run;
+use crate::trajectory::{self, UsageTotals};
 use anyhow::Result;
 use chrono::{DateTime, Weekday};
 use serde::Serialize;
@@ -55,6 +58,7 @@ pub struct Overview {
     pub specs_complete: usize,
     pub runs_total: usize,
     pub pass_rate: f64,
+    /// Injected, estimated by keel.
     pub tokens_total: usize,
     pub tokens_this_week: usize,
     pub human_decisions: usize,
@@ -81,6 +85,11 @@ pub struct SpecSummary {
     pub runs: usize,
     pub pass_rate: f64,
     pub tokens_total: usize,
+    /// Spent across every run of this spec, red ones included.
+    pub spent: UsageTotals,
+    /// Of `spent.tokens`, the part on runs whose final G2 was fail or blocked.
+    pub spent_tokens_on_red_runs: usize,
+    pub red_share: f64,
     pub last_run_at: Option<String>,
     /// First run's start to the most recent run's finish, only once the spec
     /// has reached `Complete`. keel does not replay historical stage
@@ -114,7 +123,7 @@ impl Insights {
         });
 
         let trend = build_trend(&report);
-        let specs = build_spec_summaries(&report);
+        let specs = build_spec_summaries(paths, &report);
         let lessons = build_lesson_summaries(paths)?;
 
         let runs_total = specs.iter().map(|s| s.runs).sum();
@@ -194,7 +203,7 @@ fn build_trend(report: &Report) -> Vec<WeekBucket> {
     buckets.into_values().collect()
 }
 
-fn build_spec_summaries(report: &Report) -> Vec<SpecSummary> {
+fn build_spec_summaries(paths: &Paths, report: &Report) -> Vec<SpecSummary> {
     report
         .specs
         .iter()
@@ -202,6 +211,19 @@ fn build_spec_summaries(report: &Report) -> Vec<SpecSummary> {
             let runs = spec.runs.len();
             let passed = spec.runs.iter().filter(|r| r.meta.verdict.as_deref() == Some("pass")).count();
             let tokens_total = spec.runs.iter().map(|r| r.tokens).sum();
+
+            // Every run counts: a spec's cost is what it took to get to green.
+            let mut spent = UsageTotals::default();
+            let mut spent_tokens_on_red_runs = 0;
+            for r in &spec.runs {
+                let scan = Run::load(paths, &r.meta.id).ok().and_then(|run| trajectory::scan(&run.trajectory_path()).ok());
+                let u = scan.map(|s| trajectory::usage_total(&s.events)).unwrap_or_default();
+                if r.gates.iter().rfind(|g| g.gate == "G2").is_some_and(|g| g.verdict != Verdict::Pass) {
+                    spent_tokens_on_red_runs += u.tokens;
+                }
+                spent.add(&u);
+            }
+            let red_share = if spent.tokens == 0 { 0.0 } else { spent_tokens_on_red_runs as f64 / spent.tokens as f64 };
 
             // `SpecReport.runs` is not reliably chronological — it inherits
             // `run::list()`'s lexicographic sort, and a run id's suffix is a
@@ -241,6 +263,9 @@ fn build_spec_summaries(report: &Report) -> Vec<SpecSummary> {
                 runs,
                 pass_rate: if runs == 0 { 0.0 } else { passed as f64 / runs as f64 },
                 tokens_total,
+                spent,
+                spent_tokens_on_red_runs,
+                red_share,
                 last_run_at,
                 cycle_time_days,
             }

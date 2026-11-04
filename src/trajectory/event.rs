@@ -42,6 +42,24 @@ pub enum Payload {
         #[serde(skip_serializing_if = "Option::is_none")]
         detail: Option<String>,
     },
+    /// What a call spent; `source` is `reported` or `unreported` (zeros, skipped by totals).
+    DriverUsage {
+        driver: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        task: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        gate: Option<String>,
+        source: String,
+        input_tokens: usize,
+        output_tokens: usize,
+        cache_read_tokens: usize,
+        cache_write_tokens: usize,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        cost_usd: Option<f64>,
+        /// `reported`, or `estimated from price table dated <date>`.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        cost_basis: Option<String>,
+    },
     /// An oracle was executed. This is what G2's oracle-coverage reads.
     Oracle {
         criterion: String,
@@ -87,6 +105,7 @@ impl Payload {
             Payload::Inject { .. } => "inject",
             Payload::DriverCall { .. } => "driver_call",
             Payload::DriverResult { .. } => "driver_result",
+            Payload::DriverUsage { .. } => "driver_usage",
             Payload::Oracle { .. } => "oracle",
             Payload::Gate { .. } => "gate",
             Payload::Human { .. } => "human",
@@ -95,7 +114,9 @@ impl Payload {
         }
     }
 
-    /// Tokens this event put in front of a model, if any.
+    /// Tokens keel *estimated* it put in front of a model, if any. Spent
+    /// tokens (`DriverUsage`) are deliberately not here: they are reported, and
+    /// the two are never added together.
     pub fn tokens(&self) -> usize {
         match self {
             Payload::Inject { tokens, .. } => *tokens,
@@ -137,6 +158,10 @@ impl Event {
             Payload::DriverResult { driver, status, detail, .. } => {
                 format!("{driver} {status}{}", detail.as_ref().map(|d| format!(" — {d}")).unwrap_or_default())
             }
+            Payload::DriverUsage { driver, gate, source, input_tokens, output_tokens, .. } => format!(
+                "{driver}{} {source} ({input_tokens} in, {output_tokens} out)",
+                gate.as_ref().map(|g| format!(" {g}")).unwrap_or_default()
+            ),
             Payload::Oracle { criterion, verdict, oracle, .. } => {
                 format!("{criterion} {verdict} — {oracle}")
             }
@@ -198,6 +223,7 @@ mod tests {
             Payload::Inject { source: "a".into(), tokens: 1, bytes: None },
             Payload::DriverCall { driver: "d".into(), task: None, prompt_tokens: 2 },
             Payload::DriverResult { driver: "d".into(), status: "ok".into(), files_changed: Some(1), detail: None },
+            Payload::DriverUsage { driver: "d".into(), task: None, gate: Some("G2.5".into()), source: "reported".into(), input_tokens: 1, output_tokens: 2, cache_read_tokens: 3, cache_write_tokens: 4, cost_usd: Some(0.5), cost_basis: Some("reported".into()) },
             Payload::Oracle { criterion: "AC-1".into(), oracle: "cmd".into(), verdict: "pass".into(), exit_code: Some(0) },
             Payload::Gate { gate: "G2".into(), verdict: "fail".into(), result: "gates/G2.json".into() },
             Payload::Human { stage: "spec".into(), decision: "approved".into(), by: "me".into(), note: None },

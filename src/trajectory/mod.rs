@@ -196,6 +196,56 @@ pub fn token_total(events: &[Event]) -> usize {
     events.iter().map(|e| e.payload.tokens()).sum()
 }
 
+/// What a stream's calls spent: reported figures only; unreported calls are counted, not zeroed in.
+#[derive(Debug, Default, Clone, PartialEq, Serialize)]
+pub struct UsageTotals {
+    pub tokens: usize,
+    pub calls_reported: usize,
+    pub calls_unreported: usize,
+    pub cost_reported_usd: f64,
+    pub cost_estimated_usd: f64,
+    /// Price-table label behind `cost_estimated_usd`.
+    pub estimate_basis: Option<String>,
+}
+
+impl UsageTotals {
+    pub fn add(&mut self, o: &UsageTotals) {
+        (self.tokens, self.calls_reported, self.calls_unreported) =
+            (self.tokens + o.tokens, self.calls_reported + o.calls_reported, self.calls_unreported + o.calls_unreported);
+        (self.cost_reported_usd, self.cost_estimated_usd) =
+            (self.cost_reported_usd + o.cost_reported_usd, self.cost_estimated_usd + o.cost_estimated_usd);
+        self.estimate_basis = self.estimate_basis.take().or_else(|| o.estimate_basis.clone());
+    }
+}
+
+/// Total spent tokens and cost across a stream's `driver_usage` events.
+pub fn usage_total(events: &[Event]) -> UsageTotals {
+    let mut t = UsageTotals::default();
+    for e in events {
+        let Payload::DriverUsage {
+            source, input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, cost_usd, cost_basis, ..
+        } = &e.payload
+        else {
+            continue;
+        };
+        if source != "reported" {
+            t.calls_unreported += 1;
+            continue;
+        }
+        t.calls_reported += 1;
+        t.tokens += input_tokens + output_tokens + cache_read_tokens + cache_write_tokens;
+        match (cost_usd, cost_basis.as_deref()) {
+            (Some(c), Some("reported")) => t.cost_reported_usd += c,
+            (Some(c), Some(basis)) => {
+                t.cost_estimated_usd += c;
+                t.estimate_basis = Some(basis.to_string());
+            }
+            _ => {}
+        }
+    }
+    t
+}
+
 /// Every gate verdict in the stream, in order.
 pub fn gate_verdicts(events: &[Event]) -> Vec<(String, String)> {
     events

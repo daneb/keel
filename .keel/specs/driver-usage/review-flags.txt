@@ -1,0 +1,2 @@
+tests/driver_usage.rs: let fake = format!(
+tests/driver_usage.rs: std::fs::write(bin.join("claude"), fake).unwrap();

@@ -13,13 +13,15 @@
 # Always prints exactly one keel.driverresult/1 object. Every exit path in an
 # adapter must go through this: a driver that dies without emitting is
 # indistinguishable from one that hung.
+# A non-empty $KEEL_USAGE (a JSON object) is passed through as `usage`.
 keel_emit() {
   _status="$1"
   _detail="$2"
   _files="${3:-[]}"
-  printf '{"schema":"keel.driverresult/1","status":"%s","files_changed":%s,"detail":"%s"}\n' \
+  printf '{"schema":"keel.driverresult/1","status":"%s","files_changed":%s,"detail":"%s"%s}\n' \
     "$_status" "$_files" \
-    "$(printf '%s' "$_detail" | sed 's/\\/\\\\/g; s/"/\\"/g' | tr -d '\n' | cut -c1-500)"
+    "$(printf '%s' "$_detail" | sed 's/\\/\\\\/g; s/"/\\"/g' | tr -d '\n' | cut -c1-500)" \
+    "${KEEL_USAGE:+,\"usage\":$KEEL_USAGE}"
 }
 
 # keel_require <binary> <install hint>
