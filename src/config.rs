@@ -62,6 +62,21 @@ pub struct Config {
     pub chain: ChainConfig,
     #[serde(default)]
     pub runtime: RuntimeConfig,
+    /// Rates used only to *estimate* a cost a driver did not report.
+    #[serde(default, rename = "price", skip_serializing_if = "Vec::is_empty")]
+    pub prices: Vec<Price>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Price {
+    pub driver: String,
+    /// Labels the estimate: prices move.
+    pub as_of: String,
+    pub input_per_mtok: f64,
+    pub output_per_mtok: f64,
+    pub cache_read_per_mtok: f64,
+    pub cache_write_per_mtok: f64,
 }
 
 /// What the sandbox a run happens in must vouch for (SPEC-0010).
@@ -406,6 +421,7 @@ impl Default for Config {
             ratchets: default_ratchets(),
             chain: ChainConfig::default(),
             runtime: RuntimeConfig::default(),
+            prices: vec![],
         }
     }
 }

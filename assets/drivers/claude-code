@@ -2,8 +2,9 @@
 # keel driver — Claude Code, headless.
 #
 # ── INVOCATION ─────────────────────────────────────────────────────────────
-#   claude --print "<prompt>"
+#   claude --print --output-format json "<prompt>"
 # `--print` runs headless; keel owns the gating, so no approval UI is needed.
+# The JSON output carries the CLI's own token counts and cost (the result's `usage`).
 # ───────────────────────────────────────────────────────────────────────────
 set -u
 # shellcheck disable=SC1091 # _common.sh is checked as a file of its own
@@ -17,9 +18,25 @@ keel_require claude "https://claude.com/claude-code"
 prompt=$(keel_prompt "$task") || { keel_emit blocked "could not read the task JSON"; exit 0; }
 before=$(keel_dirty_count)
 
-if ! out=$(printf '%s' "$prompt" | claude --print 2>&1); then
+if ! out=$(printf '%s' "$prompt" | claude --print --output-format json 2>&1); then
   keel_emit blocked "claude exited non-zero: $(printf '%s' "$out" | tail -c 400)"
   exit 0
 fi
 
-keel_finish "$before" "claude" "$task"
+# Empty unless the output is the JSON document: no `usage`, so unreported.
+usage=$(printf '%s' "$out" | python3 -c '
+import json, sys
+try:
+    d = json.load(sys.stdin)
+    u = d["usage"]
+    o = {"input_tokens": u.get("input_tokens", 0), "output_tokens": u.get("output_tokens", 0),
+         "cache_read_tokens": u.get("cache_read_input_tokens", 0),
+         "cache_write_tokens": u.get("cache_creation_input_tokens", 0)}
+    if d.get("total_cost_usd") is not None:
+        o["cost_usd"] = d["total_cost_usd"]
+    print(json.dumps(o))
+except Exception:
+    pass
+' 2>/dev/null)
+
+KEEL_USAGE="$usage" keel_finish "$before" "claude" "$task"

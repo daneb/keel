@@ -15,7 +15,7 @@ use crate::gate::Verdict;
 use crate::lesson;
 use crate::paths::Paths;
 use crate::run::Run;
-use crate::trajectory;
+use crate::trajectory::{self, UsageTotals};
 use anyhow::Result;
 use serde::Serialize;
 use std::collections::BTreeMap;
@@ -54,8 +54,11 @@ pub struct Metrics {
     /// by `failure::distribution` but not surfaced by `keel metrics`'s own text
     /// report; `report::insights` is the first consumer that shows it.
     pub harness_fixable_rate: f64,
+    /// Injected: keel's own estimate of what it put in front of a model.
     pub tokens_total: usize,
     pub tokens_per_run: f64,
+    /// Spent: what drivers and reviewers reported. Never added to the above.
+    pub spent: UsageTotals,
     pub human_decisions: usize,
     /// Minutes between a run starting and each human decision on it — the
     /// closest honest proxy keel has for what a person's involvement cost.
@@ -108,6 +111,7 @@ pub fn compute(paths: &Paths, threshold: usize) -> Result<Metrics> {
 
         let events = trajectory::read(&run.trajectory_path()).unwrap_or_default();
         m.tokens_total += trajectory::token_total(&events);
+        m.spent.add(&trajectory::usage_total(&events));
         let humans: Vec<&crate::trajectory::Event> =
             events.iter().filter(|e| e.payload.kind() == "human").collect();
         m.human_decisions += humans.len();

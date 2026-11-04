@@ -1,0 +1,37 @@
+{
+  "schema": "keel.gate/1",
+  "gate": "G2.5",
+  "run": "2026-11-04-003",
+  "spec": "driver-usage",
+  "verdict": "blocked",
+  "generated_at": "2026-11-04T07:21:19.256455236+00:00",
+  "checks": [
+    {
+      "id": "test-invalidation",
+      "verdict": "blocked",
+      "detail": "2 added line(s) mock or weaken behaviour — confirm the test still tests, then `keel approve --stage review driver-usage`: tests/driver_usage.rs: let fake = format!(, tests/driver_usage.rs: std::fs::write(bin.join(\"claude\"), fake).unwrap();",
+      "evidence": "evidence/review-test-invalidation.txt"
+    },
+    {
+      "id": "test-movement",
+      "verdict": "pass",
+      "detail": "11 code file(s), 1 test file(s)"
+    },
+    {
+      "id": "conventions",
+      "verdict": "pass",
+      "detail": "4 house rule(s) in force"
+    },
+    {
+      "id": "lessons",
+      "verdict": "pass",
+      "detail": "3 lesson(s) in force"
+    },
+    {
+      "id": "review",
+      "verdict": "pass",
+      "detail": "0 finding(s) (0.0s)",
+      "evidence": "evidence/review.json"
+    }
+  ]
+}

@@ -121,6 +121,9 @@ pub struct ReviewResult {
     pub findings: Vec<Finding>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub summary: Option<String>,
+    /// What a model-backed reviewer spent; `keel run` records it against G2.5.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub usage: Option<crate::driver::contract::Usage>,
 }
 
 /// What the reviewer is asked to do.
@@ -184,7 +187,7 @@ pub struct Review {
 impl Review {
     fn blocked(started: Instant, why: String) -> Self {
         Self {
-            result: ReviewResult { schema: RESULT_SCHEMA.into(), findings: vec![], summary: None },
+            result: ReviewResult { schema: RESULT_SCHEMA.into(), findings: vec![], summary: None, usage: None },
             elapsed: started.elapsed(),
             blocked: Some(why),
         }

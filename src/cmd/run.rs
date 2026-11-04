@@ -5,6 +5,7 @@
 //! record. A run you can only reconstruct when it succeeded is not evidence.
 
 use crate::config::Config;
+use crate::driver::contract::Usage;
 use crate::driver::{self, DriverStatus, DriverTask};
 use crate::gate::{self, Verdict};
 use crate::paths::Paths;
@@ -110,6 +111,7 @@ pub fn run(opts: Options) -> Result<i32> {
             files_changed: Some(inv.result.files_changed.len()),
             detail: inv.result.detail.clone(),
         })?;
+        record_usage(&mut traj, &cfg, &d.id, opts.task.clone(), None, inv.result.usage.as_ref())?;
         run.write_evidence(
             "driver.json",
             &serde_json::to_string_pretty(&inv.result)?,
@@ -147,6 +149,9 @@ pub fn run(opts: Options) -> Result<i32> {
             "G2.5" => gate::g25::run(&paths, &cfg, &spec, &run)?,
             _ => gate::g3::run(&paths, &cfg, &spec, &run)?,
         };
+        if name == "G2.5" {
+            record_reviewer_usage(&cfg, &run, &mut traj)?;
+        }
         let path = result.write(&run.gates_dir())?;
         traj.append(Payload::Gate {
             gate: result.gate.clone(),
@@ -558,6 +563,7 @@ pub fn run_waves(opts: Options) -> Result<i32> {
                 files_changed: Some(o.files.len()),
                 detail: o.detail.clone(),
             })?;
+            record_usage(&mut traj, &cfg, &driver.id, Some(o.task.clone()), None, o.usage.as_ref())?;
             println!(
                 "  {:<6} {:<9} {:>4} file(s)  {:.1}s{}",
                 o.task,
@@ -618,6 +624,9 @@ pub fn run_waves(opts: Options) -> Result<i32> {
             "G2.5" => gate::g25::run(&paths, &cfg, &spec, &run)?,
             _ => gate::g3::run(&paths, &cfg, &spec, &run)?,
         };
+        if name == "G2.5" {
+            record_reviewer_usage(&cfg, &run, &mut traj)?;
+        }
         result.write(&run.gates_dir())?;
         traj.append(Payload::Gate {
             gate: result.gate.clone(),
@@ -655,6 +664,61 @@ pub fn run_waves(opts: Options) -> Result<i32> {
     Ok(overall.exit_code())
 }
 
+/// Record what one call spent. A call that reported nothing is `unreported`,
+/// with zeros that totals skip. A reported cost is kept as is; the price table
+/// only fills a missing one, and says so in `cost_basis`.
+fn record_usage(
+    traj: &mut Trajectory,
+    cfg: &crate::config::Config,
+    driver: &str,
+    task: Option<String>,
+    gate: Option<&str>,
+    usage: Option<&Usage>,
+) -> Result<()> {
+    let u = usage.cloned().unwrap_or_default();
+    let price = cfg.prices.iter().find(|p| p.driver == driver);
+    let mtok = |n: usize, rate: f64| n as f64 / 1_000_000.0 * rate;
+    let (cost_usd, cost_basis) = match (usage, u.cost_usd, price) {
+        (None, ..) | (_, None, None) => (None, None),
+        (_, Some(c), _) => (Some(c), Some("reported".to_string())),
+        (_, None, Some(p)) => (
+            Some(
+                mtok(u.input_tokens, p.input_per_mtok)
+                    + mtok(u.output_tokens, p.output_per_mtok)
+                    + mtok(u.cache_read_tokens, p.cache_read_per_mtok)
+                    + mtok(u.cache_write_tokens, p.cache_write_per_mtok),
+            ),
+            Some(format!("estimated from price table dated {}", p.as_of)),
+        ),
+    };
+    traj.append(Payload::DriverUsage {
+        driver: driver.into(),
+        task,
+        gate: gate.map(String::from),
+        source: if usage.is_some() { "reported" } else { "unreported" }.into(),
+        input_tokens: u.input_tokens,
+        output_tokens: u.output_tokens,
+        cache_read_tokens: u.cache_read_tokens,
+        cache_write_tokens: u.cache_write_tokens,
+        cost_usd,
+        cost_basis,
+    })?;
+    Ok(())
+}
+
+/// Record each reviewer's spend against G2.5, read back from its evidence: the
+/// gate has no trajectory handle, and a second one would duplicate sequence numbers.
+fn record_reviewer_usage(cfg: &crate::config::Config, run: &Run, traj: &mut Trajectory) -> Result<()> {
+    for r in &cfg.reviewers {
+        let Ok(raw) = std::fs::read_to_string(run.evidence_dir().join(format!("{}.json", r.id))) else { continue };
+        let Ok(result) = serde_json::from_str::<crate::review::ReviewResult>(&raw) else { continue };
+        if let Some(u) = result.usage {
+            record_usage(traj, cfg, &r.id, None, Some("G2.5"), Some(&u))?;
+        }
+    }
+    Ok(())
+}
+
 struct TaskOutcome {
     task: String,
     status: String,
@@ -662,6 +726,7 @@ struct TaskOutcome {
     files: Vec<String>,
     patch: String,
     prompt_tokens: usize,
+    usage: Option<Usage>,
     elapsed: f64,
 }
 
@@ -674,6 +739,7 @@ impl TaskOutcome {
             files: vec![],
             patch: String::new(),
             prompt_tokens: 0,
+            usage: None,
             elapsed: 0.0,
         }
     }
@@ -699,6 +765,7 @@ fn execute_task(
                 files: vec![],
                 patch: String::new(),
                 prompt_tokens: 0,
+                usage: None,
                 elapsed: started.elapsed().as_secs_f64(),
             };
         }
@@ -738,6 +805,7 @@ fn execute_task(
         files,
         patch,
         prompt_tokens,
+        usage: inv.result.usage.clone(),
         elapsed: started.elapsed().as_secs_f64(),
     }
 }

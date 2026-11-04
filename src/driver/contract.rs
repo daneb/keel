@@ -53,6 +53,18 @@ pub enum DriverStatus {
     Blocked,
 }
 
+/// What a tool says a call cost. A driver that cannot report omits it: unreported, not zero.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Usage {
+    pub input_tokens: usize,
+    pub output_tokens: usize,
+    pub cache_read_tokens: usize,
+    pub cache_write_tokens: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cost_usd: Option<f64>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DriverResult {
     pub schema: String,
@@ -65,6 +77,9 @@ pub struct DriverResult {
     pub detail: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tokens: Option<usize>,
+    /// What the tool itself reported spending, as opposed to `tokens`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub usage: Option<Usage>,
 }
 
 impl DriverResult {
@@ -75,6 +90,7 @@ impl DriverResult {
             files_changed: vec![],
             detail: Some(detail.into()),
             tokens: None,
+            usage: None,
         }
     }
 
@@ -122,7 +138,7 @@ pub fn parse_result(stdout: &str) -> Result<DriverResult, String> {
     }
 }
 
-const FIELDS: &[&str] = &["schema", "status", "files_changed", "detail", "tokens"];
+const FIELDS: &[&str] = &["schema", "status", "files_changed", "detail", "tokens", "usage"];
 
 /// Work out which field serde choked on, so the caller can put it first — where
 /// a human will actually read it.
