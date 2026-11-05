@@ -1,0 +1,14 @@
+{
+  "schema": "keel.driverresult/1",
+  "status": "ok",
+  "files_changed": [
+    "src/cmd/next.rs",
+    "src/pipeline.rs",
+    "tests/json.rs",
+    "tests/pipeline.rs",
+    ".keel/runs/2026-11-04-009/",
+    ".keel/specs/blast-radius/",
+    ".keel/specs/stale-run-after-reapproval/"
+  ],
+  "detail": "claude completed"
+}

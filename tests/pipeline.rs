@@ -439,3 +439,69 @@ fn declaration_order_keeps_abandoned_terminal() {
         "the abandoned spec must not appear as work to do: {out}"
     );
 }
+
+// ---------------------------------------------------------------------------
+// a run that predates the current approvals does not satisfy the Run stage
+// ---------------------------------------------------------------------------
+
+/// A spec at the merge decision, with a passing run behind it.
+fn with_passing_run(name: &str) -> Repo {
+    let r = Repo::ready(name);
+    r.ok(&["approve", "demo", "--stage", "plan"]);
+    r.install_driver("worker", &working_driver());
+    assert_eq!(r.run(&["run", "demo"]).0, 1, "G3 should want a human");
+    assert!(headline(&r, "demo").contains("approve the merge"));
+    r
+}
+
+fn later() {
+    std::thread::sleep(std::time::Duration::from_millis(1100));
+}
+
+#[test]
+fn a_run_older_than_the_plan_approval_does_not_satisfy_the_run_stage() {
+    let r = with_passing_run("stale-run-plan");
+    later();
+    r.ok(&["approve", "demo", "--stage", "plan"]);
+
+    let h = headline(&r, "demo");
+    assert!(!h.contains("approve the merge"), "a stale run was accepted: {h}");
+    assert!(h.contains("re-run"), "{h}");
+}
+
+#[test]
+fn a_run_older_than_the_spec_approval_does_not_satisfy_the_run_stage() {
+    let r = with_passing_run("stale-run-spec");
+    later();
+    r.ok(&["approve", "demo", "--stage", "spec"]);
+    // The spec approval also stales G1; re-gating leaves the run as the only gap.
+    r.ok(&["gate", "g1", "demo"]);
+
+    let h = headline(&r, "demo");
+    assert!(!h.contains("approve the merge"), "a stale run was accepted: {h}");
+    assert!(h.contains("re-run"), "{h}");
+}
+
+#[test]
+fn a_run_newer_than_both_approvals_still_satisfies_the_run_stage() {
+    let r = Repo::ready("stale-run-fresh");
+    later();
+    r.ok(&["approve", "demo", "--stage", "plan"]);
+    later();
+    r.install_driver("worker", &working_driver());
+    assert_eq!(r.run(&["run", "demo"]).0, 1, "G3 should want a human");
+
+    assert!(headline(&r, "demo").contains("approve the merge"));
+}
+
+#[test]
+fn keel_next_explains_a_stale_run() {
+    let r = with_passing_run("stale-run-prose");
+    later();
+    r.ok(&["approve", "demo", "--stage", "plan"]);
+
+    let (_, out) = r.run(&["next", "demo"]);
+    assert!(out.contains("predates the current approvals"), "{out}");
+    assert!(out.contains("keel run demo"), "{out}");
+    assert!(out.contains(&r.latest_run()), "the stale run should be named:\n{out}");
+}

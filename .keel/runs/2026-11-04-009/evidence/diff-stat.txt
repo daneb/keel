@@ -1,0 +1,25 @@
+     2      0  .keel/runs/2026-11-04-009/evidence/build.txt
+    14      0  .keel/runs/2026-11-04-009/evidence/driver.json
+     2      0  .keel/runs/2026-11-04-009/evidence/lint.txt
+    50      0  .keel/runs/2026-11-04-009/evidence/oracles.json
+   150      0  .keel/runs/2026-11-04-009/evidence/test.txt
+    10      0  .keel/runs/2026-11-04-009/run.json
+    16      0  .keel/runs/2026-11-04-009/trajectory.jsonl
+     1      0  .keel/specs/blast-radius/approvals.jsonl
+    90      0  .keel/specs/blast-radius/gates/G0.json
+    97      0  .keel/specs/blast-radius/gates/G1.json
+   164      0  .keel/specs/blast-radius/plan.md
+   112      0  .keel/specs/blast-radius/spec.md
+    63      0  .keel/specs/blast-radius/tasks.md
+     2      0  .keel/specs/stale-run-after-reapproval/approvals.jsonl
+    90      0  .keel/specs/stale-run-after-reapproval/gates/G0.json
+    95      0  .keel/specs/stale-run-after-reapproval/gates/G1.json
+    88      0  .keel/specs/stale-run-after-reapproval/plan.md
+    80      0  .keel/specs/stale-run-after-reapproval/spec.md
+    48      0  .keel/specs/stale-run-after-reapproval/tasks.md
+    23      0  src/cmd/next.rs
+    32      8  src/pipeline.rs
+    28      0  tests/json.rs
+    66      0  tests/pipeline.rs
+
+23 file(s), +1323 -8 (1331 lines of churn) against 3565f2ac87a32e2de57f5381feed7499ff95f772
