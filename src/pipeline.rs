@@ -98,6 +98,10 @@ pub struct Position {
     pub merge_approval: Standing,
     /// The most recent run for this spec whose G2 passed, if any.
     pub passing_run: Option<String>,
+    /// A run whose G2 passed but which started before the current spec or plan
+    /// approval, so it built something other than what was approved. It does
+    /// not satisfy the Run stage and is not reported as `passing_run`.
+    pub stale_run: Option<String>,
 }
 
 /// Read an approval, treating an unreadable one as absent. See the module doc.
@@ -139,6 +143,7 @@ pub fn position(paths: &Paths, slug: &str) -> Position {
             plan_approval: Standing::Absent,
             merge_approval: Standing::Absent,
             passing_run: None,
+            stale_run: None,
         };
     }
 
@@ -157,7 +162,10 @@ pub fn position(paths: &Paths, slug: &str) -> Position {
 
     let plan_approval = standing_or_absent(paths, slug, "plan");
     let merge_approval = standing_or_absent(paths, slug, "merge");
-    let passing_run = passing_run(paths, slug);
+    let (passing_run, stale_run) = match passing_run(paths, slug) {
+        Some((id, started)) if predates(&started, &[&spec_approval, &plan_approval]) => (None, Some(id)),
+        found => (found.map(|(id, _)| id), None),
+    };
 
     let stage = derive_stage(
         &g0,
@@ -179,7 +187,21 @@ pub fn position(paths: &Paths, slug: &str) -> Position {
         plan_approval,
         merge_approval,
         passing_run,
+        stale_run,
     }
+}
+
+/// True when `started` is earlier than any of the current approvals. An
+/// unparseable timestamp is not stale: better a run that counts than a spec
+/// stuck at Run with nothing to say why.
+fn predates(started: &str, approvals: &[&Standing]) -> bool {
+    let Ok(started) = chrono::DateTime::parse_from_rfc3339(started) else { return false };
+    approvals.iter().any(|a| match a {
+        Standing::Current { at, .. } => chrono::DateTime::parse_from_rfc3339(at)
+            .map(|at| started < at)
+            .unwrap_or(false),
+        _ => false,
+    })
 }
 
 /// Just the stage, for callers that do not need the evidence.
@@ -225,18 +247,20 @@ fn derive_stage(
     }
 }
 
-/// The newest run for this spec whose G2 passed.
-fn passing_run(paths: &Paths, slug: &str) -> Option<String> {
+/// The newest run for this spec whose G2 passed, with when it started.
+fn passing_run(paths: &Paths, slug: &str) -> Option<(String, String)> {
     let ids = crate::run::list(paths).ok()?;
     // `list` is chronological, so the last match is the most recent.
-    ids.into_iter().rev().find(|id| {
-        let Ok(run) = crate::run::Run::load(paths, id) else { return false };
+    ids.into_iter().rev().find_map(|id| {
+        let run = crate::run::Run::load(paths, &id).ok()?;
         if run.meta.spec != slug {
-            return false;
+            return None;
         }
-        run.gate_results()
+        let passed = run
+            .gate_results()
             .map(|rs| rs.iter().any(|r| r.gate == "G2" && r.verdict == Verdict::Pass))
-            .unwrap_or(false)
+            .unwrap_or(false);
+        passed.then(|| (id, run.meta.started_at.clone()))
     })
 }
 

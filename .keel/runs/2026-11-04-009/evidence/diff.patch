@@ -1,0 +1,1566 @@
+diff --git a/src/cmd/next.rs b/src/cmd/next.rs
+index 453f918e..3c7a7eaf 100644
+--- a/src/cmd/next.rs
++++ b/src/cmd/next.rs
+@@ -112,6 +112,9 @@ fn run_json(slug: Option<String>) -> Result<i32> {
+             if let Some(approval) = approval {
+                 entry["approval"] = approval;
+             }
++            if let Some(run) = &pos.stale_run {
++                entry["stale_run"] = json!(run);
++            }
+             specs.push(entry);
+         }
+     } else {
+@@ -267,6 +270,13 @@ fn print_guidance(paths: &Paths, slug: &str) -> Result<()> {
+                 &format!("  keel approve {slug} --stage plan"),
+             );
+         }
++        Stage::Run if pos.stale_run.is_some() => {
++            let run = pos.stale_run.as_deref().unwrap_or_default();
++            step(
++                &format!("[{slug}] re-run — {run} predates the current approvals"),
++                &format!("  keel run {slug}"),
++            );
++        }
+         Stage::Run => {
+             step(
+                 &format!("[{slug}] do the work"),
+@@ -440,6 +450,19 @@ fn plan_approval_guidance(slug: &str, pos: &Position) {
+ }
+ 
+ fn run_guidance(paths: &Paths, slug: &str, pos: &Position) {
++    if let Some(run) = &pos.stale_run {
++        step(
++            &format!("re-run `{slug}` — run {run} predates the current approvals"),
++            &format!(
++                "The spec or plan was re-approved after {run} started, so that run\n\
++                 did not build what is now approved. Do the work again:\n\n\
++                 \x20 keel run {slug}\n\
++                 \x20 keel run {slug} --no-driver  # gate the tree as-is"
++            ),
++        );
++        return;
++    }
++
+     // A passing run already exists, so the only way to be back here is a merge
+     // approval that went stale — the agreed shape of the work changed.
+     if pos.passing_run.is_some() {
+diff --git a/src/pipeline.rs b/src/pipeline.rs
+index a797c066..5c56cc3e 100644
+--- a/src/pipeline.rs
++++ b/src/pipeline.rs
+@@ -98,6 +98,10 @@ pub struct Position {
+     pub merge_approval: Standing,
+     /// The most recent run for this spec whose G2 passed, if any.
+     pub passing_run: Option<String>,
++    /// A run whose G2 passed but which started before the current spec or plan
++    /// approval, so it built something other than what was approved. It does
++    /// not satisfy the Run stage and is not reported as `passing_run`.
++    pub stale_run: Option<String>,
+ }
+ 
+ /// Read an approval, treating an unreadable one as absent. See the module doc.
+@@ -139,6 +143,7 @@ pub fn position(paths: &Paths, slug: &str) -> Position {
+             plan_approval: Standing::Absent,
+             merge_approval: Standing::Absent,
+             passing_run: None,
++            stale_run: None,
+         };
+     }
+ 
+@@ -157,7 +162,10 @@ pub fn position(paths: &Paths, slug: &str) -> Position {
+ 
+     let plan_approval = standing_or_absent(paths, slug, "plan");
+     let merge_approval = standing_or_absent(paths, slug, "merge");
+-    let passing_run = passing_run(paths, slug);
++    let (passing_run, stale_run) = match passing_run(paths, slug) {
++        Some((id, started)) if predates(&started, &[&spec_approval, &plan_approval]) => (None, Some(id)),
++        found => (found.map(|(id, _)| id), None),
++    };
+ 
+     let stage = derive_stage(
+         &g0,
+@@ -179,9 +187,23 @@ pub fn position(paths: &Paths, slug: &str) -> Position {
+         plan_approval,
+         merge_approval,
+         passing_run,
++        stale_run,
+     }
+ }
+ 
++/// True when `started` is earlier than any of the current approvals. An
++/// unparseable timestamp is not stale: better a run that counts than a spec
++/// stuck at Run with nothing to say why.
++fn predates(started: &str, approvals: &[&Standing]) -> bool {
++    let Ok(started) = chrono::DateTime::parse_from_rfc3339(started) else { return false };
++    approvals.iter().any(|a| match a {
++        Standing::Current { at, .. } => chrono::DateTime::parse_from_rfc3339(at)
++            .map(|at| started < at)
++            .unwrap_or(false),
++        _ => false,
++    })
++}
++
+ /// Just the stage, for callers that do not need the evidence.
+ pub fn stage(paths: &Paths, slug: &str) -> Stage {
+     position(paths, slug).stage
+@@ -225,18 +247,20 @@ fn derive_stage(
+     }
+ }
+ 
+-/// The newest run for this spec whose G2 passed.
+-fn passing_run(paths: &Paths, slug: &str) -> Option<String> {
++/// The newest run for this spec whose G2 passed, with when it started.
++fn passing_run(paths: &Paths, slug: &str) -> Option<(String, String)> {
+     let ids = crate::run::list(paths).ok()?;
+     // `list` is chronological, so the last match is the most recent.
+-    ids.into_iter().rev().find(|id| {
+-        let Ok(run) = crate::run::Run::load(paths, id) else { return false };
++    ids.into_iter().rev().find_map(|id| {
++        let run = crate::run::Run::load(paths, &id).ok()?;
+         if run.meta.spec != slug {
+-            return false;
++            return None;
+         }
+-        run.gate_results()
++        let passed = run
++            .gate_results()
+             .map(|rs| rs.iter().any(|r| r.gate == "G2" && r.verdict == Verdict::Pass))
+-            .unwrap_or(false)
++            .unwrap_or(false);
++        passed.then(|| (id, run.meta.started_at.clone()))
+     })
+ }
+ 
+diff --git a/tests/json.rs b/tests/json.rs
+index 94946a2b..ccd4b25d 100644
+--- a/tests/json.rs
++++ b/tests/json.rs
+@@ -163,3 +163,31 @@ fn approvals_json_carries_history_and_every_stage_standing() {
+     assert_eq!(v["standing"]["spec"]["state"], "superseded");
+     assert!(v["standing"]["spec"]["current_hash"].is_string());
+ }
++
++#[test]
++fn next_json_names_a_run_that_predates_the_approvals() {
++    let r = Repo::ready("json-stale-run");
++    r.ok(&["approve", "demo", "--stage", "plan"]);
++    r.install_driver("worker", &r_driver());
++    assert_eq!(r.run(&["run", "demo"]).0, 1, "G3 should want a human");
++
++    let v = json(&r, &["next", "--json"]);
++    assert!(v["specs"][0].get("stale_run").is_none(), "a fresh run is not stale");
++
++    std::thread::sleep(std::time::Duration::from_millis(1100));
++    r.ok(&["approve", "demo", "--stage", "plan"]);
++
++    let v = json(&r, &["next", "--json"]);
++    assert_eq!(v["schema"], "keel.next/1");
++    assert_eq!(v["specs"][0]["stage"], "run");
++    assert_eq!(v["specs"][0]["command"], "keel run demo");
++    assert!(v["specs"][0]["stale_run"].is_string(), "{v}");
++}
++
++fn r_driver() -> String {
++    "#!/bin/sh\ncat > /dev/null\n\
++     printf 'pub fn serve() { /* limited */ }\\n' > \"$KEEL_REPO/src/api/mod.rs\"\n\
++     printf '#[test]\\nfn respects_config() { assert_eq!(1 + 1, 2); }\\n' > \"$KEEL_REPO/tests/limit.rs\"\n\
++     echo '{\"schema\":\"keel.driverresult/1\",\"status\":\"ok\",\"files_changed\":[\"src/api/mod.rs\",\"tests/limit.rs\"]}'\n"
++        .to_string()
++}
+diff --git a/tests/pipeline.rs b/tests/pipeline.rs
+index f15c76a8..d5b2b15e 100644
+--- a/tests/pipeline.rs
++++ b/tests/pipeline.rs
+@@ -439,3 +439,69 @@ fn declaration_order_keeps_abandoned_terminal() {
+         "the abandoned spec must not appear as work to do: {out}"
+     );
+ }
++
++// ---------------------------------------------------------------------------
++// a run that predates the current approvals does not satisfy the Run stage
++// ---------------------------------------------------------------------------
++
++/// A spec at the merge decision, with a passing run behind it.
++fn with_passing_run(name: &str) -> Repo {
++    let r = Repo::ready(name);
++    r.ok(&["approve", "demo", "--stage", "plan"]);
++    r.install_driver("worker", &working_driver());
++    assert_eq!(r.run(&["run", "demo"]).0, 1, "G3 should want a human");
++    assert!(headline(&r, "demo").contains("approve the merge"));
++    r
++}
++
++fn later() {
++    std::thread::sleep(std::time::Duration::from_millis(1100));
++}
++
++#[test]
++fn a_run_older_than_the_plan_approval_does_not_satisfy_the_run_stage() {
++    let r = with_passing_run("stale-run-plan");
++    later();
++    r.ok(&["approve", "demo", "--stage", "plan"]);
++
++    let h = headline(&r, "demo");
++    assert!(!h.contains("approve the merge"), "a stale run was accepted: {h}");
++    assert!(h.contains("re-run"), "{h}");
++}
++
++#[test]
++fn a_run_older_than_the_spec_approval_does_not_satisfy_the_run_stage() {
++    let r = with_passing_run("stale-run-spec");
++    later();
++    r.ok(&["approve", "demo", "--stage", "spec"]);
++    // The spec approval also stales G1; re-gating leaves the run as the only gap.
++    r.ok(&["gate", "g1", "demo"]);
++
++    let h = headline(&r, "demo");
++    assert!(!h.contains("approve the merge"), "a stale run was accepted: {h}");
++    assert!(h.contains("re-run"), "{h}");
++}
++
++#[test]
++fn a_run_newer_than_both_approvals_still_satisfies_the_run_stage() {
++    let r = Repo::ready("stale-run-fresh");
++    later();
++    r.ok(&["approve", "demo", "--stage", "plan"]);
++    later();
++    r.install_driver("worker", &working_driver());
++    assert_eq!(r.run(&["run", "demo"]).0, 1, "G3 should want a human");
++
++    assert!(headline(&r, "demo").contains("approve the merge"));
++}
++
++#[test]
++fn keel_next_explains_a_stale_run() {
++    let r = with_passing_run("stale-run-prose");
++    later();
++    r.ok(&["approve", "demo", "--stage", "plan"]);
++
++    let (_, out) = r.run(&["next", "demo"]);
++    assert!(out.contains("predates the current approvals"), "{out}");
++    assert!(out.contains("keel run demo"), "{out}");
++    assert!(out.contains(&r.latest_run()), "the stale run should be named:\n{out}");
++}
+diff --git a/.keel/runs/2026-11-04-009/evidence/build.txt b/.keel/runs/2026-11-04-009/evidence/build.txt
+new file mode 100644
+index 00000000..01700b6d
+--- /dev/null
++++ b/.keel/runs/2026-11-04-009/evidence/build.txt
+@@ -0,0 +1,2 @@
++$ cargo build --quiet
++
+diff --git a/.keel/runs/2026-11-04-009/evidence/diff-stat.txt b/.keel/runs/2026-11-04-009/evidence/diff-stat.txt
+new file mode 100644
+index 00000000..366d424f
+--- /dev/null
++++ b/.keel/runs/2026-11-04-009/evidence/diff-stat.txt
+@@ -0,0 +1,25 @@
++     2      0  .keel/runs/2026-11-04-009/evidence/build.txt
++    14      0  .keel/runs/2026-11-04-009/evidence/driver.json
++     2      0  .keel/runs/2026-11-04-009/evidence/lint.txt
++    50      0  .keel/runs/2026-11-04-009/evidence/oracles.json
++   150      0  .keel/runs/2026-11-04-009/evidence/test.txt
++    10      0  .keel/runs/2026-11-04-009/run.json
++    16      0  .keel/runs/2026-11-04-009/trajectory.jsonl
++     1      0  .keel/specs/blast-radius/approvals.jsonl
++    90      0  .keel/specs/blast-radius/gates/G0.json
++    97      0  .keel/specs/blast-radius/gates/G1.json
++   164      0  .keel/specs/blast-radius/plan.md
++   112      0  .keel/specs/blast-radius/spec.md
++    63      0  .keel/specs/blast-radius/tasks.md
++     2      0  .keel/specs/stale-run-after-reapproval/approvals.jsonl
++    90      0  .keel/specs/stale-run-after-reapproval/gates/G0.json
++    95      0  .keel/specs/stale-run-after-reapproval/gates/G1.json
++    88      0  .keel/specs/stale-run-after-reapproval/plan.md
++    80      0  .keel/specs/stale-run-after-reapproval/spec.md
++    48      0  .keel/specs/stale-run-after-reapproval/tasks.md
++    23      0  src/cmd/next.rs
++    32      8  src/pipeline.rs
++    28      0  tests/json.rs
++    66      0  tests/pipeline.rs
++
++23 file(s), +1323 -8 (1331 lines of churn) against 3565f2ac87a32e2de57f5381feed7499ff95f772
+diff --git a/.keel/runs/2026-11-04-009/evidence/driver.json b/.keel/runs/2026-11-04-009/evidence/driver.json
+new file mode 100644
+index 00000000..ceca60f1
+--- /dev/null
++++ b/.keel/runs/2026-11-04-009/evidence/driver.json
+@@ -0,0 +1,14 @@
++{
++  "schema": "keel.driverresult/1",
++  "status": "ok",
++  "files_changed": [
++    "src/cmd/next.rs",
++    "src/pipeline.rs",
++    "tests/json.rs",
++    "tests/pipeline.rs",
++    ".keel/runs/2026-11-04-009/",
++    ".keel/specs/blast-radius/",
++    ".keel/specs/stale-run-after-reapproval/"
++  ],
++  "detail": "claude completed"
++}
+\ No newline at end of file
+diff --git a/.keel/runs/2026-11-04-009/evidence/lint.txt b/.keel/runs/2026-11-04-009/evidence/lint.txt
+new file mode 100644
+index 00000000..f68c6650
+--- /dev/null
++++ b/.keel/runs/2026-11-04-009/evidence/lint.txt
+@@ -0,0 +1,2 @@
++$ cargo clippy --all-targets --quiet
++
+diff --git a/.keel/runs/2026-11-04-009/evidence/oracles.json b/.keel/runs/2026-11-04-009/evidence/oracles.json
+new file mode 100644
+index 00000000..a2306d05
+--- /dev/null
++++ b/.keel/runs/2026-11-04-009/evidence/oracles.json
+@@ -0,0 +1,50 @@
++{
++  "runs": [
++    {
++      "criterion": "AC-1",
++      "kind": "test",
++      "oracle": "test tests/pipeline.rs::a_run_older_than_the_plan_approval_does_not_satisfy_the_run_stage",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 1.43s"
++    },
++    {
++      "criterion": "AC-2",
++      "kind": "test",
++      "oracle": "test tests/pipeline.rs::a_run_older_than_the_spec_approval_does_not_satisfy_the_run_stage",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 1.43s"
++    },
++    {
++      "criterion": "AC-3",
++      "kind": "test",
++      "oracle": "test tests/pipeline.rs::a_run_newer_than_both_approvals_still_satisfies_the_run_stage",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 2.57s"
++    },
++    {
++      "criterion": "AC-4",
++      "kind": "test",
++      "oracle": "test tests/json.rs::next_json_names_a_run_that_predates_the_approvals",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 1.45s"
++    },
++    {
++      "criterion": "AC-5",
++      "kind": "test",
++      "oracle": "test tests/pipeline.rs::keel_next_explains_a_stale_run",
++      "outcome": "pass",
++      "exit_code": 0,
++      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 1.46s"
++    }
++  ],
++  "criteria": 5,
++  "executed": 5,
++  "passed": 5,
++  "failed": 0,
++  "blocked": 0,
++  "human": 0
++}
+\ No newline at end of file
+diff --git a/.keel/runs/2026-11-04-009/evidence/test.txt b/.keel/runs/2026-11-04-009/evidence/test.txt
+new file mode 100644
+index 00000000..ab35b2e0
+--- /dev/null
++++ b/.keel/runs/2026-11-04-009/evidence/test.txt
+@@ -0,0 +1,150 @@
++$ cargo test --quiet
++
++
++running 296 tests
++....................................................................................... 87/296
++....................................................................................... 174/296
++....................................................................................... 261/296
++...................................
++test result: ok. 296 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.41s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.54s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.88s
++
++
++running 7 tests
++.......
++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.46s
++
++
++running 5 tests
++.....
++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.43s
++
++
++running 13 tests
++.............
++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.68s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.83s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.41s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.97s
++
++
++running 7 tests
++.......
++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.47s
++
++
++running 9 tests
++.........
++test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.73s
++
++
++running 10 tests
++..........
++test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.67s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.61s
++
++
++running 4 tests
++....
++test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.83s
++
++
++running 25 tests
++.........................
++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.02s
++
++
++running 14 tests
++..............
++test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.76s
++
++
++running 13 tests
++.............
++test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.21s
++
++
++running 15 tests
++...............
++test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.78s
++
++
++running 25 tests
++.........................
++test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.75s
++
++
++running 24 tests
++........................
++test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.72s
++
++
++running 6 tests
++......
++test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.85s
++
++
++running 8 tests
++........
++test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.66s
++
++
++running 2 tests
++..
++test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
++
++
++running 34 tests
++..................................
++test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.37s
++
++
++running 0 tests
++
++test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
++
++
++running 7 tests
++.......
++test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.24s
++
++
++running 5 tests
++.....
++test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.69s
++
+diff --git a/.keel/runs/2026-11-04-009/run.json b/.keel/runs/2026-11-04-009/run.json
+new file mode 100644
+index 00000000..2be6da22
+--- /dev/null
++++ b/.keel/runs/2026-11-04-009/run.json
+@@ -0,0 +1,10 @@
++{
++  "schema": "keel.run/1",
++  "id": "2026-11-04-009",
++  "spec": "stale-run-after-reapproval",
++  "driver": "claude-code",
++  "keel_version": "0.12.0",
++  "store_hash": "0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2",
++  "started_at": "2026-11-04T19:40:11.019227811+00:00",
++  "base_commit": "3565f2ac87a32e2de57f5381feed7499ff95f772"
++}
+diff --git a/.keel/runs/2026-11-04-009/trajectory.jsonl b/.keel/runs/2026-11-04-009/trajectory.jsonl
+new file mode 100644
+index 00000000..c81b8f78
+--- /dev/null
++++ b/.keel/runs/2026-11-04-009/trajectory.jsonl
+@@ -0,0 +1,16 @@
++{"t":"2026-11-04T19:40:11.019290936+00:00","seq":1,"kind":"run_start","spec":"stale-run-after-reapproval","driver":"claude-code","keel_version":"0.12.0","store_hash":"0da95b9f1779ca0832d7544fbfb6a5e9e5a358923897140fa1a19b15b7352cf2"}
++{"t":"2026-11-04T19:40:11.020630109+00:00","seq":2,"kind":"inject","source":".keel/store/steering/conventions.md","tokens":424,"bytes":1693}
++{"t":"2026-11-04T19:40:11.020647151+00:00","seq":3,"kind":"inject","source":".keel/store/steering/tech.md","tokens":83,"bytes":329}
++{"t":"2026-11-04T19:40:11.020666568+00:00","seq":4,"kind":"inject","source":".keel/store/steering/structure.md","tokens":6268,"bytes":25071}
++{"t":"2026-11-04T19:40:11.020719943+00:00","seq":5,"kind":"inject","source":".keel/store/lessons/L-0001.md","tokens":96,"bytes":382}
++{"t":"2026-11-04T19:40:11.020766693+00:00","seq":6,"kind":"inject","source":".keel/specs/stale-run-after-reapproval/spec.md","tokens":774,"bytes":3095}
++{"t":"2026-11-04T19:40:11.020770735+00:00","seq":7,"kind":"driver_call","driver":"claude-code","prompt_tokens":7695}
++{"t":"2026-11-04T19:42:42.384377+00:00","seq":8,"kind":"driver_result","driver":"claude-code","status":"ok","files_changed":7,"detail":"claude completed"}
++{"t":"2026-11-04T19:42:42.514163181+00:00","seq":9,"kind":"command","cmd":"cargo build --quiet","exit_code":0,"evidence":"evidence/build.txt"}
++{"t":"2026-11-04T19:43:34.711169158+00:00","seq":10,"kind":"command","cmd":"cargo test --quiet","exit_code":0,"evidence":"evidence/test.txt"}
++{"t":"2026-11-04T19:43:38.077659919+00:00","seq":11,"kind":"command","cmd":"cargo clippy --all-targets --quiet","exit_code":0,"evidence":"evidence/lint.txt"}
++{"t":"2026-11-04T19:43:46.814321290+00:00","seq":12,"kind":"oracle","criterion":"AC-1","oracle":"test tests/pipeline.rs::a_run_older_than_the_plan_approval_does_not_satisfy_the_run_stage","verdict":"pass","exit_code":0}
++{"t":"2026-11-04T19:43:46.814371957+00:00","seq":13,"kind":"oracle","criterion":"AC-2","oracle":"test tests/pipeline.rs::a_run_older_than_the_spec_approval_does_not_satisfy_the_run_stage","verdict":"pass","exit_code":0}
++{"t":"2026-11-04T19:43:46.814375082+00:00","seq":14,"kind":"oracle","criterion":"AC-3","oracle":"test tests/pipeline.rs::a_run_newer_than_both_approvals_still_satisfies_the_run_stage","verdict":"pass","exit_code":0}
++{"t":"2026-11-04T19:43:46.814385332+00:00","seq":15,"kind":"oracle","criterion":"AC-4","oracle":"test tests/json.rs::next_json_names_a_run_that_predates_the_approvals","verdict":"pass","exit_code":0}
++{"t":"2026-11-04T19:43:46.814388707+00:00","seq":16,"kind":"oracle","criterion":"AC-5","oracle":"test tests/pipeline.rs::keel_next_explains_a_stale_run","verdict":"pass","exit_code":0}
+diff --git a/.keel/specs/blast-radius/approvals.jsonl b/.keel/specs/blast-radius/approvals.jsonl
+new file mode 100644
+index 00000000..6da4644a
+--- /dev/null
++++ b/.keel/specs/blast-radius/approvals.jsonl
+@@ -0,0 +1 @@
++{"schema":"keel.approval/1","stage":"spec","decision":"approved","artefact_hash":"8fd333590157941a615947aafab8b9f6f2be1557e244e403189d654ec8ec4772","gate_verdict":"pass","by":"unknown","at":"2026-09-14T03:51:56.310102344+00:00"}
+diff --git a/.keel/specs/blast-radius/gates/G0.json b/.keel/specs/blast-radius/gates/G0.json
+new file mode 100644
+index 00000000..f82fc098
+--- /dev/null
++++ b/.keel/specs/blast-radius/gates/G0.json
+@@ -0,0 +1,90 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G0",
++  "run": "2026-09-13-000",
++  "spec": "blast-radius",
++  "verdict": "pass",
++  "generated_at": "2026-09-13T17:25:39.092778685+00:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "SPEC-0009 (keel.spec/1)"
++    },
++    {
++      "id": "criteria-present",
++      "verdict": "pass",
++      "detail": "8 criteria"
++    },
++    {
++      "id": "criterion-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate ids"
++    },
++    {
++      "id": "no-placeholders",
++      "verdict": "pass",
++      "detail": "no unfilled scaffold text"
++    },
++    {
++      "id": "ears-conformance",
++      "verdict": "pass",
++      "detail": "8/8 conform (event-driven, ubiquitous, unwanted-behaviour)"
++    },
++    {
++      "id": "oracle-presence",
++      "verdict": "pass",
++      "detail": "8 oracles across 8 criteria"
++    },
++    {
++      "id": "oracle-wellformed",
++      "verdict": "pass",
++      "detail": "all oracles parse"
++    },
++    {
++      "id": "ambiguity",
++      "verdict": "pass",
++      "detail": "no ambiguous phrasing in criteria"
++    },
++    {
++      "id": "criterion-budget",
++      "verdict": "pass",
++      "detail": "8/8 criteria"
++    },
++    {
++      "id": "spec-length",
++      "verdict": "pass",
++      "detail": "112/250 lines"
++    },
++    {
++      "id": "scope-declared",
++      "verdict": "pass",
++      "detail": "2 glob(s): src/**, test/**"
++    },
++    {
++      "id": "change-budget",
++      "verdict": "pass",
++      "detail": "200 lines of diff budgeted"
++    },
++    {
++      "id": "oracle-mix",
++      "verdict": "pass",
++      "detail": "8/8 runnable (8 cmd)"
++    },
++    {
++      "id": "human-cost",
++      "verdict": "pass",
++      "detail": "0 human oracle(s), none load-bearing"
++    },
++    {
++      "id": "store-drift",
++      "verdict": "pass",
++      "detail": "4 projections current"
++    },
++    {
++      "id": "shared-stores",
++      "verdict": "pass",
++      "detail": "none configured"
++    }
++  ]
++}
+diff --git a/.keel/specs/blast-radius/gates/G1.json b/.keel/specs/blast-radius/gates/G1.json
+new file mode 100644
+index 00000000..db33ee5c
+--- /dev/null
++++ b/.keel/specs/blast-radius/gates/G1.json
+@@ -0,0 +1,97 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G1",
++  "run": "2026-09-14-000",
++  "spec": "blast-radius",
++  "verdict": "fail",
++  "generated_at": "2026-09-14T04:35:08.315837437+00:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "PLAN-0009 + TASKS-0009"
++    },
++    {
++      "id": "g0-passed",
++      "verdict": "pass",
++      "detail": "G0 passed in run 2026-09-13-000"
++    },
++    {
++      "id": "spec-approved",
++      "verdict": "pass",
++      "detail": "approved by unknown"
++    },
++    {
++      "id": "tasks-present",
++      "verdict": "pass",
++      "detail": "8/15 tasks"
++    },
++    {
++      "id": "task-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate task ids"
++    },
++    {
++      "id": "task-fields",
++      "verdict": "pass",
++      "detail": "all task fields recognised"
++    },
++    {
++      "id": "task-criterion-traceability",
++      "verdict": "pass",
++      "detail": "8 tasks all traced"
++    },
++    {
++      "id": "criteria-covered",
++      "verdict": "pass",
++      "detail": "8/8 criteria have a task"
++    },
++    {
++      "id": "task-budgets",
++      "verdict": "pass",
++      "detail": "all 8 tasks budgeted, total 200 lines"
++    },
++    {
++      "id": "total-budget",
++      "verdict": "pass",
++      "detail": "200/200 lines"
++    },
++    {
++      "id": "task-exit-conditions",
++      "verdict": "pass",
++      "detail": "every task states when it is done"
++    },
++    {
++      "id": "task-dependencies",
++      "verdict": "pass",
++      "detail": "1 wave(s), widths 8"
++    },
++    {
++      "id": "wave-isolation",
++      "verdict": "pass",
++      "detail": "1 wave(s), no file claimed twice within one"
++    },
++    {
++      "id": "task-files-in-scope",
++      "verdict": "fail",
++      "expected": "every task names the files it touches",
++      "actual": "no files on: T-1 (line 16), T-2 (line 22), T-3 (line 28), T-4 (line 34), T-5 (line 40), … and 3 more"
++    },
++    {
++      "id": "rollback-stated",
++      "verdict": "fail",
++      "expected": "front matter `rollback:` or a ## Rollback section states the rollback",
++      "actual": "both are empty — \"git revert\" is a legitimate answer, silence is not"
++    },
++    {
++      "id": "blast-radius-declared",
++      "verdict": "pass",
++      "detail": "85 file(s) at depth 2, 22732 lines"
++    },
++    {
++      "id": "blast-radius-current",
++      "verdict": "pass",
++      "detail": "85 files, 22732 lines — matches a fresh computation — no indexed file matches test/** (new files, or a typo)"
++    }
++  ]
++}
+diff --git a/.keel/specs/blast-radius/plan.md b/.keel/specs/blast-radius/plan.md
+new file mode 100644
+index 00000000..649ebbad
+--- /dev/null
++++ b/.keel/specs/blast-radius/plan.md
+@@ -0,0 +1,164 @@
++---
++id: PLAN-0009
++slug: blast-radius
++schema: keel.plan/1
++blast:
++  depth: 2
++  declared:
++  - src/**
++  - test/**
++  computed:
++  - src/paths.rs
++  - src/config.rs
++  - src/map/lang.rs
++  - src/gate/mod.rs
++  - src/spec/mod.rs
++  - src/trajectory/event.rs
++  - src/map/extract.rs
++  - src/trajectory/mod.rs
++  - src/run.rs
++  - src/hashing.rs
++  - src/store/mod.rs
++  - src/lesson/mod.rs
++  - src/failure/mod.rs
++  - src/plan.rs
++  - src/store/frontmatter.rs
++  - src/approval.rs
++  - src/map/blast.rs
++  - src/map/db.rs
++  - src/spec/oracle.rs
++  - src/retrieve/mod.rs
++  - src/spec/ears.rs
++  - src/spec/placeholder.rs
++  - src/report/mod.rs
++  - src/main.rs
++  - src/http.rs
++  - src/review/mod.rs
++  - src/driver/mod.rs
++  - src/pipeline.rs
++  - src/serve/mod.rs
++  - src/projection/drift.rs
++  - src/driver/contract.rs
++  - src/map/mod.rs
++  - src/gate/ratchet.rs
++  - src/gate/g1.rs
++  - src/cmd/mod.rs
++  - src/gate/g25.rs
++  - src/mcp/mod.rs
++  - src/gate/oracle_exec.rs
++  - src/projection/mod.rs
++  - src/gate/g0.rs
++  - src/evidence/mod.rs
++  - src/driver/conform.rs
++  - src/failure/taxonomy.rs
++  - src/gate/diff.rs
++  - src/worktree.rs
++  - src/projection/sections.rs
++  - src/map/render.rs
++  - src/lesson/usage.rs
++  - src/gate/g2.rs
++  - src/report/insights.rs
++  - src/retrieve/fallback.rs
++  - src/gate/g4.rs
++  - src/map/resolve.rs
++  - src/metrics.rs
++  - src/retrieve/budget.rs
++  - src/gate/g3.rs
++  - src/evidence/manifest.rs
++  - src/map/rank.rs
++  - src/cmd/next.rs
++  - src/ui.rs
++  - src/cmd/run.rs
++  - src/cmd/learn.rs
++  - src/cmd/init.rs
++  - src/driver/builtin.rs
++  - src/cmd/doctor.rs
++  - src/cmd/spec.rs
++  - src/cmd/bench.rs
++  - src/cmd/hook.rs
++  - src/cmd/retrieve.rs
++  - src/atomic.rs
++  - src/cmd/approve.rs
++  - src/cmd/driver.rs
++  - src/map/walk.rs
++  - src/cmd/report.rs
++  - src/cmd/store.rs
++  - src/cmd/gate.rs
++  - src/cmd/status.rs
++  - src/cmd/metrics.rs
++  - src/cmd/map.rs
++  - src/cmd/prune.rs
++  - src/cmd/plan.rs
++  - src/cmd/tasks.rs
++  - src/cmd/ratchet.rs
++  - src/cmd/blast.rs
++  - src/cmd/serve.rs
++  computed_lines: 22732
++rollback: ''
++verified_at: 2026-09-14
++---
++
++# Design — blast-radius
++
++## Approach
++
++_How the change is made. Name the seam you are cutting at._
++
++## Blast radius
++
++<!-- generated by `keel plan`; edits here are overwritten -->
++
++Computed from the import graph at depth 2: **85 files, 22732 lines**.
++
++| depth | file | lines |
++| --- | --- | --- |
++| scope | `src/paths.rs` | 82 |
++| scope | `src/config.rs` | 504 |
++| scope | `src/map/lang.rs` | 355 |
++| scope | `src/gate/mod.rs` | 416 |
++| scope | `src/spec/mod.rs` | 353 |
++| scope | `src/trajectory/event.rs` | 228 |
++| scope | `src/map/extract.rs` | 468 |
++| scope | `src/trajectory/mod.rs` | 370 |
++| scope | `src/run.rs` | 273 |
++| scope | `src/hashing.rs` | 49 |
++| scope | `src/store/mod.rs` | 177 |
++| scope | `src/lesson/mod.rs` | 719 |
++| scope | `src/failure/mod.rs` | 573 |
++| scope | `src/plan.rs` | 604 |
++| scope | `src/store/frontmatter.rs` | 137 |
++| scope | `src/approval.rs` | 340 |
++| scope | `src/map/blast.rs` | 268 |
++| scope | `src/map/db.rs` | 265 |
++| scope | `src/spec/oracle.rs` | 327 |
++| scope | `src/retrieve/mod.rs` | 479 |
++| scope | `src/spec/ears.rs` | 362 |
++| scope | `src/spec/placeholder.rs` | 233 |
++| scope | `src/report/mod.rs` | 156 |
++| scope | `src/main.rs` | 566 |
++| scope | `src/http.rs` | 426 |
++| scope | `src/review/mod.rs` | 545 |
++| scope | `src/driver/mod.rs` | 595 |
++| scope | `src/pipeline.rs` | 284 |
++| scope | `src/serve/mod.rs` | 455 |
++| scope | `src/projection/drift.rs` | 210 |
++| scope | `src/driver/contract.rs` | 263 |
++| scope | `src/map/mod.rs` | 203 |
++| scope | `src/gate/ratchet.rs` | 197 |
++| scope | `src/gate/g1.rs` | 526 |
++| scope | `src/cmd/mod.rs` | 23 |
++| scope | `src/gate/g25.rs` | 546 |
++| scope | `src/mcp/mod.rs` | 271 |
++| scope | `src/gate/oracle_exec.rs` | 308 |
++| scope | `src/projection/mod.rs` | 116 |
++| scope | `src/gate/g0.rs` | 341 |
++
++_… 45 more, see `keel blast`._
++
++_Scope globs matching no indexed file (new files, or a typo): test/**_
++
++
++## Rollback
++
++_Fill in `rollback:` in the front matter above. "git revert" is a
++legitimate answer; "we would not need to" is not._
+diff --git a/.keel/specs/blast-radius/spec.md b/.keel/specs/blast-radius/spec.md
+new file mode 100644
+index 00000000..672e9dd2
+--- /dev/null
++++ b/.keel/specs/blast-radius/spec.md
+@@ -0,0 +1,112 @@
++---
++id: SPEC-0009
++slug: blast-radius
++schema: keel.spec/1
++status: approved
++scope:
++- src/**
++- test/**
++budget:
++  criteria: 8
++  lines: 200
++---
++
++# blast radius
++
++## Context
++
++`keel serve`'s dashboard fetches `/api/overview` once and polls it, and
++renders a per-feature "Summary" panel from `state.specs` when an operator
++selects a feature in the rail (`assets/ui/app.js`, `renderSpecSummary`). That
++panel shows tiles for runs, tokens, events and open fails, but nothing about
++how much of the codebase the feature's declared scope reaches — the one number
++`src/map/blast.rs` already computes and `keel blast` / `keel plan` already
++print. An operator landing on a feature has no way to see its blast radius
++without leaving the browser for a terminal.
++
++`/api/spec/<slug>` already exists and already narrows `Report::build` to one
++spec, but the JS never calls it — `state.selected` only filters the specs
++already fetched by `/api/overview`. Computing the blast radius inside every
++`SpecReport` built by the unnarrowed `/api/overview` call would recompute the
++whole reverse-import graph, from scratch, for every spec, every 2-second poll
++— the smallest surface is to compute it only for the one spec `/api/spec/<slug>`
++already narrows to, and have the dashboard fetch that route when a feature is
++selected.
++
++## Acceptance criteria
++
++### AC-1 A narrowed report carries the spec's blast radius
++
++WHEN `Report::build` is called with `only` set to one spec's slug and a
++symbol index exists THE SYSTEM SHALL set that spec's `blast` field to an
++object with integer `files`, `lines` and `depth` keys computed by
++`map::blast::compute` over the spec's declared `scope` globs.
++
++oracle: cmd `cargo test --test report the_narrowed_report_carries_the_blast_radius` exit 0
++
++### AC-2 The unnarrowed report stays free of it
++
++WHEN `Report::build` is called with `only` set to `None` THE SYSTEM SHALL
++leave every spec's `blast` field absent, so `/api/overview` does not recompute
++the reverse-import graph once per spec on every poll.
++
++oracle: cmd `cargo test --test report blast_radius_is_absent_from_the_unnarrowed_report` exit 0
++
++### AC-3 A missing symbol index degrades to null
++
++IF the symbol index database does not exist THEN THE SYSTEM SHALL set the
++narrowed spec's `blast` field to `null` rather than making `keel report
++<slug> --json` exit non-zero.
++
++oracle: cmd `cargo test --test report blast_radius_is_null_without_a_symbol_index` exit 0
++
++### AC-4 The depth matches the configured default
++
++THE SYSTEM SHALL compute the narrowed spec's blast radius at
++`cfg.plan.blast_depth`, the same depth `keel blast` and `keel plan` use by
++default, so the number shown on a feature's landing panel and the number
++`keel blast` prints for the same scope agree.
++
++oracle: cmd `cargo test --test report blast_radius_depth_matches_plan_blast_depth` exit 0
++
++### AC-5 `/api/spec/<slug>` serves the field
++
++WHEN a `GET` request reaches `/api/spec/<slug>` for a spec whose scope
++matches at least one indexed file THE SYSTEM SHALL respond with JSON whose
++`specs[0].blast.files` count equals the number of paths `keel blast` reports
++for that spec's scope at the same depth.
++
++oracle: cmd `cargo test --test serve blast_radius_route_matches_keel_blast_output` exit 0
++
++### AC-6 Selecting a feature fetches its blast radius
++
++WHEN the operator selects a feature in the dashboard rail THE SYSTEM SHALL
++fetch `/api/spec/<slug>` for that feature's slug and store the response's
++`blast` field on that feature's state before the Summary panel next renders.
++
++oracle: cmd `cargo test --test serve app_js_fetches_the_spec_route_on_selection` exit 0
++
++### AC-7 The Summary panel shows a blast-radius tile
++
++WHEN the Summary panel renders for a feature whose stored `blast` field is
++not `null` THE SYSTEM SHALL display a tile labelled `blast radius` whose
++value is that field's `files` count.
++
++oracle: cmd `cargo test --test serve app_js_summary_panel_has_a_blast_radius_tile` exit 0
++
++### AC-8 A null blast radius omits the tile
++
++IF a feature's stored `blast` field is `null` THEN THE SYSTEM SHALL omit the
++blast-radius tile from the Summary panel rather than rendering a tile showing
++`0`.
++
++oracle: cmd `cargo test --test serve app_js_omits_the_blast_radius_tile_when_null` exit 0
++
++## Out of scope
++
++- Adding a blast-radius column or tile to the Overview landing view (the
++  `state.selected === null` case) — only a selected feature's own panel.
++- Changing what `map::blast::compute`, `keel blast` or `keel plan` compute;
++  this only surfaces the existing number in `keel serve`.
++- Polling `/api/spec/<slug>` on the same 2-second interval as `/api/overview`;
++  one fetch per selection is all AC-6 requires.
+diff --git a/.keel/specs/blast-radius/tasks.md b/.keel/specs/blast-radius/tasks.md
+new file mode 100644
+index 00000000..ee936302
+--- /dev/null
++++ b/.keel/specs/blast-radius/tasks.md
+@@ -0,0 +1,63 @@
++---
++id: TASKS-0009
++slug: blast-radius
++schema: keel.tasks/1
++---
++
++# Tasks
++
++Each task must name the criteria it satisfies, the files it touches, a line
++budget and an exit condition. G1 checks all four, and checks that every
++criterion in the spec is covered by at least one task.
++
++Add `- depends_on: T-1` where order matters. Tasks with no dependency on
++each other form a wave; `keel tasks` shows them.
++
++### T-1 A narrowed report carries the spec's blast radius
++- criteria: AC-1
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test report the_narrowed_report_carries_the_blast_radius` exits 0
++
++### T-2 The unnarrowed report stays free of it
++- criteria: AC-2
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test report blast_radius_is_absent_from_the_unnarrowed_report` exits 0
++
++### T-3 A missing symbol index degrades to null
++- criteria: AC-3
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test report blast_radius_is_null_without_a_symbol_index` exits 0
++
++### T-4 The depth matches the configured default
++- criteria: AC-4
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test report blast_radius_depth_matches_plan_blast_depth` exits 0
++
++### T-5 `/api/spec/<slug>` serves the field
++- criteria: AC-5
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test serve blast_radius_route_matches_keel_blast_output` exits 0
++
++### T-6 Selecting a feature fetches its blast radius
++- criteria: AC-6
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test serve app_js_fetches_the_spec_route_on_selection` exits 0
++
++### T-7 The Summary panel shows a blast-radius tile
++- criteria: AC-7
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test serve app_js_summary_panel_has_a_blast_radius_tile` exits 0
++
++### T-8 A null blast radius omits the tile
++- criteria: AC-8
++- files: _name the files this task touches_
++- budget: 25
++- exit: `cargo test --test serve app_js_omits_the_blast_radius_tile_when_null` exits 0
++
+diff --git a/.keel/specs/stale-run-after-reapproval/approvals.jsonl b/.keel/specs/stale-run-after-reapproval/approvals.jsonl
+new file mode 100644
+index 00000000..22df683d
+--- /dev/null
++++ b/.keel/specs/stale-run-after-reapproval/approvals.jsonl
+@@ -0,0 +1,2 @@
++{"schema":"keel.approval/1","stage":"spec","decision":"approved","artefact_hash":"d5ebbbe806b40a5749507520ef959d629bb39c63c9bfddda95141a773d4ddf3a","gate_verdict":"pass","by":"Dane Balia","at":"2026-11-04T19:38:01.024578108+00:00"}
++{"schema":"keel.approval/1","stage":"plan","decision":"approved","artefact_hash":"9165535b32d57fca75534fd5170306be1f8592d09ae070c247f3cfd82cb06bda","gate_verdict":"pass","by":"Dane Balia","at":"2026-11-04T19:40:10.667066478+00:00"}
+diff --git a/.keel/specs/stale-run-after-reapproval/gates/G0.json b/.keel/specs/stale-run-after-reapproval/gates/G0.json
+new file mode 100644
+index 00000000..6e144994
+--- /dev/null
++++ b/.keel/specs/stale-run-after-reapproval/gates/G0.json
+@@ -0,0 +1,90 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G0",
++  "run": "2026-11-04-009",
++  "spec": "stale-run-after-reapproval",
++  "verdict": "pass",
++  "generated_at": "2026-11-04T19:37:30.497700526+00:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "SPEC-0023 (keel.spec/1)"
++    },
++    {
++      "id": "criteria-present",
++      "verdict": "pass",
++      "detail": "5 criteria"
++    },
++    {
++      "id": "criterion-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate ids"
++    },
++    {
++      "id": "no-placeholders",
++      "verdict": "pass",
++      "detail": "no unfilled scaffold text"
++    },
++    {
++      "id": "ears-conformance",
++      "verdict": "pass",
++      "detail": "5/5 conform (event-driven)"
++    },
++    {
++      "id": "oracle-presence",
++      "verdict": "pass",
++      "detail": "5 oracles across 5 criteria"
++    },
++    {
++      "id": "oracle-wellformed",
++      "verdict": "pass",
++      "detail": "all oracles parse"
++    },
++    {
++      "id": "ambiguity",
++      "verdict": "pass",
++      "detail": "no ambiguous phrasing in criteria"
++    },
++    {
++      "id": "criterion-budget",
++      "verdict": "pass",
++      "detail": "5/5 criteria"
++    },
++    {
++      "id": "spec-length",
++      "verdict": "pass",
++      "detail": "80/250 lines"
++    },
++    {
++      "id": "scope-declared",
++      "verdict": "pass",
++      "detail": "4 glob(s): src/pipeline.rs, src/cmd/next.rs, tests/pipeline.rs, tests/json.rs"
++    },
++    {
++      "id": "change-budget",
++      "verdict": "pass",
++      "detail": "250 lines of diff budgeted"
++    },
++    {
++      "id": "oracle-mix",
++      "verdict": "pass",
++      "detail": "5/5 runnable (5 test)"
++    },
++    {
++      "id": "human-cost",
++      "verdict": "pass",
++      "detail": "0 human oracle(s), none load-bearing"
++    },
++    {
++      "id": "store-drift",
++      "verdict": "pass",
++      "detail": "4 projections current"
++    },
++    {
++      "id": "shared-stores",
++      "verdict": "pass",
++      "detail": "none configured"
++    }
++  ]
++}
+diff --git a/.keel/specs/stale-run-after-reapproval/gates/G1.json b/.keel/specs/stale-run-after-reapproval/gates/G1.json
+new file mode 100644
+index 00000000..becc1f74
+--- /dev/null
++++ b/.keel/specs/stale-run-after-reapproval/gates/G1.json
+@@ -0,0 +1,95 @@
++{
++  "schema": "keel.gate/1",
++  "gate": "G1",
++  "run": "2026-11-04-009",
++  "spec": "stale-run-after-reapproval",
++  "verdict": "pass",
++  "generated_at": "2026-11-04T19:38:47.218371045+00:00",
++  "checks": [
++    {
++      "id": "schema",
++      "verdict": "pass",
++      "detail": "PLAN-0023 + TASKS-0023"
++    },
++    {
++      "id": "g0-passed",
++      "verdict": "pass",
++      "detail": "G0 passed in run 2026-11-04-009"
++    },
++    {
++      "id": "spec-approved",
++      "verdict": "pass",
++      "detail": "approved by Dane Balia"
++    },
++    {
++      "id": "tasks-present",
++      "verdict": "pass",
++      "detail": "5/15 tasks"
++    },
++    {
++      "id": "task-ids-unique",
++      "verdict": "pass",
++      "detail": "no duplicate task ids"
++    },
++    {
++      "id": "task-fields",
++      "verdict": "pass",
++      "detail": "all task fields recognised"
++    },
++    {
++      "id": "task-criterion-traceability",
++      "verdict": "pass",
++      "detail": "5 tasks all traced"
++    },
++    {
++      "id": "criteria-covered",
++      "verdict": "pass",
++      "detail": "5/5 criteria have a task"
++    },
++    {
++      "id": "task-budgets",
++      "verdict": "pass",
++      "detail": "all 5 tasks budgeted, total 215 lines"
++    },
++    {
++      "id": "total-budget",
++      "verdict": "pass",
++      "detail": "215/250 lines"
++    },
++    {
++      "id": "task-exit-conditions",
++      "verdict": "pass",
++      "detail": "every task states when it is done"
++    },
++    {
++      "id": "task-dependencies",
++      "verdict": "pass",
++      "detail": "5 wave(s), widths 1/1/1/1/1"
++    },
++    {
++      "id": "wave-isolation",
++      "verdict": "pass",
++      "detail": "5 wave(s), no file claimed twice within one"
++    },
++    {
++      "id": "task-files-in-scope",
++      "verdict": "pass",
++      "detail": "all task files inside the declared scope"
++    },
++    {
++      "id": "rollback-stated",
++      "verdict": "pass",
++      "detail": "git revert"
++    },
++    {
++      "id": "blast-radius-declared",
++      "verdict": "pass",
++      "detail": "11 file(s) at depth 2, 3048 lines"
++    },
++    {
++      "id": "blast-radius-current",
++      "verdict": "pass",
++      "detail": "11 files, 3048 lines — matches a fresh computation"
++    }
++  ]
++}
+diff --git a/.keel/specs/stale-run-after-reapproval/plan.md b/.keel/specs/stale-run-after-reapproval/plan.md
+new file mode 100644
+index 00000000..ded93753
+--- /dev/null
++++ b/.keel/specs/stale-run-after-reapproval/plan.md
+@@ -0,0 +1,88 @@
++---
++id: PLAN-0023
++slug: stale-run-after-reapproval
++schema: keel.plan/1
++blast:
++  depth: 2
++  declared:
++  - src/pipeline.rs
++  - src/cmd/next.rs
++  - tests/pipeline.rs
++  - tests/json.rs
++  computed:
++  - src/pipeline.rs
++  - src/cmd/next.rs
++  - tests/pipeline.rs
++  - tests/json.rs
++  - src/report/mod.rs
++  - src/main.rs
++  - src/cmd/mod.rs
++  - src/report/insights.rs
++  - src/cmd/approve.rs
++  - src/serve/mod.rs
++  - src/cmd/report.rs
++  computed_lines: 3048
++rollback: git revert
++verified_at: 2026-11-04
++---
++
++# Design — stale-run-after-reapproval
++
++## Approach
++
++The seam is `pipeline::passing_run` in `src/pipeline.rs`, the one function
++that decides whether a spec's Run stage is satisfied. Today it returns the
++newest run whose G2 passed and never looks at approvals. It will also drop any
++run whose `started_at` (`RunMeta`, `src/run.rs`) precedes the current spec
++approval or the current plan approval timestamp. This mirrors the existing
++`g1_stale` rule in `position`, which compares a G1 result's `generated_at`
++with the spec approval's `at`, applied one stage later and to both approvals.
++
++`position` already reads both approvals before calling `passing_run`, so they
++are passed in rather than re-read. When the newest passing run is dropped for
++being older than an approval, `position` keeps its id in a new
++`Position::stale_run: Option<String>`, beside `g1_stale`. `derive_stage` is
++unchanged: with no passing run it already returns `Stage::Run`, which gives
++AC-1 and AC-2, and a run newer than both approvals still yields
++`MergeApproval`, which is AC-3.
++
++`keel next` reads the same `Position`, so it cannot disagree with the stage.
++`src/cmd/next.rs` adds `"stale_run": "<run id>"` to that spec's entry in
++`--json`, leaving the `keel.next/1` schema string alone, and prints a text line
++naming the stale run and `keel run <slug>`, in the way the `g1_stale` branch
++already explains itself. No other consumer is changed.
++
++Ordering: T-1 changes `src/pipeline.rs` first, with the plan-approval test
++that proves it. T-2 and T-3 add the spec-approval and still-counts cases in
++`tests/pipeline.rs`. T-4 and T-5 surface the result in `keel next` and are
++tested last. Every task edits `tests/pipeline.rs` or `src/pipeline.rs`, so the
++tasks are chained.
++
++Risk: the comparison is between RFC 3339 timestamps from different sources
++(`started_at` uses the local offset), so it must parse them rather than
++compare strings. Task budgets total 215 of the 250 lines, leaving 35 for that.
++
++## Blast radius
++
++<!-- generated by `keel plan`; edits here are overwritten -->
++
++Computed from the import graph at depth 2: **11 files, 3048 lines**.
++
++| depth | file | lines |
++| --- | --- | --- |
++| scope | `src/pipeline.rs` | 284 |
++| scope | `src/cmd/next.rs` | 475 |
++| scope | `tests/pipeline.rs` | 290 |
++| scope | `tests/json.rs` | 102 |
++| +1 | `src/report/mod.rs` | 156 |
++| +1 | `src/main.rs` | 566 |
++| +1 | `src/cmd/mod.rs` | 23 |
++| +1 | `src/report/insights.rs` | 266 |
++| +1 | `src/cmd/approve.rs` | 229 |
++| +2 | `src/serve/mod.rs` | 455 |
++| +2 | `src/cmd/report.rs` | 202 |
++
++
++## Rollback
++
++`git revert` — replace this if the change needs a different rollback.
+diff --git a/.keel/specs/stale-run-after-reapproval/spec.md b/.keel/specs/stale-run-after-reapproval/spec.md
+new file mode 100644
+index 00000000..21b4659a
+--- /dev/null
++++ b/.keel/specs/stale-run-after-reapproval/spec.md
+@@ -0,0 +1,80 @@
++---
++id: SPEC-0023
++slug: stale-run-after-reapproval
++schema: keel.spec/1
++status: approved
++scope:
++- src/pipeline.rs
++- src/cmd/next.rs
++- tests/pipeline.rs
++- tests/json.rs
++budget:
++  criteria: 5
++  lines: 250
++---
++
++# A run that predates the current approvals does not satisfy the Run stage
++
++## Context
++
++`pipeline::passing_run` returns the newest run of a spec whose G2 passed. It
++never looks at when the spec or plan was last approved. So after a spec is
++widened and re-approved, then its plan is re-approved, the old run still counts:
++`keel next` jumps to "approve the merge" for a change that was never rebuilt,
++and `moor go` reports "nothing to run" because keel says the Run stage is done.
++This happened on `adrs-for-recent-specs`, where run 007 passed, the scope was
++then widened, and the pipeline skipped the rebuild. The agent had to be asked
++for the new task by hand and G2 run outside the pipeline.
++
++`g1_stale` already applies the same idea one stage earlier: a G1 pass older than
++the current spec approval no longer counts. This spec extends that rule to the
++run, and makes `keel next --json` say so, so a consumer such as moor reads it
++instead of guessing.
++
++## Acceptance criteria
++
++### AC-1 A run older than the plan approval does not satisfy the Run stage
++
++WHEN the newest passing run of a spec started before the current plan approval
++THE SYSTEM SHALL report the spec's stage as `run`, not `merge-approval`.
++
++oracle: test tests/pipeline.rs::a_run_older_than_the_plan_approval_does_not_satisfy_the_run_stage
++
++### AC-2 A run older than the spec approval does not satisfy the Run stage
++
++WHEN the newest passing run of a spec started before the current spec approval
++THE SYSTEM SHALL report the spec's stage as `run`, not `merge-approval`.
++
++oracle: test tests/pipeline.rs::a_run_older_than_the_spec_approval_does_not_satisfy_the_run_stage
++
++### AC-3 A run that started after both approvals still counts
++
++WHEN the newest passing run of a spec started after both the current spec
++approval and the current plan approval THE SYSTEM SHALL report the spec's stage
++as `merge-approval`.
++
++oracle: test tests/pipeline.rs::a_run_newer_than_both_approvals_still_satisfies_the_run_stage
++
++### AC-4 `keel next --json` names the stale run
++
++WHEN a spec has a passing run that predates its current approvals THE SYSTEM
++SHALL include `"stale_run": "<run id>"` in that spec's entry of `keel next --json`
++and leave the `keel.next/1` schema string unchanged.
++
++oracle: test tests/json.rs::next_json_names_a_run_that_predates_the_approvals
++
++### AC-5 `keel next` says why the run is needed again
++
++WHEN a spec has a passing run that predates its current approvals THE SYSTEM
++SHALL print a `keel next` line that names the stale run and the command
++`keel run <slug>`.
++
++oracle: test tests/pipeline.rs::keel_next_explains_a_stale_run
++
++## Out of scope
++
++- Whether the delivered diff matches what the merge approval covered. That is a
++  separate gap and needs its own decision.
++- Changing how abandoned specs report `complete`. That is pinned by an existing
++  test and consumers already filter on `stage`.
++- Any change to moor.
+diff --git a/.keel/specs/stale-run-after-reapproval/tasks.md b/.keel/specs/stale-run-after-reapproval/tasks.md
+new file mode 100644
+index 00000000..a5bbe654
+--- /dev/null
++++ b/.keel/specs/stale-run-after-reapproval/tasks.md
+@@ -0,0 +1,48 @@
++---
++id: TASKS-0023
++slug: stale-run-after-reapproval
++schema: keel.tasks/1
++---
++
++# Tasks
++
++Each task must name the criteria it satisfies, the files it touches, a line
++budget and an exit condition. G1 checks all four, and checks that every
++criterion in the spec is covered by at least one task.
++
++Add `- depends_on: T-1` where order matters. Tasks with no dependency on
++each other form a wave; `keel tasks` shows them.
++
++### T-1 A run older than the plan approval does not satisfy the Run stage
++- criteria: AC-1
++- files: src/pipeline.rs, tests/pipeline.rs
++- budget: 55
++- exit: test tests/pipeline.rs::a_run_older_than_the_plan_approval_does_not_satisfy_the_run_stage
++
++### T-2 A run older than the spec approval does not satisfy the Run stage
++- criteria: AC-2
++- files: src/pipeline.rs, tests/pipeline.rs
++- depends_on: T-1
++- budget: 35
++- exit: test tests/pipeline.rs::a_run_older_than_the_spec_approval_does_not_satisfy_the_run_stage
++
++### T-3 A run that started after both approvals still counts
++- criteria: AC-3
++- files: tests/pipeline.rs
++- depends_on: T-2
++- budget: 25
++- exit: test tests/pipeline.rs::a_run_newer_than_both_approvals_still_satisfies_the_run_stage
++
++### T-4 `keel next --json` names the stale run
++- criteria: AC-4
++- files: src/pipeline.rs, src/cmd/next.rs, tests/json.rs
++- depends_on: T-3
++- budget: 50
++- exit: test tests/json.rs::next_json_names_a_run_that_predates_the_approvals
++
++### T-5 `keel next` says why the run is needed again
++- criteria: AC-5
++- files: src/cmd/next.rs, tests/pipeline.rs
++- depends_on: T-4
++- budget: 50
++- exit: test tests/pipeline.rs::keel_next_explains_a_stale_run

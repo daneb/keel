@@ -112,6 +112,9 @@ fn run_json(slug: Option<String>) -> Result<i32> {
             if let Some(approval) = approval {
                 entry["approval"] = approval;
             }
+            if let Some(run) = &pos.stale_run {
+                entry["stale_run"] = json!(run);
+            }
             specs.push(entry);
         }
     } else {
@@ -265,6 +268,13 @@ fn print_guidance(paths: &Paths, slug: &str) -> Result<()> {
             step(
                 &format!("[{slug}] approve plan"),
                 &format!("  keel approve {slug} --stage plan"),
+            );
+        }
+        Stage::Run if pos.stale_run.is_some() => {
+            let run = pos.stale_run.as_deref().unwrap_or_default();
+            step(
+                &format!("[{slug}] re-run — {run} predates the current approvals"),
+                &format!("  keel run {slug}"),
             );
         }
         Stage::Run => {
@@ -440,6 +450,19 @@ fn plan_approval_guidance(slug: &str, pos: &Position) {
 }
 
 fn run_guidance(paths: &Paths, slug: &str, pos: &Position) {
+    if let Some(run) = &pos.stale_run {
+        step(
+            &format!("re-run `{slug}` — run {run} predates the current approvals"),
+            &format!(
+                "The spec or plan was re-approved after {run} started, so that run\n\
+                 did not build what is now approved. Do the work again:\n\n\
+                 \x20 keel run {slug}\n\
+                 \x20 keel run {slug} --no-driver  # gate the tree as-is"
+            ),
+        );
+        return;
+    }
+
     // A passing run already exists, so the only way to be back here is a merge
     // approval that went stale — the agreed shape of the work changed.
     if pos.passing_run.is_some() {

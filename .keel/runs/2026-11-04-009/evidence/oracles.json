@@ -1,0 +1,50 @@
+{
+  "runs": [
+    {
+      "criterion": "AC-1",
+      "kind": "test",
+      "oracle": "test tests/pipeline.rs::a_run_older_than_the_plan_approval_does_not_satisfy_the_run_stage",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 1.43s"
+    },
+    {
+      "criterion": "AC-2",
+      "kind": "test",
+      "oracle": "test tests/pipeline.rs::a_run_older_than_the_spec_approval_does_not_satisfy_the_run_stage",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 1.43s"
+    },
+    {
+      "criterion": "AC-3",
+      "kind": "test",
+      "oracle": "test tests/pipeline.rs::a_run_newer_than_both_approvals_still_satisfies_the_run_stage",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 2.57s"
+    },
+    {
+      "criterion": "AC-4",
+      "kind": "test",
+      "oracle": "test tests/json.rs::next_json_names_a_run_that_predates_the_approvals",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 1.45s"
+    },
+    {
+      "criterion": "AC-5",
+      "kind": "test",
+      "oracle": "test tests/pipeline.rs::keel_next_explains_a_stale_run",
+      "outcome": "pass",
+      "exit_code": 0,
+      "output": "\nrunning 1 test\n.\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 1.46s"
+    }
+  ],
+  "criteria": 5,
+  "executed": 5,
+  "passed": 5,
+  "failed": 0,
+  "blocked": 0,
+  "human": 0
+}

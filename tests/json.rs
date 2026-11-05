@@ -163,3 +163,31 @@ fn approvals_json_carries_history_and_every_stage_standing() {
     assert_eq!(v["standing"]["spec"]["state"], "superseded");
     assert!(v["standing"]["spec"]["current_hash"].is_string());
 }
+
+#[test]
+fn next_json_names_a_run_that_predates_the_approvals() {
+    let r = Repo::ready("json-stale-run");
+    r.ok(&["approve", "demo", "--stage", "plan"]);
+    r.install_driver("worker", &r_driver());
+    assert_eq!(r.run(&["run", "demo"]).0, 1, "G3 should want a human");
+
+    let v = json(&r, &["next", "--json"]);
+    assert!(v["specs"][0].get("stale_run").is_none(), "a fresh run is not stale");
+
+    std::thread::sleep(std::time::Duration::from_millis(1100));
+    r.ok(&["approve", "demo", "--stage", "plan"]);
+
+    let v = json(&r, &["next", "--json"]);
+    assert_eq!(v["schema"], "keel.next/1");
+    assert_eq!(v["specs"][0]["stage"], "run");
+    assert_eq!(v["specs"][0]["command"], "keel run demo");
+    assert!(v["specs"][0]["stale_run"].is_string(), "{v}");
+}
+
+fn r_driver() -> String {
+    "#!/bin/sh\ncat > /dev/null\n\
+     printf 'pub fn serve() { /* limited */ }\\n' > \"$KEEL_REPO/src/api/mod.rs\"\n\
+     printf '#[test]\\nfn respects_config() { assert_eq!(1 + 1, 2); }\\n' > \"$KEEL_REPO/tests/limit.rs\"\n\
+     echo '{\"schema\":\"keel.driverresult/1\",\"status\":\"ok\",\"files_changed\":[\"src/api/mod.rs\",\"tests/limit.rs\"]}'\n"
+        .to_string()
+}
