@@ -7,6 +7,35 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.14.0] - 2026-11-05
+
+### Added
+
+- **`keel review <slug>` and per-criterion human judgement.** G3 used to let one
+  merge approval stand in for every `human` oracle. Each human oracle is now
+  discharged per criterion and per run, against a brief of what the reviewer
+  saw, kept as run evidence. (ADR-0028)
+- **Oracle sensitivity.** G2 checks that an oracle fails without the change it
+  claims to verify, so `assert!(true)` no longer passes as evidence. The check
+  is native and blocking; `sensitivity_paths` in `keel.toml` says where it
+  looks. Mutation testing through `cargo-mutants` is a plugin and advisory.
+  (ADR-0027)
+- **What the agent spent.** Drivers report the tokens they actually used, and
+  `keel metrics` shows them beside what keel injected. The two are labelled
+  and never summed: one is reported, the other is estimated. (ADR-0026)
+- **`docs/comparison.md`**: a plain account of where keel fits, and where
+  another tool is the better choice.
+- ADR-0026 to ADR-0028 record the three decisions above.
+
+### Fixed
+
+- **A run that predates the current approvals no longer satisfies the Run
+  stage.** After a spec or plan was re-approved, the old passing run still
+  counted, so `keel next` jumped to the merge approval for a change that had
+  not been rebuilt. `keel next` now says the run is stale and names it, and
+  `keel next --json` carries `"stale_run"` (additive; the `keel.next/1` schema
+  string is unchanged).
+
 ## [0.13.0] - 2026-11-03
 
 ### Added
