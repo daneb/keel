@@ -51,7 +51,7 @@ jobs:
   keel-cover:
     runs-on: ubuntu-latest
     steps:
-      - uses: daneb/keel@v0.12.0
+      - uses: daneb/keel@v0.14.0
 ```
 
 <p align="center"><img src="docs/img/keel-pr-check.svg" alt="A PR with the bundle of a passing run of its exact content is covered; one with no bundle is uncovered; one labelled keel:exempt passes as exempted." width="900"></p>
@@ -62,7 +62,7 @@ the record out of that container's reach, and commits the bundle back to the PR.
 
 ```yaml
 # .github/workflows/keel-runtime.yml (needs contents: write)
-      - uses: daneb/keel/runtime@v0.12.0
+      - uses: daneb/keel/runtime@v0.14.0
         with:
           spec: rate-limit
           image: rust:1-bookworm       # your toolchain
@@ -88,6 +88,7 @@ agent can't rewrite it.
 | **0.11** | **`keel next --json` reports approval standing**: who rejected an approval, why, and the command that re-checks it, so a driving tool can guide the next step. |
 | **0.12.0** | **`keel spec abandon`** retires a spec that will not be built: a terminal `Abandoned` state driven off the spec's own status, recorded in the approval log with who and why, and dropped from the open set by `keel next`. Six RustSec advisories in the TLS chain cleared. |
 | **0.11.1** | G2.5 only asks for a moved test when the change touches testable code, and counts inline tests; the Copilot driver preflights its credential. |
+| **0.14.0** | **Evidence you can trust more**: G2 fails an oracle that passes without the change, G3 discharges each human oracle per criterion, and `keel metrics` reports what the agent spent beside what keel injected. A re-approved spec no longer reuses a stale run. |
 
 ## keel and moor, in one line each
 
