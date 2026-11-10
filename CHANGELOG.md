@@ -7,6 +7,28 @@ Notable changes to keel. The format follows
 Pre-1.0 means the command surface may still move. The wire schemas are frozen
 and additive-only — see *Spine freeze* in [ROADMAP.md](ROADMAP.md).
 
+## [0.14.1] - 2026-11-10
+
+### Changed
+
+- **Dependency bumps.** `rusqlite` 0.40.2 → 0.41.1, `jsonschema` 0.58.6 →
+    0.60.2, and a patch-and-minor group of three updates, including the TLS
+    chain (`rustls` 0.23.46, `rustls-webpki` 0.103.16, `webpki-root-certs`
+    1.0.11) that clears the RUSTSEC-2026-0346/-0347/-0348/-0349/-0382/-0383
+    advisories. `cargo audit` is clean. No source change accompanied the bumps.
+
+### Removed
+
+- **Retired five specs whose work had already landed.** Each was dropped with
+    a recorded reason rather than built or merged, because the capability it
+    described already exists in the tree or reached master by another route:
+    `spec-abandonment` (the abandoned terminal stage and `keel spec abandon`),
+    `agent-driver` (the driver contract, already `implemented`),
+    `lock-completed-specs` (the completed-spec approval lock),
+    `rustls-advisories` (the TLS bumps above, landed via dependabot), and
+    `g1-usability` (the rollback body fallback, oracle exit pre-fill, and
+    `files: scope` inheritance). ADR-0003 through ADR-0007 record the reasoning.
+
 ## [0.14.0] - 2026-11-05
 
 ### Added
